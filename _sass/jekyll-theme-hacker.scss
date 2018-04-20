@@ -70,6 +70,7 @@ header h1:before {
   content: "./ ";
   font-size: 24px;
   color:$body-background;
+  visibility: hidden;
 }
 
 header h2 {
