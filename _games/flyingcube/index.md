@@ -1,5 +1,6 @@
 ---
 layout: default
+permalink: /games/flyingcube/index.html
 ---
 
 ***First Test Game***
