@@ -13,4 +13,4 @@ This is a great section all about how to do this that or the other thing.
 
 {% endraw %}
 
-{% include ./game01.html %}
+{% include_relative ./game01.html %}
