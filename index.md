@@ -4,4 +4,6 @@ layout: default
 
 **Hi!!**, testing the website right now...
 
-[First Game](./games/game01.html).
+[First Game](./games/game01).
+
+{% include_relative games/game01.html %}
