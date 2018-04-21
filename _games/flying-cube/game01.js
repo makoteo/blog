@@ -84,7 +84,7 @@ function Pipe(){
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
     this.x = WIDTH;
     this.w = 40;
-    this.speed = 2;
+    this.speed = 3;
     this.hit = false;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
