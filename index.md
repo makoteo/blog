@@ -6,5 +6,8 @@ layout: default
 
 [First Game](./games/game01.html).
 
+{% raw %}
 
-    <button>Hi!!</button>
+<button>Hi!!</button>
+
+{% endraw %}
