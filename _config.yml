@@ -8,4 +8,4 @@ theme: jekyll-theme-hacker
 collections:
     games:
         output: true
-        permalink: /:collection/:name
+        permalink: /games/:name
