@@ -3,3 +3,8 @@ description: Some random experiments with coding...
 show_downloads: false
 google_analytics:
 theme: jekyll-theme-hacker
+
+
+collections:
+        games:
+                output: true
