@@ -169,7 +169,7 @@ function Cloud(){
     this.height = Math.floor((Math.random() * 20) + 30);
     this.x = WIDTH;
     this.y = Math.floor((Math.random() * (HEIGHT - this.height - 20)) + 10);
-    this.velX = Math.floor((Math.random() * (3-1)) + 1);
+    this.velX = Math.floor((Math.random() * 2) - 3);
     this.draw = function(){
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         ctx.fillRect(this.x, this.y, this.width, this.height);
