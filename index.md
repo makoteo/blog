@@ -6,3 +6,5 @@ layout: default
 
 [First Game](./games/game01.html).
 
+
+    <button>Hi!!</button>
