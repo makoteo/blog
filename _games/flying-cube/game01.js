@@ -72,7 +72,7 @@ function Player(x, y, width, height, velY){
         }else{
             if(y + height < HEIGHT){
                 if(pipes.length > 0){
-                    velY = 1;
+                    velY = 2;
                     y+=velY;
                 }
             }
@@ -178,7 +178,8 @@ function Cloud(){
         this.x -= this.velX;
     }
 }
-player = new Player(50, HEIGHT/2 - 10, 20, 20, 0);
+player = new Player(50, HEIGHT/2 - 10, 20, 20, 0); //Add the Player
+
 function game(){
     ctx.fillStyle = "#86b0f4";
     ctx.fillRect(0,0,WIDTH,HEIGHT);
@@ -228,7 +229,7 @@ function game(){
     }
 }
 function Jump(){
-    player.setVelY(-3);
+    player.setVelY(-4);
 }
 function Start(){
     if(gameRunning == false){
