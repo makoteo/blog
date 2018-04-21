@@ -4,6 +4,6 @@ layout: default
 
 ***First Test Game***
 
-This is the first game here. 
+Flying Cube. 
 
 {% include_relative game01.html %}
