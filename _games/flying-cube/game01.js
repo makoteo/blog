@@ -246,6 +246,13 @@ function Reload() {
     localStorage.setItem("HighScore", 0);
     //localStorage.clear();
 }
-window.setInterval(function(){
+/*window.setInterval(function(){
     game();
-}, 10);
+}, 10);*/
+
+function repeatOften() {
+    // Do whatever
+    game();
+    requestAnimationFrame(repeatOften);
+}
+requestAnimationFrame(repeatOften);
