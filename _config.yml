@@ -8,4 +8,4 @@ theme: jekyll-theme-hacker
 collections:
     games:
         output: true
-        permalink: /games/flying-cube/index.html
+        permalink: /:collection/flying-cube/index.html
