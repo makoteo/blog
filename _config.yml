@@ -6,5 +6,6 @@ theme: jekyll-theme-hacker
 
 
 collections:
-        games:
-                output: true
+    games:
+        output: true
+        permalink: /:collection/:name
