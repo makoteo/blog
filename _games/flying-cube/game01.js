@@ -68,7 +68,7 @@ function Player(x, y, width, height, velY){
             }else if(y<0){
                 y = 1;
             }
-            velY+=0.1;
+            velY+=0.2;
         }else{
             if(y + height < HEIGHT){
                 if(pipes.length > 0){
