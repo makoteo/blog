@@ -11,6 +11,6 @@ This is a great section all about how to do this that or the other thing.
 
 <script src="./game01.js"></script>
 
-<iframe src="./game01.html" height="200" width="300"></iframe>
+<div w3-include-html="./game01.html"></div>
 
 {% endraw %}
