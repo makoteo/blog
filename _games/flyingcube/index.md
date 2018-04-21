@@ -8,3 +8,5 @@ permalink: /games/flyingcube/index.html
 Flying Cube. 
 
 {% include_relative game01.html %}
+
+{{ :collection }} 
