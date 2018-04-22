@@ -58,11 +58,11 @@ function Player(x, y, width, height, velY){
         return height;
     }
     this.update = function(){
-        if(gameRunning == true){
+        if(gameRunning == true){ // If player is playing
             if(y>0 && y<HEIGHT-height){
-                y+=velY;
+                y+=velY; //Add the velocity, which can be negative (When going down)
             }
-            if(y>HEIGHT-height){
+            if(y>HEIGHT-height){ //Make canvas boundaries
                 y=HEIGHT - height - 1;
                 velY = -3;
             }else if(y<0){
@@ -70,7 +70,7 @@ function Player(x, y, width, height, velY){
             }
             velY+=0.2;
         }else{
-            if(y + height < HEIGHT){
+            if(y + height < HEIGHT){ //Make player fall down after they die
                 if(pipes.length > 0){
                     velY = 2;
                     y+=velY;
@@ -92,15 +92,14 @@ function Pipe(){
     this.goingup=false;
     this.update = function(){
         this.x -= this.speed;
-        if(HEIGHT - this.top - this.bottom < 125){
+        if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){
                 this.bottom-=1;
-            }else if(this.top > 30){
-                this.top-=1;
-            }else if(this.bottom > 30 && this.top > 30){
-                this.top-=1;
-                this.bottom-=1;
             }
+            if(this.top > 30){
+                this.top-=1;
+            }
+            // Mechanism to move them apart... 
         }
         if(this.moving <= 0.1){
             if((this.goingup == true) && (Math.round(this.top)>Math.round(this.topmove))){
@@ -181,8 +180,8 @@ function Cloud(){
 player = new Player(50, HEIGHT/2 - 10, 20, 20, 0); //Add the Player
 
 function game(){
-    ctx.fillStyle = "#86b0f4";
-    ctx.fillRect(0,0,WIDTH,HEIGHT);
+    ctx.fillStyle = "#86b0f4"; //Sky color
+    ctx.fillRect(0,0,WIDTH,HEIGHT); //Background
     for(var i = 0; i < clouds.length; i++){
         clouds[i].draw();
     }
