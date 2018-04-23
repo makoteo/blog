@@ -82,7 +82,7 @@ function Player(x, y, width, height, velY){
         }
     }
 }
-function Pipe(var speed){
+function Pipe(speed){
     this.top = Math.random() * (HEIGHT/2 - 50) + 50;
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
     this.x = WIDTH;
