@@ -89,17 +89,17 @@ function Pipe(){
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
-    this.goingup=false;
+    this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
         this.x -= this.speed;
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
-            if(this.bottom > 30){
+            if(this.bottom > 30){ //So bottom pipe doesn't go to low
                 this.bottom-=1;
             }
-            if(this.top > 30){
+            if(this.top > 30){ // So top pipe doesn't go to low
                 this.top-=1;
             }
-            // Mechanism to move them apart... 
+            // Mechanism to move them apart...
         }
         if(this.moving <= 0.1){
             if((this.goingup == true) && (Math.round(this.top)>Math.round(this.topmove))){
