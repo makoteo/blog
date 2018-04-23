@@ -8,6 +8,9 @@ var clouds = [];
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
+var gameSpeed = 3;
+var speedChanged = false;
+var spawnRate = 150;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -79,12 +82,12 @@ function Player(x, y, width, height, velY){
         }
     }
 }
-function Pipe(){
+function Pipe(var speed){
     this.top = Math.random() * (HEIGHT/2 - 50) + 50;
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
     this.x = WIDTH;
     this.w = 40;
-    this.speed = 3;
+    this.speed = speed;
     this.hit = false;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
@@ -219,8 +222,8 @@ function game(){
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
         }
-        if(frameCount % 150 == 0){
-            pipes.push(new Pipe());
+        if(frameCount % spawnRate == 0){
+            pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 75 == 0){
             clouds.push(new Cloud());
@@ -239,6 +242,17 @@ function Start(){
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
+
+        if((SCORE % 20 == 0) && (speedChanged = false)){
+            gameSpeed++;
+            spawnRate-=10;
+            speedChanged=true;
+        }
+
+        if(!(SCORE % 20 == 0) && (speedChanged = false)){
+            speedChanged = true;
+        }
+
     }
     player.setVelY(-3);
 }
