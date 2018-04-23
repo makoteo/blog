@@ -228,6 +228,17 @@ function game(){
         if(frameCount % 75 == 0){
             clouds.push(new Cloud());
         }
+
+        if((SCORE % 20 == 0) && (speedChanged = false)){
+            gameSpeed++;
+            spawnRate-=10;
+            speedChanged=true;
+        }
+
+        if(!(SCORE % 20 == 0) && (speedChanged = true)){
+            speedChanged = false;
+        }
+
     }
 }
 function Jump(){
@@ -239,20 +250,12 @@ function Start(){
         pipes = [];
         clouds = [];
         SCORE = 0;
+        gameSpeed = 3;
+        spawnRate = 150;
+        speedChanged = false;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
-
-        if((SCORE % 20 == 0) && (speedChanged = false)){
-            gameSpeed++;
-            spawnRate-=10;
-            speedChanged=true;
-        }
-
-        if(!(SCORE % 20 == 0) && (speedChanged = false)){
-            speedChanged = true;
-        }
-
     }
     player.setVelY(-3);
 }
