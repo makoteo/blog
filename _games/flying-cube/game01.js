@@ -1,4 +1,4 @@
-var versionCode = "1.12";
+var versionCode = "1.14";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
@@ -230,14 +230,14 @@ function game(){
             clouds.push(new Cloud());
         }
 
-        if((SCORE % 15 === 0) && (speedChanged = false)){
+        if((SCORE % 5 === 0)){
             gameSpeed++;
             spawnRate-=10;
             speedChanged=true;
             console.log("Speed Change!!");
         }
 
-        if((SCORE % 15 !== 0) && (speedChanged = true)){
+        if((SCORE % 5 !== 0) && (speedChanged = true)){
             speedChanged = false;
         }
 
