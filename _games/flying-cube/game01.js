@@ -223,20 +223,21 @@ function game(){
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
         }
-        if(frameCount % spawnRate == 0){
+        if(frameCount % spawnRate === 0){
             pipes.push(new Pipe(gameSpeed));
         }
-        if(frameCount % 75 == 0){
+        if(frameCount % 150 === 0){
             clouds.push(new Cloud());
         }
 
-        if((SCORE % 15 == 0) && (speedChanged = false)){
+        if((SCORE % 15 === 0) && (speedChanged = false)){
             gameSpeed++;
             spawnRate-=10;
             speedChanged=true;
+            console.log("Speed Change!!");
         }
 
-        if(!(SCORE % 15 == 0) && (speedChanged = true)){
+        if((SCORE % 15 !== 0) && (speedChanged = true)){
             speedChanged = false;
         }
 
