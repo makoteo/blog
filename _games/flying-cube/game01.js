@@ -12,6 +12,7 @@ var frameCount = 0;
 var gameSpeed = 3;
 var speedChanged = false;
 var spawnRate = 150;
+var waveTimer = 0;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -223,17 +224,23 @@ function game(){
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
         }
-        if(frameCount % spawnRate === 0){
+
+        if(SCORE = 5){
+            gameSpeed = 4;
+            spawnRate = 120;
+            console.log("Speed Change!!");
+            waveTimer= 50;
+        }
+
+        if(waveTimer > 0){
+            waveTimer--;
+        }
+
+        if((frameCount % spawnRate === 0) && (waveTimer == 0)){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
-        }
-
-        if((SCORE % 5 === 0) && SCORE != 0){
-            gameSpeed = 4;
-            spawnRate = 100;
-            console.log("Speed Change!!");
         }
 
     }
