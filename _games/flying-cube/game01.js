@@ -136,6 +136,11 @@ function Pipe(){
             }
         }
     }
+
+    this.getX(){
+        return this.x;
+    }
+
     this.hits = function(x, y, width, height){
         if (y < this.top || y + height > HEIGHT - this.bottom) {
             if (x + width > this.x && x < this.x + this.w) {
