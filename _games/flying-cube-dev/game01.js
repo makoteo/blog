@@ -106,10 +106,11 @@ function Pipe(){
                     if ((pipesX[j] - this.x > 300)) {
                         this.move = true;
                         console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                        this.xchecked = true;
                     } else {
                         this.move = false;
+                        this.xchecked = false;
                     }
-                    this.xchecked = true;
                 } else {
                     this.move = true;
                     console.log("2nd if -- " + this.x + ", " + pipesX[j]);
