@@ -198,7 +198,7 @@ function game(){
     player.draw();
     player.update();
     if(gameRunning == true){
-        if(waiting = false) {
+        if(waiting == false) {
             frameCount++;
         }
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
