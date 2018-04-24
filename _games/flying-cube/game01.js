@@ -12,8 +12,6 @@ var frameCount = 0;
 var gameSpeed = 3;
 var spawnRate = 150;
 var waiting = false;
-var waitingTimer = 0;
-var levelChanged = false;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -235,7 +233,7 @@ function game(){
                 spawnRate -= 20;
                 waiting = true;
             }
-            if(waiting = false) {
+            if(waiting === false) {
                 pipes.push(new Pipe());
                 waiting = false;
             }
