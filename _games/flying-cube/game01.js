@@ -231,7 +231,11 @@ function game(){
             if((SCORE % 5 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                waiting = true;
+                if(waiting = false) {
+                    waiting = true;
+                }else{
+                    waiting = false;
+                }
             }
             if(waiting === false) {
                 pipes.push(new Pipe());
