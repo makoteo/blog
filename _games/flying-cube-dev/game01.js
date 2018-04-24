@@ -99,23 +99,24 @@ function Pipe(){
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
 
-        for (var j = 0; j < pipesX.length; j++) { //FIX DON'T UPDATE EVERY TIME SOMETHING
-            if (this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
+        for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING
+            if(this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
                 if ((pipesX[j] - this.x > 300)) {
                     this.move = true;
-                    console.log("1st if -- " + this.x + ", " + pipesX[j]);
-                } else {
+                    //console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                }else{
                     this.move = false;
                 }
-            } else {
+            }else{
                 this.move = true;
-                console.log("2nd if -- " + this.x + ", " + pipesX[j]);
+                //console.log("2nd if -- " + this.x + ", " + pipesX[j]);
             }
         }
 
         if(this.move === true){
             this.x -= this.speed;
         }
+
 
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){ //So bottom pipe doesn't go to low
