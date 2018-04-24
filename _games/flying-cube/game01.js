@@ -233,8 +233,7 @@ function game(){
             if(fivePassed === false) {
                 gameSpeed = 4;
                 spawnRate = 120;
-                console.log("Speed Change!!");
-                waveTimer = 100;
+                waveTimer = 80;
                 fivePassed = true;
             }
         }
