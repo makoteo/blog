@@ -97,7 +97,6 @@ function Pipe(){
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
-    this.xchecked = false;
     this.update = function(){
 
         if(this.xchecked = false) {
@@ -106,15 +105,12 @@ function Pipe(){
                     if ((pipesX[j] - this.x > 300)) {
                         this.move = true;
                         console.log("1st if -- " + this.x + ", " + pipesX[j]);
-                        this.xchecked = true;
                     } else {
                         this.move = false;
-                        this.xchecked = false;
                     }
                 } else {
                     this.move = true;
                     console.log("2nd if -- " + this.x + ", " + pipesX[j]);
-                    this.xchecked = true;
                 }
             }
         }
