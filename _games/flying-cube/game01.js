@@ -226,7 +226,7 @@ function game(){
         }
 
         if(SCORE === 5){
-            if(fivePassed = false) {
+            if(fivePassed === false) {
                 gameSpeed = 4;
                 spawnRate = 120;
                 console.log("Speed Change!!");
