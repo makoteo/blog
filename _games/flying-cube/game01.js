@@ -230,7 +230,7 @@ function game(){
             clouds.push(new Cloud());
         }
 
-        if((SCORE % 5 === 0) && (speedChanged = false)){
+        if((SCORE % 5 === 0) && (speedChanged = true)){
             gameSpeed++;
             spawnRate-=10;
             console.log("Speed Change!!");
