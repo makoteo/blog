@@ -229,24 +229,11 @@ function game(){
             }
         }
 
-        if((SCORE % 5 === 0) && (SCORE != 0)){
-            if(levelPassed === false) {
+        if(frameCount % spawnRate === 0){
+            if((SCORE % 5 === 0) && (SCORE != 0)){
                 gameSpeed += 1;
                 spawnRate -= 20;
-                waveTimer = 0;
-                levelPassed = true;
             }
-        }
-
-        if(waveTimer > 0){
-            waiting = true;
-            waveTimer--;
-        }else{
-            waiting = false;
-            levelPassed = false;
-        }
-
-        if(frameCount % spawnRate === 0){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
