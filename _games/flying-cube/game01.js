@@ -229,9 +229,11 @@ function game(){
 
         if(frameCount % spawnRate === 0){
             pipes.push(new Pipe());
-            if((SCORE % 9 === 0) && (SCORE != 0)) {
+            if((SCORE % 10 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
-                spawnRate -= 20;
+                if(spawnRate>20) {
+                    spawnRate -= 20;
+                }
             }
         }
         if(frameCount % 150 === 0){
@@ -250,7 +252,7 @@ function Start(){
         clouds = [];
         SCORE = 0;
         gameSpeed = 3;
-        spawnRate = 140;
+        spawnRate = 130;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
