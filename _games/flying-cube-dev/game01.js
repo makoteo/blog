@@ -1,3 +1,4 @@
+var versionCode = "1.14d";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
@@ -8,6 +9,11 @@ var clouds = [];
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
+var gameSpeed = 3;
+var spawnRate = 150;
+var waiting = false;
+var pause = false;
+var pipesX = [];
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -84,14 +90,26 @@ function Pipe(){
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
     this.x = WIDTH;
     this.w = 40;
-    this.speed = 3;
+    this.speed = gameSpeed;
     this.hit = false;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
-        this.x -= this.speed;
+
+        for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING 
+            if(this.x > pipesX[j]) {
+                if ((pipesX[j] - this.x > 300) && !(this.x = pipesX[i])) {
+                    this.x -= this.speed;
+                    console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                }
+            }else{
+                this.x -= this.speed;
+                console.log("2nd if -- " + this.x + ", " + pipesX[j]);
+            }
+        }
+
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){ //So bottom pipe doesn't go to low
                 this.bottom-=1;
@@ -118,6 +136,11 @@ function Pipe(){
             }
         }
     }
+
+    this.getX = function(){
+        return this.x;
+    }
+
     this.hits = function(x, y, width, height){
         if (y < this.top || y + height > HEIGHT - this.bottom) {
             if (x + width > this.x && x < this.x + this.w) {
@@ -188,10 +211,13 @@ function game(){
     for(var i = 0; i < pipes.length; i++){
         pipes[i].draw();
     }
+
     player.draw();
     player.update();
     if(gameRunning == true){
-        frameCount++;
+        if(waiting == false) {
+            frameCount++;
+        }
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
         for(var i = 0; i < clouds.length; i++){
@@ -200,13 +226,13 @@ function game(){
                 clouds.splice(i, 1);
             }
         }
+
+        for(var i = 0; i < pipes.length; i++){
+            pipesX.push(pipes[i].getX());
+        }
+
         for(var i = 0; i < pipes.length; i++){
             pipes[i].update();
-            if(pipes[i].x < (0 - pipes[i].w)){
-                pipes.splice(i, 1);
-                SCORE++;
-                document.getElementById("score").innerHTML = "Score: " + SCORE;
-            }
             if(pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())){
                 gameRunning = false;
                 frameCount = 0;
@@ -218,13 +244,26 @@ function game(){
                 document.getElementById("endScore").innerHTML = "Score: " + SCORE;
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
+            if(pipes[i].x < (0 - pipes[i].w)){
+                pipes.splice(i, 1);
+                SCORE++;
+                document.getElementById("score").innerHTML = "Score: " + SCORE;
+            }
         }
-        if(frameCount % 150 == 0){
+
+        if(frameCount % spawnRate === 0){
             pipes.push(new Pipe());
+            if((SCORE % 20 === 0) && (SCORE != 0)) {
+                gameSpeed += 1;
+                if(spawnRate>20) {
+                    spawnRate -= 20;
+                }
+            }
         }
-        if(frameCount % 75 == 0){
+        if(frameCount % 150 === 0){
             clouds.push(new Cloud());
         }
+
     }
 }
 function Jump(){
@@ -236,6 +275,8 @@ function Start(){
         pipes = [];
         clouds = [];
         SCORE = 0;
+        gameSpeed = 3;
+        spawnRate = 130;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
