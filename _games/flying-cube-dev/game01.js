@@ -99,19 +99,17 @@ function Pipe(){
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
 
-        if(this.xchecked = false) {
-            for (var j = 0; j < pipesX.length; j++) { //FIX DON'T UPDATE EVERY TIME SOMETHING
-                if (this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
-                    if ((pipesX[j] - this.x > 300)) {
-                        this.move = true;
-                        console.log("1st if -- " + this.x + ", " + pipesX[j]);
-                    } else {
-                        this.move = false;
-                    }
-                } else {
+        for (var j = 0; j < pipesX.length; j++) { //FIX DON'T UPDATE EVERY TIME SOMETHING
+            if (this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
+                if ((pipesX[j] - this.x > 300)) {
                     this.move = true;
-                    console.log("2nd if -- " + this.x + ", " + pipesX[j]);
+                    console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                } else {
+                    this.move = false;
                 }
+            } else {
+                this.move = true;
+                console.log("2nd if -- " + this.x + ", " + pipesX[j]);
             }
         }
 
