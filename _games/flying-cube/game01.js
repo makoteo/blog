@@ -227,7 +227,7 @@ function game(){
             }
         }
 
-        if(SCORE === 5){
+        if(SCORE === 4){
             if(fivePassed === false) {
                 gameSpeed = 4;
                 spawnRate = 120;
@@ -240,11 +240,11 @@ function game(){
         if(waveTimer > 0){
             waveTimer--;
             if(document.getElementById("speedUp").style.opacity < 1) {
-                document.getElementById("speedUp").style.opacity += 0.1;
+                document.getElementById("speedUp").style.opacity += "0.1";
             }
         }else{
             if(document.getElementById("speedUp").style.opacity > 0) {
-                document.getElementById("speedUp").style.opacity -= 0.1;
+                document.getElementById("speedUp").style.opacity -= "0.1";
             }
         }
 
