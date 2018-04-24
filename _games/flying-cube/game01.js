@@ -12,6 +12,8 @@ var frameCount = 0;
 var gameSpeed = 3;
 var fivePassed = false;
 var twentyFivePassed = false;
+var FiftyPassed = false;
+var EightyPassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
 var waiting = false;
@@ -246,6 +248,23 @@ function game(){
                 twentyFivePassed = true;
             }
         }
+        if(SCORE === 49){
+            if(FiftyPassed === false) {
+                gameSpeed = 6;
+                spawnRate = 80;
+                waveTimer = 40;
+                FiftyPassed = true;
+            }
+        }
+        if(SCORE === 79){
+            if(EightyPassed === false) {
+                gameSpeed = 7;
+                spawnRate = 60;
+                waveTimer = 20;
+                EightyPassed = true;
+            }
+        }
+
 
         if(waveTimer > 0){
             waiting = true;
