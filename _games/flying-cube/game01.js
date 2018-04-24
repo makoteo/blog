@@ -250,7 +250,7 @@ function Start(){
         clouds = [];
         SCORE = 0;
         gameSpeed = 3;
-        spawnRate = 150;
+        spawnRate = 140;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
