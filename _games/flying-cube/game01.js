@@ -11,7 +11,7 @@ var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
 var fivePassed = false;
-var spawnRate = 150;
+var spawnRate = 175;
 var waveTimer = 0;
 var speedUpTextVisibility = 0;
 function Player(x, y, width, height, velY){
