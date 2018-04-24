@@ -10,7 +10,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
-var speedChanged = false;
+var fivePassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
 function Player(x, y, width, height, velY){
@@ -229,7 +229,10 @@ function game(){
             gameSpeed = 4;
             spawnRate = 120;
             console.log("Speed Change!!");
-            waveTimer = 50;
+            if(fivePassed = false){
+                waveTimer = 50;
+            }
+            fivePassed = true;
         }
 
         if(waveTimer > 0){
