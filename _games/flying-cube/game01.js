@@ -225,7 +225,7 @@ function game(){
             }
         }
 
-        if(SCORE = 5){
+        if(SCORE == 5){
             gameSpeed = 4;
             spawnRate = 120;
             console.log("Speed Change!!");
@@ -236,7 +236,7 @@ function game(){
             waveTimer--;
         }
 
-        if((frameCount % spawnRate === 0) && (waveTimer = 0)){
+        if((frameCount % spawnRate === 0) && (waveTimer == 0)){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
