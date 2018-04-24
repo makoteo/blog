@@ -239,13 +239,6 @@ function game(){
 
         if(waveTimer > 0){
             waveTimer--;
-            if(document.getElementById("speedUp").style.opacity < 1) {
-                document.getElementById("speedUp").style.opacity += "0.1";
-            }
-        }else{
-            if(document.getElementById("speedUp").style.opacity > 0) {
-                document.getElementById("speedUp").style.opacity -= "0.1";
-            }
         }
 
         if((frameCount % spawnRate === 0) && (waveTimer === 0)){
