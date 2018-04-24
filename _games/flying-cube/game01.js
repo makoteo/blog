@@ -226,10 +226,10 @@ function game(){
         }
 
         if(SCORE === 5){
-            gameSpeed = 4;
-            spawnRate = 120;
-            console.log("Speed Change!!");
             if(fivePassed = false) {
+                gameSpeed = 4;
+                spawnRate = 120;
+                console.log("Speed Change!!");
                 waveTimer = 50;
                 fivePassed = true;
             }
