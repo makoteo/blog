@@ -233,17 +233,9 @@ function game(){
             if (levelChanged = false) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                waitingTimer = 50;
                 levelChanged = true;
             }
 
-        }
-
-        if(waitingTimer > 0){
-            waitingTimer--;
-            waiting = true;
-        }else{
-            waiting = false;
         }
 
         if(frameCount % spawnRate === 0){
