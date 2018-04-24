@@ -244,10 +244,6 @@ function game(){
         if(waveTimer > 0){
             waveTimer--;
             speedUpTextVisibility+=2
-        }else {
-            if (speedUpTextVisibility > 0) {
-                speedUpTextVisibility -= 2;
-            }
         }
 
         if((frameCount % spawnRate === 0) && (waveTimer === 0)){
