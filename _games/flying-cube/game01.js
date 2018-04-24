@@ -1,4 +1,4 @@
-var versionCode = "1.14c";
+var versionCode = "1.14d";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
@@ -231,7 +231,7 @@ function game(){
         }
 
         if((SCORE % 5 === 0) && SCORE != 0){
-            gameSpeed = 8;
+            gameSpeed = 4;
             spawnRate = 100;
             console.log("Speed Change!!");
         }
