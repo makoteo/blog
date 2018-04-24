@@ -92,26 +92,12 @@ function Pipe(){
     this.w = 40;
     this.speed = gameSpeed;
     this.hit = false;
-    this.move = false;
+    this.move = true;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
-
-        for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING
-            if(this.x > pipesX[j] && (pipesX[j] - this.x) > 10) {
-                if ((pipesX[j] - this.x > 300)) {
-                    this.move = true;
-                    //console.log("1st if -- " + this.x + ", " + pipesX[j]);
-                }else{
-                    this.move = false;
-                }
-            }else{
-                this.move = true;
-                //console.log("2nd if -- " + this.x + ", " + pipesX[j]);
-            }
-        }
 
         if(this.move === true){
             this.x -= this.speed;
@@ -235,8 +221,20 @@ function game(){
             }
         }
 
+        pipesX = [];
+
         for(var i = 0; i < pipes.length; i++){
             pipesX.push(pipes[i].getX());
+        }
+
+
+        for(var j = 0; j < pipesX.length - 1; j++){ //TRY AGAIN!!
+            if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
+                pipes[j+1].move = false;
+                console.log("Slowdown... ");
+            }else{
+                pipes[j+1].move = true;
+            }
         }
 
         for(var i = 0; i < pipes.length; i++){
@@ -261,15 +259,17 @@ function game(){
 
         if(frameCount % spawnRate === 0){
             pipes.push(new Pipe());
-            if((SCORE % 5 === 0) && (SCORE != 0)) {
-                gameSpeed += 1;
-                if(spawnRate>20) {
-                    spawnRate -= 20;
-                }
-            }
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
+        }
+
+        if(frameCount % 500 === 0) {
+            gameSpeed += 1;
+            if(spawnRate > 40) {
+                spawnRate -= 20;
+            }
+            console.log("Speed up!! ");
         }
 
     }
