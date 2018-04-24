@@ -229,18 +229,16 @@ function game(){
             }
         }
 
-        if((SCORE % 5 === 0) && (SCORE != 0)) {
-            if (levelChanged = false) {
+        if(frameCount % spawnRate === 0){
+            if((SCORE % 5 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                levelChanged = true;
+                waiting = true;
             }
-
-        }
-
-        if(frameCount % spawnRate === 0){
-            pipes.push(new Pipe());
-            levelChanged = false;
+            if(waiting = false) {
+                pipes.push(new Pipe());
+                waiting = false;
+            }
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
