@@ -231,8 +231,8 @@ function game(){
             if((SCORE % 10 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                pipes.push(new Pipe());
             }
+            pipes.push(new Pipe());
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
