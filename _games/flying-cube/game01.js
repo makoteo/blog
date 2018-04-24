@@ -11,6 +11,7 @@ var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
 var fivePassed = false;
+var twentyFivePassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
 var waiting = false;
@@ -229,12 +230,20 @@ function game(){
             }
         }
 
-        if(SCORE === 4){
+        if(SCORE === 9){
             if(fivePassed === false) {
                 gameSpeed = 4;
                 spawnRate = 120;
                 waveTimer = 80;
                 fivePassed = true;
+            }
+        }
+        if(SCORE === 24){
+            if(twentyFivePassed === false) {
+                gameSpeed = 5;
+                spawnRate = 100;
+                waveTimer = 60;
+                twentyFivePassed = true;
             }
         }
 
