@@ -231,16 +231,8 @@ function game(){
             if((SCORE % 10 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                if(waiting = false) {
-                    waiting = true;
-                }else{
-                    waiting = false;
-                }
-            }
-            if(waiting === false) {
                 pipes.push(new Pipe());
             }
-            waiting = false;
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
