@@ -229,7 +229,7 @@ function game(){
             gameSpeed = 4;
             spawnRate = 120;
             console.log("Speed Change!!");
-            waveTimer = 0;
+            waveTimer = 50;
         }
 
         if(waveTimer > 0){
