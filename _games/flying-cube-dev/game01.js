@@ -100,7 +100,7 @@ function Pipe(){
     this.update = function(){
 
         for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING
-            if(this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
+            if(this.x > pipesX[j] && (pipesX[j] - this.x) > 10) {
                 if ((pipesX[j] - this.x > 300)) {
                     this.move = true;
                     //console.log("1st if -- " + this.x + ", " + pipesX[j]);
@@ -261,7 +261,7 @@ function game(){
 
         if(frameCount % spawnRate === 0){
             pipes.push(new Pipe());
-            if((SCORE % 20 === 0) && (SCORE != 0)) {
+            if((SCORE % 5 === 0) && (SCORE != 0)) {
                 gameSpeed += 1;
                 if(spawnRate>20) {
                     spawnRate -= 20;
