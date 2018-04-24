@@ -10,10 +10,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
-var fivePassed = false;
-var twentyFivePassed = false;
-var FiftyPassed = false;
-var EightyPassed = false;
+var levelPassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
 var waiting = false;
@@ -232,45 +229,21 @@ function game(){
             }
         }
 
-        if(SCORE === 9){
-            if(fivePassed === false) {
-                gameSpeed = 4;
-                spawnRate = 120;
-                waveTimer = 80;
-                fivePassed = true;
+        if(SCORE % 10 === 0){
+            if(levelPassed === false) {
+                gameSpeed += 1;
+                spawnRate -= 20;
+                waveTimer = 50;
+                levelPassed = true;
             }
         }
-        if(SCORE === 24){
-            if(twentyFivePassed === false) {
-                gameSpeed = 5;
-                spawnRate = 100;
-                waveTimer = 60;
-                twentyFivePassed = true;
-            }
-        }
-        if(SCORE === 49){
-            if(FiftyPassed === false) {
-                gameSpeed = 6;
-                spawnRate = 80;
-                waveTimer = 40;
-                FiftyPassed = true;
-            }
-        }
-        if(SCORE === 79){
-            if(EightyPassed === false) {
-                gameSpeed = 7;
-                spawnRate = 60;
-                waveTimer = 20;
-                EightyPassed = true;
-            }
-        }
-
 
         if(waveTimer > 0){
             waiting = true;
             waveTimer--;
         }else{
             waiting = false;
+            levelPassed = false;
         }
 
         if(frameCount % spawnRate === 0){
