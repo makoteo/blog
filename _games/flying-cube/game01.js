@@ -236,7 +236,7 @@ function game(){
             waveTimer--;
         }
 
-        if((frameCount % spawnRate === 0) && (waveTimer == 0)){
+        if((frameCount % spawnRate === 0) && (waveTimer = 0)){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
