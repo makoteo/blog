@@ -12,6 +12,8 @@ var frameCount = 0;
 var gameSpeed = 3;
 var spawnRate = 150;
 var waiting = false;
+var pause = false;
+var pipesX = [];
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -95,7 +97,19 @@ function Pipe(){
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
-        this.x -= this.speed;
+
+        for(var j = 0; j < pipesX.length; j++){
+            if(this.x > pipesX[j]) {
+                if ((pipesX[j] - this.x > 300) && !(this.x = pipesX[i])) {
+                    this.x -= this.speed;
+                    console.log("1st if -- "this.x + ", " + pipesX[j]);
+                }
+            }else{
+                this.x -= this.speed;
+                console.log("2nd if -- "this.x + ", " + pipesX[j]);
+            }
+        }
+
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){ //So bottom pipe doesn't go to low
                 this.bottom-=1;
@@ -207,6 +221,11 @@ function game(){
                 clouds.splice(i, 1);
             }
         }
+
+        for(var i = 0; i < pipes.length; i++){
+            pipesX.push(pipes[i].getX());
+        }
+
         for(var i = 0; i < pipes.length; i++){
             pipes[i].update();
             if(pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())){
