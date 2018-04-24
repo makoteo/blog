@@ -239,7 +239,7 @@ function game(){
 
         if(waveTimer > 0){
             waveTimer--;
-            document.getElementById("speedUp").style.opacity += "0.02";
+            document.getElementById("speedUp").style.opacity = 1;
         }
 
         if((frameCount % spawnRate === 0) && (waveTimer === 0)){
