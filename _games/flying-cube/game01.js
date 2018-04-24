@@ -12,6 +12,8 @@ var frameCount = 0;
 var gameSpeed = 3;
 var spawnRate = 150;
 var waiting = false;
+var waitingTimer = 0;
+var levelChanged = false;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -227,11 +229,26 @@ function game(){
             }
         }
 
-        if(frameCount % spawnRate === 0){
-            if((SCORE % 5 === 0) && (SCORE != 0)){
+        if((SCORE % 5 === 0) && (SCORE != 0)) {
+            if (levelChanged = false) {
                 gameSpeed += 1;
+                spawnRate -= 20;
+                waitingTimer = 50;
+                levelChanged = true;
             }
+
+        }
+
+        if(waitingTimer > 0){
+            waitingTimer--;
+            waiting = true;
+        }else{
+            waiting = false;
+        }
+
+        if(frameCount % spawnRate === 0){
             pipes.push(new Pipe());
+            levelChanged = false;
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
