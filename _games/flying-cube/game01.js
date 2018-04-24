@@ -137,7 +137,7 @@ function Pipe(){
         }
     }
 
-    this.getX(){
+    this.getX = function(){
         return this.x;
     }
 
