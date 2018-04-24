@@ -233,7 +233,7 @@ function game(){
             if(levelPassed === false) {
                 gameSpeed += 1;
                 spawnRate -= 20;
-                waveTimer = 50;
+                waveTimer = 0;
                 levelPassed = true;
             }
         }
