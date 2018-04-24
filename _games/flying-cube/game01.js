@@ -197,7 +197,7 @@ function game(){
 
     ctx.fillStyle = "rgba(255, 255, 255, (speedUpTextVisibility/100))";
     ctx.font = "30px Arial";
-    ctx.fillText("Speed Up!!",HEIGHT-25, WIDTH-50);
+    ctx.fillText("Speed Up!!", HEIGHT/2-25, WIDTH/2-50);
 
     player.draw();
     player.update();
