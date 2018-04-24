@@ -11,7 +11,7 @@ var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
 var fivePassed = false;
-var spawnRate = 250;
+var spawnRate = 150;
 var waveTimer = 0;
 var speedUpTextVisibility = 0;
 function Player(x, y, width, height, velY){
@@ -232,16 +232,12 @@ function game(){
                 gameSpeed = 4;
                 spawnRate = 120;
                 console.log("Speed Change!!");
-                waveTimer = 50;
+                waveTimer += 100;
                 fivePassed = true;
             }
         }
 
-        if(waveTimer > 0){
-            waveTimer--;
-        }
-
-        if((frameCount % spawnRate === 0) && (waveTimer === 0)){
+        if((frameCount + waveTimer) % spawnRate === 0){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
@@ -260,7 +256,7 @@ function Start(){
         clouds = [];
         SCORE = 0;
         gameSpeed = 3;
-        spawnRate = 175;
+        spawnRate = 150;
         fivePassed = false;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
