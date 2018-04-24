@@ -235,8 +235,8 @@ function game(){
             }
             if(waiting === false) {
                 pipes.push(new Pipe());
-                waiting = false;
             }
+            waiting = false;
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
