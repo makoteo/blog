@@ -97,19 +97,24 @@ function Pipe(){
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
+    this.xchecked = false;
     this.update = function(){
 
-        for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING 
-            if(this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
-                if ((pipesX[j] - this.x > 300)) {
+        if(this.xchecked = false) {
+            for (var j = 0; j < pipesX.length; j++) { //FIX DON'T UPDATE EVERY TIME SOMETHING
+                if (this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
+                    if ((pipesX[j] - this.x > 300)) {
+                        this.move = true;
+                        console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                    } else {
+                        this.move = false;
+                    }
+                    this.xchecked = true;
+                } else {
                     this.move = true;
-                    console.log("1st if -- " + this.x + ", " + pipesX[j]);
-                }else{
-                    this.move = false;
+                    console.log("2nd if -- " + this.x + ", " + pipesX[j]);
+                    this.xchecked = true;
                 }
-            }else{
-                this.move = true;
-                console.log("2nd if -- " + this.x + ", " + pipesX[j]);
             }
         }
 
