@@ -13,7 +13,7 @@ var gameSpeed = 3;
 var fivePassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
-var speedUpTextVisibility = 0;
+var waiting = false;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -198,7 +198,9 @@ function game(){
     player.draw();
     player.update();
     if(gameRunning == true){
-        frameCount++;
+        if(waiting = false) {
+            frameCount++;
+        }
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
         for(var i = 0; i < clouds.length; i++){
@@ -232,12 +234,19 @@ function game(){
                 gameSpeed = 4;
                 spawnRate = 120;
                 console.log("Speed Change!!");
-                waveTimer = 149;
+                waveTimer = 50;
                 fivePassed = true;
             }
         }
 
-        if((frameCount - waveTimer) % spawnRate === 0){
+        if(waveTimer > 0){
+            waiting = true;
+            waveTimer--;
+        }else{
+            waiting = false;
+        }
+
+        if(frameCount % spawnRate === 0){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
