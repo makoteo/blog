@@ -13,6 +13,7 @@ var gameSpeed = 3;
 var fivePassed = false;
 var spawnRate = 150;
 var waveTimer = 0;
+var speedUpTextVisibility = 0;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -193,6 +194,11 @@ function game(){
     for(var i = 0; i < pipes.length; i++){
         pipes[i].draw();
     }
+
+    ctx.fillStyle = "rgba(255, 255, 255, (speedUpTextVisibility/100))";
+    ctx.font = "30px Arial";
+    ctx.fillText("Speed Up!!",HEIGHT-25, WIDTH-50);
+
     player.draw();
     player.update();
     if(gameRunning == true){
@@ -237,6 +243,9 @@ function game(){
 
         if(waveTimer > 0){
             waveTimer--;
+            speedUpTextVisibility+=2
+        }else{
+            speedUpTextVisibility-=2;
         }
 
         if((frameCount % spawnRate === 0) && (waveTimer === 0)){
@@ -259,7 +268,7 @@ function Start(){
         SCORE = 0;
         gameSpeed = 3;
         spawnRate = 150;
-        speedChanged = false;
+        fivePassed = false;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
