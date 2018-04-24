@@ -92,6 +92,7 @@ function Pipe(){
     this.w = 40;
     this.speed = gameSpeed;
     this.hit = false;
+    this.move = false;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
@@ -101,13 +102,19 @@ function Pipe(){
         for(var j = 0; j < pipesX.length; j++){ //FIX DON'T UPDATE EVERY TIME SOMETHING 
             if(this.x < pipesX[j] && (pipesX[j] - this.x) > 10) {
                 if ((pipesX[j] - this.x > 300)) {
-                    this.x -= this.speed;
+                    this.move = true;
                     console.log("1st if -- " + this.x + ", " + pipesX[j]);
+                }else{
+                    this.move = false;
                 }
             }else{
-                this.x -= this.speed;
+                this.move = true;
                 console.log("2nd if -- " + this.x + ", " + pipesX[j]);
             }
+        }
+
+        if(this.move === true){
+            this.x -= this.speed;
         }
 
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
