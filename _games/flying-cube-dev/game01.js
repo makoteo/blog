@@ -229,7 +229,7 @@ function game(){
 
 
         for(var j = 0; j < pipesX.length - 1; j++){ //TRY AGAIN!!
-            if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
+            if ((pipesX[j + 1] - pipesX[j] < 350) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
                 pipes[j+1].move = false;
                 console.log("Slowdown... ");
             }else{
