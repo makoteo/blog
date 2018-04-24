@@ -209,11 +209,6 @@ function game(){
         }
         for(var i = 0; i < pipes.length; i++){
             pipes[i].update();
-            if(pipes[i].x < (0 - pipes[i].w)){
-                pipes.splice(i, 1);
-                SCORE++;
-                document.getElementById("score").innerHTML = "Score: " + SCORE;
-            }
             if(pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())){
                 gameRunning = false;
                 frameCount = 0;
@@ -224,6 +219,11 @@ function game(){
                 localStorage.setItem("HighScore", HIGHSCORE);
                 document.getElementById("endScore").innerHTML = "Score: " + SCORE;
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
+            }
+            if(pipes[i].x < (0 - pipes[i].w)){
+                pipes.splice(i, 1);
+                SCORE++;
+                document.getElementById("score").innerHTML = "Score: " + SCORE;
             }
         }
 
