@@ -222,7 +222,7 @@ function game(){
         if(frameCount % 150 == 0){
             pipes.push(new Pipe());
         }
-        if(frameCount % 75 == 0){
+        if(frameCount % 150 == 0){
             clouds.push(new Cloud());
         }
     }
