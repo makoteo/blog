@@ -230,7 +230,6 @@ function game(){
         if(frameCount % spawnRate === 0){
             if((SCORE % 5 === 0) && (SCORE != 0)){
                 gameSpeed += 1;
-                spawnRate -= 20;
             }
             pipes.push(new Pipe());
         }
