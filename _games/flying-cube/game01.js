@@ -260,7 +260,7 @@ function Start(){
         clouds = [];
         SCORE = 0;
         gameSpeed = 3;
-        spawnRate = 150;
+        spawnRate = 175;
         fivePassed = false;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
