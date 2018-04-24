@@ -83,12 +83,12 @@ function Player(x, y, width, height, velY){
         }
     }
 }
-function Pipe(speed){
+function Pipe(){
     this.top = Math.random() * (HEIGHT/2 - 50) + 50;
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
     this.x = WIDTH;
     this.w = 40;
-    this.speed = speed;
+    this.speed = gameSpeed;
     this.hit = false;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
@@ -232,7 +232,7 @@ function game(){
                 gameSpeed += 1;
                 spawnRate -= 20;
             }
-            pipes.push(new Pipe(gameSpeed));
+            pipes.push(new Pipe());
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
