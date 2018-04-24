@@ -102,11 +102,11 @@ function Pipe(){
             if(this.x > pipesX[j]) {
                 if ((pipesX[j] - this.x > 300) && !(this.x = pipesX[i])) {
                     this.x -= this.speed;
-                    console.log("1st if -- "this.x + ", " + pipesX[j]);
+                    console.log("1st if -- " + this.x + ", " + pipesX[j]);
                 }
             }else{
                 this.x -= this.speed;
-                console.log("2nd if -- "this.x + ", " + pipesX[j]);
+                console.log("2nd if -- " + this.x + ", " + pipesX[j]);
             }
         }
 
