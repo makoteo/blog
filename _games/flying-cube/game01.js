@@ -232,12 +232,12 @@ function game(){
                 gameSpeed = 4;
                 spawnRate = 120;
                 console.log("Speed Change!!");
-                waveTimer += 100;
+                waveTimer = 149;
                 fivePassed = true;
             }
         }
 
-        if((frameCount + waveTimer) % spawnRate === 0){
+        if((frameCount - waveTimer) % spawnRate === 0){
             pipes.push(new Pipe(gameSpeed));
         }
         if(frameCount % 150 === 0){
