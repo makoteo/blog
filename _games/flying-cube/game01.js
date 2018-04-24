@@ -10,7 +10,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var gameSpeed = 3;
-var spawnRate = 175;
+var spawnRate = 150;
 var waiting = false;
 function Player(x, y, width, height, velY){
     this.x = x;
@@ -250,7 +250,7 @@ function Start(){
         clouds = [];
         SCORE = 0;
         gameSpeed = 3;
-        spawnRate = 175;
+        spawnRate = 150;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
