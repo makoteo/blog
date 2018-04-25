@@ -14,6 +14,8 @@ var spawnRate = 150;
 var waiting = false;
 var pause = false;
 var pipesX = [];
+var speedUpTextTimer = 0;
+var speedUpTextVisible = false;
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -36,8 +38,8 @@ function Player(x, y, width, height, velY){
             if(pipes.length > 0){
                 ctx.fillStyle = "red";
                 ctx.font = "15px Arial";
-                ctx.fillText("x",x + 2,y + 14);
-                ctx.fillText("x",x + width - 9,y + 14);
+                ctx.fillText("x",x + 4,y + 14);
+                ctx.fillText("x",x + width - 6,y + 14);
             }else{
                 ctx.fillStyle = "black";
                 ctx.fillRect(x + 4, y+7, 3, 7);
@@ -207,6 +209,7 @@ function game(){
 
     player.draw();
     player.update();
+
     if(gameRunning == true){
         if(waiting == false) {
             frameCount++;
@@ -265,10 +268,25 @@ function game(){
 
         if(frameCount % 2000 === 0) { //2000
             gameSpeed += 1;
+            speedUpTextTimer = 100;
             if(spawnRate > 40) {
                 spawnRate -= 15;
             }
             console.log("Speed up!! ");
+        }
+
+        if(speedUpTextTimer > 0){
+            speedUpTextTimer--;
+            speedUpTextVisible = true;
+        }else{
+            speedUpTextVisible = false;
+        }
+
+        if(speedUpTextVisible === true){
+            ctx.textAlign = "center";
+            ctx.fillStyle = "white";
+            ctx.font = "30px Arial";
+            ctx.fillText("SPEED UP AHEAD!!",WIDTH/2, HEIGHT/2);
         }
 
     }
@@ -284,6 +302,7 @@ function Start(){
         SCORE = 0;
         gameSpeed = 3;
         spawnRate = 130;
+        speedUpTextVisible = false;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
