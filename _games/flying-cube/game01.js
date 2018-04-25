@@ -39,6 +39,7 @@ function Player(x, y, width, height, velY){
             if(pipes.length > 0){
                 ctx.fillStyle = "red";
                 ctx.font = "15px Arial";
+                ctx.textAlign("left");
                 ctx.fillText("x",x + 4,y + 14);
                 ctx.fillText("x",x + width - 6,y + 14);
             }else{
