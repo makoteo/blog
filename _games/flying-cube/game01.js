@@ -4,19 +4,24 @@ var HEIGHT = 500;
 var gameRunning = false;
 var SCORE = 0;
 var HIGHSCORE = 0;
+
 var pipes = [];
 var clouds = [];
+var pipesX = [];
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
 var frameCount = 0;
 var gameSpeed = 3;
 var spawnRate = 150;
+
 var waiting = false;
-var pause = false;
-var pipesX = [];
+
 var speedUpTextTimer = 0;
 var speedUpTextVisible = false;
 var gameMode = "Infinite";
+
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
