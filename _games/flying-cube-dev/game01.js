@@ -47,25 +47,25 @@ function Player(x, y, width, height, velY){
                 ctx.fillRect(x + width - 4 - 2, y+7, 3, 7);
             }
         }
-    }
+    };
     this.setVelY = function(i){
         velY = i;
-    }
+    };
     this.getX = function(){
         return x;
-    }
+    };
     this.getY = function(){
         return y;
-    }
+    };
     this.setY = function(i){
         y = i;
-    }
+    };
     this.getWidth = function(){
         return width;
-    }
+    };
     this.getHeight = function(){
         return height;
-    }
+    };
     this.update = function(){
         if(gameRunning == true){ // If player is playing
             if(y>0 && y<HEIGHT-height){
@@ -131,11 +131,11 @@ function Pipe(){
                 this.goingup = true;
             }
         }
-    }
+    };
 
     this.getX = function(){
         return this.x;
-    }
+    };
 
     this.hits = function(x, y, width, height){
         if (y < this.top || y + height > HEIGHT - this.bottom) {
@@ -144,7 +144,7 @@ function Pipe(){
                 return true;
             }
         }
-    }
+    };
     this.draw = function(){
         ctx.fillStyle = "#2ed136";
         if(this.hit == true){
@@ -191,7 +191,7 @@ function Cloud(){
     this.draw = function(){
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
+    };
     this.update = function(){
         this.x -= this.velX;
     }
@@ -199,6 +199,7 @@ function Cloud(){
 player = new Player(50, HEIGHT/2 - 10, 20, 20, 0); //Add the Player
 
 function game(){
+
     ctx.fillStyle = "#86b0f4"; //Sky color
     ctx.fillRect(0,0,WIDTH,HEIGHT); //Background
     for(var i = 0; i < clouds.length; i++){
@@ -338,6 +339,15 @@ function Start(){
     }
     player.setVelY(-3);
 }
+
+window.onkeyup = function(e) {
+    var key = e.keyCode ? e.keyCode : e.which;
+
+    if (key == 32) {
+        Jump();
+    }
+};
+
 function Reload() {
     localStorage.setItem("HighScore", 0);
     //localStorage.clear();
