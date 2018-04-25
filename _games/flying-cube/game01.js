@@ -1,4 +1,4 @@
-var versionCode = "1.14d";
+var versionCode = "1.2";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
@@ -232,13 +232,14 @@ function game(){
             pipesX.push(pipes[i].getX());
         }
 
-
-        for (var j = 0; j < pipesX.length - 1; j++) { //TRY AGAIN!!
-            if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
-                pipes[j + 1].move = false;
-                console.log("Slowdown... ");
-            } else {
-                pipes[j + 1].move = true;
+        if(gameMode === "Speed") {
+            for (var j = 0; j < pipesX.length - 1; j++) { //TRY AGAIN!!
+                if ((pipesX[j + 1] - pipesX[j] < 370) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
+                    pipes[j + 1].move = false;
+                    console.log("Slowdown... ");
+                } else {
+                    pipes[j + 1].move = true;
+                }
             }
         }
 
