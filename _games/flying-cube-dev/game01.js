@@ -16,6 +16,7 @@ var pause = false;
 var pipesX = [];
 var speedUpTextTimer = 0;
 var speedUpTextVisible = false;
+var gameMode = "Infinite";
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -210,69 +211,81 @@ function game(){
     player.draw();
     player.update();
 
-    if(gameRunning == true){
-        if(waiting == false) {
+    if(gameRunning == true) {
+        if (waiting == false) {
             frameCount++;
         }
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
-        for(var i = 0; i < clouds.length; i++){
+        document.getElementById("modeMenu").setAttribute("hidden", "hidden");
+        for (var i = 0; i < clouds.length; i++) {
             clouds[i].update();
-            if(clouds[i].x + clouds[i].width < 0){
+            if (clouds[i].x + clouds[i].width < 0) {
                 clouds.splice(i, 1);
             }
         }
 
         pipesX = [];
 
-        for(var i = 0; i < pipes.length; i++){
+        for (var i = 0; i < pipes.length; i++) {
             pipesX.push(pipes[i].getX());
         }
 
 
-        for(var j = 0; j < pipesX.length - 1; j++){ //TRY AGAIN!!
+        for (var j = 0; j < pipesX.length - 1; j++) { //TRY AGAIN!!
             if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
-                pipes[j+1].move = false;
+                pipes[j + 1].move = false;
                 console.log("Slowdown... ");
-            }else{
+            } else {
                 pipes[j + 1].move = true;
             }
         }
 
-        for(var i = 0; i < pipes.length; i++){
+        for (var i = 0; i < pipes.length; i++) {
             pipes[i].update();
-            if(pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())){
+            if (pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
                 gameRunning = false;
                 frameCount = 0;
                 document.getElementById("resetMenu").removeAttribute("hidden");
-                if(SCORE > HIGHSCORE){
+                if (SCORE > HIGHSCORE) {
                     HIGHSCORE = SCORE;
                 }
                 localStorage.setItem("HighScore", HIGHSCORE);
                 document.getElementById("endScore").innerHTML = "Score: " + SCORE;
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
-            if(pipes[i].x < (0 - pipes[i].w)){
+            if (pipes[i].x < (0 - pipes[i].w)) {
                 pipes.splice(i, 1);
                 SCORE++;
                 document.getElementById("score").innerHTML = "Score: " + SCORE;
             }
         }
 
-        if((frameCount % spawnRate === 0) && !(frameCount % 2000 <= 200)){
-            pipes.push(new Pipe());
+        if(gameMode === "Infinite") {
+            if ((frameCount % spawnRate === 0)) {
+                pipes.push(new Pipe());
+            }
+        }else{
+            if ((frameCount % spawnRate === 0) && !(frameCount % 2000 <= 200)) {
+                pipes.push(new Pipe());
+            }
         }
-        if(frameCount % 150 === 0){
+
+        if (frameCount % 150 === 0) {
             clouds.push(new Cloud());
         }
 
-        if(frameCount % 2000 === 0) { //2000
-            gameSpeed += 1;
-            speedUpTextTimer = 100;
-            if(spawnRate > 40) {
-                spawnRate -= 15;
+        if (gameMode === "Speed") {
+            if (frameCount % 2000 === 0) { //2000
+                gameSpeed += 1;
+                speedUpTextTimer = 150;
+                if (spawnRate > 40) {
+                    spawnRate -= 15;
+                }
+                console.log("Speed up!! ");
             }
-            console.log("Speed up!! ");
+        }else{
+
         }
 
         if(speedUpTextTimer > 0){
@@ -294,6 +307,22 @@ function game(){
 function Jump(){
     player.setVelY(-4);
 }
+
+function setGameMode(i){
+    if(i === 1){
+        gameMode = "Infinite";
+    }else{
+        gameMode = "Speed";
+    }
+    Start()
+}
+
+function changeToModeMenu(){
+    document.getElementById("startMenu").setAttribute("hidden", "hidden");
+    document.getElementById("resetMenu").setAttribute("hidden", "hidden");
+    document.getElementById("modeMenu").removeAttribute("hidden");
+}
+
 function Start(){
     if(gameRunning == false){
         gameRunning = true;
