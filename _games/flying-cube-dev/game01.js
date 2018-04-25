@@ -331,7 +331,7 @@ function Start(){
         SCORE = 0;
         gameSpeed = 3;
         spawnRate = 130;
-        speedUpTextVisible = false;
+        speedUpTextTimer = 0;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
