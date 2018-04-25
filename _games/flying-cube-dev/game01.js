@@ -88,7 +88,7 @@ function Player(x, y, width, height, velY){
 function Pipe(){
     this.top = Math.random() * (HEIGHT/2 - 50) + 50;
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
-    this.x = WIDTH;
+    this.x = WIDTH + 20;
     this.w = 40;
     this.speed = gameSpeed;
     this.hit = false;
@@ -102,7 +102,6 @@ function Pipe(){
         if(this.move === true){
             this.x -= this.speed;
         }
-
 
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){ //So bottom pipe doesn't go to low
@@ -229,11 +228,11 @@ function game(){
 
 
         for(var j = 0; j < pipesX.length - 1; j++){ //TRY AGAIN!!
-            if ((pipesX[j + 1] - pipesX[j] < 350) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
+            if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
                 pipes[j+1].move = false;
                 console.log("Slowdown... ");
             }else{
-                pipes[j+1].move = true;
+                pipes[j + 1].move = true;
             }
         }
 
@@ -257,17 +256,17 @@ function game(){
             }
         }
 
-        if(frameCount % spawnRate === 0){
+        if((frameCount % spawnRate === 0) && !(frameCount % 2000 <= 200)){
             pipes.push(new Pipe());
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
         }
 
-        if(frameCount % 500 === 0) {
+        if(frameCount % 2000 === 0) { //2000
             gameSpeed += 1;
             if(spawnRate > 40) {
-                spawnRate -= 20;
+                spawnRate -= 15;
             }
             console.log("Speed up!! ");
         }
