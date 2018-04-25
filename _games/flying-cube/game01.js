@@ -1,3 +1,4 @@
+var versionCode = "1.14d";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
@@ -8,6 +9,14 @@ var clouds = [];
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var frameCount = 0;
+var gameSpeed = 3;
+var spawnRate = 150;
+var waiting = false;
+var pause = false;
+var pipesX = [];
+var speedUpTextTimer = 0;
+var speedUpTextVisible = false;
+var gameMode = "Infinite";
 function Player(x, y, width, height, velY){
     this.x = x;
     this.y = y;
@@ -30,33 +39,33 @@ function Player(x, y, width, height, velY){
             if(pipes.length > 0){
                 ctx.fillStyle = "red";
                 ctx.font = "15px Arial";
-                ctx.fillText("x",x + 2,y + 14);
-                ctx.fillText("x",x + width - 9,y + 14);
+                ctx.fillText("x",x + 4,y + 14);
+                ctx.fillText("x",x + width - 6,y + 14);
             }else{
                 ctx.fillStyle = "black";
                 ctx.fillRect(x + 4, y+7, 3, 7);
                 ctx.fillRect(x + width - 4 - 2, y+7, 3, 7);
             }
         }
-    }
+    };
     this.setVelY = function(i){
         velY = i;
-    }
+    };
     this.getX = function(){
         return x;
-    }
+    };
     this.getY = function(){
         return y;
-    }
+    };
     this.setY = function(i){
         y = i;
-    }
+    };
     this.getWidth = function(){
         return width;
-    }
+    };
     this.getHeight = function(){
         return height;
-    }
+    };
     this.update = function(){
         if(gameRunning == true){ // If player is playing
             if(y>0 && y<HEIGHT-height){
@@ -82,16 +91,21 @@ function Player(x, y, width, height, velY){
 function Pipe(){
     this.top = Math.random() * (HEIGHT/2 - 50) + 50;
     this.bottom = Math.random() * (HEIGHT/2 - 50) + 50;
-    this.x = WIDTH;
+    this.x = WIDTH + 20;
     this.w = 40;
-    this.speed = 3;
+    this.speed = gameSpeed;
     this.hit = false;
+    this.move = true;
     this.moving = Math.random();
     this.topmove = Math.floor((Math.random() * ((this.top - 5) - 0)) + 0);
     this.bottommove = Math.floor((Math.random() * ((this.bottom + 5) - 0)) + 0);
     this.goingup = false; //Just to know the velocity direction...
     this.update = function(){
-        this.x -= this.speed;
+
+        if(this.move === true){
+            this.x -= this.speed;
+        }
+
         if(HEIGHT - this.top - this.bottom < 125){ //If gap is too small
             if(this.bottom > 30){ //So bottom pipe doesn't go to low
                 this.bottom-=1;
@@ -117,7 +131,12 @@ function Pipe(){
                 this.goingup = true;
             }
         }
-    }
+    };
+
+    this.getX = function(){
+        return this.x;
+    };
+
     this.hits = function(x, y, width, height){
         if (y < this.top || y + height > HEIGHT - this.bottom) {
             if (x + width > this.x && x < this.x + this.w) {
@@ -125,7 +144,7 @@ function Pipe(){
                 return true;
             }
         }
-    }
+    };
     this.draw = function(){
         ctx.fillStyle = "#2ed136";
         if(this.hit == true){
@@ -172,7 +191,7 @@ function Cloud(){
     this.draw = function(){
         ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
+    };
     this.update = function(){
         this.x -= this.velX;
     }
@@ -180,6 +199,7 @@ function Cloud(){
 player = new Player(50, HEIGHT/2 - 10, 20, 20, 0); //Add the Player
 
 function game(){
+
     ctx.fillStyle = "#86b0f4"; //Sky color
     ctx.fillRect(0,0,WIDTH,HEIGHT); //Background
     for(var i = 0; i < clouds.length; i++){
@@ -188,60 +208,146 @@ function game(){
     for(var i = 0; i < pipes.length; i++){
         pipes[i].draw();
     }
+
     player.draw();
     player.update();
-    if(gameRunning == true){
-        frameCount++;
+
+    if(gameRunning == true) {
+        if (waiting == false) {
+            frameCount++;
+        }
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
-        for(var i = 0; i < clouds.length; i++){
+        document.getElementById("modeMenu").setAttribute("hidden", "hidden");
+        for (var i = 0; i < clouds.length; i++) {
             clouds[i].update();
-            if(clouds[i].x + clouds[i].width < 0){
+            if (clouds[i].x + clouds[i].width < 0) {
                 clouds.splice(i, 1);
             }
         }
-        for(var i = 0; i < pipes.length; i++){
-            pipes[i].update();
-            if(pipes[i].x < (0 - pipes[i].w)){
-                pipes.splice(i, 1);
-                SCORE++;
-                document.getElementById("score").innerHTML = "Score: " + SCORE;
+
+        pipesX = [];
+
+        for (var i = 0; i < pipes.length; i++) {
+            pipesX.push(pipes[i].getX());
+        }
+
+
+        for (var j = 0; j < pipesX.length - 1; j++) { //TRY AGAIN!!
+            if ((pipesX[j + 1] - pipesX[j] < 400) && (pipesX[j + 1] - pipesX[j] > 0) && (pipesX[j + 1] != pipesX[j])) {
+                pipes[j + 1].move = false;
+                console.log("Slowdown... ");
+            } else {
+                pipes[j + 1].move = true;
             }
-            if(pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())){
+        }
+
+        for (var i = 0; i < pipes.length; i++) {
+            pipes[i].update();
+            if (pipes[i].hits(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
                 gameRunning = false;
                 frameCount = 0;
                 document.getElementById("resetMenu").removeAttribute("hidden");
-                if(SCORE > HIGHSCORE){
+                if (SCORE > HIGHSCORE) {
                     HIGHSCORE = SCORE;
                 }
                 localStorage.setItem("HighScore", HIGHSCORE);
                 document.getElementById("endScore").innerHTML = "Score: " + SCORE;
                 document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
             }
+            if (pipes[i].x < (0 - pipes[i].w)) {
+                pipes.splice(i, 1);
+                SCORE++;
+                document.getElementById("score").innerHTML = "Score: " + SCORE;
+            }
         }
-        if(frameCount % 150 == 0){
-            pipes.push(new Pipe());
+
+        if(gameMode === "Infinite") {
+            if ((frameCount % spawnRate === 0)) {
+                pipes.push(new Pipe());
+            }
+        }else{
+            if ((frameCount % spawnRate === 0) && !(frameCount % 2000 <= 200)) {
+                pipes.push(new Pipe());
+            }
         }
-        if(frameCount % 150 == 0){
+
+        if (frameCount % 150 === 0) {
             clouds.push(new Cloud());
         }
+
+        if (gameMode === "Speed") {
+            if (frameCount % 2000 === 0) { //2000
+                gameSpeed += 1;
+                speedUpTextTimer = 150;
+                if (spawnRate > 40) {
+                    spawnRate -= 15;
+                }
+                console.log("Speed up!! ");
+            }
+        }else{
+
+        }
+
+        if(speedUpTextTimer > 0){
+            speedUpTextTimer--;
+            speedUpTextVisible = true;
+        }else{
+            speedUpTextVisible = false;
+        }
+
+        if(speedUpTextVisible === true){
+            ctx.textAlign = "center";
+            ctx.fillStyle = "white";
+            ctx.font = "30px Arial";
+            ctx.fillText("SPEED UP AHEAD!!",WIDTH/2, HEIGHT/2);
+        }
+
     }
 }
 function Jump(){
     player.setVelY(-4);
 }
+
+function setGameMode(i){
+    if(i === 1){
+        gameMode = "Infinite";
+    }else{
+        gameMode = "Speed";
+    }
+    Start()
+}
+
+function changeToModeMenu(){
+    document.getElementById("startMenu").setAttribute("hidden", "hidden");
+    document.getElementById("resetMenu").setAttribute("hidden", "hidden");
+    document.getElementById("modeMenu").removeAttribute("hidden");
+}
+
 function Start(){
     if(gameRunning == false){
         gameRunning = true;
         pipes = [];
         clouds = [];
         SCORE = 0;
+        gameSpeed = 3;
+        spawnRate = 130;
+        speedUpTextTimer = 0;
         document.getElementById("score").innerHTML = "Score: " + SCORE;
         player.setY(240);
         HIGHSCORE = localStorage.getItem("HighScore");
     }
     player.setVelY(-3);
 }
+
+window.onkeyup = function(e) {
+    var key = e.keyCode ? e.keyCode : e.which;
+
+    if (key == 32) {
+        Jump();
+    }
+};
+
 function Reload() {
     localStorage.setItem("HighScore", 0);
     //localStorage.clear();
