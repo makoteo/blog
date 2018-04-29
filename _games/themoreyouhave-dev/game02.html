@@ -1,0 +1,32 @@
+<link rel="stylesheet" type="text/css" href="game02.css">
+
+<center>
+
+    <div class="relative">
+        <canvas onclick="Jump()" id="myCanvas" width="500" height="500">
+            Your browser does not support the canvas element.
+        </canvas>
+        <div class="absolute" id="startMenu">
+            <p class="centeredbig">Annoying Cube</p>
+            <p class="centered" onclick="changeToModeMenu()"><button>Play</button></p>
+            <p class="centered" onclick="Reload()"><button>Remove data</button></p>
+        </div>
+        <div class="absolute" id="modeMenu" hidden="hidden">
+            <p class="centeredbig">Pick A Game Mode</p>
+            <p class="centered" onclick="setGameMode(1)"><button>Infinite</button></p>
+            <p class="centered" onclick="setGameMode(2)"><button>Speed Add</button></p>
+        </div>
+        <div class="onside">
+            <p class="centeredbig" id="score" style="color: white; font-family: Helvetica">Score: 0</p>
+        </div>
+        <div class="absolute" id="resetMenu" hidden="hidden">
+            <p class="centeredbig">Game Over</p>
+            <p class="centered" id="endScore">Score: 0</p>
+            <p class="centered" id="endHighScore">HighScore: 0</p>
+            <p class="centered" onclick="Start()"><button>Play again</button></p>
+        </div>
+    </div>
+
+</center>
+
+<script src="game02.js"></script>

@@ -1,4 +1,4 @@
-var versionCode = "1.2";
+var versionCode = "1.3";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
