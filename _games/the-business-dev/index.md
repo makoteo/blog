@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /games/themoreyouhave-dev/index.html
+permalink: /games/the-business-dev/index.html
 title: The more you have...
 ---
 
