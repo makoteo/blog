@@ -1,7 +1,7 @@
 ---
 layout: default
 permalink: /games/themoreyouhave-dev/index.html
-title: Flying Cube
+title: The more you have...
 ---
 
 {% include_relative game02.html %}
