@@ -13,7 +13,7 @@ var coins = [];
 var clouds = [];
 
 var coinG = new Image();
-coinG.src = "CoinForBusiness2.png";
+coinG.src = "CoinForBusinessTwo.png";
 
 var groundG = new Image();
 groundG.src = "GrassBottomBusiness.png";
