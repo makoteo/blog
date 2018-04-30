@@ -3,7 +3,7 @@ var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
 var SCORE = 0;
-var HIGHSCORE = 0;
+var HIGHSCORE = 0; 
 
 var floorHeight = HEIGHT/8;
 
