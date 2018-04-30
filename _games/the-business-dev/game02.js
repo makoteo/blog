@@ -13,13 +13,13 @@ var coins = [];
 var clouds = [];
 
 var coinG = new Image();
-coinG.src = "CoinForBusiness.png";
+coinG.src = "./CoinForBusiness.png";
 
 var groundG = new Image();
-groundG.src = "grassBottomBusiness.png";
+groundG.src = "./grassBottomBusiness.png";
 
 var cloudG = new Image();
-cloudG.src = "cloudBusiness.png";
+cloudG.src = "./cloudBusiness.png";
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
