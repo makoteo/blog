@@ -19,7 +19,7 @@ var groundG = new Image();
 groundG.src = "GrassBottomBusiness.png";
 
 var cloudG = new Image();
-cloudG.src = "CloudBusiness.png"; 
+cloudG.src = "CloudBusiness.png";
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -106,7 +106,7 @@ function coin(){
         //ctx.fillStyle = "rgb(240, 240, 00)";
         //ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
 
-        ctx.drawImage(coinG, 0, 0, 8, 8, this.x, this.y, this.width, this.height);
+        ctx.drawImage(coinG, 0, 0, 20, 20, this.x, this.y, this.width, this.height);
         // x on map, y on tile map, width on tm, height on tm, x pos, y pos, width, height
     };
     this.update = function(){
