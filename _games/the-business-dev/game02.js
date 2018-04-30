@@ -3,7 +3,7 @@ var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
 var SCORE = 0;
-var HIGHSCORE = 0; 
+var HIGHSCORE = 0;
 
 var floorHeight = HEIGHT/8;
 
@@ -16,10 +16,10 @@ var coinG = new Image();
 coinG.src = "CoinForBusiness.png";
 
 var groundG = new Image();
-groundG.src = "GrassBottomBusiness.png";
+groundG.src = "grassBottomBusiness.png";
 
 var cloudG = new Image();
-cloudG.src = "CloudBusiness.png";
+cloudG.src = "cloudBusiness.png";
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
