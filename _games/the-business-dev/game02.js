@@ -19,7 +19,7 @@ var groundG = new Image();
 groundG.src = "GrassBottomBusiness.png";
 
 var cloudG = new Image();
-cloudG.src = "CloudBusiness.png";
+cloudG.src = "CloudBusiness.png"; 
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
