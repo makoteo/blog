@@ -2,6 +2,8 @@
 layout: default
 ---
 
-**Hi!!**, testing the website right now...
+**Hi!!** These are all the games I currently have here. Feel free to play some if you're bored!! 
 
-[First Game](./games/flying-cube/index.html).
+[Annoying Cube](./games/flying-cube/index.html).
+
+[The Business (Very Early Alpha)](./games/the-business-dev/index.html).
