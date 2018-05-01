@@ -299,6 +299,7 @@ function Start(){
         clouds = [];
         player.setX(WIDTH/2);
         document.getElementById("score").innerHTML = "" + SCORE;
+        document.getElementById("score").innerHTML = "" + GAMESCORE;
         HIGHSCORE = localStorage.getItem("HighScore");
         gameRunning = true;
     }
