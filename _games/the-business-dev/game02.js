@@ -285,7 +285,7 @@ function game(){
             document.getElementById("endScore").innerHTML = "Score: " + GAMESCORE;
             document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
 
-            localStorage.setItem('HighScore', HIGHSCORE);
+            localStorage.setItem('HighScoreBusiness', HIGHSCORE);
         }
 
     }
@@ -300,7 +300,7 @@ function Start(){
         player.setX(WIDTH/2);
         document.getElementById("score").innerHTML = "" + SCORE;
         document.getElementById("score").innerHTML = "" + GAMESCORE;
-        HIGHSCORE = localStorage.getItem("HighScore");
+        HIGHSCORE = localStorage.getItem("HighScoreBusiness");
         gameRunning = true;
     }
 }
@@ -316,7 +316,7 @@ window.addEventListener('keyup', function (e) {
 })
 
 function Reload() {
-    localStorage.setItem("HighScore", 0);
+    localStorage.setItem("HighScoreBusiness", 0);
     //localStorage.clear();
 }
 
