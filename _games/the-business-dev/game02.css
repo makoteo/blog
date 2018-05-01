@@ -14,11 +14,11 @@ div.absolute {
     border: 3px solid gray;
     background-color: lightgray;
 }
-div.onside {
+div.onleftside {
     position: absolute;
     top: 0px;
     right: 400px;
-    width: 100px;
+    width: 80px;
     height: 100px;
 }
 div.onrightside {
@@ -42,6 +42,18 @@ p.centeredbig {
 }
 p.scoretext {
     text-align: right;
+    font-weight: bold;
+    line-height: 20px;
+    font-size: 25px;
+    color: gray;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+p.gamescoretext {
+    text-align: left;
     font-weight: bold;
     line-height: 20px;
     font-size: 25px;

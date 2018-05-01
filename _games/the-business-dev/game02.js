@@ -3,6 +3,7 @@ var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
 var SCORE = 0;
+var GAMESCORE = 0;
 var HIGHSCORE = 0;
 
 var gCoinProb = 10;
@@ -209,7 +210,14 @@ function game(){
                 }else if(coins[i].value === 3){
                     SCORE += 50;
                 }
+
+                if(SCORE > GAMESCORE){
+                    GAMESCORE = SCORE;
+                }
+
                 document.getElementById("score").innerHTML = "" + SCORE;
+                document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
+
                 coins.splice(i, 1);
             }
         }else if(coins[i].y > HEIGHT){
@@ -220,6 +228,7 @@ function game(){
             }else if(coins[i].value === 3){
                 SCORE -= 80;
             }
+
             document.getElementById("score").innerHTML = "" + SCORE;
             coins.splice(i, 1);
         }
@@ -267,7 +276,16 @@ function game(){
         if(SCORE < 0){
             gameRunning = false;
             player.setVelX(0);
+
+            if(GAMESCORE > HIGHSCORE){
+                HIGHSCORE = GAMESCORE;
+            }
+
             document.getElementById("resetMenu").removeAttribute("hidden");
+            document.getElementById("endScore").innerHTML = "Score: " + GAMESCORE;
+            document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
+
+            localStorage.setItem('HighScore', HIGHSCORE);
         }
 
     }
@@ -276,6 +294,7 @@ function game(){
 function Start(){
     if(gameRunning == false){
         SCORE = 0;
+        GAMESCORE = 0;
         coins = [];
         clouds = [];
         player.setX(WIDTH/2);
