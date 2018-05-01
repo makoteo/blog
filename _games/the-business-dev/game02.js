@@ -13,6 +13,8 @@ var floorHeight = HEIGHT/8;
 
 var frameCount = 0;
 
+var spawnRate = 100;
+
 var coins = [];
 var clouds = [];
 
@@ -123,38 +125,42 @@ function Player(x, y, width, height, velocityY){
     }
 }
 
-function coin(){
+function coin(value, x){
 
     this.width = 20;
     this.height = 20;
     this.y = 0 - this.height;
-    this.x = Math.floor((Math.random() * (WIDTH - this.height - 20)) + 10);
+    this.x = x;
+
+    if (!this.x > 0) {
+        this.x = Math.floor((Math.random() * (WIDTH - this.height - 20)) + 10);
+    }
 
     this.prob = Math.floor((Math.random() * 100));
 
-    this.value = 0;
+    this.value = value;
 
     this.velX = Math.floor((Math.random() * 2) + 1);
 
-    if(this.prob > 100 - gCoinProb){
-        this.value = 3;
-    }else if(this.prob > 100 - gCoinProb - sCoinProb){
-        this.value = 2;
-    }else{
-        this.value = 1;
+    if(!this.value > 0) {
+        if (this.prob > 100 - gCoinProb) {
+            this.value = 3;
+        } else if (this.prob > 100 - gCoinProb - sCoinProb) {
+            this.value = 2;
+        } else {
+            this.value = 1;
+        }
     }
-
-    console.log(this.prob);
 
     this.draw = function(){
         //ctx.fillStyle = "rgb(240, 240, 00)";
         //ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
         if(this.value === 1) {
-            ctx.drawImage(coinG, 20, 0, 20, 20, this.x, this.y, this.width, this.height); //SILVER
+            ctx.drawImage(coinG, 0, 0, 20, 20, this.x - this.width/2, this.y - this.height/2, this.width, this.height); //SILVER
         }else if(this.value === 2) {
-            ctx.drawImage(coinG, 0, 0, 20, 20, this.x, this.y, this.width, this.height); //BRONZE
+            ctx.drawImage(coinG, 20, 0, 20, 20, this.x - this.width/2, this.y - this.height/2, this.width, this.height); //BRONZE
         }else if(this.value === 3) {
-            ctx.drawImage(coinG, 40, 0, 20, 20, this.x, this.y, this.width, this.height); //GOLD
+            ctx.drawImage(coinG, 40, 0, 20, 20, this.x - this.width/2, this.y - this.height/2, this.width, this.height); //GOLD
         }
         // x on map, y on tile map, width on tm, height on tm, x pos, y pos, width, height
     };
@@ -182,6 +188,50 @@ function Cloud(){
 
 player = new Player(WIDTH/2, HEIGHT/2, 16, 32, 0); //Add the Player
 
+function addWave(){
+
+    var WaveProb = Math.floor((Math.random() * 100));
+
+    var ThreeRandomNextToEachOtherProb = 10;
+    var TwoRandomNextToEachOtherProb = 20;
+    var ThreeBronzeNextToEachOtherProb = 10;
+    var ThreeSilverNextToEachOtherProb = 5;
+    var ThreeGoldNextToEachOtherProb = 2;
+    //THE REST OF THE PROB IS THE NORMAL WAVE!!
+
+    if(coins.length === 0 && SCORE === 0) { //STARTING WAVE MUST BE IN MIDDLE
+        coins.push(new coin(0, WIDTH / 2));
+    }else {
+
+        console.log(WaveProb);
+
+        if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb) {
+            coins.push(new coin(0, WIDTH/4));
+            coins.push(new coin(0, WIDTH/2));
+            coins.push(new coin(0, WIDTH - WIDTH/4));
+        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb) {
+            coins.push(new coin(0, WIDTH/3));
+            coins.push(new coin(0, WIDTH - WIDTH/3));
+        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb) {
+            coins.push(new coin(1, WIDTH/4));
+            coins.push(new coin(1, WIDTH/2));
+            coins.push(new coin(1, WIDTH - WIDTH/4));
+        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb) {
+            coins.push(new coin(2, WIDTH/4));
+            coins.push(new coin(2, WIDTH/2));
+            coins.push(new coin(2, WIDTH - WIDTH/4));
+        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb) {
+            coins.push(new coin(3, WIDTH/4));
+            coins.push(new coin(3, WIDTH/2));
+            coins.push(new coin(3, WIDTH - WIDTH/4));
+        }else{
+            coins.push(new coin(0, 0));
+        }
+
+    }
+
+}
+
 function game(){
     ctx.fillStyle = "rgb(164, 197, 249)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -192,7 +242,6 @@ function game(){
 
         if(clouds[i].x + clouds[i].width + 50 < 0){
             clouds.splice(i, 1);
-            console.log("Deleted!!");
         }
 
     }
@@ -201,8 +250,8 @@ function game(){
         coins[i].update();
         coins[i].draw();
 
-        if(coins[i].x + coins[i].width > player.getX() - (player.getwidth()/2) && coins[i].x < player.getX() + (player.getwidth()/2)){
-            if(coins[i].y + coins[i].height > player.getY() -(player.getheight()/2) && coins[i].y < player.getY() + (player.getheight()/2)){
+        if(coins[i].x + (coins[i].width/2) > player.getX() - (player.getwidth()/2) && coins[i].x - (coins[i].width/2) < player.getX() + (player.getwidth()/2)){
+            if(coins[i].y + (coins[i].height/2) > player.getY() -(player.getheight()/2) && coins[i].y - (coins[i].height/2) < player.getY() + (player.getheight()/2)){
                 if(coins[i].value === 1){
                     SCORE += 10;
                 }else if(coins[i].value === 2){
@@ -266,9 +315,21 @@ function game(){
 
         //Spawning
 
-        if(frameCount % 50 === 0){
-            coins.push(new coin());
+        if(frameCount % spawnRate === 0){
+            addWave();
         }
+
+        if(frameCount % 1000 === 0){
+            gCoinProb += 3;
+            sCoinProb += 3;
+            console.log("Buff!!");
+        }
+
+        if(frameCount % 1500 === 0){
+            spawnRate -= 10;
+            console.log("Speed Buff!!");
+        }
+
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
         }
