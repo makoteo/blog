@@ -5,6 +5,9 @@ var gameRunning = false;
 var SCORE = 0;
 var HIGHSCORE = 0;
 
+var gCoinProb = 10;
+var sCoinProb = 30;
+
 var floorHeight = HEIGHT/8;
 
 var frameCount = 0;
@@ -21,8 +24,12 @@ groundG.src = "GrassBottomBusiness.png";
 var cloudG = new Image();
 cloudG.src = "CloudBusiness.png";
 
+var playerOneG = new Image();
+playerOneG.src = "PlayerOneBusiness.png";
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
 function Player(x, y, width, height, velocityY){
     this.x = x;
     this.y = y;
@@ -30,10 +37,28 @@ function Player(x, y, width, height, velocityY){
     this.height = height;
     var velocityY = velocityY;
     var velocityX = 0;
+    var facing = 0;
 
     this.draw = function(){
-        ctx.fillStyle = "rgb(30, 20, 40)";
-        ctx.fillRect(x - width/2, y - height/2, width, height);
+        //ctx.fillStyle = "rgb(30, 20, 40)";
+        //ctx.fillRect(x - width/2, y - height/2, width, height);
+
+        if(velocityX < 0){
+            facing = 0;
+        }else if (velocityX > 0){
+            facing = 1;
+        }
+
+        if(gameRunning === false){
+            facing = 0;
+        }
+
+        if(facing === 0) {
+            ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
+        }else{
+            ctx.drawImage(playerOneG, 16, 0, 16, 32, x - width/2, y - height/2, width, height);
+        }
+
     };
     this.update = function(){
 
@@ -69,6 +94,9 @@ function Player(x, y, width, height, velocityY){
     this.setVelX = function(i){
         velocityX = i;
     }
+    this.setX = function(i){
+        x = i;
+    }
     this.setVelY = function(i){
         velocityY = i;
     }
@@ -100,24 +128,43 @@ function coin(){
     this.height = 20;
     this.y = 0 - this.height;
     this.x = Math.floor((Math.random() * (WIDTH - this.height - 20)) + 10);
+
+    this.prob = Math.floor((Math.random() * 100));
+
+    this.value = 0;
+
     this.velX = Math.floor((Math.random() * 2) + 1);
+
+    if(this.prob > 100 - gCoinProb){
+        this.value = 3;
+    }else if(this.prob > 100 - gCoinProb - sCoinProb){
+        this.value = 2;
+    }else{
+        this.value = 1;
+    }
+
+    console.log(this.prob);
 
     this.draw = function(){
         //ctx.fillStyle = "rgb(240, 240, 00)";
         //ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-
-        ctx.drawImage(coinG, 0, 0, 20, 20, this.x, this.y, this.width, this.height);
+        if(this.value === 1) {
+            ctx.drawImage(coinG, 20, 0, 20, 20, this.x, this.y, this.width, this.height); //SILVER
+        }else if(this.value === 2) {
+            ctx.drawImage(coinG, 0, 0, 20, 20, this.x, this.y, this.width, this.height); //BRONZE
+        }else if(this.value === 3) {
+            ctx.drawImage(coinG, 40, 0, 20, 20, this.x, this.y, this.width, this.height); //GOLD
+        }
         // x on map, y on tile map, width on tm, height on tm, x pos, y pos, width, height
     };
     this.update = function(){
         this.y+=3;
-
     }
 
 }
 
 function Cloud(){
-    this.width = Math.floor((Math.random() * 150) + 50);
+    this.width = Math.floor((Math.random() * 100) + 100);
     this.height = this.width * 0.75;
     this.type = Math.floor((Math.random() * 3));
     this.xType = this.type*200;
@@ -141,6 +188,12 @@ function game(){
     for(var i = 0; i < clouds.length; i++){
         clouds[i].update();
         clouds[i].draw();
+
+        if(clouds[i].x + clouds[i].width + 50 < 0){
+            clouds.splice(i, 1);
+            console.log("Deleted!!");
+        }
+
     }
 
     for(var i = 0; i < coins.length; i++){
@@ -149,8 +202,26 @@ function game(){
 
         if(coins[i].x + coins[i].width > player.getX() - (player.getwidth()/2) && coins[i].x < player.getX() + (player.getwidth()/2)){
             if(coins[i].y + coins[i].height > player.getY() -(player.getheight()/2) && coins[i].y < player.getY() + (player.getheight()/2)){
+                if(coins[i].value === 1){
+                    SCORE += 10;
+                }else if(coins[i].value === 2){
+                    SCORE += 20;
+                }else if(coins[i].value === 3){
+                    SCORE += 50;
+                }
+                document.getElementById("score").innerHTML = "" + SCORE;
                 coins.splice(i, 1);
             }
+        }else if(coins[i].y > HEIGHT){
+            if(coins[i].value === 1){
+                SCORE -= 20;
+            }else if(coins[i].value === 2){
+                SCORE -= 40;
+            }else if(coins[i].value === 3){
+                SCORE -= 80;
+            }
+            document.getElementById("score").innerHTML = "" + SCORE;
+            coins.splice(i, 1);
         }
 
     }
@@ -163,7 +234,8 @@ function game(){
 
     ctx.drawImage(groundG, 0, 0, 1000, 100, 0, HEIGHT - floorHeight, 1000, 100);
 
-    if(gameRunning == true) {
+    if(gameRunning === true) {
+
         frameCount++;
 
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
@@ -185,11 +257,17 @@ function game(){
 
         //Spawning
 
-        if(frameCount % 100 === 0){
+        if(frameCount % 50 === 0){
             coins.push(new coin());
         }
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
+        }
+
+        if(SCORE < 0){
+            gameRunning = false;
+            player.setVelX(0);
+            document.getElementById("resetMenu").removeAttribute("hidden");
         }
 
     }
@@ -197,9 +275,13 @@ function game(){
 
 function Start(){
     if(gameRunning == false){
-        gameRunning = true;
-        document.getElementById("score").innerHTML = "Score: " + SCORE;
+        SCORE = 0;
+        coins = [];
+        clouds = [];
+        player.setX(WIDTH/2);
+        document.getElementById("score").innerHTML = "" + SCORE;
         HIGHSCORE = localStorage.getItem("HighScore");
+        gameRunning = true;
     }
 }
 

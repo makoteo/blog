@@ -21,8 +21,28 @@ div.onside {
     width: 100px;
     height: 100px;
 }
+div.onrightside {
+    position: absolute;
+    top: 0px;
+    left: 400px;
+    width: 80px;
+    height: 100px;
+}
 p.centeredbig {
     text-align: center;
+    font-weight: bold;
+    line-height: 20px;
+    font-size: 25px;
+    color: gray;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+p.scoretext {
+    text-align: right;
+    font-weight: bold;
     line-height: 20px;
     font-size: 25px;
     color: gray;
