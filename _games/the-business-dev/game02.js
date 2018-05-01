@@ -6,14 +6,18 @@ var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
 
-var gCoinProb = 10;
-var sCoinProb = 30;
+var gCoinProb = 0;
+var sCoinProb = 5;
 
 var floorHeight = HEIGHT/8;
 
 var frameCount = 0;
 
 var spawnRate = 100;
+
+var BarSize = 200;
+
+var DeathPercent = 0.8;
 
 var coins = [];
 var clouds = [];
@@ -32,6 +36,15 @@ playerOneG.src = "PlayerOneBusiness.png";
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
+var TwoRandomNextToEachOtherProb = 10;
+
+var ThreeRandomNextToEachOtherProb = 3;
+var ThreeBronzeNextToEachOtherProb = 3;
+var ThreeSilverNextToEachOtherProb = 0;
+var ThreeGoldNextToEachOtherProb = 0;
+
+var FiveRandomNextToEachOtherProb = 0;
 
 function Player(x, y, width, height, velocityY){
     this.x = x;
@@ -192,18 +205,13 @@ function addWave(){
 
     var WaveProb = Math.floor((Math.random() * 100));
 
-    var ThreeRandomNextToEachOtherProb = 10;
-    var TwoRandomNextToEachOtherProb = 20;
-    var ThreeBronzeNextToEachOtherProb = 10;
-    var ThreeSilverNextToEachOtherProb = 5;
-    var ThreeGoldNextToEachOtherProb = 2;
+    // ADD FIVE COINS NEXT TO EACH OTHER!!!
+
     //THE REST OF THE PROB IS THE NORMAL WAVE!!
 
     if(coins.length === 0 && SCORE === 0) { //STARTING WAVE MUST BE IN MIDDLE
         coins.push(new coin(0, WIDTH / 2));
     }else {
-
-        console.log(WaveProb);
 
         if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb) {
             coins.push(new coin(0, WIDTH/4));
@@ -224,6 +232,12 @@ function addWave(){
             coins.push(new coin(3, WIDTH/4));
             coins.push(new coin(3, WIDTH/2));
             coins.push(new coin(3, WIDTH - WIDTH/4));
+        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb - FiveRandomNextToEachOtherProb) {
+            coins.push(new coin(0, WIDTH/6));
+            coins.push(new coin(0, 2 * (WIDTH/6)));
+            coins.push(new coin(0, 3 * (WIDTH/6)));
+            coins.push(new coin(0, 4 * (WIDTH/6)));
+            coins.push(new coin(0, 5 * (WIDTH/6)));
         }else{
             coins.push(new coin(0, 0));
         }
@@ -271,11 +285,11 @@ function game(){
             }
         }else if(coins[i].y > HEIGHT){
             if(coins[i].value === 1){
-                SCORE -= 20;
+                SCORE -= 10;
             }else if(coins[i].value === 2){
-                SCORE -= 40;
+                SCORE -= 20;
             }else if(coins[i].value === 3){
-                SCORE -= 80;
+                SCORE -= 50;
             }
 
             document.getElementById("score").innerHTML = "" + SCORE;
@@ -321,7 +335,7 @@ function game(){
 
         if(frameCount % 1000 === 0){
             gCoinProb += 3;
-            sCoinProb += 3;
+            sCoinProb += 5;
             console.log("Buff!!");
         }
 
@@ -330,11 +344,42 @@ function game(){
             console.log("Speed Buff!!");
         }
 
+        if(frameCount % 2000 === 0) {
+            TwoRandomNextToEachOtherProb += 5;
+
+            ThreeRandomNextToEachOtherProb += 5;
+            ThreeBronzeNextToEachOtherProb += 5;
+            ThreeSilverNextToEachOtherProb += 3;
+            ThreeGoldNextToEachOtherProb += 2;
+
+            FiveRandomNextToEachOtherProb += 1;
+
+            console.log("Wave Buff!!");
+        }
+
         if(frameCount % 150 === 0){
             clouds.push(new Cloud());
         }
 
-        if(SCORE < 0){
+        ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+        ctx.fillRect(WIDTH/2 - BarSize/2 - 2, HEIGHT - HEIGHT/9, BarSize + 4, 20);
+
+        var greenWidth = 200 / ((GAMESCORE - (GAMESCORE * DeathPercent)) / (SCORE - (GAMESCORE * DeathPercent)));
+        var redWidth = 200 / ((GAMESCORE - (GAMESCORE * DeathPercent)) / (GAMESCORE - SCORE));
+
+        if(GAMESCORE * DeathPercent === 0){
+            greenWidth = 200;
+        }
+
+        ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+
+        ctx.fillRect(WIDTH/2 - BarSize/2, HEIGHT - HEIGHT/9 + 2, greenWidth, 18);
+
+        ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+
+        ctx.fillRect(WIDTH/2 - BarSize/2 + greenWidth, HEIGHT - HEIGHT/9 + 2, redWidth, 18);
+
+        if(SCORE <= (GAMESCORE * DeathPercent) && (GAMESCORE * DeathPercent != 0)){
             gameRunning = false;
             player.setVelX(0);
 
@@ -356,8 +401,25 @@ function Start(){
     if(gameRunning == false){
         SCORE = 0;
         GAMESCORE = 0;
+        frameCount = 0;
+
+        gCoinProb = 0;
+        sCoinProb = 5;
+
         coins = [];
         clouds = [];
+
+        spawnRate = 100;
+
+        TwoRandomNextToEachOtherProb = 10;
+
+        ThreeRandomNextToEachOtherProb = 3;
+        ThreeBronzeNextToEachOtherProb = 3;
+        ThreeSilverNextToEachOtherProb = 0;
+        ThreeGoldNextToEachOtherProb = 0;
+
+        FiveRandomNextToEachOtherProb = 0;
+
         player.setX(WIDTH/2);
         document.getElementById("score").innerHTML = "" + SCORE;
         document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
