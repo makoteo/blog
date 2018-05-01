@@ -299,7 +299,7 @@ function Start(){
         clouds = [];
         player.setX(WIDTH/2);
         document.getElementById("score").innerHTML = "" + SCORE;
-        document.getElementById("score").innerHTML = "" + 0;
+        document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
         HIGHSCORE = localStorage.getItem("HighScoreBusiness");
         gameRunning = true;
     }
