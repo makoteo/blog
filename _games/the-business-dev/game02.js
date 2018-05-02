@@ -1,4 +1,4 @@
-var versionCode = "Alpha0.1";
+var versionCode = "Alpha 0.9";
 var WIDTH = 500;
 var HEIGHT = 500;
 var gameRunning = false;
