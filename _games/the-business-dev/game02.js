@@ -37,10 +37,10 @@ playerOneG.src = "PlayerOneBusiness.png";
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var TwoRandomNextToEachOtherProb = 10;
+var TwoRandomNextToEachOtherProb = 0;
 
-var ThreeRandomNextToEachOtherProb = 3;
-var ThreeBronzeNextToEachOtherProb = 3;
+var ThreeRandomNextToEachOtherProb = 0;
+var ThreeBronzeNextToEachOtherProb = 0;
 var ThreeSilverNextToEachOtherProb = 0;
 var ThreeGoldNextToEachOtherProb = 0;
 
