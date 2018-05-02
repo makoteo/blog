@@ -447,10 +447,10 @@ window.addEventListener('keydown', function (e) {
         e.preventDefault();
     }
 
-})
+}, false);
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type == "keydown");
-})
+}, false);
 
 function Reload() {
     localStorage.setItem("HighScoreBusiness", 0);
