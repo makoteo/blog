@@ -205,34 +205,32 @@ function addWave(){
 
     var WaveProb = Math.floor((Math.random() * 100));
 
-    // ADD FIVE COINS NEXT TO EACH OTHER!!!
-
-    //THE REST OF THE PROB IS THE NORMAL WAVE!!
+    console.log(WaveProb);
 
     if(coins.length === 0 && SCORE === 0) { //STARTING WAVE MUST BE IN MIDDLE
         coins.push(new coin(0, WIDTH / 2));
     }else {
 
-        if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb) {
+        if (WaveProb > (100 - ThreeRandomNextToEachOtherProb)) {
             coins.push(new coin(0, WIDTH/4));
             coins.push(new coin(0, WIDTH/2));
             coins.push(new coin(0, WIDTH - WIDTH/4));
-        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb) {
+        }else if(WaveProb > (100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb)) {
             coins.push(new coin(0, WIDTH/3));
             coins.push(new coin(0, WIDTH - WIDTH/3));
-        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb) {
+        }else if(WaveProb > (100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb)) {
             coins.push(new coin(1, WIDTH/4));
             coins.push(new coin(1, WIDTH/2));
             coins.push(new coin(1, WIDTH - WIDTH/4));
-        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb) {
+        }else if(WaveProb > (100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb)) {
             coins.push(new coin(2, WIDTH/4));
             coins.push(new coin(2, WIDTH/2));
             coins.push(new coin(2, WIDTH - WIDTH/4));
-        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb) {
+        }else if(WaveProb > (100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb)) {
             coins.push(new coin(3, WIDTH/4));
             coins.push(new coin(3, WIDTH/2));
             coins.push(new coin(3, WIDTH - WIDTH/4));
-        }else if (WaveProb >= 100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb - FiveRandomNextToEachOtherProb) {
+        }else if(WaveProb > (100 - ThreeRandomNextToEachOtherProb - TwoRandomNextToEachOtherProb - ThreeBronzeNextToEachOtherProb - ThreeSilverNextToEachOtherProb - ThreeGoldNextToEachOtherProb - FiveRandomNextToEachOtherProb)) {
             coins.push(new coin(0, WIDTH/6));
             coins.push(new coin(0, 2 * (WIDTH/6)));
             coins.push(new coin(0, 3 * (WIDTH/6)));
@@ -321,7 +319,7 @@ function game(){
         if (keys && keys[39] || keys && keys[68]) {player.setVelX(3)}
 
         if(player.getY() >= (HEIGHT - floorHeight - (player.getheight()/2))) {
-            if (keys && keys[38] || keys && keys[87]) {
+            if (keys && keys[38] || keys && keys[87] || keys && keys[32]) {
                 player.setVelY(-8)
             }
         }
@@ -334,18 +332,18 @@ function game(){
             addWave();
         }
 
-        if(frameCount % 1000 === 0){
+        if((frameCount % 1000 === 0) && (SCORE != 0)) {
             gCoinProb += 3;
             sCoinProb += 5;
             console.log("Buff!!");
         }
 
-        if(frameCount % 1500 === 0){
+        if((frameCount % 1500 === 0) && (SCORE != 0)) {
             spawnRate -= 10;
             console.log("Speed Buff!!");
         }
 
-        if(frameCount % 2000 === 0) {
+        if((frameCount % 2000 === 0) && (SCORE != 0)) {
             TwoRandomNextToEachOtherProb += 5;
 
             ThreeRandomNextToEachOtherProb += 5;
@@ -414,10 +412,10 @@ function Start(){
 
         spawnRate = 100;
 
-        TwoRandomNextToEachOtherProb = 10;
+        TwoRandomNextToEachOtherProb = 0;
 
-        ThreeRandomNextToEachOtherProb = 3;
-        ThreeBronzeNextToEachOtherProb = 3;
+        ThreeRandomNextToEachOtherProb = 0;
+        ThreeBronzeNextToEachOtherProb = 0;
         ThreeSilverNextToEachOtherProb = 0;
         ThreeGoldNextToEachOtherProb = 0;
 
