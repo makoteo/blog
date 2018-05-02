@@ -442,6 +442,11 @@ var keys;
 window.addEventListener('keydown', function (e) {
     keys = (keys || []);
     keys[e.keyCode] = (e.type == "keydown");
+
+    if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+        e.preventDefault();
+    }
+
 })
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type == "keydown");
