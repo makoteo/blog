@@ -199,7 +199,7 @@ function Cloud(){
     }
 }
 
-player = new Player(WIDTH/2, HEIGHT/2, 16, 32, 0); //Add the Player
+player = new Player(WIDTH/2, HEIGHT - HEIGHT/8 - 16, 16, 32, 0); //Add the Player
 
 function addWave(){
 
@@ -312,6 +312,7 @@ function game(){
 
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
+        document.getElementById("instructionsMenu").setAttribute("hidden", "hidden");
 
         player.setVelX(0);
 
@@ -373,13 +374,13 @@ function game(){
 
         ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
 
-        ctx.fillRect(WIDTH/2 - BarSize/2, HEIGHT - HEIGHT/9 + 2, greenWidth, 18);
+        ctx.fillRect(WIDTH/2 - BarSize/2, HEIGHT - HEIGHT/9 + 2, greenWidth, 16);
 
         ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
 
         ctx.fillRect(WIDTH/2 - BarSize/2 + greenWidth, HEIGHT - HEIGHT/9 + 2, redWidth, 18);
 
-        if(SCORE <= (GAMESCORE * DeathPercent) && (GAMESCORE * DeathPercent != 0)){
+        if((SCORE <= (GAMESCORE * DeathPercent) && (GAMESCORE * DeathPercent != 0)) || SCORE < 0){
             gameRunning = false;
             player.setVelX(0);
 
@@ -388,6 +389,8 @@ function game(){
             }
 
             document.getElementById("resetMenu").removeAttribute("hidden");
+            document.getElementById("scorediv").setAttribute("hidden", "hidden");
+            document.getElementById("gamescorediv").setAttribute("hidden", "hidden");
             document.getElementById("endScore").innerHTML = "Score: " + GAMESCORE;
             document.getElementById("endHighScore").innerHTML = "HighScore: " + HIGHSCORE;
 
@@ -423,9 +426,17 @@ function Start(){
         player.setX(WIDTH/2);
         document.getElementById("score").innerHTML = "" + SCORE;
         document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
+        document.getElementById("scorediv").removeAttribute("hidden");
+        document.getElementById("gamescorediv").removeAttribute("hidden");
         HIGHSCORE = localStorage.getItem("HighScoreBusiness");
         gameRunning = true;
     }
+}
+
+function ShowInstructions(){
+    document.getElementById("startMenu").setAttribute("hidden", "hidden");
+    document.getElementById("resetMenu").setAttribute("hidden", "hidden");
+    document.getElementById("instructionsMenu").removeAttribute("hidden");
 }
 
 var keys;

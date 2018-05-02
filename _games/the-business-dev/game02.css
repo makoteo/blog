@@ -7,12 +7,17 @@ div.relative {
 
 div.absolute {
     position: absolute;
-    top: 175px;
-    right: 150px;
-    width: 200px;
-    height: 150px;
-    border: 3px solid gray;
-    background-color: lightgray;
+    top: 100px;
+    right: 100px;
+    width: 300px;
+    height: 300px;
+}
+div.absoluteinstructions {
+    position: absolute;
+    top: 25px;
+    right: 50px;
+    width: 400px;
+    height: 450px;
 }
 div.onleftside {
     position: absolute;
@@ -28,12 +33,27 @@ div.onrightside {
     width: 80px;
     height: 100px;
 }
+
 p.centeredbig {
     text-align: center;
     font-weight: bold;
-    line-height: 20px;
-    font-size: 25px;
-    color: gray;
+    line-height: 30px;
+    font-family: 'Courier New';
+    font-size: 35px;
+    color: #4A597F;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+p.instructionText {
+    text-align: center;
+    font-weight: bold;
+    line-height: 15px;
+    font-family: 'Arial';
+    font-size: 16px;
+    color: #4A597F;
     user-select: none;
     -moz-user-select: none;
     -khtml-user-select: none;
@@ -66,24 +86,37 @@ p.gamescoretext {
 }
 p.centered {
     text-align: center;
-    line-height: 11px;
-    font-size: 16px;
-    color: gray;
+    line-height: 15px;
+    font-family: 'Courier New';
+    font-weight: bold;
+    font-size: 20px;
+    color: #4A597F;
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select: none;
     -o-user-select: none;
 }
 button {
-    background: #d5dfe0;/*color*/
-    height: 20px;
-    width: 100px;
-    border: 1px solid darkgray;
-    box-shadow: 0px 2px #999;/*x pos, y pos, blur(optional), color*/
-    transition: all 0s;
+    background-color: #7197ff;
+    border: 3px solid #4A597F;
+    padding: 16px 32px;
+    width: 200px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+
+    font-family: 'Courier New';
+    font-weight: bold;
+    color: #4A597F;
+
 }
 button:hover {
-    background: #7c8786;/*color*/
+    background-color: white;
 }
 button:active {
     background: #7c8786;
