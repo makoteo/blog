@@ -1,19 +1,23 @@
 var versionCode = "Alpha 0.9";
-var WIDTH = 500;
+var WIDTH = 700;
 var HEIGHT = 500;
 var gameRunning = false;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
 
-// EXAMPLE ARRAY coins = [];
+var floorHeight = HEIGHT/6;
+var walkHeight = HEIGHT/8;
+
+
+var playerTroops = [];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
-function Player(x, y, width, height){
+function Soldier(x, y, width, height){
     this.x = x;
     this.y = y;
     this.width = width;
@@ -31,19 +35,6 @@ function Player(x, y, width, height){
     };
     this.update = function(){
 
-    }
-    this.setVelX = function(i){
-        velocityX = i;
-    }
-    this.setX = function(i){
-        x = i;
-    }
-    this.setVelY = function(i){
-        velocityY = i;
-    }
-
-    this.getVelY = function(){
-        return velocityY;
     }
 
     this.getheight = function(){
@@ -63,9 +54,11 @@ function Player(x, y, width, height){
     }
 }
 
+
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-player = new Player(WIDTH/2, HEIGHT - HEIGHT/8 - 16, 16, 32, 0); //Add the Player
+
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -92,6 +85,12 @@ function game(){
     if(gameRunning === true) {
 
         frameCount++;
+
+        for(var i = 0; i < playerTroops.length; i++){
+
+            
+
+        }
 
         /* HIDE ALL DIVS
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
