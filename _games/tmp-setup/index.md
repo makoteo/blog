@@ -1,9 +1,9 @@
 ---
 layout: default
-permalink: /games/defend-the-castle/index.html
+permalink: /games/tmp-setup/index.html
 title: Defend the Castle!!
 ---
 
 [Back To Main Page](../../).
 
-{% include_relative tmp-setup.html %}
+{% include_relative tmp.html %}

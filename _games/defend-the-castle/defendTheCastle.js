@@ -88,7 +88,7 @@ function game(){
 
         for(var i = 0; i < playerTroops.length; i++){
 
-            
+
 
         }
 
