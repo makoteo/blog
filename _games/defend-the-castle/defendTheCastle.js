@@ -26,68 +26,46 @@ var ctx = canvas.getContext("2d");
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
-function Soldier(x, y, width, height, type){
+function Soldier(x, y, width, height, team, type){
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.type = type;
+    this.team = team;
+    this.health = 0;
+    this.attackDmg = 0;
+    this.attackTimer = 0;
+
+    this.internalTimer = 0;
 
     if(type === 0){
-        this.speed = 3;
-    }
 
-    this.draw = function(){
-        ctx.fillStyle = "rgb(255, 255, 255)";
-        ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
+        this.health = 20;
+        this.attackDmg = 10;
+        this.attackTimer = 60;
+        this.knockBack = 5;
 
-        /* IMAGE EXAMPLE
-        ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
-        */
-
-    };
-    this.update = function(){
-        this.x-=this.speed;
-
-        if(this.x < enemyCastleX + castleWidth/2 + this.width/2){
-            this.speed = 0;
-            if(castlesEnemy.health > 0) {
-                castlesEnemy.health--;
-            }
+        if(team === 0){
+            this.speedDef = -2;
+        }else{
+            this.speedDef = 2;
         }
+
+    }else{
+        this.speedDef = 3;
+        this.knockBack = 5;
     }
 
-    this.getheight = function(){
-        return height;
-    }
-
-    this.getwidth = function(){
-        return width;
-    }
-
-    this.getY = function(){
-        return y;
-    }
-
-    this.getX = function () {
-        return x;
-    }
-}
-
-function Enemy(x, y, width, height, type){
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.type = type;
-
-    if(type === 0){
-        this.speed = 3;
-    }
+    this.speed = this.speedDef;
 
     this.draw = function(){
-        ctx.fillStyle = "rgb(0, 0, 0)";
-        ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
+        if(team === 0) {
+            ctx.fillStyle = "rgb(255, 255, 255)";
+            ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+        }else{
+            ctx.fillStyle = "rgb(0, 0, 0)";
+            ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+        }
 
         /* IMAGE EXAMPLE
         ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
@@ -95,16 +73,71 @@ function Enemy(x, y, width, height, type){
 
     };
     this.update = function(){
+
         this.x+=this.speed;
 
-        if(this.x > playerCastleX - castleWidth/2 - this.width/2){
-            this.speed = 0;
+        this.internalTimer++;
+
+        if(this.team === 1) {
+            if (this.speed < 0) {
+                this.speed++;
+            } else {
+                this.speed = this.speedDef;
+            }
+        }else{
+            if (this.speed > 0) {
+                this.speed--;
+            } else {
+                this.speed = this.speedDef;
+            }
         }
 
-        for(var i = 0; i < playerTroops.length; i++){
+        if(this.team === 0) {
 
-            if(this.x >= playerTroops[i].x - playerTroops[i].width*1.5){
+            if (this.x < enemyCastleX + castleWidth / 2 + this.width / 2) {
                 this.speed = 0;
+                if (castlesEnemy.health > 0) {
+                    if(this.internalTimer % this.attackTimer === 0){
+                        castlesEnemy.health-= this.attackDmg;
+                    }
+                }
+            }
+
+            for (var i = 0; i < enemyTroops.length; i++) {
+
+                if (this.x <= enemyTroops[i].x + enemyTroops[i].width) {
+                    if(this.internalTimer % this.attackTimer === 0) {
+                        this.speed = enemyTroops[i].knockBack;
+                        this.health -= enemyTroops[i].attackDmg;
+                    }else{
+                        this.speed = 0;
+                    }
+                }
+
+            }
+
+        }else if(this.team === 1) {
+
+            if (this.x > playerCastleX - castleWidth / 2 - this.width / 2) {
+                this.speed = 0;
+                if (castlesPlayer.health > 0) {
+                    if(this.internalTimer % this.attackTimer === 0){
+                        castlesPlayer.health-= this.attackDmg;
+                    }
+                }
+            }
+
+            for (var i = 0; i < playerTroops.length; i++) {
+
+                if (this.x >= playerTroops[i].x - playerTroops[i].width) {
+                    if(this.internalTimer % this.attackTimer === 0) {
+                        this.speed = -playerTroops[i].knockBack;
+                        this.health -= playerTroops[i].attackDmg;
+                    }else{
+                        this.speed = 0;
+                    }
+                }
+
             }
 
         }
@@ -128,11 +161,13 @@ function Enemy(x, y, width, height, type){
     }
 }
 
-function Castle(type){
+function Castle(team, health){
     this.x = 0;
-    this.health = 100;
-    this.type = type;
-    if(this.type === 0) {
+    this.health = health;
+    this.healthBarWidth = 60;
+    this.healthBarMargin = 2;
+    this.team = team;
+    if(this.team === 0) {
         this.x = enemyCastleX;
     }else{
         this.x = playerCastleX;
@@ -141,15 +176,17 @@ function Castle(type){
     this.width = castleWidth;
     this.height = castleHeight;
 
+    this.healthMultiplier = (this.healthBarWidth - 2*this.healthBarMargin) / this.health;
+
     this.draw = function(){
         ctx.fillStyle = "rgb(30, 20, 40)";
         ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
 
         ctx.fillStyle = "rgb(30, 20, 40)";
-        ctx.fillRect(this.x - this.width/2 - cameraX + 20, this.y - this.height/2 - 100, 60, 10);
+        ctx.fillRect(this.x - this.width/2 - cameraX + 20, this.y - this.height/2 - 100,this.healthBarWidth, 10);
 
         ctx.fillStyle = "rgb(0, 200, 0)";
-        ctx.fillRect(this.x - this.width/2 - cameraX + 22, this.y - this.height/2 - 98, this.health * 0.56, 6);
+        ctx.fillRect(this.x - this.width/2 - cameraX + 20 + this.healthBarMargin, this.y - this.height/2 - 100 + this.healthBarMargin, this.health * this.healthMultiplier, 10 - 2*this.healthBarMargin);
 
         /* IMAGE EXAMPLE
         ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
@@ -163,13 +200,13 @@ function Castle(type){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-castlesEnemy = new Castle(0);
-castlesPlayer = new Castle(1);
+castlesEnemy = new Castle(0, 100);
+castlesPlayer = new Castle(1, 100);
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
 function getTroopOne(){
-    playerTroops.push(new Soldier(playerCastleX, walkHeight - 16, 16, 32, 0));
+    playerTroops.push(new Soldier(playerCastleX, walkHeight - 16, 16, 32, 0, 0));
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
@@ -205,7 +242,7 @@ function game(){
         castlesPlayer.draw();
 
         if(frameCount % 500 === 0){
-            enemyTroops.push(new Enemy(enemyCastleX, walkHeight - 16, 16, 32, 0));
+            enemyTroops.push(new Soldier(enemyCastleX, walkHeight - 16, 16, 32, 1, 0));
         }
 
         for(var i = 0; i < playerTroops.length; i++){
@@ -213,11 +250,19 @@ function game(){
             playerTroops[i].update();
             playerTroops[i].draw();
 
+            if(playerTroops[i].health <= 0){
+                playerTroops.splice(i, 1);
+            }
+
         }
         for(var i = 0; i < enemyTroops.length; i++){
 
             enemyTroops[i].update();
             enemyTroops[i].draw();
+
+            if(enemyTroops[i].health <= 0){
+                enemyTroops.splice(i, 1);
+            }
 
         }
 

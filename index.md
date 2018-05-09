@@ -8,4 +8,4 @@ layout: default
 
 [The Business (Discontinued)](./games/the-business-dev/index.html).
 
-[Defend the Castle(Early Alpha)](./games/defend-the-castle/index.html).
+[Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
