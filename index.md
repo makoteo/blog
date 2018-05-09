@@ -6,4 +6,6 @@ layout: default
 
 [Annoying Cube](./games/flying-cube/index.html).
 
-[The Business (Very Early Alpha)](./games/the-business-dev/index.html).
+[The Business (Discontinued)](./games/the-business-dev/index.html).
+
+[Defend the Castle(Early Alpha)](./games/defend-the-castle/index.html).

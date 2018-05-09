@@ -19,6 +19,7 @@ var castleWidth = 100;
 var castleHeight = 100;
 
 var playerTroops = [];
+var enemyTroops = [];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -54,6 +55,60 @@ function Soldier(x, y, width, height, type){
                 castlesEnemy.health--;
             }
         }
+    }
+
+    this.getheight = function(){
+        return height;
+    }
+
+    this.getwidth = function(){
+        return width;
+    }
+
+    this.getY = function(){
+        return y;
+    }
+
+    this.getX = function () {
+        return x;
+    }
+}
+
+function Enemy(x, y, width, height, type){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.type = type;
+
+    if(type === 0){
+        this.speed = 3;
+    }
+
+    this.draw = function(){
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
+
+        /* IMAGE EXAMPLE
+        ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
+        */
+
+    };
+    this.update = function(){
+        this.x+=this.speed;
+
+        if(this.x > playerCastleX - castleWidth/2 - this.width/2){
+            this.speed = 0;
+        }
+
+        for(var i = 0; i < playerTroops.length; i++){
+
+            if(this.x >= playerTroops[i].x - playerTroops[i].width*1.5){
+                this.speed = 0;
+            }
+
+        }
+
     }
 
     this.getheight = function(){
@@ -149,10 +204,20 @@ function game(){
         castlesPlayer.update();
         castlesPlayer.draw();
 
+        if(frameCount % 500 === 0){
+            enemyTroops.push(new Enemy(enemyCastleX, walkHeight - 16, 16, 32, 0));
+        }
+
         for(var i = 0; i < playerTroops.length; i++){
 
             playerTroops[i].update();
             playerTroops[i].draw();
+
+        }
+        for(var i = 0; i < enemyTroops.length; i++){
+
+            enemyTroops[i].update();
+            enemyTroops[i].draw();
 
         }
 
