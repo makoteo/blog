@@ -1,7 +1,7 @@
 ---
 layout: default
 permalink: /games/tmp-setup/index.html
-title: Defend the Castle!!
+title: This is the tmp setup!!
 ---
 
 [Back To Main Page](../../).

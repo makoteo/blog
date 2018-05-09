@@ -1,14 +1,22 @@
 var versionCode = "Alpha 0.9";
-var WIDTH = 700;
+var WIDTH = 800;
 var HEIGHT = 500;
-var gameRunning = false;
+var gameRunning = true;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
+var frameCount = 0;
 
-var floorHeight = HEIGHT/6;
-var walkHeight = HEIGHT/8;
+var floorHeight = HEIGHT - HEIGHT/3;
+var walkHeight = HEIGHT - HEIGHT/4;
 
+var cameraX = 0;
+var cameraXMax = 300;
+
+var enemyCastleX = 100;
+var playerCastleX = WIDTH + cameraXMax - 100;
+var castleWidth = 100;
+var castleHeight = 100;
 
 var playerTroops = [];
 
@@ -17,16 +25,20 @@ var ctx = canvas.getContext("2d");
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
-function Soldier(x, y, width, height){
+function Soldier(x, y, width, height, type){
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.type = type;
+
+    if(type === 0){
+        this.speed = 3;
+    }
 
     this.draw = function(){
-        //DRAW EXAMPLE
-        //ctx.fillStyle = "rgb(30, 20, 40)";
-        //ctx.fillRect(x - width/2, y - height/2, width, height);
+        ctx.fillStyle = "rgb(255, 255, 255)";
+        ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
 
         /* IMAGE EXAMPLE
         ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
@@ -34,7 +46,14 @@ function Soldier(x, y, width, height){
 
     };
     this.update = function(){
+        this.x-=this.speed;
 
+        if(this.x < enemyCastleX + castleWidth/2 + this.width/2){
+            this.speed = 0;
+            if(castlesEnemy.health > 0) {
+                castlesEnemy.health--;
+            }
+        }
     }
 
     this.getheight = function(){
@@ -54,15 +73,49 @@ function Soldier(x, y, width, height){
     }
 }
 
+function Castle(type){
+    this.x = 0;
+    this.health = 100;
+    this.type = type;
+    if(this.type === 0) {
+        this.x = enemyCastleX;
+    }else{
+        this.x = playerCastleX;
+    }
+    this.y = walkHeight - 55;
+    this.width = castleWidth;
+    this.height = castleHeight;
 
+    this.draw = function(){
+        ctx.fillStyle = "rgb(30, 20, 40)";
+        ctx.fillRect(this.x - this.width/2 - cameraX, this.y - this.height/2, this.width, this.height);
+
+        ctx.fillStyle = "rgb(30, 20, 40)";
+        ctx.fillRect(this.x - this.width/2 - cameraX + 20, this.y - this.height/2 - 100, 60, 10);
+
+        ctx.fillStyle = "rgb(0, 200, 0)";
+        ctx.fillRect(this.x - this.width/2 - cameraX + 22, this.y - this.height/2 - 98, this.health * 0.56, 6);
+
+        /* IMAGE EXAMPLE
+        ctx.drawImage(playerOneG, 0, 0, 16, 32, x - width/2, y - height/2, width, height);
+        */
+
+    };
+    this.update = function(){
+
+    }
+}
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-
+castlesEnemy = new Castle(0);
+castlesPlayer = new Castle(1);
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-
+function getTroopOne(){
+    playerTroops.push(new Soldier(playerCastleX, walkHeight - 16, 16, 32, 0));
+}
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
@@ -70,6 +123,10 @@ function game(){
     //SKY FILL
     ctx.fillStyle = "rgb(164, 197, 249)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.fillStyle = "rgb(90, 193, 42)";
+    ctx.fillRect(0, floorHeight, WIDTH, HEIGHT);
+    ctx.fillRect(0, walkHeight, WIDTH, HEIGHT);
 
     /* EXAMPLE FOR LOOP
     for(var i = 0; i < coins.length; i++){
@@ -86,9 +143,16 @@ function game(){
 
         frameCount++;
 
+        castlesEnemy.update();
+        castlesEnemy.draw();
+
+        castlesPlayer.update();
+        castlesPlayer.draw();
+
         for(var i = 0; i < playerTroops.length; i++){
 
-
+            playerTroops[i].update();
+            playerTroops[i].draw();
 
         }
 
@@ -98,9 +162,8 @@ function game(){
         document.getElementById("instructionsMenu").setAttribute("hidden", "hidden");
         */
 
-        /* (KEY INPUT)
-        if (keys && keys[40] || keys && keys[83]) {player.setVelY(player.getVelY() + 0.2)}
-        */
+        if (keys && keys[37] || keys && keys[65]) {if(cameraX >= 5){cameraX-=5;}}
+        if (keys && keys[39] || keys && keys[68]) {if(cameraX <= cameraXMax){cameraX+=5;}}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
