@@ -20,9 +20,17 @@ var castleHeight = 100;
 
 var playerTroops = [];
 var enemyTroops = [];
+var clouds = [];
+var soldierSlots = [1, 2, 0, 0];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
+var stickManOneG = new Image();
+stickManOneG.src = "StickManOne.png";
+
+var cloudG = new Image();
+cloudG.src = "CloudBusiness.png";
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -38,12 +46,22 @@ function Soldier(x, y, width, height, team, type){
 
     this.internalTimer = 0;
 
+    this.frame = 0;
+
     if(type === 0){
 
         this.health = 20;
-        this.attackDmg = 10;
+        this.attackDmg = 5;
         this.attackTimer = 60;
-        this.knockBack = 5;
+        this.knockBack = 3;
+        this.knockBackResistance = 0;
+
+        this.width = 16;
+        this.height = 32;
+
+        this.frameSwitch = 10;
+
+        this.yOffset = 0;
 
         if(team === 0){
             this.speedDef = -2;
@@ -51,9 +69,29 @@ function Soldier(x, y, width, height, team, type){
             this.speedDef = 2;
         }
 
+    }else if(type === 1){
+
+        this.health = 50;
+        this.attackDmg = 10;
+        this.attackTimer = 60;
+        this.knockBack = 7;
+        this.knockBackResistance = 1;
+
+        this.width = 32;
+        this.height = 64;
+
+        this.frameSwitch = 20;
+
+        this.yOffset = 16;
+
+        if(team === 0){
+            this.speedDef = -1;
+        }else{
+            this.speedDef = 1;
+        }
+
     }else{
-        this.speedDef = 3;
-        this.knockBack = 5;
+
     }
 
     this.speed = this.speedDef;
@@ -61,10 +99,21 @@ function Soldier(x, y, width, height, team, type){
     this.draw = function(){
         if(team === 0) {
             ctx.fillStyle = "rgb(255, 255, 255)";
-            ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+            //ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+            if(this.frame === 0) {
+                ctx.drawImage(stickManOneG, 0, 0, 32, 64, this.x - this.width / 2 - cameraX, this.y - this.height / 2 - this.yOffset, this.width, this.height);
+            }else{
+                ctx.drawImage(stickManOneG, 32, 0, 32, 64, this.x - this.width / 2 - cameraX, this.y - this.height / 2 - this.yOffset, this.width, this.height);
+            }
         }else{
             ctx.fillStyle = "rgb(0, 0, 0)";
-            ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+            //ctx.fillRect(this.x - this.width / 2 - cameraX, this.y - this.height / 2, this.width, this.height);
+
+            if(this.frame === 0) {
+                ctx.drawImage(stickManOneG, 64, 0, 32, 64, this.x - this.width / 2 - cameraX, this.y - this.height / 2 - this.yOffset, this.width, this.height);
+            }else{
+                ctx.drawImage(stickManOneG, 96, 0, 32, 64, this.x - this.width / 2 - cameraX, this.y - this.height / 2 - this.yOffset, this.width, this.height);
+            }
         }
 
         /* IMAGE EXAMPLE
@@ -78,15 +127,25 @@ function Soldier(x, y, width, height, team, type){
 
         this.internalTimer++;
 
+        if(this.internalTimer % this.frameSwitch === 0){
+
+            if(this.frame === 0){
+                this.frame = 1;
+            }else{
+                this.frame = 0;
+            }
+
+        }
+
         if(this.team === 1) {
             if (this.speed < 0) {
-                this.speed++;
+                this.speed+=0.2;
             } else {
                 this.speed = this.speedDef;
             }
         }else{
             if (this.speed > 0) {
-                this.speed--;
+                this.speed-=0.2;
             } else {
                 this.speed = this.speedDef;
             }
@@ -105,9 +164,9 @@ function Soldier(x, y, width, height, team, type){
 
             for (var i = 0; i < enemyTroops.length; i++) {
 
-                if (this.x <= enemyTroops[i].x + enemyTroops[i].width) {
-                    if(this.internalTimer % this.attackTimer === 0) {
-                        this.speed = enemyTroops[i].knockBack;
+                if (this.x <= enemyTroops[i].x + enemyTroops[i].width && this.x >= enemyTroops[i].x - enemyTroops[i].width/2) {
+                    if(this.internalTimer % this.attackTimer <= 3) {
+                        this.speed = enemyTroops[i].knockBack - this.knockBackResistance;
                         this.health -= enemyTroops[i].attackDmg;
                     }else{
                         this.speed = 0;
@@ -121,7 +180,7 @@ function Soldier(x, y, width, height, team, type){
             if (this.x > playerCastleX - castleWidth / 2 - this.width / 2) {
                 this.speed = 0;
                 if (castlesPlayer.health > 0) {
-                    if(this.internalTimer % this.attackTimer === 0){
+                    if(this.internalTimer % this.attackTimer <= 3){
                         castlesPlayer.health-= this.attackDmg;
                     }
                 }
@@ -129,9 +188,9 @@ function Soldier(x, y, width, height, team, type){
 
             for (var i = 0; i < playerTroops.length; i++) {
 
-                if (this.x >= playerTroops[i].x - playerTroops[i].width) {
+                if (this.x >= playerTroops[i].x - playerTroops[i].width && this.x <= playerTroops[i].x + playerTroops[i].width/2) {
                     if(this.internalTimer % this.attackTimer === 0) {
-                        this.speed = -playerTroops[i].knockBack;
+                        this.speed = -playerTroops[i].knockBack + this.knockBackResistance;
                         this.health -= playerTroops[i].attackDmg;
                     }else{
                         this.speed = 0;
@@ -198,6 +257,23 @@ function Castle(team, health){
     }
 }
 
+
+function Cloud(){
+    this.width = Math.floor((Math.random() * 50) + 150);
+    this.height = this.width * 0.75;
+    this.type = Math.floor((Math.random() * 3));
+    this.xType = this.type*200;
+    this.x = WIDTH + cameraXMax;
+    this.y = Math.floor((Math.random() * (HEIGHT - this.height - 20)) + 10);
+    this.velX = Math.floor((Math.random() * 2) + 1);
+    this.draw = function(){
+        ctx.drawImage(cloudG, this.xType, 0, 200, 150, this.x - cameraX, this.y, this.width, this.height);
+    };
+    this.update = function(){
+        this.x -= this.velX;
+    }
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 castlesEnemy = new Castle(0, 100);
@@ -205,9 +281,14 @@ castlesPlayer = new Castle(1, 100);
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-function getTroopOne(){
-    playerTroops.push(new Soldier(playerCastleX, walkHeight - 16, 16, 32, 0, 0));
+function getTroop(i){
+    if(soldierSlots[i] === 1) {
+        playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 0));
+    }else if(soldierSlots[i] === 2){
+        playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 1));
+    }
 }
+
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
@@ -216,9 +297,15 @@ function game(){
     ctx.fillStyle = "rgb(164, 197, 249)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
+    for(var i = 0; i < clouds.length; i++){
+
+        clouds[i].update();
+        clouds[i].draw();
+
+    }
+
     ctx.fillStyle = "rgb(90, 193, 42)";
     ctx.fillRect(0, floorHeight, WIDTH, HEIGHT);
-    ctx.fillRect(0, walkHeight, WIDTH, HEIGHT);
 
     /* EXAMPLE FOR LOOP
     for(var i = 0; i < coins.length; i++){
@@ -241,8 +328,12 @@ function game(){
         castlesPlayer.update();
         castlesPlayer.draw();
 
-        if(frameCount % 500 === 0){
+        if(frameCount % 200 === 0){
             enemyTroops.push(new Soldier(enemyCastleX, walkHeight - 16, 16, 32, 1, 0));
+        }
+
+        if(frameCount % 300 === 0){
+            clouds.push(new Cloud());
         }
 
         for(var i = 0; i < playerTroops.length; i++){
@@ -265,6 +356,40 @@ function game(){
             }
 
         }
+
+        ctx.fillStyle = "rgb(48, 32, 0)";
+        ctx.fillRect(WIDTH/2 - 185, HEIGHT*0.8, 90, 90);
+        ctx.fillRect(WIDTH/2 - 87, HEIGHT*0.8, 90, 90);
+        ctx.fillRect(WIDTH/2 + 12, HEIGHT*0.8, 90, 90);
+        ctx.fillRect(WIDTH/2 + 110, HEIGHT*0.8, 90, 90);
+
+        ctx.fillStyle = "rgb(135, 99, 22)";
+        ctx.fillRect(WIDTH/2 - 195, HEIGHT*0.79, 90, 90);
+        ctx.fillRect(WIDTH/2 - 97, HEIGHT*0.79, 90, 90);
+        ctx.fillRect(WIDTH/2 + 2, HEIGHT*0.79, 90, 90);
+        ctx.fillRect(WIDTH/2 + 100, HEIGHT*0.79, 90, 90);
+
+        var x0 = WIDTH/2 - 170;
+        var x1 = WIDTH/2 - 70;
+        var x2 = WIDTH/2 + 30;
+        var x3 = WIDTH/2 + 130;
+
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.font="15px Arial";
+        ctx.textBaseline="middle";
+        ctx.textAlign="center";
+
+        ctx.drawImage(stickManOneG, 0, 0, 32, 64, x0 + 8, HEIGHT*0.8 + 32, 16, 32);
+        ctx.fillText("100", x0 + 16, HEIGHT*0.95, 100);
+
+        ctx.drawImage(stickManOneG, 0, 0, 32, 64, x1, HEIGHT*0.8, 32, 64);
+        ctx.fillText("100", x1 + 16, HEIGHT*0.95, 100);
+
+        //ctx.drawImage(stickManOneG, 0, 0, 32, 64, x2, HEIGHT*0.8, 32, 64);
+        //ctx.fillText("100", x2 + 16, HEIGHT*0.95, 100);
+
+        //ctx.drawImage(stickManOneG, 0, 0, 32, 64, x3, HEIGHT*0.8, 32, 64);
+        //ctx.fillText("100", x3 + 16, HEIGHT*0.95, 100);
 
         /* HIDE ALL DIVS
         document.getElementById("startMenu").setAttribute("hidden", "hidden");

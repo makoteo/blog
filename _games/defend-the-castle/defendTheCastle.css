@@ -108,6 +108,7 @@ button.getTroop {
     background-color: #7197ff;
     border: 3px solid #4A597F;
     padding: 4px 2px;
+
     width: 100px;
     height: 100px;
     text-align: center;
@@ -124,6 +125,26 @@ button.getTroop {
     color: #4A597F;
 
 }
+
+div.button {
+    background-color: #7197ff;
+    border: 3px solid #4A597F;
+    padding: 4px 2px;
+
+    width: 80px;
+    height: 80px;
+
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 10px;
+    margin: 4px 2px;
+
+    font-family: 'Courier New';
+    font-weight: bold;
+    color: #4A597F;
+}
+
 button:hover {
     background-color: white;
 }
@@ -132,4 +153,21 @@ button:active {
 }
 button:focus {
     outline:0;
+}
+
+img.stickmanOne {
+    position: absolute;
+    top: -20px;
+    clip: rect(0px,32px,64px,0px);
+}
+p.cost {
+    position: relative;
+
+    left: 20px;
+    bottom: 30px;
+
+    font-family: 'Courier New';
+    font-weight: bold;
+    font-size: 15px;
+    color: black;
 }
