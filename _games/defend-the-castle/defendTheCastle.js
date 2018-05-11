@@ -5,6 +5,7 @@ var gameRunning = true;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
+var GAMEMONEY = 0;
 var frameCount = 0;
 
 var floorHeight = HEIGHT - HEIGHT/3;
@@ -31,6 +32,9 @@ stickManOneG.src = "StickManOne.png";
 
 var cloudG = new Image();
 cloudG.src = "CloudBusiness.png";
+
+var manOneCost = 25;
+var giantOneCost = 100;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -283,9 +287,15 @@ castlesPlayer = new Castle(1, 100);
 
 function getTroop(i){
     if(soldierSlots[i] === 1) {
-        playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 0));
+        if(GAMEMONEY >= manOneCost) {
+            playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 0));
+            GAMEMONEY-=manOneCost;
+        }
     }else if(soldierSlots[i] === 2){
-        playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 1));
+        if(GAMEMONEY >= giantOneCost) {
+            playerTroops.push(new Soldier(playerCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 0, 0, 0, 1));
+            GAMEMONEY-=giantOneCost;
+        }
     }
 }
 
@@ -322,14 +332,18 @@ function game(){
 
         frameCount++;
 
+        if(frameCount % 10 === 0){
+            GAMEMONEY++;
+        }
+
         castlesEnemy.update();
         castlesEnemy.draw();
 
         castlesPlayer.update();
         castlesPlayer.draw();
 
-        if(frameCount % 200 === 0){
-            enemyTroops.push(new Soldier(enemyCastleX, walkHeight - 16, 16, 32, 1, 0));
+        if(frameCount % 250 === 0){
+            enemyTroops.push(new Soldier(enemyCastleX, walkHeight - 16 + 5 - Math.floor((Math.random() * 10) - 5), 16, 32, 1, 0));
         }
 
         if(frameCount % 300 === 0){
@@ -352,6 +366,11 @@ function game(){
             enemyTroops[i].draw();
 
             if(enemyTroops[i].health <= 0){
+                if(enemyTroops[i].type = 1){
+                    GAMEMONEY += 10;
+                }else if(enemyTroops[i].type = 2){
+                    GAMEMONEY += 50;
+                }
                 enemyTroops.splice(i, 1);
             }
 
@@ -369,21 +388,37 @@ function game(){
         ctx.fillRect(WIDTH/2 + 2, HEIGHT*0.79, 90, 90);
         ctx.fillRect(WIDTH/2 + 100, HEIGHT*0.79, 90, 90);
 
-        var x0 = WIDTH/2 - 170;
-        var x1 = WIDTH/2 - 70;
-        var x2 = WIDTH/2 + 30;
-        var x3 = WIDTH/2 + 130;
+        var xSlots = [WIDTH/2 - 170, WIDTH/2 - 70, WIDTH/2 + 30, WIDTH/2 + 130];
+        var xBoxSlots = [WIDTH/2 - 195, WIDTH/2 - 97, WIDTH/2 + 2, WIDTH/2 + 100];
 
         ctx.fillStyle = "rgb(0, 0, 0)";
         ctx.font="15px Arial";
         ctx.textBaseline="middle";
         ctx.textAlign="center";
 
-        ctx.drawImage(stickManOneG, 0, 0, 32, 64, x0 + 8, HEIGHT*0.8 + 32, 16, 32);
-        ctx.fillText("100", x0 + 16, HEIGHT*0.95, 100);
-
-        ctx.drawImage(stickManOneG, 0, 0, 32, 64, x1, HEIGHT*0.8, 32, 64);
-        ctx.fillText("100", x1 + 16, HEIGHT*0.95, 100);
+        for(var i = 0; i < soldierSlots.length; i++) {
+            if (soldierSlots[i] === 1) {
+                ctx.drawImage(stickManOneG, 0, 0, 32, 64, xSlots[i] + 8, HEIGHT * 0.8 + 16, 16, 32);
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.fillText("25", xSlots[i] + 16, HEIGHT * 0.95, 100);
+                if(GAMEMONEY < manOneCost){
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                    ctx.fillRect(xBoxSlots[i], HEIGHT*0.79, 90, 90);
+                }
+            }else if(soldierSlots[i] === 2) {
+                ctx.drawImage(stickManOneG, 0, 0, 32, 64, xSlots[i], HEIGHT * 0.8, 32, 64);
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.fillText("100", xSlots[i] + 16, HEIGHT * 0.95, 100);
+                if(GAMEMONEY < giantOneCost){
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+                    ctx.fillRect(xBoxSlots[i], HEIGHT*0.79, 90, 90);
+                }
+            }
+        }
+        ctx.textAlign="right";
+        ctx.font="bold 25px Courier";
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.fillText(GAMEMONEY.toString(), WIDTH - 20, 20, 100)
 
         //ctx.drawImage(stickManOneG, 0, 0, 32, 64, x2, HEIGHT*0.8, 32, 64);
         //ctx.fillText("100", x2 + 16, HEIGHT*0.95, 100);
