@@ -8,7 +8,12 @@ var HIGHSCORE = 0;
 
 var voxels = [];
 
-var grid = [0, 0, 0, 0, 0, 0];
+var grid = [
+      [0, 1, 1, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0, 0]
+];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -67,7 +72,7 @@ function Voxel(x, y, width, height){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-var width = 5;
+/*var width = 5;
 
 for(var i = 0; i < 10; i++) {
     var offset = 0;
@@ -79,6 +84,27 @@ for(var i = 0; i < 10; i++) {
     }
     for(var j = 0; j < width; j++) {
         voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 20) - (HEIGHT / 30 * (i + 1))), 75, 75));
+        //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
+    }
+    //width--;
+}*/
+
+var width = 5;
+
+for(var i = 0; i < grid.length; i++) {
+    var offset = 0;
+    if(i % 2 === 0){
+        offset = 1;
+        width = 6;
+    }else{
+        width = 7;
+    }
+    for(var j = 0; j < grid[0].length; j++) {
+        if(grid[i][j] === 0){
+
+        }else{
+            voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH / 20), HEIGHT - ((HEIGHT / 30 * 20) - (HEIGHT / 30 * (i + 1))), 75, 75));
+        }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
     //width--;
