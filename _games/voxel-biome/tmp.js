@@ -1,6 +1,6 @@
 var versionCode = "Alpha 0.9";
-var WIDTH = 500;
-var HEIGHT = 500;
+var WIDTH = 720;
+var HEIGHT = 720;
 var gameRunning = false;
 var SCORE = 0;
 var GAMESCORE = 0;
@@ -8,7 +8,7 @@ var HIGHSCORE = 0;
 
 var voxels = [];
 
-var grid = [0, 0, 0];
+var grid = [0, 0, 0, 0, 0, 0];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -67,8 +67,22 @@ function Voxel(x, y, width, height){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-voxels.push(new Voxel(WIDTH/8 * 4 + 36, HEIGHT - HEIGHT/8 - 24, 75, 75));
-voxels.push(new Voxel(WIDTH/8 * 4, HEIGHT - HEIGHT/8, 75, 75));
+var width = 5;
+
+for(var i = 0; i < 10; i++) {
+    var offset = 0;
+    if(i % 2 === 0){
+        offset = 1;
+        width = 6;
+    }else{
+        width = 7;
+    }
+    for(var j = 0; j < width; j++) {
+        voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 20) - (HEIGHT / 30 * (i + 1))), 75, 75));
+        //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
+    }
+    //width--;
+}
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
