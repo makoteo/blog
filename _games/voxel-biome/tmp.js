@@ -11,8 +11,8 @@ var voxels = [];
 var grid = [
       [0, 1, 1, 1, 1, 0],
     [0, 0, 1, 1, 1, 0],
-      [0, 1, 1, 1, 1, 0],
-    [0, 0, 0, 0, 0, 0]
+      [0, 0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 0, 0]
 ];
 
 var canvas = document.getElementById("myCanvas");
@@ -103,7 +103,7 @@ for(var i = 0; i < grid.length; i++) {
         if(grid[i][j] === 0){
 
         }else{
-            voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH / 20), HEIGHT - ((HEIGHT / 30 * 20) - (HEIGHT / 30 * (i + 1))), 75, 75));
+            voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH / 20), HEIGHT - ((HEIGHT / 30 * (5 + grid.length)) - (HEIGHT / 30 * (i + 1))), 75, 75));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
