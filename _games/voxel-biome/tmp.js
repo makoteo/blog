@@ -20,15 +20,26 @@ var grid = [
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
-    [0, 0, 0, 0, 2, 1, 1, 2, 0, 0, 0],
-      [0, 0, 0, 2, 1, 1, 1, 2, 0, 0],
-    [0, 0, 0, 2, 1, 1, 1, 2, 2, 0, 0],
+    [0, 0, 0, 0, 2, 3, 1, 2, 0, 0, 0],
+      [0, 0, 0, 2, 3, 3, 1, 2, 0, 0],
+    [0, 0, 0, 2, 1, 3, 1, 2, 2, 0, 0],
       [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0],
     [0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0],
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
 ];
+
+var islandTest = [
+
+    [1, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 1]
+
+]
 
 var selected = [];
 var clickSelected = [];
@@ -69,6 +80,8 @@ function Voxel(x, y, width, height, type){
             ctx.drawImage(voxelsG, 0, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 2) {
             ctx.drawImage(voxelsG, 300, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+        }else if(this.type === 3) {
+            ctx.drawImage(voxelsG, 600, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
         }
 
     };
@@ -128,6 +141,8 @@ for(var i = 0; i < grid.length; i++) {
             voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 1));
         }else if(grid[i][j] === 2){
             voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 2));
+        }else if(grid[i][j] === 3){
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 3));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
