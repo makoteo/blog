@@ -6,20 +6,26 @@ var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
 
+var htmlWidth = window.innerWidth;
+var htmlHeight = window.innerHeight;
+
+var offsetWidth = (WIDTH - htmlWidth) / 2 + 30;
+var offsetHeight = (HEIGHT - htmlHeight) / 2 + 10;
+
 var voxels = [];
 
 var grid = [
-      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+      [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
+      [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
+    [0, 0, 0, 0, 2, 1, 1, 2, 0, 0, 0],
+      [0, 0, 0, 2, 1, 1, 1, 2, 0, 0],
+    [0, 0, 0, 2, 1, 1, 1, 2, 2, 0, 0],
+      [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0],
+      [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
 ];
 
 var canvas = document.getElementById("myCanvas");
@@ -28,23 +34,50 @@ var ctx = canvas.getContext("2d");
 var voxelsG = new Image();
 voxelsG.src = "BiomeGame.png";
 
+var mousePos;
+var mousePosX;
+var mousePosY;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
-function Voxel(x, y, width, height){
+function Voxel(x, y, width, height, type){
     this.x = x;
+    this.startY = y;
     this.y = y;
     this.width = width;
     this.height = height;
+    this.type = type;
+
+    this.movingUp = false;
 
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
-        ctx.drawImage(voxelsG, 0, 0, 300, 300, x - width/2, y - height/2, width, height);
+        if(this.type === 1) {
+            ctx.drawImage(voxelsG, 0, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+        }else if(this.type === 2) {
+            ctx.drawImage(voxelsG, 300, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+        }
 
     };
     this.update = function(){
-
+        if(this.movingUp === false) {
+            if(this.y < this.startY){
+                this.y++;
+            }
+        }else{
+            if(this.y > this.startY - 20){
+                this.y--;
+            }
+        }
+    }
+    this.animateUp = function(up){
+        if(up === 0) {
+            this.movingUp = true;
+        }else{
+            this.movingUp = false;
+        }
     }
 }
 
@@ -80,8 +113,10 @@ for(var i = 0; i < grid.length; i++) {
     for(var j = 0; j < grid[i].length; j++) {
         if(grid[i][j] === 0){
 
-        }else{
-            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16));
+        }else if(grid[i][j] === 1){
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 1));
+        }else if(grid[i][j] === 2){
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 2));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -99,23 +134,24 @@ function game(){
     ctx.fillStyle = "rgb(5, 8, 15)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    /*
-    ctx.beginPath();
-    ctx.strokeStyle = "rgb(255, 255, 255)";
-    ctx.moveTo(WIDTH - WIDTH/8, HEIGHT/8 * 5);
-    ctx.lineTo(WIDTH/8 * 4, HEIGHT - HEIGHT/8);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(WIDTH/8, HEIGHT/8 * 5);
-    ctx.lineTo(WIDTH/8 * 4, HEIGHT - HEIGHT/8);
-    ctx.stroke();
-    */
-
     for(var i = 0; i < voxels.length; i++){
         voxels[i].update();
         voxels[i].draw();
+
+        if(//((mousePosX > voxels[i].x + voxels[i].width/3)) &&
+            //((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width/3)) &&
+            ((mousePosY > voxels[i].y + voxels[i].height/6)) &&
+            ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height/3))) {
+
+            voxels[i].animateUp(0);
+
+        }else{
+            voxels[i].animateUp(1);
+        }
+
     }
+
+    window.onmousemove = logMouseMove;
 
     /* IMAGE DRAW EXAMPLE
     ctx.drawImage(groundG, 0, 0, 1000, 100, 0, HEIGHT - floorHeight, 1000, 100);
@@ -195,6 +231,15 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type == "keydown");
 }, false);
+
+function logMouseMove(e) {
+
+    e = event || window.event;
+    mousePos = { x: e.clientX, y: e.clientY };
+    mousePosX = e.clientX + offsetWidth;
+    mousePosY = e.clientY - offsetHeight;
+    //console.log(mousePosX + ", " + mousePosY);
+}
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
 
