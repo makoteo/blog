@@ -1,6 +1,6 @@
 var versionCode = "Alpha 0.9";
-var WIDTH = 720;
-var HEIGHT = 720;
+var WIDTH = 1200;
+var HEIGHT = 675;
 var gameRunning = false;
 var SCORE = 0;
 var GAMESCORE = 0;
@@ -9,10 +9,17 @@ var HIGHSCORE = 0;
 var voxels = [];
 
 var grid = [
-      [0, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 0],
-      [0, 0, 1, 1, 0, 0],
-    [0, 0, 0, 1, 0, 0]
+      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
 ];
 
 var canvas = document.getElementById("myCanvas");
@@ -38,35 +45,6 @@ function Voxel(x, y, width, height){
     };
     this.update = function(){
 
-    }
-    this.setVelX = function(i){
-        velocityX = i;
-    }
-    this.setX = function(i){
-        x = i;
-    }
-    this.setVelY = function(i){
-        velocityY = i;
-    }
-
-    this.getVelY = function(){
-        return velocityY;
-    }
-
-    this.getheight = function(){
-        return height;
-    }
-
-    this.getwidth = function(){
-        return width;
-    }
-
-    this.getY = function(){
-        return y;
-    }
-
-    this.getX = function () {
-        return x;
     }
 }
 
@@ -99,11 +77,11 @@ for(var i = 0; i < grid.length; i++) {
     }else{
         width = 7;
     }
-    for(var j = 0; j < grid[0].length; j++) {
+    for(var j = 0; j < grid[i].length; j++) {
         if(grid[i][j] === 0){
 
         }else{
-            voxels.push(new Voxel((WIDTH / 10 * (j + 2)) + (offset * WIDTH / 20), HEIGHT - ((HEIGHT / 30 * (5 + grid.length)) - (HEIGHT / 30 * (i + 1))), 75, 75));
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -121,6 +99,7 @@ function game(){
     ctx.fillStyle = "rgb(5, 8, 15)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
+    /*
     ctx.beginPath();
     ctx.strokeStyle = "rgb(255, 255, 255)";
     ctx.moveTo(WIDTH - WIDTH/8, HEIGHT/8 * 5);
@@ -131,6 +110,7 @@ function game(){
     ctx.moveTo(WIDTH/8, HEIGHT/8 * 5);
     ctx.lineTo(WIDTH/8 * 4, HEIGHT - HEIGHT/8);
     ctx.stroke();
+    */
 
     for(var i = 0; i < voxels.length; i++){
         voxels[i].update();
