@@ -14,6 +14,8 @@ var offsetHeight = (HEIGHT - htmlHeight) / 2 + 10;
 
 var voxels = [];
 
+var thisFrameClicked = false;
+
 var grid = [
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
@@ -28,11 +30,16 @@ var grid = [
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
 ];
 
+var selected = [];
+var clickSelected = [];
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var voxelsG = new Image();
 voxelsG.src = "BiomeGame.png";
+
+var currentID = 0;
 
 var mousePos;
 var mousePosX;
@@ -47,6 +54,10 @@ function Voxel(x, y, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
+
+    this.id = currentID;
+
+    currentID++;
 
     this.movingUp = false;
 
@@ -138,17 +149,62 @@ function game(){
         voxels[i].update();
         voxels[i].draw();
 
-        if(//((mousePosX > voxels[i].x + voxels[i].width/3)) &&
-            //((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width/3)) &&
-            ((mousePosY > voxels[i].y + voxels[i].height/6)) &&
-            ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height/3))) {
-
-            voxels[i].animateUp(0);
-
-        }else{
-            voxels[i].animateUp(1);
+        if(selected.length > 0) {
+            if (voxels[i].id === selected[0] || voxels[i].id === clickSelected[0] ) {
+                voxels[i].animateUp(0);
+            } else {
+                voxels[i].animateUp(1);
+            }
         }
 
+        if(voxels[i].id !== selected[0]) {
+            if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
+                ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
+                ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
+                ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 3))) {
+
+                //voxels[i].animateUp(0);
+
+                selected.unshift(voxels[i].id);
+
+                if(thisFrameClicked === true){
+                    if(voxels[i].id === clickSelected[0]) {
+                        clickSelected = [];
+                    }else{
+                        clickSelected.unshift(voxels[i].id);
+                    }
+                }
+
+            } else {
+                //selected.splice(0, 1);
+            }
+        }else{
+            if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
+                ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
+                ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
+                ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 8))) {
+
+                if(thisFrameClicked === true){
+                    if(voxels[i].id === clickSelected[0]) {
+                        clickSelected = [];
+                    }else{
+                        clickSelected.unshift(voxels[i].id);
+                    }
+                }
+
+            } else {
+                selected.unshift(999);
+            }
+        }
+
+    }
+
+    if(selected.length > 1){
+        selected.splice(1, 1);
+    }
+
+    if(clickSelected.length > 1){
+        clickSelected.splice(1, 1);
     }
 
     window.onmousemove = logMouseMove;
@@ -156,6 +212,8 @@ function game(){
     /* IMAGE DRAW EXAMPLE
     ctx.drawImage(groundG, 0, 0, 1000, 100, 0, HEIGHT - floorHeight, 1000, 100);
     */
+
+    thisFrameClicked = false;
 
     if(gameRunning === true) {
 
@@ -239,6 +297,12 @@ function logMouseMove(e) {
     mousePosX = e.clientX + offsetWidth;
     mousePosY = e.clientY - offsetHeight;
     //console.log(mousePosX + ", " + mousePosY);
+}
+
+document.addEventListener("click", clickedTrue);
+
+function clickedTrue(){
+    thisFrameClicked = true;
 }
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
