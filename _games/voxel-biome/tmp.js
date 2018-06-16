@@ -24,24 +24,13 @@ var grid = [
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
     [0, 0, 0, 0, 2, 3, 1, 2, 0, 0, 0],
       [0, 0, 0, 2, 3, 3, 4, 2, 0, 0],
-    [0, 0, 0, 2, 1, 3, 4, 2, 2, 0, 0],
+    [0, 0, 0, 2, 1, 3, 5, 2, 2, 0, 0],
       [0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 0],
     [0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0],
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
 ];
-
-var islandTest = [
-
-    [1, 0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 1]
-
-]
 
 var selected = [];
 var clickSelected = [];
@@ -66,11 +55,13 @@ var forests = 0;
 var deserts = 0;
 var fields = 0;
 var seas = 0;
+var cities = 0;
 
 var forestPol = -5;
-var fieldPol = -1;
-var seaPol = -2;
-var desertPol = +1;
+var fieldPol = -2;
+var seaPol = -1;
+var desertPol = +2;
+var cityPol = +10;
 
 var forestDesc1 = "All those leaves";
 var forestDesc2 = "are bound to ";
@@ -87,6 +78,10 @@ var seaDesc3 = "of that pollution.";
 var desertDesc1 = "There's not ";
 var desertDesc2 = "much here, just ";
 var desertDesc3 = "some sandstorms.";
+
+var cityDesc1 = "Your biggest";
+var cityDesc2 = "enemy. A LOT ";
+var cityDesc3 = "of pollution.";
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -96,6 +91,7 @@ function Voxel(x, y, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
+    this.stage = 1;
 
     this.id = currentID;
 
@@ -117,6 +113,12 @@ function Voxel(x, y, width, height, type){
             ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 4) {
             ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+        }else if(this.type === 5) {
+            if(this.stage === 0) {
+                ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }else{
+                ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
         }
 
     };
@@ -184,6 +186,8 @@ for(var i = 0; i < grid.length; i++) {
             voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 3));
         }else if(grid[i][j] === 4){
             voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 4));
+        }else if(grid[i][j] === 5){
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 5));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -213,6 +217,8 @@ function game(){
             forests++;
         }else if(voxels[i].type === 4){
             deserts++;
+        }else if(voxels[i].type === 5){
+            cities++;
         }
 
         if(selected.length > 0) {
@@ -287,7 +293,7 @@ function game(){
 
     }
 
-    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol);
+    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol) + (cities * cityPol);
 
     if(selected.length > 1){
         selected.splice(1, 1);
@@ -318,6 +324,7 @@ function game(){
     if (keys && keys[50]){buildType = 2;}
     if (keys && keys[51]){buildType = 3;}
     if (keys && keys[52]){buildType = 4;}
+    if (keys && keys[53]){buildType = 5;}
     if (keys && keys[48]){buildType = 0;}
 
 
@@ -332,7 +339,7 @@ function game(){
 
     if(POLUTION < 0){
         ctx.fillStyle = "rgb(0, 200, 0)";
-    }else if(POLUTION < 90){
+    }else if(POLUTION < 50){
         ctx.fillStyle = "rgb(255, 140, 0)";
     }else{
         ctx.fillStyle = "rgb(200, 0, 0)";
@@ -348,15 +355,18 @@ function game(){
     ctx.fillText("Seas: " + seas,WIDTH/90,HEIGHT/10 + (HEIGHT/15));
     ctx.fillText("Forests: " + forests,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*2);
     ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
+    ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
 
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
     ctx.fillRect(WIDTH - WIDTH/7, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
 
     if(clickSelected.length > 0){
         var selectedVoxelType = 0;
+        var selectedVoxelStage = 0;
         for(i = 0; i < voxels.length; i++){
             if(voxels[i].id === clickSelected[0]){
                 selectedVoxelType = voxels[i].type;
+                selectedVoxelStage = voxels[i].stage;
                 //break;
             }
             if(selectedVoxelType === 1){
@@ -461,6 +471,36 @@ function game(){
 
                 ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
+            }else if(selectedVoxelType === 5){
+
+                if(selectedVoxelStage === 0) {
+                    ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                }else{
+                    ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                }
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("City" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(cityDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(cityDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(cityDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(cityPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + cityPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+
             }
         }
     }
@@ -470,6 +510,7 @@ function game(){
     deserts = 0;
     fields = 0;
     seas = 0;
+    cities = 0;
 
     if(gameRunning === true) {
 
