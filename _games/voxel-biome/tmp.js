@@ -385,8 +385,14 @@ function game(){
                         for(var n = 0; n < gridRoll[1].length; n++){
                             if(gridRoll[m][n] === voxels[f].id){
 
-                                if(diceRollCity2 <= 1){
+                                if(diceRollCity2 <= 0.25){
                                     voxels[gridRoll[m-1][n]].type = 5;
+                                }else if(diceRollCity2 <= 0.5){
+                                    voxels[gridRoll[m][n-1]].type = 5;
+                                }else if(diceRollCity2 <= 0.75){
+                                    voxels[gridRoll[m+1][n]].type = 5;
+                                }else if(diceRollCity2 <= 1){
+                                    voxels[gridRoll[m][+1]].type = 5;1
                                 }
 
                             }
