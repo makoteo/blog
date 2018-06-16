@@ -28,6 +28,34 @@ var grid = [
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
 ];
 
+var gridTest = [
+
+    [1, 2, 2, 2, 2, 2],
+    [2, 1, 1, 1, 1, 2],
+    [2, 1, 1, 1, 1, 2],
+    [2, 1, 1, 1, 1, 2],
+    [2, 1, 1, 1, 1, 2],
+    [2, 2, 2, 2, 2, 1]
+
+]
+
+var mapSideLength = 6;
+
+var gridRoll = [
+
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+];
+
 var selected = [];
 var clickSelected = [];
 
@@ -87,11 +115,13 @@ function Voxel(x, y, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
-    this.stage = 1;
+    this.stage = 0;
 
     this.id = currentID;
 
     currentID++;
+
+    gridRoll[Math.ceil(this.id/mapSideLength)].push(this.id); //WRONG
 
     this.movingUp = false;
 
@@ -176,7 +206,7 @@ for(var i = 0; i < 10; i++) {
 
 var width = 5;
 
-for(var i = 0; i < grid.length; i++) {
+/*for(var i = 0; i < grid.length; i++) {
     var offset = 0;
     if(i % 2 === 0){
         offset = 1;
@@ -199,6 +229,35 @@ for(var i = 0; i < grid.length; i++) {
             voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 5));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
+    }
+    //width--;
+}*/
+
+var maxGridLength = gridTest[0].length;
+var movedif = 1;
+
+for(var i = 0; i < 6; i++) {
+    for(var j = 0; j < maxGridLength; j++) {
+        if(gridTest[i][j] === 0){
+
+        }else if(gridTest[i][j] === 1){
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 29) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 1));
+        }else if(gridTest[i][j] === 2){
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 29) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 2));
+        }else if(gridTest[i][j] === 3){
+            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 3));
+        }else if(gridTest[i][j] === 4){
+            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 4));
+        }else if(gridTest[i][j] === 5){
+            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 5));
+        }
+        //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
+    }
+
+    if(i<maxGridLength){
+        movedif++;
+    }else{
+        movedif--;
     }
     //width--;
 }
@@ -305,6 +364,41 @@ function game(){
     POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol) + (cities * cityPol);
 
     frameCount++;
+
+    // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
+
+    if(frameCount % 100 === 0){
+        for(var f = 0; f < voxels.length; f++){
+
+            if(voxels[f].type === 5) {
+                var diceRollCity = Math.random();
+
+                if(diceRollCity < 0.1){
+                    if(voxels[f].stage === 0){
+                        voxels[f].stage = 1;
+                    }
+                }else if(diceRollCity <= 1){
+
+                    var diceRollCity2 = Math.random();
+
+                    for(var m = 0; m < gridRoll.length; m++){
+                        for(var n = 0; n < gridRoll[1].length; n++){
+                            if(gridRoll[m][n] === voxels[f].id){
+
+                                if(diceRollCity2 <= 1){
+                                    voxels[gridRoll[m-1][n]].type = 5;
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+    }
 
     if(selected.length > 1){
         selected.splice(1, 1);
