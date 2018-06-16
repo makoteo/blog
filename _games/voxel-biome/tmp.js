@@ -5,6 +5,7 @@ var gameRunning = false;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
+var POLUTION = 0;
 
 var htmlWidth = window.innerWidth;
 var htmlHeight = window.innerHeight;
@@ -286,6 +287,8 @@ function game(){
 
     }
 
+    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol);
+
     if(selected.length > 1){
         selected.splice(1, 1);
     }
@@ -315,6 +318,7 @@ function game(){
     if (keys && keys[50]){buildType = 2;}
     if (keys && keys[51]){buildType = 3;}
     if (keys && keys[52]){buildType = 4;}
+    if (keys && keys[48]){buildType = 0;}
 
 
     // DRAWING ---------------------------------------------------------------------------------------------------------------------------------
@@ -325,7 +329,16 @@ function game(){
 
     ctx.textAlign="center";
     ctx.fillText("Time Remaining: 2:00",WIDTH/2,HEIGHT/10);
-    ctx.fillText("Pollution: 0%",WIDTH/2,HEIGHT/6);
+
+    if(POLUTION < 0){
+        ctx.fillStyle = "rgb(0, 200, 0)";
+    }else if(POLUTION < 90){
+        ctx.fillStyle = "rgb(255, 140, 0)";
+    }else{
+        ctx.fillStyle = "rgb(200, 0, 0)";
+    }
+
+    ctx.fillText("Pollution: " + POLUTION + "%",WIDTH/2,HEIGHT/6);
 
     ctx.font = '15pt Courier New';
     ctx.fillStyle = "rgb(255, 255, 255)";
@@ -467,12 +480,6 @@ function game(){
         document.getElementById("resetMenu").setAttribute("hidden", "hidden");
         document.getElementById("instructionsMenu").setAttribute("hidden", "hidden");
         */
-
-        if (keys && keys[49]){buildType = 1;}
-        if (keys && keys[50]){buildType = 2;}
-        if (keys && keys[51]){buildType = 3;}
-        if (keys && keys[52]){buildType = 4;}
-        if (keys && keys[48]){buildType = 0;}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
