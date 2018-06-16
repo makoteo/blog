@@ -9,21 +9,22 @@ var HIGHSCORE = 0;
 var htmlWidth = window.innerWidth;
 var htmlHeight = window.innerHeight;
 
-var offsetWidth = (WIDTH - htmlWidth) / 2 + 30;
-var offsetHeight = (HEIGHT - htmlHeight) / 2 + 10;
+var offsetWidth = (WIDTH - htmlWidth) / 2 + WIDTH/40;
+var offsetHeight = (HEIGHT - htmlHeight) / 2 + WIDTH/120;
 
 var voxels = [];
 
 var thisFrameClicked = false;
+var mouseHeld = false;
 
 var grid = [
       [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
     [0, 0, 0, 0, 2, 3, 1, 2, 0, 0, 0],
-      [0, 0, 0, 2, 3, 3, 1, 2, 0, 0],
-    [0, 0, 0, 2, 1, 3, 1, 2, 2, 0, 0],
-      [0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 0],
+      [0, 0, 0, 2, 3, 3, 4, 2, 0, 0],
+    [0, 0, 0, 2, 1, 3, 4, 2, 2, 0, 0],
+      [0, 0, 0, 2, 2, 1, 1, 2, 0, 0, 0],
     [0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0],
       [0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
@@ -55,6 +56,10 @@ var currentID = 0;
 var mousePos;
 var mousePosX;
 var mousePosY;
+var mouseDownTimer = 0;
+var tempMouseTimer = 0;
+
+var buildType = 1;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -72,16 +77,20 @@ function Voxel(x, y, width, height, type){
 
     this.movingUp = false;
 
+    this.maxHeight = 5;
+
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
         if(this.type === 1) {
-            ctx.drawImage(voxelsG, 0, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 0, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 2) {
-            ctx.drawImage(voxelsG, 300, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 300, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 3) {
-            ctx.drawImage(voxelsG, 600, 0, 300, 300, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 600, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
+        }else if(this.type === 4) {
+            ctx.drawImage(voxelsG, 900, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
     };
@@ -91,7 +100,7 @@ function Voxel(x, y, width, height, type){
                 this.y++;
             }
         }else{
-            if(this.y > this.startY - 20){
+            if(this.y > this.startY - this.maxHeight){
                 this.y--;
             }
         }
@@ -99,8 +108,12 @@ function Voxel(x, y, width, height, type){
     this.animateUp = function(up){
         if(up === 0) {
             this.movingUp = true;
-        }else{
+            this.maxHeight = 5;
+        }else if(up === 1){
             this.movingUp = false;
+        }else{
+            this.movingUp = true;
+            this.maxHeight =  20;
         }
     }
 }
@@ -138,11 +151,13 @@ for(var i = 0; i < grid.length; i++) {
         if(grid[i][j] === 0){
 
         }else if(grid[i][j] === 1){
-            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 1));
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 1));
         }else if(grid[i][j] === 2){
-            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 2));
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 2));
         }else if(grid[i][j] === 3){
-            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/16, 3));
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 3));
+        }else if(grid[i][j] === 4){
+            voxels.push(new Voxel((WIDTH / 16.5 * (j + 2.75)) + (offset * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (5 + grid.length)) - (HEIGHT / 28 * (i + 1))), WIDTH/16, WIDTH/12, 4));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -165,10 +180,18 @@ function game(){
         voxels[i].draw();
 
         if(selected.length > 0) {
-            if (voxels[i].id === selected[0] || voxels[i].id === clickSelected[0] ) {
-                voxels[i].animateUp(0);
+            if (voxels[i].id === selected[0]) {
+                if(voxels[i].id === clickSelected[0]){
+                    voxels[i].animateUp(2);
+                }else{
+                    voxels[i].animateUp(0);
+                }
             } else {
-                voxels[i].animateUp(1);
+                if(voxels[i].id === clickSelected[0]){
+                    voxels[i].animateUp(2);
+                }else{
+                    voxels[i].animateUp(1);
+                }
             }
         }
 
@@ -182,16 +205,21 @@ function game(){
 
                 selected.unshift(voxels[i].id);
 
-                if(thisFrameClicked === true){
+                if(thisFrameClicked === true && tempMouseTimer < 1){
                     if(voxels[i].id === clickSelected[0]) {
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
                     }
+                    tempMouseTimer = 10;
                 }
 
             } else {
-                //selected.splice(0, 1);
+                if(thisFrameClicked === true) {
+                    if (voxels[i].id === clickSelected[0]) {
+                        clickSelected.unshift(999);
+                    }
+                }
             }
         }else{
             if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
@@ -199,16 +227,21 @@ function game(){
                 ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
                 ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 8))) {
 
-                if(thisFrameClicked === true){
+                if(thisFrameClicked === true && tempMouseTimer < 1){
                     if(voxels[i].id === clickSelected[0]) {
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
+                        voxels[i].type = buildType;
                     }
+                    tempMouseTimer = 10;
+                }else if(mouseHeld === true){
+                    voxels[i].type = buildType;
                 }
 
             } else {
                 selected.unshift(999);
+
             }
         }
 
@@ -224,11 +257,25 @@ function game(){
 
     window.onmousemove = logMouseMove;
 
-    /* IMAGE DRAW EXAMPLE
-    ctx.drawImage(groundG, 0, 0, 1000, 100, 0, HEIGHT - floorHeight, 1000, 100);
-    */
+    if(tempMouseTimer > 0){
+        tempMouseTimer--;
+    }
 
-    thisFrameClicked = false;
+    if(thisFrameClicked === true){
+        if(mouseDownTimer < 20) {
+            mouseDownTimer++;
+        }else{
+            mouseHeld = true;
+        }
+
+    }else{
+        mouseDownTimer = 0;
+    }
+
+    if (keys && keys[49]){buildType = 1;}
+    if (keys && keys[50]){buildType = 2;}
+    if (keys && keys[51]){buildType = 3;}
+    if (keys && keys[52]){buildType = 4;}
 
     if(gameRunning === true) {
 
@@ -240,9 +287,10 @@ function game(){
         document.getElementById("instructionsMenu").setAttribute("hidden", "hidden");
         */
 
-        /* (KEY INPUT)
-        if (keys && keys[40] || keys && keys[83]) {player.setVelY(player.getVelY() + 0.2)}
-        */
+        if (keys && keys[49]){buildType = 1;}
+        if (keys && keys[50]){buildType = 2;}
+        if (keys && keys[51]){buildType = 3;}
+        if (keys && keys[52]){buildType = 4;}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
@@ -314,10 +362,17 @@ function logMouseMove(e) {
     //console.log(mousePosX + ", " + mousePosY);
 }
 
-document.addEventListener("click", clickedTrue);
+document.addEventListener("mousedown", clickedTrue);
+
+document.addEventListener("mouseup", clickedFalse);
 
 function clickedTrue(){
     thisFrameClicked = true;
+}
+
+function clickedFalse(){
+    thisFrameClicked = false;
+    mouseHeld = false;
 }
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
