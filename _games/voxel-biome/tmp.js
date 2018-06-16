@@ -7,12 +7,6 @@ var GAMESCORE = 0;
 var HIGHSCORE = 0;
 var POLUTION = 0;
 
-var htmlWidth = window.innerWidth;
-var htmlHeight = window.innerHeight;
-
-var offsetWidth = (WIDTH - htmlWidth) / 2 + WIDTH/40;
-var offsetHeight = (HEIGHT - htmlHeight) / 2 + WIDTH/120;
-
 var voxels = [];
 
 var thisFrameClicked = false;
@@ -101,19 +95,32 @@ function Voxel(x, y, width, height, type){
 
     this.maxHeight = 5;
 
+    this.randomChance = Math.random();
+
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
-        if(this.type === 1) {
+        if(this.type === 1) { //FIELD
             ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 2) {
+
+            if(this.randomChance < 0.1){
+                ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }else if(this.randomChance < 0.2){
+                ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
+
+        }else if(this.type === 2) { //SEA
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 3) {
+        }else if(this.type === 3) { //FOREST
             ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 4) {
+        }else if(this.type === 4) { //DESERT
             ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 5) {
+
+            if(this.randomChance < 0.2){
+                ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
+        }else if(this.type === 5) { //TOWN/CITY
             if(this.stage === 0) {
                 ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }else{
@@ -584,11 +591,12 @@ window.addEventListener('keyup', function (e) {
 }, false);
 
 function logMouseMove(e) {
-
     e = event || window.event;
-    mousePos = { x: e.clientX, y: e.clientY };
-    mousePosX = e.clientX + offsetWidth;
-    mousePosY = e.clientY - offsetHeight;
+
+    var rect = canvas.getBoundingClientRect();
+
+    mousePosX = e.clientX - rect.left + WIDTH/30;
+    mousePosY = e.clientY - rect.top + WIDTH/30;
     //console.log(mousePosX + ", " + mousePosY);
 }
 
