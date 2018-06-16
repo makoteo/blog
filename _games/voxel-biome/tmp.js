@@ -9,6 +9,8 @@ var POLUTION = 0;
 
 var voxels = [];
 
+var frameCount = 0;
+
 var thisFrameClicked = false;
 var mouseHeld = false;
 
@@ -105,9 +107,9 @@ function Voxel(x, y, width, height, type){
             ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
             if(this.randomChance < 0.1){
-                ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }else if(this.randomChance < 0.2){
-                ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                ctx.drawImage(voxelsG, 1500, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
         }else if(this.type === 2) { //SEA
@@ -118,7 +120,7 @@ function Voxel(x, y, width, height, type){
             ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
             if(this.randomChance < 0.2){
-                ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }else if(this.type === 5) { //TOWN/CITY
             if(this.stage === 0) {
@@ -302,6 +304,8 @@ function game(){
 
     POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol) + (cities * cityPol);
 
+    frameCount++;
+
     if(selected.length > 1){
         selected.splice(1, 1);
     }
@@ -337,6 +341,19 @@ function game(){
 
     // DRAWING ---------------------------------------------------------------------------------------------------------------------------------
 
+    if(POLUTION < 10){
+        ctx.fillStyle = "rgba(51, 13, 13, 0)";
+    }else if(POLUTION < 20){
+        ctx.fillStyle = "rgba(51, 13, 13, 0.1)";
+    }else if(POLUTION < 40){
+        ctx.fillStyle = "rgba(51, 13, 13, 0.2)";
+    }else if(POLUTION < 50){
+        ctx.fillStyle = "rgba(51, 13, 13, 0.3)";
+    }else{
+        ctx.fillStyle = "rgba(51, 13, 13, 0.4)";
+    }
+
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     ctx.font = '20pt Courier New';
     ctx.fillStyle = "rgb(255, 255, 255)";
@@ -521,7 +538,7 @@ function game(){
 
     if(gameRunning === true) {
 
-        frameCount++;
+
 
         /* HIDE ALL DIVS
         document.getElementById("startMenu").setAttribute("hidden", "hidden");
