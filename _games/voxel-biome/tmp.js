@@ -59,8 +59,33 @@ var mousePosY;
 var mouseDownTimer = 0;
 var tempMouseTimer = 0;
 
-var buildType = 1;
+var buildType = 0;
 
+var forests = 0;
+var deserts = 0;
+var fields = 0;
+var seas = 0;
+
+var forestPol = -5;
+var fieldPol = -1;
+var seaPol = -2;
+var desertPol = +1;
+
+var forestDesc1 = "All those leaves";
+var forestDesc2 = "are bound to ";
+var forestDesc3 = "reduce pollution.";
+
+var fieldDesc1 = "There's a few";
+var fieldDesc2 = "flowers. Could ";
+var fieldDesc3 = "mean something.";
+
+var seaDesc1 = "The algae may";
+var seaDesc2 = "reduce a little ";
+var seaDesc3 = "of that pollution.";
+
+var desertDesc1 = "There's not ";
+var desertDesc2 = "much here, just ";
+var desertDesc3 = "some sandstorms.";
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -84,13 +109,13 @@ function Voxel(x, y, width, height, type){
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
         if(this.type === 1) {
-            ctx.drawImage(voxelsG, 0, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 2) {
-            ctx.drawImage(voxelsG, 300, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 3) {
-            ctx.drawImage(voxelsG, 600, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 4) {
-            ctx.drawImage(voxelsG, 900, 0, 300, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
     };
@@ -179,6 +204,16 @@ function game(){
         voxels[i].update();
         voxels[i].draw();
 
+        if(voxels[i].type === 1){
+            fields++;
+        }else if(voxels[i].type === 2){
+            seas++;
+        }else if(voxels[i].type === 3){
+            forests++;
+        }else if(voxels[i].type === 4){
+            deserts++;
+        }
+
         if(selected.length > 0) {
             if (voxels[i].id === selected[0]) {
                 if(voxels[i].id === clickSelected[0]){
@@ -232,11 +267,15 @@ function game(){
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
-                        voxels[i].type = buildType;
+                        if(buildType !== 0) {
+                            voxels[i].type = buildType;
+                        }
                     }
                     tempMouseTimer = 10;
                 }else if(mouseHeld === true){
-                    voxels[i].type = buildType;
+                    if(buildType !== 0) {
+                        voxels[i].type = buildType;
+                    }
                 }
 
             } else {
@@ -277,6 +316,148 @@ function game(){
     if (keys && keys[51]){buildType = 3;}
     if (keys && keys[52]){buildType = 4;}
 
+
+    // DRAWING ---------------------------------------------------------------------------------------------------------------------------------
+
+
+    ctx.font = '20pt Courier New';
+    ctx.fillStyle = "rgb(255, 255, 255)";
+
+    ctx.textAlign="center";
+    ctx.fillText("Time Remaining: 2:00",WIDTH/2,HEIGHT/10);
+    ctx.fillText("Pollution: 0%",WIDTH/2,HEIGHT/6);
+
+    ctx.font = '15pt Courier New';
+    ctx.fillStyle = "rgb(255, 255, 255)";
+
+    ctx.textAlign="left";
+    ctx.fillText("Fields: " + fields,WIDTH/90,HEIGHT/10);
+    ctx.fillText("Seas: " + seas,WIDTH/90,HEIGHT/10 + (HEIGHT/15));
+    ctx.fillText("Forests: " + forests,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*2);
+    ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
+
+    ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
+    ctx.fillRect(WIDTH - WIDTH/7, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
+
+    if(clickSelected.length > 0){
+        var selectedVoxelType = 0;
+        for(i = 0; i < voxels.length; i++){
+            if(voxels[i].id === clickSelected[0]){
+                selectedVoxelType = voxels[i].type;
+                //break;
+            }
+            if(selectedVoxelType === 1){
+
+                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Fields" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(fieldDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(fieldDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(fieldDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(fieldPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + fieldPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+
+            }else if(selectedVoxelType === 2){
+                ctx.drawImage(voxelsG, 300, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Sea" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(seaDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(seaDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(seaDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(seaPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + seaPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+            }else if(selectedVoxelType === 3){
+
+                ctx.drawImage(voxelsG, 600, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Forest" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(forestDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(forestDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(forestDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(forestPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + forestPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+
+            }else if(selectedVoxelType === 4){
+
+                ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Desert" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(desertDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(desertDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(desertDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(desertPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+
+            }
+        }
+    }
+
+
+    forests = 0;
+    deserts = 0;
+    fields = 0;
+    seas = 0;
+
     if(gameRunning === true) {
 
         frameCount++;
@@ -291,6 +472,7 @@ function game(){
         if (keys && keys[50]){buildType = 2;}
         if (keys && keys[51]){buildType = 3;}
         if (keys && keys[52]){buildType = 4;}
+        if (keys && keys[48]){buildType = 0;}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
