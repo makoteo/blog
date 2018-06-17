@@ -241,15 +241,15 @@ for(var i = 0; i < 6; i++) {
         if(gridTest[i][j] === 0){
 
         }else if(gridTest[i][j] === 1){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 29) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 1));
         }else if(gridTest[i][j] === 2){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 29) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 2));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 2));
         }else if(gridTest[i][j] === 3){
-            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 3));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 3));
         }else if(gridTest[i][j] === 4){
-            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 4));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 4));
         }else if(gridTest[i][j] === 5){
-            voxels.push(new Voxel((WIDTH / 16.5 * j) + (i * WIDTH / 33), HEIGHT - ((HEIGHT / 31 * (j)) - (HEIGHT / 28 * (-10))), WIDTH/16, WIDTH/12, 5));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29), WIDTH/16, WIDTH/12, 5));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
