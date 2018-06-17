@@ -160,6 +160,8 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
+            ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
         }else if(this.type === 2) { //SEA
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 3) { //FOREST
@@ -178,6 +180,8 @@ function Voxel(x, y, width, height, type){
             }
         }
         if(DEBUG === true) {
+            ctx.font = '20pt Courier New';
+            ctx.textAlign = "center";
             ctx.fillText(this.id, this.x, this.y);
         }
 
