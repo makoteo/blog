@@ -130,7 +130,11 @@ function Voxel(x, y, width, height, type){
     this.id = currentID;
 
     if(this.id/mapSideLength !== 0) {
-        gridRoll[Math.ceil(this.id / mapSideLength)].push(this.id);
+        if(this.id/mapSideLength === 1) {
+            gridRoll[Math.ceil(this.id / (mapSideLength) + 1)].push(this.id);
+        }else{
+            gridRoll[Math.ceil(this.id / (mapSideLength) + 0.1)].push(this.id);
+        }
     }else{
         gridRoll[1].push(this.id);
     }
