@@ -166,21 +166,13 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
-            if(this.cityProperty === true){
-                if(this.stage === 0) {
-                    ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-                }else{
-                    ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-                }
-            }
-
         }else if(this.type === 2) { //SEA
 
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
-            if(this.cityProperty === true){
-                ctx.drawImage(voxelsG, 300, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-            }
+        }else if(this.type === 2.1) { //SEA
+
+            ctx.drawImage(voxelsG, 300, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 3) { //FOREST
             ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
@@ -232,6 +224,11 @@ function Voxel(x, y, width, height, type){
         if(this.internalTimer === 0){
 
             this.cityProperty = true;
+            if(this.type === 1){
+                this.type = 5;
+            }else if(this.type === 2){
+                this.type = 2.1;
+            }
             this.turnToCityTerritory = false;
 
         }
@@ -533,7 +530,7 @@ function game(){
             }
             if(selectedVoxelType === 1){
 
-                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
@@ -565,6 +562,30 @@ function game(){
 
                 ctx.textAlign="center";
                 ctx.fillText("Sea" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(seaDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(seaDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(seaDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(seaPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + seaPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+            }else if(selectedVoxelType === 2.1){
+                ctx.drawImage(voxelsG, 300, 400, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Oil Rig" , WIDTH - WIDTH/13, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
