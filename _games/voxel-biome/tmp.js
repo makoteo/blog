@@ -129,6 +129,12 @@ function Voxel(x, y, width, height, type){
 
     this.id = currentID;
 
+    this.internalTimer = 100;
+
+    this.turnToCityTerritory = false;
+
+    this.cityProperty = false;
+
     if(this.id/mapSideLength !== 0) {
         if(this.id/mapSideLength === 1) {
             gridRoll[Math.ceil(this.id / (mapSideLength) + 1)].push(this.id);
@@ -160,10 +166,22 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
-            ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.cityProperty === true){
+                if(this.stage === 0) {
+                    ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                }else{
+                    ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                }
+            }
 
         }else if(this.type === 2) { //SEA
+
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            if(this.cityProperty === true){
+                ctx.drawImage(voxelsG, 300, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
+
         }else if(this.type === 3) { //FOREST
             ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 4) { //DESERT
@@ -173,12 +191,18 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }else if(this.type === 5) { //TOWN/CITY
+            this.internalTimer = 0;
             if(this.stage === 0) {
                 ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }else{
                 ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }
+
+        if(this.turnToCityTerritory === true) {
+            ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+        }
+
         if(DEBUG === true) {
             ctx.font = '20pt Courier New';
             ctx.textAlign = "center";
@@ -196,6 +220,22 @@ function Voxel(x, y, width, height, type){
                 this.y--;
             }
         }
+
+        if(this.turnToCityTerritory === true){
+            if(this.internalTimer > 0) {
+                this.internalTimer--;
+            }else{
+                this.turnToCityTerritory = false;
+            }
+        }
+
+        if(this.internalTimer === 0){
+
+            this.cityProperty = true;
+            this.turnToCityTerritory = false;
+
+        }
+
     }
     this.animateUp = function(up){
         if(up === 0) {
@@ -258,7 +298,7 @@ function game(){
             forests++;
         }else if(voxels[i].type === 4){
             deserts++;
-        }else if(voxels[i].type === 5){
+        }else if(voxels[i].type === 5 || voxels[i].cityProperty === true){
             cities++;
         }
 
@@ -342,55 +382,46 @@ function game(){
 
     if(frameCount % 100 === 0){
 
-        var x = Math.floor(Math.random() * cities);
-        var cityNumber = 0;
-
         for(var f = 0; f < voxels.length; f++){
 
-            if(voxels[f].type === 5) {
-                if(x === cityNumber){
-                    var diceRollCity = Math.random();
+            if(voxels[f].type === 5 || voxels[f].cityProperty === true) {
+                var diceRollCity = Math.random();
 
-                    if (diceRollCity < 0.1) {
-                        if (voxels[f].stage === 0) {
-                            voxels[f].stage = 1;
-                        }
-                    } else if (diceRollCity <= 1) {
+                if (diceRollCity < 0.3) {
+                    if (voxels[f].stage === 0) {
+                        voxels[f].stage = 1;
+                    }
+                }else{
 
-                        var diceRollCity2 = Math.random();
+                    var diceRollCity2 = Math.floor(Math.random() * 4);
 
-                        for (var m = 0; m < gridRoll.length; m++) {
-                            for (var n = 0; n < gridRoll[1].length; n++) {
-                                if (gridRoll[m][n] === voxels[f].id) {
+                    for (var m = 0; m < gridRoll.length; m++) {
+                        for (var n = 0; n < gridRoll[1].length; n++) {
+                            if (gridRoll[m][n] === voxels[f].id) {
 
-                                    if (diceRollCity2 <= 0.25) {
-                                        if (voxels[gridRoll[m - 1][n]] != null) {
-                                            voxels[gridRoll[m - 1][n]].type = 5;
-                                        }
-                                    } else if (diceRollCity2 <= 0.5) {
-                                        if (voxels[gridRoll[m][n - 1]] != null) {
-                                            voxels[gridRoll[m][n - 1]].type = 5;
-                                        }
-                                    } else if (diceRollCity2 <= 0.75) {
-                                        if (voxels[gridRoll[m + 1][n]] != null) {
-                                            voxels[gridRoll[m + 1][n]].type = 5;
-                                        }
-                                    } else if (diceRollCity2 <= 1) {
-                                        if (voxels[gridRoll[m][n + 1]] != null) {
-                                            voxels[gridRoll[m][n + 1]].type = 5;
-                                        }
+                                if (diceRollCity2 === 1) {
+                                    if (voxels[gridRoll[m - 1][n]] != null) {
+                                        voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }
-
+                                } else if (diceRollCity2 === 2) {
+                                    if (voxels[gridRoll[m][n - 1]] != null) {
+                                        voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
+                                    }
+                                } else if (diceRollCity2 === 3) {
+                                    if (voxels[gridRoll[m + 1][n]] != null) {
+                                        voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
+                                    }
+                                }else{
+                                    if (voxels[gridRoll[m][n + 1]] != null) {
+                                        voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
+                                    }
                                 }
+
                             }
                         }
-
                     }
 
-                }else{
-                    cityNumber++;
                 }
-
 
             }
 
