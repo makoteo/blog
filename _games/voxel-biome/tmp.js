@@ -5,6 +5,9 @@ var gameRunning = false;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
+
+var TEMPPOINTS = 0;
+var POINTS = 0;
 var POLUTION = 0;
 
 var DEBUG = false;
@@ -90,6 +93,7 @@ var seas = 0;
 var towns = 0;
 var cities = 0;
 var oilrigs = 0;
+var desertFactories = 0;
 
 var forestPol = -5;
 var fieldPol = -2;
@@ -98,6 +102,7 @@ var desertPol = +2;
 var townPol = +5;
 var cityPol = +10;
 var oilRigPol = +12;
+var desertFactoryPol = +15;
 
 var forestDesc1 = "All those leaves";
 var forestDesc2 = "are bound to ";
@@ -126,6 +131,10 @@ var cityDesc3 = "of pollution.";
 var oilRigDesc1 = "They're taking";
 var oilRigDesc2 = "the seas too!";
 var oilRigDesc3 = "More pollution!!";
+
+var desertFactoryDesc1 = "They're taking";
+var desertFactoryDesc2 = "the deserts as";
+var desertFactoryDesc3 = "well?!";
 
 var frameTimer2 = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -194,6 +203,8 @@ function Voxel(x, y, width, height, type){
             if(this.randomChance < 0.2){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
+        }else if(this.type === 4.1) { //DESERT
+            ctx.drawImage(voxelsG, 900, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 5) { //TOWN/CITY
             ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 5.1) {
@@ -242,6 +253,8 @@ function Voxel(x, y, width, height, type){
                 this.type = 5.1;
             }else if(this.type === 2){
                 this.type = 2.1;
+            }else if(this.type === 4){
+                this.type = 4.1;
             }
             this.turnToCityTerritory = false;
 
@@ -271,15 +284,15 @@ for(var i = 0; i < gridTest[0].length; i++) {
         if(gridTest[i][j] === 0){
 
         }else if(gridTest[i][j] === 1){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
         }else if(gridTest[i][j] === 2){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
         }else if(gridTest[i][j] === 3){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
         }else if(gridTest[i][j] === 4){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
         }else if(gridTest[i][j] === 5){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5.1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -293,6 +306,9 @@ for(var i = 0; i < gridTest[0].length; i++) {
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
+
+    frameCount++;
+
     //SKY FILL
     ctx.fillStyle = "rgb(5, 8, 15)";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -307,10 +323,12 @@ function game(){
             seas++;
         }else if(voxels[i].type === 2.1){
             oilrigs++;
-.1        }else if(voxels[i].type === 3){
+.1      }else if(voxels[i].type === 3){
             forests++;
         }else if(voxels[i].type === 4){
             deserts++;
+        }else if(voxels[i].type === 4.1){
+            desertFactories++;
         }else if(voxels[i].type === 5){
             cities++;
         }else if(voxels[i].type === 5.1){
@@ -391,9 +409,11 @@ function game(){
 
     POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol) + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol);
 
-    frameCount++;
-
     // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
+
+    TEMPPOINTS += ((fields) + (seas) + (forests * 2) - (deserts))/1000;
+
+    POINTS = Math.round(TEMPPOINTS);
 
     if(frameCount % 100 === 0){
 
@@ -512,7 +532,7 @@ function game(){
     ctx.fillStyle = "rgb(255, 255, 255)";
 
     ctx.textAlign="center";
-    ctx.fillText("Time Remaining: 2:00",WIDTH/2,HEIGHT/10);
+    ctx.fillText("Points: " + POINTS,WIDTH/2,HEIGHT/10);
 
     if(POLUTION < 0){
         ctx.fillStyle = "rgb(0, 200, 0)";
@@ -533,6 +553,9 @@ function game(){
     ctx.fillText("Forests: " + forests,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*2);
     ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
     ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
+
+    ctx.textAlign="center";
+    ctx.fillText("Year 1 - Spring",WIDTH/2,HEIGHT/4);
 
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
     ctx.fillRect(WIDTH - WIDTH/7, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
@@ -672,6 +695,32 @@ function game(){
 
                 ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
+            }else if(selectedVoxelType === 4.1) {
+
+                ctx.drawImage(voxelsG, 900, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign = "center";
+                ctx.fillText("Factory", WIDTH - WIDTH / 13, HEIGHT / 4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(desertFactoryDesc1, WIDTH - WIDTH / 13, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                ctx.fillText(desertFactoryDesc2, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                ctx.fillText(desertFactoryDesc3, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                ctx.font = '10pt Courier New';
+                if (desertFactoryPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                } else {
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
             }else if(selectedVoxelType === 5){
 
                 ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
@@ -736,6 +785,7 @@ function game(){
     cities = 0;
     oilrigs = 0;
     towns = 0;
+    desertFactories = 0;
 
     if(gameRunning === true) {
 
