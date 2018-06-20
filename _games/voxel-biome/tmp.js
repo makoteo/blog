@@ -10,6 +10,9 @@ var TEMPPOINTS = 0;
 var POINTS = 0;
 var POLUTION = 0;
 
+var YEAR = 1;
+var SEASON = "Fall";
+
 var DEBUG = false;
 
 var voxels = [];
@@ -137,6 +140,8 @@ var desertFactoryDesc2 = "the deserts as";
 var desertFactoryDesc3 = "well?!";
 
 var frameTimer2 = 0;
+var yearVisible = true;
+var yearlength = 1800;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -150,7 +155,7 @@ function Voxel(x, y, width, height, type){
 
     this.id = currentID;
 
-    this.internalTimer = 100;
+    this.internalTimer = yearlength;
 
     this.turnToCityTerritory = false;
 
@@ -174,12 +179,31 @@ function Voxel(x, y, width, height, type){
 
     this.randomChance = Math.random();
 
+    this.opac1 = 1;
+    this.opac2 = 0;
+    this.opac3 = 0;
+
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
         if(this.type === 1) { //FIELD
+            if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall") {
+                if(this.opac1 < 0.95){
+                    this.opac1 += 0.05;
+                }
+            }else{
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+            }
+
+            ctx.drawImage(voxelsG, 0, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac1;
             ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = 1;
 
             if(this.randomChance < 0.1){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
@@ -196,7 +220,40 @@ function Voxel(x, y, width, height, type){
             ctx.drawImage(voxelsG, 300, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 3) { //FOREST
+
+            if(SEASON === "Spring" || SEASON === "Summer") {
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+                if(this.opac3 > 0.05){
+                    this.opac3 -= 0.05;
+                }
+            }else if (SEASON === "Fall"){
+                if(this.opac1 < 0.95){
+                    this.opac1 += 0.05;
+                }
+                if(this.opac3 > 0.05){
+                    this.opac3 -= 0.05;
+                }
+            }else{
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+                if(this.opac3 < 0.95){
+                    this.opac3 += 0.05;
+                }
+            }
+
             ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac1;
+            ctx.drawImage(voxelsG, 600, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac3;
+            ctx.drawImage(voxelsG, 900, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = 1;
+
         }else if(this.type === 4) { //DESERT
             ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
@@ -413,9 +470,33 @@ function game(){
 
     TEMPPOINTS += ((fields) + (seas) + (forests * 2) - (deserts))/1000;
 
+    if(frameCount % yearlength === 0){
+        yearVisible = true;
+        if(SEASON === "Spring"){
+            SEASON = "Summer";
+        }else if(SEASON === "Summer"){
+            SEASON = "Fall";
+        }else if(SEASON === "Fall"){
+            SEASON = "Winter";
+        }else if(SEASON === "Winter"){
+            SEASON = "Spring";
+            YEAR++;
+        }
+    }
+
+    for(var b = 0; b < 8; b++){
+        if(frameCount % yearlength === yearlength - 200 + b*25){
+            if(yearVisible === false){
+                yearVisible = true;
+            }else {
+                yearVisible = false;
+            }
+        }
+    }
+
     POINTS = Math.round(TEMPPOINTS);
 
-    if(frameCount % 100 === 0){
+    if(frameCount % yearlength === 0){
 
         for(var f = 0; f < voxels.length; f++){
 
@@ -554,8 +635,14 @@ function game(){
     ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
     ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
 
-    ctx.textAlign="center";
-    ctx.fillText("Year 1 - Spring",WIDTH/2,HEIGHT/4);
+    if(yearVisible === true) {
+        ctx.fillStyle = "rgb(255, 255, 255)";
+    }else{
+        ctx.fillStyle = "rgb(200, 0, 0)";
+    }
+
+    ctx.textAlign = "center";
+    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4);
 
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
     ctx.fillRect(WIDTH - WIDTH/7, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
