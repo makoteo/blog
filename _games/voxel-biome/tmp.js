@@ -11,7 +11,7 @@ var POINTS = 0;
 var POLUTION = 0;
 
 var YEAR = 1;
-var SEASON = "Fall";
+var SEASON = "Spring";
 
 var DEBUG = false;
 
@@ -183,6 +183,12 @@ function Voxel(x, y, width, height, type){
     this.opac2 = 0;
     this.opac3 = 0;
 
+    if(this.type === 3){
+        this.opac1 = 1;
+        this.opac2 = 1;
+        this.opac3 = 1;
+    }
+
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
@@ -223,7 +229,7 @@ function Voxel(x, y, width, height, type){
 
             if(SEASON === "Spring" || SEASON === "Summer") {
                 if(this.opac1 > 0.05){
-                    this.opac1 -= 0.05;
+                    this.opac1 = 0;
                 }
                 if(this.opac3 > 0.05){
                     this.opac3 -= 0.05;
@@ -262,11 +268,30 @@ function Voxel(x, y, width, height, type){
             }
         }else if(this.type === 4.1) { //DESERT
             ctx.drawImage(voxelsG, 900, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 5) { //TOWN/CITY
+        }else if(this.type === 5) { //TOWN
+
             ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
         }else if(this.type === 5.1) {
             this.internalTimer = 0; //---------------------------------------- REMEMBER TO MOVE THIS LINE ALONG...
+
+            if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall") {
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+            }else{
+                if(this.opac1 < 0.95){
+                    this.opac1 += 0.05;
+                }
+            }
+
             ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac1;
+            ctx.drawImage(voxelsG, 1200, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = 1;
+
         }
 
         if(this.turnToCityTerritory === true) {
