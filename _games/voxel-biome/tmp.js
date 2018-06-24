@@ -13,6 +13,8 @@ var POLUTION = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
+var GAMESPEED = 5;
+
 var DEBUG = false;
 
 var voxels = [];
@@ -21,6 +23,8 @@ var frameCount = 0;
 
 var thisFrameClicked = false;
 var mouseHeld = false;
+
+var animationOffset = 0;
 
 var gridTest = [
 
@@ -78,6 +82,9 @@ var ctx = canvas.getContext("2d");
 
 var voxelsG = new Image();
 voxelsG.src = "BiomeGame.png";
+
+var voxelsGUI = new Image();
+voxelsGUI.src = "VoxelBiomeUI.png";
 
 var currentID = 0;
 
@@ -154,6 +161,8 @@ var MountainDesc3 = "Big plus!";
 var frameTimer2 = 0;
 var yearVisible = true;
 var yearlength = 1800;
+
+var actionSelected = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -381,7 +390,7 @@ function Voxel(x, y, width, height, type){
 
         if(this.turnToCityTerritory === true){
             if(this.internalTimer > 0) {
-                this.internalTimer--;
+                this.internalTimer-=GAMESPEED;
             }else{
                 this.turnToCityTerritory = false;
             }
@@ -456,7 +465,17 @@ for(var i = 0; i < gridTest[0].length; i++) {
 
 function game(){
 
-    frameCount+=5;
+    frameCount+=GAMESPEED;
+
+    if(actionSelected !== 0){
+        if(animationOffset < 300){
+            animationOffset+=3;
+        }
+    }else{
+        if(animationOffset > 0){
+            animationOffset-=3;
+        }
+    }
 
     //SKY FILL
     ctx.fillStyle = "rgb(5, 8, 15)";
@@ -565,7 +584,7 @@ function game(){
 
     // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-    TEMPPOINTS += ((fields) + (seas) + (forests * 2) - (deserts) + (Mountains))/1000;
+    TEMPPOINTS += (((fields) + (seas) + (forests * 2) - (deserts) + (Mountains))/1000) * GAMESPEED;
     if(frameCount % yearlength === 0){
         yearVisible = true;
         if(SEASON === "Spring"){
@@ -710,7 +729,7 @@ function game(){
     ctx.fillStyle = "rgb(255, 255, 255)";
 
     ctx.textAlign="center";
-    ctx.fillText("Points: " + POINTS,WIDTH/2,HEIGHT/10);
+    ctx.fillText("Points: " + POINTS,WIDTH/2,HEIGHT/10 - animationOffset);
 
     if(POLUTION < 0){
         ctx.fillStyle = "rgb(0, 200, 0)";
@@ -720,18 +739,18 @@ function game(){
         ctx.fillStyle = "rgb(200, 0, 0)";
     }
 
-    ctx.fillText("Pollution: " + POLUTION + "%",WIDTH/2,HEIGHT/6);
+    ctx.fillText("Pollution: " + POLUTION + "%",WIDTH/2,HEIGHT/6 - animationOffset);
 
     ctx.font = '15pt Courier New';
     ctx.fillStyle = "rgb(255, 255, 255)";
 
     ctx.textAlign="left";
-    ctx.fillText("Fields: " + fields,WIDTH/90,HEIGHT/10);
-    ctx.fillText("Seas: " + seas,WIDTH/90,HEIGHT/10 + (HEIGHT/15));
-    ctx.fillText("Forests: " + forests,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*2);
-    ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
-    ctx.fillText("Mountains: " + Mountains,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
-    ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*5);
+    ctx.fillText("Fields: " + fields,WIDTH/90 - animationOffset,HEIGHT/10);
+    ctx.fillText("Seas: " + seas,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15));
+    ctx.fillText("Forests: " + forests,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*2);
+    ctx.fillText("Deserts: " + deserts,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*3);
+    ctx.fillText("Mountains: " + Mountains,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*4);
+    ctx.fillText("Cities: " + cities,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*5);
 
     if(yearVisible === true) {
         ctx.fillStyle = "rgb(255, 255, 255)";
@@ -740,10 +759,12 @@ function game(){
     }
 
     ctx.textAlign = "center";
-    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4);
+    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - animationOffset);
+
+    ctx.drawImage(voxelsGUI, 0, 0, 250, 100, WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5);
 
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
-    ctx.fillRect(WIDTH - WIDTH/7, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
+    ctx.fillRect(WIDTH - WIDTH/7 + animationOffset, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
 
     if(clickSelected.length > 0){
         for(i = 0; i < voxels.length; i++){
@@ -756,20 +777,20 @@ function game(){
             }
             if(selectedVoxelType === 1){
 
-                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Fields" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Fields" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(fieldDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(fieldDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(fieldDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(fieldDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(fieldDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(fieldDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(fieldPol <= 0) {
@@ -778,23 +799,23 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + fieldPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + fieldPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }else if(selectedVoxelType === 2){
-                ctx.drawImage(voxelsG, 300, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 300, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Sea" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Sea" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(seaDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(seaDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(seaDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(seaDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(seaDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(seaDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(seaPol <= 0) {
@@ -803,22 +824,22 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + seaPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + seaPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
             }else if(selectedVoxelType === 2.1){
-                ctx.drawImage(voxelsG, 300, 400, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 300, 400, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Oil Rig" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Oil Rig" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(oilRigDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(oilRigDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(oilRigDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(oilRigDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(oilRigDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(oilRigDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(oilRigPol <= 0) {
@@ -827,23 +848,23 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + oilRigPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + oilRigPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
             }else if(selectedVoxelType === 3){
 
-                ctx.drawImage(voxelsG, 600, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 600, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Forest" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Forest" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(forestDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(forestDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(forestDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(forestDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(forestDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(forestDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(forestPol <= 0) {
@@ -852,24 +873,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + forestPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + forestPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }else if(selectedVoxelType === 3.1){
 
-                ctx.drawImage(voxelsG, 600, 400, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 600, 400, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Industrial Unit" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Industrial Unit" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(forestFactoryDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(forestFactoryDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(forestFactoryDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(forestFactoryDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(forestFactoryDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(forestFactoryDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(forestFactoryPol <= 0) {
@@ -878,24 +899,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + forestFactoryPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + forestFactoryPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }else if(selectedVoxelType === 4){
 
-                ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Desert" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Desert" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(desertDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(desertDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(desertDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(desertDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(desertDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(desertDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(desertPol <= 0) {
@@ -904,24 +925,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }else if(selectedVoxelType === 4.1) {
 
-                ctx.drawImage(voxelsG, 900, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                ctx.drawImage(voxelsG, 900, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign = "center";
-                ctx.fillText("Factory", WIDTH - WIDTH / 13, HEIGHT / 4);
+                ctx.fillText("Factory", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(desertFactoryDesc1, WIDTH - WIDTH / 13, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
-                ctx.fillText(desertFactoryDesc2, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
-                ctx.fillText(desertFactoryDesc3, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+                ctx.fillText(desertFactoryDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                ctx.fillText(desertFactoryDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                ctx.fillText(desertFactoryDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
 
                 ctx.font = '10pt Courier New';
                 if (desertFactoryPol <= 0) {
@@ -930,24 +951,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+                ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
 
             }else if(selectedVoxelType === 5) {
 
-                ctx.drawImage(voxelsG, 1500, 800, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                ctx.drawImage(voxelsG, 1500, 800, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign = "center";
-                ctx.fillText("Mountains", WIDTH - WIDTH / 13, HEIGHT / 4);
+                ctx.fillText("Mountains", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(MountainDesc1, WIDTH - WIDTH / 13, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
-                ctx.fillText(MountainDesc2, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
-                ctx.fillText(MountainDesc3, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+                ctx.fillText(MountainDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                ctx.fillText(MountainDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                ctx.fillText(MountainDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
 
                 ctx.font = '10pt Courier New';
                 if (MountainPol <= 0) {
@@ -956,24 +977,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + MountainPol.toString() + "%", WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+                ctx.fillText("Pollution: " + MountainPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
 
             }else if(selectedVoxelType === 6){
 
-                ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("City" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("City" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(cityDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(cityDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(cityDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(cityDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(cityDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(cityDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(cityPol <= 0) {
@@ -982,24 +1003,24 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + cityPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + cityPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }else if(selectedVoxelType === 6.1){
 
-                ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+                ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
                 ctx.font = '12pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
                 ctx.textAlign="center";
-                ctx.fillText("Town" , WIDTH - WIDTH/13, HEIGHT/4);
+                ctx.fillText("Town" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
 
                 ctx.font = '9pt Courier New';
                 ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.fillText(townDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(townDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(townDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                ctx.fillText(townDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(townDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(townDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
 
                 ctx.font = '10pt Courier New';
                 if(townPol <= 0) {
@@ -1008,7 +1029,7 @@ function game(){
                     ctx.fillStyle = "rgb(200, 0, 0)";
                 }
 
-                ctx.fillText("Pollution: " + townPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                ctx.fillText("Pollution: " + townPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
             }
         }
