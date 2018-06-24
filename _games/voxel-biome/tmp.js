@@ -97,6 +97,8 @@ var towns = 0;
 var cities = 0;
 var oilrigs = 0;
 var desertFactories = 0;
+var forestFactories = 0;
+var Mountains = 0;
 
 var forestPol = -5;
 var fieldPol = -2;
@@ -106,6 +108,8 @@ var townPol = +5;
 var cityPol = +10;
 var oilRigPol = +12;
 var desertFactoryPol = +15;
+var forestFactoryPol = +15;
+var MountainPol = -1;
 
 var forestDesc1 = "All those leaves";
 var forestDesc2 = "are bound to ";
@@ -139,6 +143,14 @@ var desertFactoryDesc1 = "They're taking";
 var desertFactoryDesc2 = "the deserts as";
 var desertFactoryDesc3 = "well?!";
 
+var forestFactoryDesc1 = "No no no...";
+var forestFactoryDesc2 = "This is getting";
+var forestFactoryDesc3 = "really bad...";
+
+var MountainDesc1 = "They block cities";
+var MountainDesc2 = "from spreading.";
+var MountainDesc3 = "Big plus!";
+
 var frameTimer2 = 0;
 var yearVisible = true;
 var yearlength = 1800;
@@ -151,7 +163,6 @@ function Voxel(x, y, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
-    this.stage = 0;
 
     this.id = currentID;
 
@@ -188,13 +199,26 @@ function Voxel(x, y, width, height, type){
         //ctx.fillStyle = "rgb(30, 20, 40)";
         //ctx.fillRect(x - width/2, y - height/2, width, height);
         if(this.type === 1) { //FIELD
-            if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall") {
+            if(SEASON === "Spring" || SEASON === "Fall") {
                 if(this.opac1 < 0.95){
                     this.opac1 += 0.05;
+                }
+                if(this.opac3 > 0.05 && this.opac1 > 0.8){
+                    this.opac3 -= 0.05;
+                }
+            }else if (SEASON === "Summer"){
+                if(this.opac3 < 0.95){
+                    this.opac3 += 0.05;
+                }
+                if(this.opac1 > 0.05 && this.opac3 > 0.8){
+                    this.opac1 -= 0.05;
                 }
             }else{
                 if(this.opac1 > 0.05){
                     this.opac1 -= 0.05;
+                }
+                if(this.opac3 > 0.05){
+                    this.opac3 -= 0.05;
                 }
             }
 
@@ -202,6 +226,9 @@ function Voxel(x, y, width, height, type){
 
             ctx.globalAlpha = this.opac1;
             ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac3;
+            ctx.drawImage(voxelsG, 0, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = 1;
 
@@ -213,7 +240,22 @@ function Voxel(x, y, width, height, type){
 
         }else if(this.type === 2) { //SEA
 
+            if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall" ) {
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+            }else{
+                if(this.opac1 < 0.95){
+                    this.opac1 += 0.05;
+                }
+            }
+
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac1;
+            ctx.drawImage(voxelsG, 300, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = 1;
 
         }else if(this.type === 2.1) { //SEA
 
@@ -254,19 +296,41 @@ function Voxel(x, y, width, height, type){
 
             ctx.globalAlpha = 1;
 
+        }else if(this.type === 3.1) { // FOREST FACTORY
+            ctx.drawImage(voxelsG, 600, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 4) { //DESERT
+
+            if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall" ) {
+                if(this.opac1 > 0.05){
+                    this.opac1 -= 0.05;
+                }
+            }else{
+                if(this.opac1 < 0.95){
+                    this.opac1 += 0.05;
+                }
+            }
+
             ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = this.opac1;
+            ctx.drawImage(voxelsG, 1800, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+            ctx.globalAlpha = 1;
 
             if(this.randomChance < 0.2){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }else if(this.type === 4.1) { //DESERT
             ctx.drawImage(voxelsG, 900, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.type === 5) { //TOWN
+        }else if(this.type === 5) { //MOUNTAIN
+
+            ctx.drawImage(voxelsG, 1500, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+
+        }else if(this.type === 6) { //TOWN
 
             ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
-        }else if(this.type === 5.1) {
+        }else if(this.type === 6.1) {
             this.internalTimer = 0; //---------------------------------------- REMEMBER TO MOVE THIS LINE ALONG...
 
             if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall") {
@@ -301,7 +365,7 @@ function Voxel(x, y, width, height, type){
     };
     this.update = function(){
 
-        if(this.type === 5.1 && this.opac1 > 0 && SEASON !== "Winter"){
+        if(this.type === 6.1 && this.opac1 > 0 && SEASON !== "Winter"){
             this.opac1 = 0;
         }
 
@@ -323,7 +387,7 @@ function Voxel(x, y, width, height, type){
             }
         }
 
-        if(this.type === 5){
+        if(this.type === 6){
             this.internalTimer = 0;
         }
 
@@ -331,11 +395,13 @@ function Voxel(x, y, width, height, type){
 
             this.cityProperty = true;
             if(this.type === 1){
-                this.type = 5.1;
+                this.type = 6.1;
             }else if(this.type === 2){
                 this.type = 2.1;
             }else if(this.type === 4){
                 this.type = 4.1;
+            }else if(this.type === 3){
+                this.type = 3.1;
             }
             this.turnToCityTerritory = false;
 
@@ -373,7 +439,9 @@ for(var i = 0; i < gridTest[0].length; i++) {
         }else if(gridTest[i][j] === 4){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
         }else if(gridTest[i][j] === 5){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5.1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5));
+        }else if(gridTest[i][j] === 6){
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -406,13 +474,17 @@ function game(){
             oilrigs++;
 .1      }else if(voxels[i].type === 3){
             forests++;
+        }else if(voxels[i].type === 3.1){
+            forestFactories++;
         }else if(voxels[i].type === 4){
             deserts++;
         }else if(voxels[i].type === 4.1){
             desertFactories++;
         }else if(voxels[i].type === 5){
+            Mountains++;
+        }else if(voxels[i].type === 6){
             cities++;
-        }else if(voxels[i].type === 5.1){
+        }else if(voxels[i].type === 6.1){
             towns++;
         }
 
@@ -488,12 +560,12 @@ function game(){
 
     }
 
-    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol) + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol);
+    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
+        + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
 
     // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-    TEMPPOINTS += ((fields) + (seas) + (forests * 2) - (deserts))/1000;
-
+    TEMPPOINTS += ((fields) + (seas) + (forests * 2) - (deserts) + (Mountains))/1000;
     if(frameCount % yearlength === 0){
         yearVisible = true;
         if(SEASON === "Spring"){
@@ -524,12 +596,12 @@ function game(){
 
         for(var f = 0; f < voxels.length; f++){
 
-            if(voxels[f].type === 5 || voxels[f].cityProperty === true || voxels[f].type === 5.1) {
+            if(voxels[f].type === 6 || voxels[f].cityProperty === true || voxels[f].type === 6.1) {
                 var diceRollCity = Math.random();
 
                 if (diceRollCity < 0.3) {
-                    if (voxels[f].type === 5.1) {
-                        voxels[f].type = 5;
+                    if (voxels[f].type === 6.1) {
+                        voxels[f].type = 6;
                     }
                 }else{
 
@@ -540,19 +612,19 @@ function game(){
                             if (gridRoll[m][n] === voxels[f].id) {
 
                                 if (diceRollCity2 === 1) {
-                                    if (voxels[gridRoll[m - 1][n]] != null) {
+                                    if (voxels[gridRoll[m - 1][n]] != null && voxels[gridRoll[m - 1][n]].type !== 5) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 2) {
-                                    if (voxels[gridRoll[m][n - 1]] != null) {
+                                    if (voxels[gridRoll[m][n - 1]] != null && voxels[gridRoll[m][n - 1]].type !== 5) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 3) {
-                                    if (voxels[gridRoll[m + 1][n]] != null) {
+                                    if (voxels[gridRoll[m + 1][n]] != null && voxels[gridRoll[m + 1][n]].type !== 5) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }
                                 }else{
-                                    if (voxels[gridRoll[m][n + 1]] != null) {
+                                    if (voxels[gridRoll[m][n + 1]] != null&& voxels[gridRoll[m][n + 1]].type !== 5) {
                                         voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
                                     }
                                 }
@@ -597,7 +669,8 @@ function game(){
     if (keys && keys[50]){buildType = 2;}
     if (keys && keys[51]){buildType = 3;}
     if (keys && keys[52]){buildType = 4;}
-    if (keys && keys[53]){buildType = 5.1;}
+    if (keys && keys[53]){buildType = 5;}
+    if (keys && keys[54]){buildType = 6.1;}
     if (keys && keys[48]){buildType = 0;}
 
     if (keys && keys[114] && frameTimer2 < 1){
@@ -657,7 +730,8 @@ function game(){
     ctx.fillText("Seas: " + seas,WIDTH/90,HEIGHT/10 + (HEIGHT/15));
     ctx.fillText("Forests: " + forests,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*2);
     ctx.fillText("Deserts: " + deserts,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*3);
-    ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
+    ctx.fillText("Mountains: " + Mountains,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*4);
+    ctx.fillText("Cities: " + cities,WIDTH/90,HEIGHT/10 + (HEIGHT/15)*5);
 
     if(yearVisible === true) {
         ctx.fillStyle = "rgb(255, 255, 255)";
@@ -780,6 +854,32 @@ function game(){
 
                 ctx.fillText("Pollution: " + forestPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
+            }else if(selectedVoxelType === 3.1){
+
+                ctx.drawImage(voxelsG, 600, 400, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign="center";
+                ctx.fillText("Industrial Unit" , WIDTH - WIDTH/13, HEIGHT/4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(forestFactoryDesc1 , WIDTH - WIDTH/13, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
+                ctx.fillText(forestFactoryDesc2 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
+                ctx.fillText(forestFactoryDesc3 , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+
+                ctx.font = '10pt Courier New';
+                if(forestFactoryPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                }else{
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + forestFactoryPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+
             }else if(selectedVoxelType === 4){
 
                 ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH/9, HEIGHT/18, WIDTH/15, WIDTH/11.25);
@@ -832,7 +932,33 @@ function game(){
 
                 ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
 
-            }else if(selectedVoxelType === 5){
+            }else if(selectedVoxelType === 5) {
+
+                ctx.drawImage(voxelsG, 1500, 800, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                ctx.font = '12pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.textAlign = "center";
+                ctx.fillText("Mountains", WIDTH - WIDTH / 13, HEIGHT / 4);
+
+                ctx.font = '9pt Courier New';
+                ctx.fillStyle = "rgb(255, 255, 255)";
+
+                ctx.fillText(MountainDesc1, WIDTH - WIDTH / 13, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                ctx.fillText(MountainDesc2, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                ctx.fillText(MountainDesc3, WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                ctx.font = '10pt Courier New';
+                if (MountainPol <= 0) {
+                    ctx.fillStyle = "rgb(0, 200, 0)";
+                } else {
+                    ctx.fillStyle = "rgb(200, 0, 0)";
+                }
+
+                ctx.fillText("Pollution: " + MountainPol.toString() + "%", WIDTH - WIDTH / 13, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+            }else if(selectedVoxelType === 6){
 
                 ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
@@ -858,7 +984,7 @@ function game(){
 
                 ctx.fillText("Pollution: " + cityPol.toString() + "%" , WIDTH - WIDTH/13, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
 
-            }else if(selectedVoxelType === 5.1){
+            }else if(selectedVoxelType === 6.1){
 
                 ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
@@ -897,6 +1023,8 @@ function game(){
     oilrigs = 0;
     towns = 0;
     desertFactories = 0;
+    forestFactories = 0;
+    Mountains = 0;
 
     if(gameRunning === true) {
 
