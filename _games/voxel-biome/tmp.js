@@ -183,12 +183,6 @@ function Voxel(x, y, width, height, type){
     this.opac2 = 0;
     this.opac3 = 0;
 
-    if(this.type === 3){
-        this.opac1 = 1;
-        this.opac2 = 1;
-        this.opac3 = 1;
-    }
-
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
@@ -306,6 +300,11 @@ function Voxel(x, y, width, height, type){
 
     };
     this.update = function(){
+
+        if(this.type === 5.1 && this.opac1 > 0 && SEASON !== "Winter"){
+            this.opac1 = 0;
+        }
+
         if(this.movingUp === false) {
             if(this.y < this.startY){
                 this.y++;
@@ -389,7 +388,7 @@ for(var i = 0; i < gridTest[0].length; i++) {
 
 function game(){
 
-    frameCount++;
+    frameCount+=5;
 
     //SKY FILL
     ctx.fillStyle = "rgb(5, 8, 15)";
