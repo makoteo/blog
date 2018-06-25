@@ -26,6 +26,8 @@ var mouseHeld = false;
 
 var animationOffset = 0;
 
+var actionClicked = false;
+
 var gridTest = [
 
     [1, 2, 2, 2, 2, 2, 1, 1],
@@ -163,6 +165,8 @@ var yearVisible = true;
 var yearlength = 1800;
 
 var actionSelected = 0;
+
+var tempMouseTimer2 = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -176,8 +180,10 @@ function Voxel(x, y, width, height, type){
     this.id = currentID;
 
     this.internalTimer = yearlength;
+    this.internalTimer2 = yearlength;
 
     this.turnToCityTerritory = false;
+    this.turnToNatureTerritory = false;
 
     this.cityProperty = false;
 
@@ -253,11 +259,12 @@ function Voxel(x, y, width, height, type){
                 if(this.opac1 > 0.05){
                     this.opac1 -= 0.05;
                 }
-            }else{
+            }
+            /*else{
                 if(this.opac1 < 0.95){
                     this.opac1 += 0.05;
                 }
-            }
+            }*/
 
             ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
@@ -363,6 +370,8 @@ function Voxel(x, y, width, height, type){
 
         if(this.turnToCityTerritory === true) {
             ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+        }else if(this.turnToNatureTeritory === true){
+            ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
         if(DEBUG === true) {
@@ -396,8 +405,20 @@ function Voxel(x, y, width, height, type){
             }
         }
 
+        if(this.turnToNatureTerritory === true){
+            if(this.internalTimer2 > 0) {
+                this.internalTimer2-=GAMESPEED;
+            }else{
+                this.turnToNatureTerritory = false;
+            }
+        }
+
         if(this.type === 6){
             this.internalTimer = 0;
+        }
+
+        if(this.type === 3){
+            this.internalTimer2 = 0;
         }
 
         if(this.internalTimer === 0){
@@ -413,6 +434,16 @@ function Voxel(x, y, width, height, type){
                 this.type = 3.1;
             }
             this.turnToCityTerritory = false;
+
+        }
+
+        if(this.internalTimer2 === 0){
+
+            if(this.type === 1){
+                this.type = 3;
+            }
+
+            this.turnToNatureTerritory = false;
 
         }
 
@@ -433,7 +464,6 @@ function Voxel(x, y, width, height, type){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 var maxGridLength = gridTest[0].length;
-var movedif = 1;
 
 for(var i = 0; i < gridTest[0].length; i++) {
     for(var j = 0; j < maxGridLength; j++) {
@@ -459,7 +489,11 @@ for(var i = 0; i < gridTest[0].length; i++) {
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-
+function onClick(xObj, yObj, widthObj, heightObj){
+    if((((mousePosX - WIDTH/30) > xObj)) && ((mousePosX - WIDTH/30 < (xObj + widthObj))) && (((mousePosY - WIDTH/30) > yObj)) && (((mousePosY - WIDTH/30) < (yObj + heightObj)))) {
+        return true;
+    }
+}
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
@@ -467,13 +501,30 @@ function game(){
 
     frameCount+=GAMESPEED;
 
+    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false){
+        if(onClick(WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5)){
+            console.log("Hi 2!!");
+            tempMouseTimer2 = 30;
+            if(actionSelected === 0){
+                actionSelected = 1;
+            }else{
+                actionSelected = 0;
+            }
+        }
+        actionClicked = false;
+    }
+
+    if(tempMouseTimer2 > 0){
+        tempMouseTimer2--;
+    }
+
     if(actionSelected !== 0){
-        if(animationOffset < 300){
-            animationOffset+=3;
+        if(animationOffset < 200){
+            animationOffset+=5;
         }
     }else{
         if(animationOffset > 0){
-            animationOffset-=3;
+            animationOffset-=5;
         }
     }
 
@@ -491,7 +542,7 @@ function game(){
             seas++;
         }else if(voxels[i].type === 2.1){
             oilrigs++;
-.1      }else if(voxels[i].type === 3){
+        }else if(voxels[i].type === 3){
             forests++;
         }else if(voxels[i].type === 3.1){
             forestFactories++;
@@ -615,14 +666,17 @@ function game(){
 
         for(var f = 0; f < voxels.length; f++){
 
-            if(voxels[f].type === 6 || voxels[f].cityProperty === true || voxels[f].type === 6.1) {
+            if(voxels[f].type === 6 || (voxels[f].cityProperty === true && voxels[f].type !== 2.1) || voxels[f].type === 6.1) {
                 var diceRollCity = Math.random();
 
                 if (diceRollCity < 0.3) {
                     if (voxels[f].type === 6.1) {
                         voxels[f].type = 6;
+                    }else{
+                        diceRollCity = 0.4;
                     }
-                }else{
+                }
+                if (diceRollCity >= 0.3){
 
                     var diceRollCity2 = Math.floor(Math.random() * 4);
 
@@ -656,6 +710,39 @@ function game(){
 
             }
 
+            for(var g = 0; g < voxels.length; g++){
+
+                if(voxels[g].type === 3) {
+                    var diceRollNature = Math.floor(Math.random() * 4);
+
+                    for (var x = 0; x < gridRoll.length; x++) {
+                        for (var y = 0; y < gridRoll[1].length; y++) {
+                            if (gridRoll[x][y] === voxels[g].id) {
+
+                                if (diceRollNature === 1) {
+                                    if (voxels[gridRoll[x - 1][y]] != null && voxels[gridRoll[x - 1][y]].type === 1) {
+                                        voxels[gridRoll[x - 1][y]].turnToNatureTerritory = true;
+                                    }
+                                } else if (diceRollNature === 2) {
+                                    if (voxels[gridRoll[x][y - 1]] != null && voxels[gridRoll[x][y - 1]].type === 1) {
+                                        voxels[gridRoll[x][y - 1]].turnToNatureTerritory = true;
+                                    }
+                                } else if (diceRollNature === 3) {
+                                    if (voxels[gridRoll[x + 1][y]] != null && voxels[gridRoll[x + 1][y]].type === 1) {
+                                        voxels[gridRoll[x + 1][y]].turnToNatureTerritory = true;
+                                    }
+                                }else{
+                                    if (voxels[gridRoll[x][y + 1]] != null&& voxels[gridRoll[x][y + 1]].type === 1) {
+                                        voxels[gridRoll[x][y + 1]].turnToNatureTerritory = true;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 
@@ -761,10 +848,12 @@ function game(){
     ctx.textAlign = "center";
     ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - animationOffset);
 
-    ctx.drawImage(voxelsGUI, 0, 0, 250, 100, WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5);
-
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
     ctx.fillRect(WIDTH - WIDTH/7 + animationOffset, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
+
+    //GUI -------------------------------------------------------------------------------------------------------------------------------------------
+
+    ctx.drawImage(voxelsGUI, 0, 0, 250, 100, WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5);
 
     if(clickSelected.length > 0){
         for(i = 0; i < voxels.length; i++){
@@ -1034,7 +1123,6 @@ function game(){
             }
         }
     }
-
 
     forests = 0;
     deserts = 0;
