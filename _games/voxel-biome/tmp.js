@@ -214,6 +214,10 @@ function Voxel(x, y, width, height, type){
     this.opac2 = 0;
     this.opac3 = 0;
 
+    this.falling = false;
+    this.typeToChangeTo = 0;
+    this.hasFallen = false;
+
     this.draw = function(){
         //DRAW EXAMPLE
         //ctx.fillStyle = "rgb(30, 20, 40)";
@@ -412,8 +416,22 @@ function Voxel(x, y, width, height, type){
             this.internalTimer = 0;
         }
 
-        if(this.type === 3){
-            this.internalTimer2 = 0;
+        if(this.falling === true){
+
+            this.fallSpeed = 5;
+
+            if(this.hasFallen === false){
+                this.y += this.fallSpeed;
+                this.hasFallen = true;
+            }
+
+            if(this.y % y <= 4){
+                this.y+=this.fallSpeed;
+            }else{
+                this.y = y;
+                this.type = this.typeToChangeTo;
+                this.falling = false;
+            }
         }
 
         if(this.internalTimer === 0){
@@ -441,6 +459,11 @@ function Voxel(x, y, width, height, type){
                 this.movingUp = true;
                 this.maxHeight = 20;
             }
+        }
+
+        this.fallAwayAndReplace = function(changeType){
+            this.falling = true;
+            this.typeToChangeTo = changeType;
         }
     }
 }
@@ -484,53 +507,6 @@ function onClick(xObj, yObj, widthObj, heightObj){
 function game(){
 
     frameCount+=GAMESPEED;
-
-    //CARD CLICKED --------------------------------------------------------------------------------------------------------
-    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false){
-        if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
-            cardSelected = 1;
-            cardYOffset1 = 100;
-        }else if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
-            cardSelected = 2;
-            cardYOffset2 = 100;
-        }else if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
-            cardSelected = 3;
-            cardYOffset3 = 100;
-        }else{
-            cardSelected = 0;
-        }
-    }
-
-
-    //CARD MOUSEOVER --------------------------------------------------------------------------------------------------------
-
-    var cardMoveSpeed = 7;
-
-    if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset1 < 100){
-            cardYOffset1+=cardMoveSpeed;
-        }
-    }else if(cardYOffset1 > 0 && cardSelected !== 1){
-        cardYOffset1-=cardMoveSpeed;
-    }
-
-    if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset2 < 100){
-            cardYOffset2+=cardMoveSpeed;
-        }
-    }else if(cardYOffset2 > 0 && cardSelected !== 2){
-        cardYOffset2-=cardMoveSpeed;
-    }
-
-    if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset3 < 100){
-            cardYOffset3+=cardMoveSpeed;
-        }
-    }else if(cardYOffset3 > 0 && cardSelected !== 3){
-        cardYOffset3-=cardMoveSpeed;
-    }
-
-    //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
 
     if(tempMouseTimer2 > 0){
         tempMouseTimer2--;
@@ -607,6 +583,9 @@ function game(){
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
+                        if(cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1){
+                            voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
+                        }
                     }
                     tempMouseTimer = 10;
                 }
@@ -629,6 +608,9 @@ function game(){
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
+                        if((cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1) || (cardLookingFor[cardSelected - 1] === 4 && voxels[i].type === 4)){
+                            voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
+                        }
                         if(buildType !== 0) {
                             voxels[i].type = buildType;
                         }
@@ -650,6 +632,72 @@ function game(){
 
     POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
         + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
+
+    //CARD CLICKED --------------------------------------------------------------------------------------------------------
+    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false){
+        if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
+            if(cardSelected !== 1 && tempMouseTimer2 < 1){
+                cardSelected = 1;
+            }else{
+                cardSelected = 0;
+            }
+            tempMouseTimer2 = 20;
+            cardYOffset1 = 100;
+        }else if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
+            if(cardSelected !== 2 && tempMouseTimer2 < 1){
+                cardSelected = 2;
+            }else{
+                cardSelected = 0;
+            }
+            tempMouseTimer2 = 20;
+            cardYOffset2 = 100;
+        }else if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
+            if(cardSelected !== 3 && tempMouseTimer2 < 1){
+                cardSelected = 3;
+            }else{
+                cardSelected = 0;
+            }
+            tempMouseTimer2 = 20;
+            cardYOffset3 = 100;
+        }else{
+            cardSelected = 0;
+        }
+    }
+
+    if(tempMouseTimer2 > 0){
+        tempMouseTimer2--;
+    }
+
+
+    //CARD MOUSEOVER --------------------------------------------------------------------------------------------------------
+
+    var cardMoveSpeed = 7;
+
+    if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset1 < 100){
+            cardYOffset1+=cardMoveSpeed;
+        }
+    }else if(cardYOffset1 > 0 && cardSelected !== 1){
+        cardYOffset1-=cardMoveSpeed;
+    }
+
+    if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset2 < 100){
+            cardYOffset2+=cardMoveSpeed;
+        }
+    }else if(cardYOffset2 > 0 && cardSelected !== 2){
+        cardYOffset2-=cardMoveSpeed;
+    }
+
+    if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset3 < 100){
+            cardYOffset3+=cardMoveSpeed;
+        }
+    }else if(cardYOffset3 > 0 && cardSelected !== 3){
+        cardYOffset3-=cardMoveSpeed;
+    }
+
+    //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
 
     // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -872,6 +920,29 @@ function game(){
     }else{
         ctx.drawImage(voxelsGUI, xPosCard[2], 0, 300, 400, WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/8, HEIGHT/3.375);
     }
+
+    var word1 = "";
+    var word2 = "";
+
+    if(cardLookingFor[cardSelected - 1] === 1){
+        word1 = "Field";
+    }else if(cardLookingFor[cardSelected - 1] === 4){
+        word1 = "Desert";
+    }
+
+    if(cardGiving[cardSelected - 1] === 1){
+        word2 = "Field";
+    }else if(cardGiving[cardSelected - 1] === 2){
+        word2 = "Sea";
+    }else if(cardGiving[cardSelected - 1] === 3){
+        word2 = "Forest";
+    }else if(cardGiving[cardSelected - 1] === 5){
+        word2 = "Mountain";
+    }
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white"
+    ctx.fillText("Pick " + word1 + " to turn into " + word2, WIDTH/2, (-150) + animationOffset);
 
     //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
 
