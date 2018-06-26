@@ -174,6 +174,16 @@ var cardSelected = 0;
 
 var cardLookingFor = [1, 1, 1];
 var cardGiving = [2, 3, 5];
+
+var cardCombos = [
+
+  [1, 2],
+  [1, 3],
+  [1, 5],
+  [4, 1],
+  [4, 5]
+
+];
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -502,6 +512,14 @@ function onClick(xObj, yObj, widthObj, heightObj){
     }
 }
 
+function switchUpCards(cardNumber){
+    var randomx = Math.floor(Math.random() * (cardCombos.length));
+
+    cardLookingFor[cardNumber] = cardCombos[randomx][0];
+    cardGiving[cardNumber] = cardCombos[randomx][1];
+
+}
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
@@ -585,6 +603,7 @@ function game(){
                         clickSelected.unshift(voxels[i].id);
                         if(cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1){
                             voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
+                            switchUpCards(cardSelected - 1);
                         }
                     }
                     tempMouseTimer = 10;
@@ -610,6 +629,7 @@ function game(){
                         clickSelected.unshift(voxels[i].id);
                         if((cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1) || (cardLookingFor[cardSelected - 1] === 4 && voxels[i].type === 4)){
                             voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
+                            switchUpCards(cardSelected - 1);
                         }
                         if(buildType !== 0) {
                             voxels[i].type = buildType;
@@ -671,7 +691,7 @@ function game(){
 
     //CARD MOUSEOVER --------------------------------------------------------------------------------------------------------
 
-    var cardMoveSpeed = 7;
+    var cardMoveSpeed = 5;
 
     if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
         if(cardYOffset1 < 100){
