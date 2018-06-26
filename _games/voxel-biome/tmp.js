@@ -26,8 +26,6 @@ var mouseHeld = false;
 
 var animationOffset = 0;
 
-var actionClicked = false;
-
 var gridTest = [
 
     [1, 2, 2, 2, 2, 2, 1, 1],
@@ -167,6 +165,15 @@ var yearlength = 1800;
 var actionSelected = 0;
 
 var tempMouseTimer2 = 0;
+
+var cardYOffset1 = 0;
+var cardYOffset2 = 0;
+var cardYOffset3 = 0;
+
+var cardSelected = 0;
+
+var cardLookingFor = [1, 1, 1];
+var cardGiving = [2, 3, 5];
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -180,10 +187,8 @@ function Voxel(x, y, width, height, type){
     this.id = currentID;
 
     this.internalTimer = yearlength;
-    this.internalTimer2 = yearlength;
 
     this.turnToCityTerritory = false;
-    this.turnToNatureTerritory = false;
 
     this.cityProperty = false;
 
@@ -370,8 +375,6 @@ function Voxel(x, y, width, height, type){
 
         if(this.turnToCityTerritory === true) {
             ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
-        }else if(this.turnToNatureTeritory === true){
-            ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
         if(DEBUG === true) {
@@ -405,14 +408,6 @@ function Voxel(x, y, width, height, type){
             }
         }
 
-        if(this.turnToNatureTerritory === true){
-            if(this.internalTimer2 > 0) {
-                this.internalTimer2-=GAMESPEED;
-            }else{
-                this.turnToNatureTerritory = false;
-            }
-        }
-
         if(this.type === 6){
             this.internalTimer = 0;
         }
@@ -436,27 +431,16 @@ function Voxel(x, y, width, height, type){
             this.turnToCityTerritory = false;
 
         }
-
-        if(this.internalTimer2 === 0){
-
-            if(this.type === 1){
-                this.type = 3;
+        this.animateUp = function(up){
+            if(up === 0) {
+                this.movingUp = true;
+                this.maxHeight = 5;
+            }else if(up === 1){
+                this.movingUp = false;
+            }else {
+                this.movingUp = true;
+                this.maxHeight = 20;
             }
-
-            this.turnToNatureTerritory = false;
-
-        }
-
-    }
-    this.animateUp = function(up){
-        if(up === 0) {
-            this.movingUp = true;
-            this.maxHeight = 5;
-        }else if(up === 1){
-            this.movingUp = false;
-        }else{
-            this.movingUp = true;
-            this.maxHeight =  20;
         }
     }
 }
@@ -470,17 +454,17 @@ for(var i = 0; i < gridTest[0].length; i++) {
         if(gridTest[i][j] === 0){
 
         }else if(gridTest[i][j] === 1){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
         }else if(gridTest[i][j] === 2){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
         }else if(gridTest[i][j] === 3){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
         }else if(gridTest[i][j] === 4){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
         }else if(gridTest[i][j] === 5){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5));
         }else if(gridTest[i][j] === 6){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))), (HEIGHT / 14 * j/2) + (i * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 6.1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15)) - WIDTH/50), (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -501,24 +485,58 @@ function game(){
 
     frameCount+=GAMESPEED;
 
+    //CARD CLICKED --------------------------------------------------------------------------------------------------------
     if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false){
-        if(onClick(WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5)){
-            console.log("Hi 2!!");
-            tempMouseTimer2 = 30;
-            if(actionSelected === 0){
-                actionSelected = 1;
-            }else{
-                actionSelected = 0;
-            }
+        if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
+            cardSelected = 1;
+            cardYOffset1 = 100;
+        }else if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
+            cardSelected = 2;
+            cardYOffset2 = 100;
+        }else if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
+            cardSelected = 3;
+            cardYOffset3 = 100;
+        }else{
+            cardSelected = 0;
         }
-        actionClicked = false;
     }
+
+
+    //CARD MOUSEOVER --------------------------------------------------------------------------------------------------------
+
+    var cardMoveSpeed = 7;
+
+    if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset1 < 100){
+            cardYOffset1+=cardMoveSpeed;
+        }
+    }else if(cardYOffset1 > 0 && cardSelected !== 1){
+        cardYOffset1-=cardMoveSpeed;
+    }
+
+    if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset2 < 100){
+            cardYOffset2+=cardMoveSpeed;
+        }
+    }else if(cardYOffset2 > 0 && cardSelected !== 2){
+        cardYOffset2-=cardMoveSpeed;
+    }
+
+    if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
+        if(cardYOffset3 < 100){
+            cardYOffset3+=cardMoveSpeed;
+        }
+    }else if(cardYOffset3 > 0 && cardSelected !== 3){
+        cardYOffset3-=cardMoveSpeed;
+    }
+
+    //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
 
     if(tempMouseTimer2 > 0){
         tempMouseTimer2--;
     }
 
-    if(actionSelected !== 0){
+    if(cardSelected !== 0){
         if(animationOffset < 200){
             animationOffset+=5;
         }
@@ -709,40 +727,6 @@ function game(){
                 }
 
             }
-
-            for(var g = 0; g < voxels.length; g++){
-
-                if(voxels[g].type === 3) {
-                    var diceRollNature = Math.floor(Math.random() * 4);
-
-                    for (var x = 0; x < gridRoll.length; x++) {
-                        for (var y = 0; y < gridRoll[1].length; y++) {
-                            if (gridRoll[x][y] === voxels[g].id) {
-
-                                if (diceRollNature === 1) {
-                                    if (voxels[gridRoll[x - 1][y]] != null && voxels[gridRoll[x - 1][y]].type === 1) {
-                                        voxels[gridRoll[x - 1][y]].turnToNatureTerritory = true;
-                                    }
-                                } else if (diceRollNature === 2) {
-                                    if (voxels[gridRoll[x][y - 1]] != null && voxels[gridRoll[x][y - 1]].type === 1) {
-                                        voxels[gridRoll[x][y - 1]].turnToNatureTerritory = true;
-                                    }
-                                } else if (diceRollNature === 3) {
-                                    if (voxels[gridRoll[x + 1][y]] != null && voxels[gridRoll[x + 1][y]].type === 1) {
-                                        voxels[gridRoll[x + 1][y]].turnToNatureTerritory = true;
-                                    }
-                                }else{
-                                    if (voxels[gridRoll[x][y + 1]] != null&& voxels[gridRoll[x][y + 1]].type === 1) {
-                                        voxels[gridRoll[x][y + 1]].turnToNatureTerritory = true;
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-
-                }
-            }
         }
     }
 
@@ -846,14 +830,50 @@ function game(){
     }
 
     ctx.textAlign = "center";
-    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - animationOffset);
+    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - HEIGHT/50 - animationOffset);
 
     ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
     ctx.fillRect(WIDTH - WIDTH/7 + animationOffset, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
 
     //GUI -------------------------------------------------------------------------------------------------------------------------------------------
 
-    ctx.drawImage(voxelsGUI, 0, 0, 250, 100, WIDTH - WIDTH/8, HEIGHT/2, WIDTH/9.6, HEIGHT/13.5);
+    var xPosCard = [0, 0, 0];
+
+    for(var b = 0; b < 3; b++){
+        if(cardLookingFor[b] === 1 && cardGiving[b] === 3){
+            xPosCard[b] = 0;
+        }else if(cardLookingFor[b] === 1 && cardGiving[b] === 2){
+            xPosCard[b] = 900;
+        }else if(cardLookingFor[b] === 1 && cardGiving[b] === 5){
+            xPosCard[b] = 1200;
+        }else if(cardLookingFor[b] === 4 && cardGiving[b] === 1){
+            xPosCard[b] = 300;
+        }else if(cardLookingFor[b] === 4 && cardGiving[b] === 5){
+            xPosCard[b] = 600;
+        }else{
+            xPosCard[b] = 0;
+        }
+    }
+
+    if(cardSelected !== 1 || cardSelected === 0){
+        ctx.drawImage(voxelsGUI, xPosCard[0], 0, 300, 400, WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1 + animationOffset, WIDTH/8, HEIGHT/3.375);
+    }else{
+        ctx.drawImage(voxelsGUI, xPosCard[0], 0, 300, 400, WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/8, HEIGHT/3.375);
+    }
+
+    if(cardSelected !== 2 || cardSelected === 0){
+        ctx.drawImage(voxelsGUI, xPosCard[1], 0, 300, 400, WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2 + animationOffset, WIDTH/8, HEIGHT/3.375);
+    }else{
+        ctx.drawImage(voxelsGUI, xPosCard[1], 0, 300, 400, WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/8, HEIGHT/3.375);
+    }
+
+    if(cardSelected !== 3 || cardSelected === 0){
+        ctx.drawImage(voxelsGUI, xPosCard[2], 0, 300, 400, WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3 + animationOffset, WIDTH/8, HEIGHT/3.375);
+    }else{
+        ctx.drawImage(voxelsGUI, xPosCard[2], 0, 300, 400, WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/8, HEIGHT/3.375);
+    }
+
+    //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
 
     if(clickSelected.length > 0){
         for(i = 0; i < voxels.length; i++){
