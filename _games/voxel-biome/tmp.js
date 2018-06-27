@@ -184,6 +184,8 @@ var cardPosX = [0, 0, 0];
 
 var cards = [[1, 2], [1, 3], [1, 5]];
 
+var cardOpacity = 1;
+
 var word1 = "";
 var word2 = "";
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -687,11 +689,25 @@ function game(){
     //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
     var clickCheck = false;
+    var opaqueCheck = false;
 
     for(var g = 0; g < cards.length; g++){
 
         if(cardYOffset[g] < 0){
             cardYOffset[g]+=cardMoveSpeed;
+        }
+
+        if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 8, HEIGHT / 3.375)) {
+            if(g + 1 === cardSelected){
+                cardOpacity = 0.3;
+            }
+            console.log("Opacity!!");
+            opaqueCheck = true;
+        } else {
+            console.log("No opacity");
+            if(opaqueCheck === false){
+                cardOpacity = 1;
+            }
         }
 
         if(onClick(cardPosX[g], HEIGHT - HEIGHT/8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)){
@@ -703,7 +719,7 @@ function game(){
         }
 
         if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
-            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 10, HEIGHT / 3.375)) {
+            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
                 clickCheck = true;
                 if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
                     cardSelected = g + 1;
@@ -940,7 +956,9 @@ function game(){
             ctx.fillStyle = "red";
             ctx.fillText("Discard", cardPosX[l] + cardHalfWidth, HEIGHT + HEIGHT/7 - cardYOffset[l] + animationOffset);
         }else{
+            ctx.globalAlpha = cardOpacity;
             ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
+            ctx.globalAlpha = 1;
         }
     }
 
