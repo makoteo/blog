@@ -166,14 +166,9 @@ var actionSelected = 0;
 
 var tempMouseTimer2 = 0;
 
-var cardYOffset1 = 0;
-var cardYOffset2 = 0;
-var cardYOffset3 = 0;
+var cardYOffset = [0, 0, 0];
 
 var cardSelected = 0;
-
-var cardLookingFor = [1, 1, 1];
-var cardGiving = [2, 3, 5];
 
 var cardCombos = [
 
@@ -184,6 +179,13 @@ var cardCombos = [
   [4, 5]
 
 ];
+
+var cardPosX = [0, 0, 0];
+
+var cards = [[1, 2], [1, 3], [1, 5]];
+
+var word1 = "";
+var word2 = "";
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -513,10 +515,11 @@ function onClick(xObj, yObj, widthObj, heightObj){
 }
 
 function switchUpCards(cardNumber){
-    var randomx = Math.floor(Math.random() * (cardCombos.length));
+    //cards[cardNumber] = cardCombos[randomx];
 
-    cardLookingFor[cardNumber] = cardCombos[randomx][0];
-    cardGiving[cardNumber] = cardCombos[randomx][1];
+    cards.splice(cardNumber, 1);
+
+    cardSelected = 0;
 
 }
 
@@ -601,9 +604,11 @@ function game(){
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
-                        if(cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1){
-                            voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
-                            switchUpCards(cardSelected - 1);
+                        if(cardSelected !== 0){
+                            if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
+                                voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                switchUpCards(cardSelected - 1);
+                            }
                         }
                     }
                     tempMouseTimer = 10;
@@ -627,9 +632,11 @@ function game(){
                         clickSelected = [];
                     }else{
                         clickSelected.unshift(voxels[i].id);
-                        if((cardLookingFor[cardSelected - 1] === 1 && voxels[i].type === 1) || (cardLookingFor[cardSelected - 1] === 4 && voxels[i].type === 4)){
-                            voxels[i].fallAwayAndReplace(cardGiving[cardSelected - 1]);
-                            switchUpCards(cardSelected - 1);
+                        if(cardSelected !== 0){
+                            if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
+                                voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                switchUpCards(cardSelected - 1);
+                            }
                         }
                         if(buildType !== 0) {
                             voxels[i].type = buildType;
@@ -653,68 +660,63 @@ function game(){
     POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
         + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
 
-    //CARD CLICKED --------------------------------------------------------------------------------------------------------
-    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false){
-        if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
-            if(cardSelected !== 1 && tempMouseTimer2 < 1){
-                cardSelected = 1;
-            }else{
-                cardSelected = 0;
-            }
-            tempMouseTimer2 = 20;
-            cardYOffset1 = 100;
-        }else if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
-            if(cardSelected !== 2 && tempMouseTimer2 < 1){
-                cardSelected = 2;
-            }else{
-                cardSelected = 0;
-            }
-            tempMouseTimer2 = 20;
-            cardYOffset2 = 100;
-        }else if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
-            if(cardSelected !== 3 && tempMouseTimer2 < 1){
-                cardSelected = 3;
-            }else{
-                cardSelected = 0;
-            }
-            tempMouseTimer2 = 20;
-            cardYOffset3 = 100;
-        }else{
-            cardSelected = 0;
+    // PLAYER TURN ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    if(frameCount % yearlength === 0){
+        if(cards.length < 3){
+            var randomx = Math.floor(Math.random() * (cardCombos.length));
+
+            cards.push(cardCombos[randomx]);
+            cardYOffset[cards.length - 1] = 50;
         }
+
     }
+
+    var xPosCard = [0, 0, 0];
+    var cardWidth = WIDTH/8;
+    var cardHalfWidth = cardWidth/2;
+    var cardHeight = HEIGHT/3.375;
+    var cardOffset = WIDTH/10;
+    var cardMoveSpeed = 5;
 
     if(tempMouseTimer2 > 0){
         tempMouseTimer2--;
     }
 
 
-    //CARD MOUSEOVER --------------------------------------------------------------------------------------------------------
+    //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
-    var cardMoveSpeed = 5;
+    var clickCheck = false;
 
-    if(onClick(WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset1 < 100){
-            cardYOffset1+=cardMoveSpeed;
+    for(var g = 0; g < cards.length; g++){
+
+        if(cardYOffset[g] < 0){
+            cardYOffset[g]+=cardMoveSpeed;
         }
-    }else if(cardYOffset1 > 0 && cardSelected !== 1){
-        cardYOffset1-=cardMoveSpeed;
-    }
 
-    if(onClick(WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset2 < 100){
-            cardYOffset2+=cardMoveSpeed;
+        if(onClick(cardPosX[g], HEIGHT - HEIGHT/8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)){
+            if(cardYOffset[g] < 100){
+                cardYOffset[g]+=cardMoveSpeed;
+            }
+        }else if(cardYOffset[g] > 0 && cardSelected !== (g+1)){
+            cardYOffset[g]-=cardMoveSpeed;
         }
-    }else if(cardYOffset2 > 0 && cardSelected !== 2){
-        cardYOffset2-=cardMoveSpeed;
-    }
-
-    if(onClick(WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/10, HEIGHT/3.375)){
-        if(cardYOffset3 < 100){
-            cardYOffset3+=cardMoveSpeed;
+        if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
+            if(onClick(cardPosX[g], HEIGHT - HEIGHT/8 - cardYOffset[g], WIDTH/10, HEIGHT/3.375)){
+                clickCheck = true;
+                if(cardSelected !== (g+1) && tempMouseTimer2 < 1){
+                    cardSelected = g+1;
+                }else{
+                    cardSelected = 0;
+                }
+                tempMouseTimer2 = 20;
+                cardYOffset[g] = 100;
+            }else{
+                if(clickCheck === false){
+                    cardSelected = 0;
+                }
+            }
         }
-    }else if(cardYOffset3 > 0 && cardSelected !== 3){
-        cardYOffset3-=cardMoveSpeed;
     }
 
     //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
@@ -905,63 +907,54 @@ function game(){
 
     //GUI -------------------------------------------------------------------------------------------------------------------------------------------
 
-    var xPosCard = [0, 0, 0];
-
-    for(var b = 0; b < 3; b++){
-        if(cardLookingFor[b] === 1 && cardGiving[b] === 3){
+    for(var b = 0; b < cards.length; b++){
+        if(cards[b][0] === 1 && cards[b][1] === 3){
             xPosCard[b] = 0;
-        }else if(cardLookingFor[b] === 1 && cardGiving[b] === 2){
+        }else if(cards[b][0] === 1 && cards[b][1] === 2){
             xPosCard[b] = 900;
-        }else if(cardLookingFor[b] === 1 && cardGiving[b] === 5){
+        }else if(cards[b][0] === 1 && cards[b][1] === 5){
             xPosCard[b] = 1200;
-        }else if(cardLookingFor[b] === 4 && cardGiving[b] === 1){
+        }else if(cards[b][0] === 4 && cards[b][1] === 1){
             xPosCard[b] = 300;
-        }else if(cardLookingFor[b] === 4 && cardGiving[b] === 5){
+        }else if(cards[b][0] === 4 && cards[b][1] === 5){
             xPosCard[b] = 600;
         }else{
             xPosCard[b] = 0;
         }
     }
 
-    if(cardSelected !== 1 || cardSelected === 0){
-        ctx.drawImage(voxelsGUI, xPosCard[0], 0, 300, 400, WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1 + animationOffset, WIDTH/8, HEIGHT/3.375);
-    }else{
-        ctx.drawImage(voxelsGUI, xPosCard[0], 0, 300, 400, WIDTH/2 - WIDTH/16 - WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset1, WIDTH/8, HEIGHT/3.375);
+    for(var q = 0; q < cards.length; q++) {
+        cardPosX[q] = WIDTH / 2 - cardHalfWidth - cardOffset * ((cards.length) / 2) + 2 * (WIDTH / 8 - WIDTH / 10) + cardOffset * q;
     }
 
-    if(cardSelected !== 2 || cardSelected === 0){
-        ctx.drawImage(voxelsGUI, xPosCard[1], 0, 300, 400, WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2 + animationOffset, WIDTH/8, HEIGHT/3.375);
-    }else{
-        ctx.drawImage(voxelsGUI, xPosCard[1], 0, 300, 400, WIDTH/2 - WIDTH/16, HEIGHT - HEIGHT/8 - cardYOffset2, WIDTH/8, HEIGHT/3.375);
+    for(var l = 0; l < cards.length; l++){
+        if(cardSelected !== (l+1) || cardSelected === 0){
+            ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l] + animationOffset, WIDTH/8, cardHeight);
+        }else{
+            ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
+        }
     }
 
-    if(cardSelected !== 3 || cardSelected === 0){
-        ctx.drawImage(voxelsGUI, xPosCard[2], 0, 300, 400, WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3 + animationOffset, WIDTH/8, HEIGHT/3.375);
-    }else{
-        ctx.drawImage(voxelsGUI, xPosCard[2], 0, 300, 400, WIDTH/2 - WIDTH/16 + WIDTH/10, HEIGHT - HEIGHT/8 - cardYOffset3, WIDTH/8, HEIGHT/3.375);
-    }
+    if(cardSelected !== 0 && !(cards.length < 1)){
+        if((cards[cardSelected - 1][0]) === 1){
+            word1 = "Field";
+        }else if((cards[cardSelected - 1][0]) === 4){
+            word1 = "Desert";
+        }
 
-    var word1 = "";
-    var word2 = "";
-
-    if(cardLookingFor[cardSelected - 1] === 1){
-        word1 = "Field";
-    }else if(cardLookingFor[cardSelected - 1] === 4){
-        word1 = "Desert";
-    }
-
-    if(cardGiving[cardSelected - 1] === 1){
-        word2 = "Field";
-    }else if(cardGiving[cardSelected - 1] === 2){
-        word2 = "Sea";
-    }else if(cardGiving[cardSelected - 1] === 3){
-        word2 = "Forest";
-    }else if(cardGiving[cardSelected - 1] === 5){
-        word2 = "Mountain";
+        if(cards[cardSelected - 1][1] === 1){
+            word2 = "Field";
+        }else if(cards[cardSelected - 1][1] === 2){
+            word2 = "Sea";
+        }else if(cards[cardSelected - 1][1] === 3){
+            word2 = "Forest";
+        }else if(cards[cardSelected - 1][1] === 5){
+            word2 = "Mountain";
+        }
     }
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "white"
+    ctx.fillStyle = "white";
     ctx.fillText("Pick " + word1 + " to turn into " + word2, WIDTH/2, (-150) + animationOffset);
 
     //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
