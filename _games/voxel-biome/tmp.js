@@ -172,11 +172,11 @@ var cardSelected = 0;
 
 var cardCombos = [
 
-  [1, 2],
-  [1, 3],
-  [1, 5],
-  [4, 1],
-  [4, 5]
+    [1, 2],
+    [1, 3],
+    [1, 5],
+    [4, 1],
+    [4, 5]
 
 ];
 
@@ -701,20 +701,25 @@ function game(){
         }else if(cardYOffset[g] > 0 && cardSelected !== (g+1)){
             cardYOffset[g]-=cardMoveSpeed;
         }
+
         if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
-            if(onClick(cardPosX[g], HEIGHT - HEIGHT/8 - cardYOffset[g], WIDTH/10, HEIGHT/3.375)){
+            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 10, HEIGHT / 3.375)) {
                 clickCheck = true;
-                if(cardSelected !== (g+1) && tempMouseTimer2 < 1){
-                    cardSelected = g+1;
-                }else{
+                if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
+                    cardSelected = g + 1;
+                } else {
                     cardSelected = 0;
                 }
                 tempMouseTimer2 = 20;
                 cardYOffset[g] = 100;
-            }else{
-                if(clickCheck === false){
+            } else {
+                if (clickCheck === false) {
                     cardSelected = 0;
                 }
+            }
+
+            if(onClick(cardPosX[g], HEIGHT + HEIGHT/7 - cardYOffset[g] + animationOffset - HEIGHT/90, WIDTH/10, HEIGHT/45)){
+                switchUpCards(g);
             }
         }
     }
@@ -930,6 +935,10 @@ function game(){
     for(var l = 0; l < cards.length; l++){
         if(cardSelected !== (l+1) || cardSelected === 0){
             ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l] + animationOffset, WIDTH/8, cardHeight);
+            ctx.textAlign = "center";
+            ctx.font = "bold 8pt Courier";
+            ctx.fillStyle = "red";
+            ctx.fillText("Discard", cardPosX[l] + cardHalfWidth, HEIGHT + HEIGHT/7 - cardYOffset[l] + animationOffset);
         }else{
             ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
         }
@@ -955,6 +964,7 @@ function game(){
 
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
+    ctx.font = '15pt Courier New';
     ctx.fillText("Pick " + word1 + " to turn into " + word2, WIDTH/2, (-150) + animationOffset);
 
     //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
