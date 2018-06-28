@@ -1091,7 +1091,9 @@ function game(){
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     ctx.font = '15pt Courier New';
-    ctx.fillText("Pick " + cardNeedGive[cardSelected - 1][0] + " " + word1 + "(s) to turn into " + cardNeedGive[cardSelected - 1][1] + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+    if(cardSelected !== 0){
+        ctx.fillText("Pick " + cardNeedGive[cardSelected - 1][0] + " " + word1 + "(s) to turn into " + cardNeedGive[cardSelected - 1][1] + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+    }
 
     if(cardSelected !== 0 && cardNeedGive[cardSelected - 1][1] - cardNeedGive[cardSelected - 1][0] !== 0){
         ctx.textAlign = "center";
