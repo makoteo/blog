@@ -13,7 +13,7 @@ var POLUTION = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
-var GAMESPEED = 5;
+var GAMESPEED = 2;
 
 var DEBUG = false;
 
@@ -107,15 +107,15 @@ var desertFactories = 0;
 var forestFactories = 0;
 var Mountains = 0;
 
-var forestPol = -5;
-var fieldPol = -2;
-var seaPol = -1;
-var desertPol = +2;
-var townPol = +5;
-var cityPol = +10;
-var oilRigPol = +12;
-var desertFactoryPol = +15;
-var forestFactoryPol = +15;
+var forestPol = -6;
+var fieldPol = -3;
+var seaPol = -2;
+var desertPol = +1;
+var townPol = +3;
+var cityPol = +8;
+var oilRigPol = +10;
+var desertFactoryPol = +12;
+var forestFactoryPol = +12;
 var MountainPol = -1;
 
 var forestDesc1 = "All those leaves";
@@ -528,6 +528,10 @@ function Voxel(x, y, width, height, type){
         this.fallAwayAndReplace = function(changeType){
             this.falling = true;
             this.typeToChangeTo = changeType;
+        }
+
+        if(this.type === 0 || this.type === 5){
+            this.cityProperty = false;
         }
     }
 }
