@@ -165,6 +165,7 @@ var yearlength = 1800;
 var actionSelected = 0;
 
 var tempMouseTimer2 = 0;
+var tempMouseTimer3 = 0;
 
 var cardYOffset = [0, 0, 0];
 
@@ -184,13 +185,14 @@ var cardPosX = [0, 0, 0];
 
 var cards = [[1, 2], [1, 3], [1, 5]];
 
-var cardNeedGive = [[1, 1], [1, 1], [1, 1]];
+var cardNeedGive = [[2, 2], [1, 1], [1, 1]];
 
 var cardOpacity = 1;
 
 var tileSelectedByCard = [];
 
-var tradeButtonOffset = 0;
+var tradeButtonOffset1 = 0;
+var tradeButtonOffset2 = 0;
 
 var word1 = "";
 var word2 = "";
@@ -638,7 +640,7 @@ function game(){
                         }
                         if(cardSelected !== 0){
                             if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
-                                tileSelectedByCard.push(voxels[i].id);
+                                tileSelectedByCard.unshift(voxels[i].id);
                                 //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
                                 //switchUpCards(cardSelected - 1);
                             }
@@ -719,30 +721,58 @@ function game(){
         tempMouseTimer2--;
     }
 
+    if(cardSelected !== 0 && tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0]){
+        tileSelectedByCard.splice(0, 1);
+    }
 
     //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
     var clickCheck = false;
     var opaqueCheck = false;
 
-    if (onClick(WIDTH/2 - 150/2, (-100) + animationOffset + tradeButtonOffset, 150, 40)) {
-        tradeButtonOffset = 5;
+    if (onClick(WIDTH/2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
+        tradeButtonOffset1 = 5;
     }else{
-        tradeButtonOffset = 0;
+        tradeButtonOffset1 = 0;
     }
 
-    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
-        if (onClick(WIDTH/2 - 150/2, (-100) + animationOffset + tradeButtonOffset, 150, 40)) {
-            for(var z = 0; z < tileSelectedByCard.length; z++){
-                for(var p = 0; p < voxels.length; p++) {
-                    if(voxels[p].id === tileSelectedByCard[z]) {
-                        voxels[p].type = (cards[cardSelected - 1][1]);
-                        tileSelectedByCard = [];
+    if (onClick(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+        tradeButtonOffset2 = 5;
+    }else{
+        tradeButtonOffset2 = 0;
+    }
+
+    if(cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+        var biomesTraded = 0;
+        if (onClick(WIDTH/2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
+            for(var p = 0; p < voxels.length; p++) {
+                for(var z = 0; z < tileSelectedByCard.length; z++) {
+                    if (voxels[p].id === tileSelectedByCard[z]) {
+                        if(biomesTraded < cardNeedGive[cardSelected - 1][1]){
+                            voxels[p].type = (cards[cardSelected - 1][1]);
+                        }else{
+                            voxels[p].type = 0;
+                        }
                         //cardSelected = 0;
-                        switchUpCards(cardSelected - 1);
+                        biomesTraded++;
                     }
                 }
             }
+            cards.splice(cardSelected - 1, 1);
+            tempMouseTimer3 = 1;
+            tileSelectedByCard = [];
+            cardSelected = 0;
+        }
+    }
+
+    if(tempMouseTimer3 > 0){
+        tempMouseTimer3--;
+    }
+
+    if(cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+        if (onClick(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+            tileSelectedByCard = [];
+            cardSelected = 0;
         }
     }
 
@@ -785,9 +815,9 @@ function game(){
                 tempMouseTimer2 = 20;
                 cardYOffset[g] = 100;
             } else {
-                if (clickCheck === false && (tileSelectedByCard.length > cardNeedGive[cardSelected][0] || tileSelectedByCard.length === 0)) {
-                    tileSelectedByCard = [];
-                    cardSelected = 0;
+                if (clickCheck === false && cardSelected !== 0 && (tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0] || tileSelectedByCard.length === 0)) {
+                    //tileSelectedByCard = [];
+                    //cardSelected = 0;
                 }
             }
 
@@ -1046,12 +1076,20 @@ function game(){
         var rectWidth = 150;
         var rectHeight = 40;
         ctx.fillStyle = "gray";
-        ctx.fillRect(WIDTH/2 - rectWidth/2, (-100) + animationOffset + tradeButtonOffset, rectWidth, rectHeight);
+        ctx.fillRect(WIDTH/2 - rectWidth, (-100) + animationOffset + tradeButtonOffset1, rectWidth, rectHeight);
         ctx.fillStyle = "rgb(35, 35, 35)";
-        ctx.fillRect(WIDTH/2 - rectWidth/2 + 2, (-100) + animationOffset + 2 + tradeButtonOffset, rectWidth - 4, rectHeight - 4);
+        ctx.fillRect(WIDTH/2 - rectWidth + 2, (-100) + animationOffset + 2 + tradeButtonOffset1, rectWidth - 4, rectHeight - 4);
 
         ctx.fillStyle = "white";
-        ctx.fillText("Trade", WIDTH/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset);
+        ctx.fillText("Accept", WIDTH/2 - rectWidth/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset1);
+
+        ctx.fillStyle = "gray";
+        ctx.fillRect(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, rectWidth, rectHeight);
+        ctx.fillStyle = "rgb(35, 35, 35)";
+        ctx.fillRect(WIDTH/2 + 2, (-100) + animationOffset + 2 + tradeButtonOffset2, rectWidth - 4, rectHeight - 4);
+
+        ctx.fillStyle = "white";
+        ctx.fillText("Decline", WIDTH/2 + rectWidth/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset2);
     }
 
     //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
