@@ -177,7 +177,11 @@ var cardCombos = [
     [1, 3],
     [1, 5],
     [4, 1],
-    [4, 5]
+    [4, 5],
+    [1, 3],
+    [3, 5],
+    [4, 1],
+    [1, 3]
 
 ];
 
@@ -186,7 +190,11 @@ var cardNeedGiveCombos = [
     [1, 1],
     [1, 1],
     [1, 1],
+    [1, 1],
+    [1, 1],
+    [2, 1],
     [3, 2],
+    [2, 1],
     [3, 2]
 
 ];
@@ -195,7 +203,7 @@ var cardPosX = [0, 0, 0];
 
 var cards = [[1, 2], [1, 3], [1, 5]];
 
-var cardNeedGive = [[2, 1], [1, 1], [1, 1]];
+var cardNeedGive = [[1, 1], [1, 1], [1, 1]];
 
 var cardOpacity = 1;
 
@@ -206,6 +214,9 @@ var tradeButtonOffset2 = 0;
 
 var word1 = "";
 var word2 = "";
+
+var num1 = 0;
+var num2 = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -656,7 +667,7 @@ function game(){
                             clickSelected.unshift(voxels[i].id);
                         }
                         if(cardSelected !== 0){
-                            if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
+                            if(cards[cardSelected - 1][0] === voxels[i].type){
                                 tileSelectedByCard.unshift(voxels[i].id);
                                 //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
                                 //switchUpCards(cardSelected - 1);
@@ -687,7 +698,7 @@ function game(){
                             clickSelected.unshift(voxels[i].id);
                         }
                         if(cardSelected !== 0){
-                            if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
+                            if(cards[cardSelected - 1][0] === voxels[i].type){
                                 if(tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1]){
                                     voxels[i].toBeDestroyed = true;
                                 }
@@ -733,6 +744,7 @@ function game(){
     }
 
     var xPosCard = [0, 0, 0];
+    var yPosCard = [0, 0, 0];
     var cardWidth = WIDTH/8;
     var cardHalfWidth = cardWidth/2;
     var cardHeight = HEIGHT/3.375;
@@ -1044,14 +1056,27 @@ function game(){
     for(var b = 0; b < cards.length; b++){
         if(cards[b][0] === 1 && cards[b][1] === 3){
             xPosCard[b] = 0;
+            if(cardNeedGive[b][0] === 2){
+                yPosCard[b] = 400;
+            }else if(cardNeedGive[b][0] === 3){
+                yPosCard[b] = 400;
+                xPosCard[b] = 900;
+            }
         }else if(cards[b][0] === 1 && cards[b][1] === 2){
             xPosCard[b] = 900;
         }else if(cards[b][0] === 1 && cards[b][1] === 5){
             xPosCard[b] = 1200;
         }else if(cards[b][0] === 4 && cards[b][1] === 1){
             xPosCard[b] = 300;
+            if(cardNeedGive[b][0] > 1){
+                yPosCard[b] = 400;
+                xPosCard[b] = 600;
+            }
         }else if(cards[b][0] === 4 && cards[b][1] === 5){
             xPosCard[b] = 600;
+        }else if(cards[b][0] === 3 && cards[b][1] === 5){
+            xPosCard[b] = 300;
+            yPosCard[b] = 400;
         }else{
             xPosCard[b] = 0;
         }
@@ -1063,14 +1088,14 @@ function game(){
 
     for(var l = 0; l < cards.length; l++){
         if(cardSelected !== (l+1) || cardSelected === 0){
-            ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l] + animationOffset, WIDTH/8, cardHeight);
+            ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l] + animationOffset, WIDTH/8, cardHeight);
             ctx.textAlign = "center";
             ctx.font = "bold 8pt Courier";
             ctx.fillStyle = "red";
             ctx.fillText("Discard", cardPosX[l] + cardHalfWidth, HEIGHT + HEIGHT/7 - cardYOffset[l] + animationOffset);
         }else{
             ctx.globalAlpha = cardOpacity;
-            ctx.drawImage(voxelsGUI, xPosCard[l], 0, 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
+            ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
             ctx.globalAlpha = 1;
         }
     }
@@ -1096,11 +1121,14 @@ function game(){
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     ctx.font = '15pt Courier New';
-    if(cardSelected !== 0){
-        ctx.fillText("Pick " + cardNeedGive[cardSelected - 1][0] + " " + word1 + "(s) to turn into " + cardNeedGive[cardSelected - 1][1] + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
-    }
 
-    if(cardSelected !== 0 && cardNeedGive[cardSelected - 1][1] - cardNeedGive[cardSelected - 1][0] !== 0){
+    if(cardSelected !== 0){
+        num1 = cardNeedGive[cardSelected - 1][0];
+        num2 = cardNeedGive[cardSelected - 1][1];
+    }
+    ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+
+    if(num2 - num1 !== 0){
         ctx.textAlign = "center";
         ctx.fillStyle = "white";
         ctx.font = '10pt Courier New';
