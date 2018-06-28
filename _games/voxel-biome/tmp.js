@@ -780,6 +780,7 @@ function game(){
                 }
             }
             cards.splice(cardSelected - 1, 1);
+            cardNeedGive.splice(cardSelected - 1, 1);
             tempMouseTimer3 = 1;
             tileSelectedByCard = [];
             cardSelected = 0;
@@ -973,6 +974,8 @@ function game(){
         }
 
     }
+
+    if (keys && keys[27]){cardSelected = 0; tileSelectedByCard = [];}
 
     if(frameTimer2 > 0){
         frameTimer2--;
