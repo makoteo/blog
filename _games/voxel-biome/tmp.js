@@ -181,11 +181,21 @@ var cardCombos = [
 
 ];
 
+var cardNeedGiveCombos = [
+
+    [1, 1],
+    [1, 1],
+    [1, 1],
+    [3, 2],
+    [3, 2]
+
+];
+
 var cardPosX = [0, 0, 0];
 
 var cards = [[1, 2], [1, 3], [1, 5]];
 
-var cardNeedGive = [[2, 2], [1, 1], [1, 1]];
+var cardNeedGive = [[2, 1], [1, 1], [1, 1]];
 
 var cardOpacity = 1;
 
@@ -241,6 +251,8 @@ function Voxel(x, y, width, height, type){
     this.hasFallen = false;
 
     this.cardSelected = false;
+
+    this.toBeDestroyed = false;
 
     this.draw = function(){
         //DRAW EXAMPLE
@@ -401,7 +413,7 @@ function Voxel(x, y, width, height, type){
 
         }
 
-        if(this.turnToCityTerritory === true) {
+        if(this.turnToCityTerritory === true || this.toBeDestroyed === true) {
             ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
@@ -484,6 +496,10 @@ function Voxel(x, y, width, height, type){
             }
         }else{
             this.cardSelected = false;
+        }
+
+        if(this.cardSelected === false){
+            this.toBeDestroyed = false;
         }
 
         this.animateUp = function(up){
@@ -672,6 +688,9 @@ function game(){
                         if(cardSelected !== 0){
                             if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
                                 tileSelectedByCard.unshift(voxels[i].id);
+                                if(tileSelectedByCard.length > cardNeedGive[cardSelected - 1][1]){
+                                    voxels[i].toBeDestroyed = true;
+                                }
                                 //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
                                 //switchUpCards(cardSelected - 1);
                             }
@@ -705,6 +724,7 @@ function game(){
             var randomx = Math.floor(Math.random() * (cardCombos.length));
 
             cards.push(cardCombos[randomx]);
+            cardNeedGive.push(cardNeedGiveCombos[randomx]);
             cardYOffset[cards.length - 1] = 50;
         }
 
@@ -745,13 +765,14 @@ function game(){
     if(cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
         var biomesTraded = 0;
         if (onClick(WIDTH/2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
-            for(var p = 0; p < voxels.length; p++) {
-                for(var z = 0; z < tileSelectedByCard.length; z++) {
+            for(var z = 0; z < tileSelectedByCard.length; z++) {
+                for(var p = 0; p < voxels.length; p++) {
                     if (voxels[p].id === tileSelectedByCard[z]) {
-                        if(biomesTraded < cardNeedGive[cardSelected - 1][1]){
+                        if(voxels[p].toBeDestroyed === false){
                             voxels[p].type = (cards[cardSelected - 1][1]);
                         }else{
                             voxels[p].type = 0;
+                            voxels[p].toBeDestroyed = false;
                         }
                         //cardSelected = 0;
                         biomesTraded++;
@@ -1070,9 +1091,20 @@ function game(){
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     ctx.font = '15pt Courier New';
-    ctx.fillText("Pick " + word1 + " to turn into " + word2, WIDTH/2, (-150) + animationOffset);
+    ctx.fillText("Pick " + cardNeedGive[cardSelected - 1][0] + " " + word1 + "(s) to turn into " + cardNeedGive[cardSelected - 1][1] + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+
+    if(cardSelected !== 0 && cardNeedGive[cardSelected - 1][1] - cardNeedGive[cardSelected - 1][0] !== 0){
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = '10pt Courier New';
+        ctx.fillText("Tiles with red cross will be destroyed.", WIDTH/2, (-130) + animationOffset);
+    }
+
 
     if(cardSelected !== 0 && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]){
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = '15pt Courier New';
         var rectWidth = 150;
         var rectHeight = 40;
         ctx.fillStyle = "gray";
