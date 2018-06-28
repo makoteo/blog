@@ -559,6 +559,7 @@ function switchUpCards(cardNumber){
     //cards[cardNumber] = cardCombos[randomx];
 
     cards.splice(cardNumber, 1);
+    cardNeedGive.splice(cardSelected - 1, 1);
 
     cardSelected = 0;
 
@@ -687,10 +688,10 @@ function game(){
                         }
                         if(cardSelected !== 0){
                             if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
-                                tileSelectedByCard.unshift(voxels[i].id);
-                                if(tileSelectedByCard.length > cardNeedGive[cardSelected - 1][1]){
+                                if(tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1]){
                                     voxels[i].toBeDestroyed = true;
                                 }
+                                tileSelectedByCard.unshift(voxels[i].id);
                                 //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
                                 //switchUpCards(cardSelected - 1);
                             }
@@ -725,6 +726,7 @@ function game(){
 
             cards.push(cardCombos[randomx]);
             cardNeedGive.push(cardNeedGiveCombos[randomx]);
+
             cardYOffset[cards.length - 1] = 50;
         }
 
@@ -779,8 +781,8 @@ function game(){
                     }
                 }
             }
-            cards.splice(cardSelected - 1, 1);
             cardNeedGive.splice(cardSelected - 1, 1);
+            cards.splice(cardSelected - 1, 1);
             tempMouseTimer3 = 1;
             tileSelectedByCard = [];
             cardSelected = 0;
@@ -1102,7 +1104,7 @@ function game(){
         ctx.textAlign = "center";
         ctx.fillStyle = "white";
         ctx.font = '10pt Courier New';
-        ctx.fillText("Tiles with red cross will be destroyed.", WIDTH/2, (-130) + animationOffset);
+        ctx.fillText("The last tile you pick (the one with the red cross) will be destroyed.", WIDTH/2, (-130) + animationOffset);
     }
 
 
