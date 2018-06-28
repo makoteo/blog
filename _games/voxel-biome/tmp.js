@@ -424,7 +424,11 @@ function Voxel(x, y, width, height, type){
 
         }
 
-        if(this.turnToCityTerritory === true || this.toBeDestroyed === true) {
+        if(this.turnToCityTerritory === true && this.type !== 0 && this.type !== 5) {
+            ctx.drawImage(voxelsG, 1800, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+        }
+
+        if(this.toBeDestroyed === true && this.type !== 0){
             ctx.drawImage(voxelsG, 1800, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
         }
 
@@ -921,19 +925,19 @@ function game(){
                             if (gridRoll[m][n] === voxels[f].id) {
 
                                 if (diceRollCity2 === 1) {
-                                    if (voxels[gridRoll[m - 1][n]] != null && voxels[gridRoll[m - 1][n]].type !== 5) {
+                                    if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 2) {
-                                    if (voxels[gridRoll[m][n - 1]] != null && voxels[gridRoll[m][n - 1]].type !== 5) {
+                                    if (n > 1 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 3) {
-                                    if (voxels[gridRoll[m + 1][n]] != null && voxels[gridRoll[m + 1][n]].type !== 5) {
+                                    if (m < mapSideLength - 1 && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }
                                 }else{
-                                    if (voxels[gridRoll[m][n + 1]] != null&& voxels[gridRoll[m][n + 1]].type !== 5) {
+                                    if (n < mapSideLength - 1 && voxels[gridRoll[m][n + 1]].type !== 5 && voxels[gridRoll[m][n + 1]].type !== 0) {
                                         voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
                                     }
                                 }
