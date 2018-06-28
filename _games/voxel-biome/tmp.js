@@ -184,7 +184,13 @@ var cardPosX = [0, 0, 0];
 
 var cards = [[1, 2], [1, 3], [1, 5]];
 
+var cardNeedGive = [[1, 1], [1, 1], [1, 1]];
+
 var cardOpacity = 1;
+
+var tileSelectedByCard = [];
+
+var tradeButtonOffset = 0;
 
 var word1 = "";
 var word2 = "";
@@ -231,6 +237,8 @@ function Voxel(x, y, width, height, type){
     this.falling = false;
     this.typeToChangeTo = 0;
     this.hasFallen = false;
+
+    this.cardSelected = false;
 
     this.draw = function(){
         //DRAW EXAMPLE
@@ -463,6 +471,19 @@ function Voxel(x, y, width, height, type){
             this.turnToCityTerritory = false;
 
         }
+
+        if(tileSelectedByCard.length > 0){
+            for(var t = 0; t < tileSelectedByCard.length; t++){
+                if(tileSelectedByCard[t] === this.id){
+                    this.animateUp(2);
+                    this.cardSelected = true;
+                    break;
+                }
+            }
+        }else{
+            this.cardSelected = false;
+        }
+
         this.animateUp = function(up){
             if(up === 0) {
                 this.movingUp = true;
@@ -550,43 +571,50 @@ function game(){
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < voxels.length; i++){
-        voxels[i].update();
-        voxels[i].draw();
+
+        var voxel = voxels[i];
+
+        voxel.update();
+        voxel.draw();
 
         if(voxels[i].type === 1){
             fields++;
-        }else if(voxels[i].type === 2){
+        }else if(voxel.type === 2){
             seas++;
-        }else if(voxels[i].type === 2.1){
+        }else if(voxel.type === 2.1){
             oilrigs++;
-        }else if(voxels[i].type === 3){
+        }else if(voxel.type === 3){
             forests++;
-        }else if(voxels[i].type === 3.1){
+        }else if(voxel.type === 3.1){
             forestFactories++;
-        }else if(voxels[i].type === 4){
+        }else if(voxel.type === 4){
             deserts++;
-        }else if(voxels[i].type === 4.1){
+        }else if(voxel.type === 4.1){
             desertFactories++;
-        }else if(voxels[i].type === 5){
+        }else if(voxel.type === 5){
             Mountains++;
-        }else if(voxels[i].type === 6){
+        }else if(voxel.type === 6){
             cities++;
-        }else if(voxels[i].type === 6.1){
+        }else if(voxel.type === 6.1){
             towns++;
         }
 
         if(selected.length > 0) {
-            if (voxels[i].id === selected[0]) {
-                if(voxels[i].id === clickSelected[0]){
-                    voxels[i].animateUp(2);
+            if (voxel.id === selected[0]) {
+                if(voxel.id === clickSelected[0]){
+                    voxel.animateUp(2);
                 }else{
-                    voxels[i].animateUp(0);
+                    if(voxel.cardSelected === false){
+                        voxel.animateUp(0);
+                    }
                 }
             } else {
-                if(voxels[i].id === clickSelected[0]){
-                    voxels[i].animateUp(2);
+                if(voxel.id === clickSelected[0]){
+                    voxel.animateUp(2);
                 }else{
-                    voxels[i].animateUp(1);
+                    if(voxel.cardSelected === false){
+                        voxel.animateUp(1);
+                    }
                 }
             }
         }
@@ -605,11 +633,14 @@ function game(){
                     if(voxels[i].id === clickSelected[0]) {
                         clickSelected = [];
                     }else{
-                        clickSelected.unshift(voxels[i].id);
+                        if(cardSelected !== 0 && tileSelectedByCard.length < cardNeedGive[cardSelected - 1][0]){
+                            clickSelected.unshift(voxels[i].id);
+                        }
                         if(cardSelected !== 0){
                             if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
-                                voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
-                                switchUpCards(cardSelected - 1);
+                                tileSelectedByCard.push(voxels[i].id);
+                                //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                //switchUpCards(cardSelected - 1);
                             }
                         }
                     }
@@ -633,11 +664,14 @@ function game(){
                     if(voxels[i].id === clickSelected[0]) {
                         clickSelected = [];
                     }else{
-                        clickSelected.unshift(voxels[i].id);
+                        if(cardSelected === 0){
+                            clickSelected.unshift(voxels[i].id);
+                        }
                         if(cardSelected !== 0){
                             if(cards[cardSelected - 1][0] === 1 && voxels[i].type === 1 || cards[cardSelected - 1][0] === 4 && voxels[i].type === 4){
-                                voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
-                                switchUpCards(cardSelected - 1);
+                                tileSelectedByCard.unshift(voxels[i].id);
+                                //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                //switchUpCards(cardSelected - 1);
                             }
                         }
                         if(buildType !== 0) {
@@ -691,6 +725,27 @@ function game(){
     var clickCheck = false;
     var opaqueCheck = false;
 
+    if (onClick(WIDTH/2 - 150/2, (-100) + animationOffset + tradeButtonOffset, 150, 40)) {
+        tradeButtonOffset = 5;
+    }else{
+        tradeButtonOffset = 0;
+    }
+
+    if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
+        if (onClick(WIDTH/2 - 150/2, (-100) + animationOffset + tradeButtonOffset, 150, 40)) {
+            for(var z = 0; z < tileSelectedByCard.length; z++){
+                for(var p = 0; p < voxels.length; p++) {
+                    if(voxels[p].id === tileSelectedByCard[z]) {
+                        voxels[p].type = (cards[cardSelected - 1][1]);
+                        tileSelectedByCard = [];
+                        //cardSelected = 0;
+                        switchUpCards(cardSelected - 1);
+                    }
+                }
+            }
+        }
+    }
+
     for(var g = 0; g < cards.length; g++){
 
         if(cardYOffset[g] < 0){
@@ -725,11 +780,13 @@ function game(){
                     cardSelected = g + 1;
                 } else {
                     cardSelected = 0;
+                    tileSelectedByCard = [];
                 }
                 tempMouseTimer2 = 20;
                 cardYOffset[g] = 100;
             } else {
-                if (clickCheck === false) {
+                if (clickCheck === false && (tileSelectedByCard.length > cardNeedGive[cardSelected][0] || tileSelectedByCard.length === 0)) {
+                    tileSelectedByCard = [];
                     cardSelected = 0;
                 }
             }
@@ -984,6 +1041,18 @@ function game(){
     ctx.fillStyle = "white";
     ctx.font = '15pt Courier New';
     ctx.fillText("Pick " + word1 + " to turn into " + word2, WIDTH/2, (-150) + animationOffset);
+
+    if(cardSelected !== 0 && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]){
+        var rectWidth = 150;
+        var rectHeight = 40;
+        ctx.fillStyle = "gray";
+        ctx.fillRect(WIDTH/2 - rectWidth/2, (-100) + animationOffset + tradeButtonOffset, rectWidth, rectHeight);
+        ctx.fillStyle = "rgb(35, 35, 35)";
+        ctx.fillRect(WIDTH/2 - rectWidth/2 + 2, (-100) + animationOffset + 2 + tradeButtonOffset, rectWidth - 4, rectHeight - 4);
+
+        ctx.fillStyle = "white";
+        ctx.fillText("Trade", WIDTH/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset);
+    }
 
     //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
 
