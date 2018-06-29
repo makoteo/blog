@@ -29,11 +29,11 @@ var animationOffset = 0;
 
 var levelOneGrid = [
 
-    [1, 2, 2, 2, 2],
-    [2, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1],
-    [2, 1, 1, 1, 1]
+    [3, 3, 3, 1, 3],
+    [3, 6, 2, 2, 3],
+    [1, 2, 2, 2, 1],
+    [3, 2, 2, 2, 3],
+    [1, 1, 3, 3, 1]
 
 ];
 
@@ -81,6 +81,7 @@ var gridRoll = [
     [],
     [],
     []
+
 ];
 
 var selected = [];
@@ -181,6 +182,8 @@ var tempTimer2 = 0;
 var cardYOffset = [0, 0, 0];
 
 var cardSelected = 0;
+
+var cardLevelLimitation = 0;
 
 var cardCombos = [
 
@@ -477,7 +480,7 @@ function Voxel(x, y, width, height, type){
             }
         }
 
-        if(this.type === 6){
+        if(this.type === 6 || this.type === 6.1){
             this.internalTimer = 0;
         }
 
@@ -556,6 +559,10 @@ function Voxel(x, y, width, height, type){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
+if(LEVEL === 0){
+    cardLevelLimitation = 5;
+}
+
 var map = levelOneGrid;
 var mapSideLength = map[0].length;
 var maxGridLength = map[0].length;
@@ -577,7 +584,7 @@ for(var i = 0; i < map.length; i++) {
         }else if(map[i][j] === 5){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 5));
         }else if(map[i][j] === 6){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15)) - WIDTH/50), (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 6.1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
@@ -765,7 +772,7 @@ function game(){
 
     if(frameCount % yearlength === 0){
         if(cards.length < 3){
-            var randomx = Math.floor(Math.random() * (cardCombos.length));
+            var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
             cards.push(cardCombos[randomx]);
             cardNeedGive.push(cardNeedGiveCombos[randomx]);
@@ -854,10 +861,8 @@ function game(){
             if(g + 1 === cardSelected){
                 cardOpacity = 0.3;
             }
-            console.log("Opacity!!");
             opaqueCheck = true;
         } else {
-            console.log("No opacity");
             if(opaqueCheck === false){
                 cardOpacity = 1;
             }
@@ -963,11 +968,11 @@ function game(){
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 2) {
-                                    if (n > 1 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                    if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }
                                 } else if (diceRollCity2 === 3) {
-                                    if (m < mapSideLength - 1 && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
+                                    if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }
                                 }else{
