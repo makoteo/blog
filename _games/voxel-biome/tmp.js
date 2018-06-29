@@ -29,10 +29,10 @@ var animationOffset = 0;
 
 var levelOneGrid = [
 
-    [1, 1, 3, 1, 1],
-    [1, 3, 2, 2, 1],
-    [1, 1, 2, 2, 1],
-    [3, 6, 1, 2, 3],
+    [1, 2, 2, 1, 1],
+    [1, 3, 2, 1, 1],
+    [1, 1, 1, 1, 1],
+    [3, 6, 1, 1, 3],
     [3, 1, 1, 3, 1]
 
 ];
@@ -188,6 +188,7 @@ var cardLevelLimitation = 0;
 var cardCombos = [
 
     [1, 2],
+    [1, 3],
     [1, 3],
     [1, 5],
     [4, 1],
@@ -560,7 +561,7 @@ function Voxel(x, y, width, height, type){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 if(LEVEL === 0){
-    cardLevelLimitation = 7;
+    cardLevelLimitation = 6;
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
 }
@@ -956,7 +957,7 @@ function game(){
 
         for(var f = 0; f < voxels.length; f++){
 
-            if(voxels[f].type === 6 || (voxels[f].cityProperty === true && voxels[f].type !== 2.1) || voxels[f].type === 6.1) {
+            if(voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
                 var diceRollCity = Math.random();
 
                 if (diceRollCity < 0.3) {
@@ -973,12 +974,10 @@ function game(){
                         for (var n = 0; n < gridRoll[1].length; n++) {
                             if (gridRoll[m][n] === voxels[f].id) {
 
-                                var diceRollCity2 = Math.floor(Math.random() * 4);
-
-                                console.log("Check " + voxels[f].id);
+                                var diceRollCity2 = Math.floor(Math.random() * 4) + 1;
 
                                 if (diceRollCity2 === 1) {
-                                    if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
+                                    if ((m > 1) && (voxels[gridRoll[m - 1][n]].type) !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }else{
                                         diceRollCity2 = 2;
@@ -986,7 +985,7 @@ function game(){
                                 }
 
                                 if (diceRollCity2 === 2) {
-                                    if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                    if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }else{
                                         diceRollCity2 = 3;
@@ -994,7 +993,7 @@ function game(){
                                 }
 
                                 if (diceRollCity2 === 3) {
-                                    if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
+                                    if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && (voxels[gridRoll[m + 1][n]].type !== 0)) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }else{
                                         diceRollCity2 = 4;
@@ -1002,15 +1001,15 @@ function game(){
                                 }
 
                                 if (diceRollCity2 === 4) {
-                                    if (n < mapSideLength - 1 && voxels[gridRoll[m][n + 1]].type !== 5 && voxels[gridRoll[m][n + 1]].type !== 0) {
+                                    if ((n < mapSideLength - 1) && (voxels[gridRoll[m][n + 1]].type !== 5) && (voxels[gridRoll[m][n + 1]].type !== 0)) {
                                         voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
                                     }else{
-                                        diceRollCity = 1;
+                                        diceRollCity2 = 1;
                                     }
                                 }
 
                                 if (diceRollCity2 === 1) {
-                                    if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
+                                    if ((m > 1) && (voxels[gridRoll[m - 1][n]].type !== 5) && (voxels[gridRoll[m - 1][n]].type !== 0)) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }else{
                                         diceRollCity2 = 2;
@@ -1018,7 +1017,7 @@ function game(){
                                 }
 
                                 if (diceRollCity2 === 2) {
-                                    if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                    if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }else{
                                         diceRollCity2 = 3;
@@ -1026,8 +1025,10 @@ function game(){
                                 }
 
                                 if (diceRollCity2 === 3) {
-                                    if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
+                                    if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && voxels[gridRoll[m + 1][n]].type !== 0) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
+                                    }else{
+                                        console.log("FAIL");
                                     }
                                 }
 
@@ -1097,7 +1098,7 @@ function game(){
 
     if(POLUTION < 10){
         ctx.fillStyle = "rgba(51, 13, 13, 0)";
-    }else if(POLUTION < 20){
+    }else if(POLUTION < 25){
         ctx.fillStyle = "rgba(51, 13, 13, 0.1)";
     }else if(POLUTION < 40){
         ctx.fillStyle = "rgba(51, 13, 13, 0.2)";
