@@ -1,7 +1,7 @@
 var versionCode = "Alpha 0.9";
 var WIDTH = 1200;
 var HEIGHT = 675;
-var gameRunning = false;
+var gameRunning = true;
 var SCORE = 0;
 var GAMESCORE = 0;
 var HIGHSCORE = 0;
@@ -14,9 +14,13 @@ var LEVEL = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
+var LOSSPOINT = 50;
+
 var GAMESPEED = 2; //DEFAULT 2
 
 var DEBUG = false;
+
+var GAMESTATE = "GAME";
 
 var voxels = [];
 
@@ -25,7 +29,22 @@ var frameCount = 0;
 var thisFrameClicked = false;
 var mouseHeld = false;
 
+var endGameTimer = 0;
+
 var animationOffset = 0;
+
+var timerRed = false;
+
+var winYears = [4, 1, 1];
+
+var blackScreen1Opacity = 0;
+
+var menuAnimationTimer = 0;
+
+var GUIOpacity = 1;
+
+var timeSurvivedOpacity = 0;
+var timeSurvivedText = 0;
 
 var levelOneGrid = [
 
@@ -616,166 +635,179 @@ function switchUpCards(cardNumber){
 
 function game(){
 
-    frameCount+=GAMESPEED;
-
-    if(tempMouseTimer2 > 0){
-        tempMouseTimer2--;
+    if(GAMESTATE === "GAME"){
+        gameRunning = true;
     }
 
-    if(cardSelected !== 0){
-        if(animationOffset < 200){
-            animationOffset+=5;
-        }
-    }else{
-        if(animationOffset > 0){
-            animationOffset-=5;
-        }
-    }
+    if(gameRunning === true) {
+        frameCount += GAMESPEED;
 
-    //SKY FILL
-    ctx.fillStyle = "rgb(5, 8, 15)";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    for(var i = 0; i < voxels.length; i++){
-
-        var voxel = voxels[i];
-
-        voxel.update();
-        voxel.draw();
-
-        if(voxels[i].type === 1){
-            fields++;
-        }else if(voxel.type === 2){
-            seas++;
-        }else if(voxel.type === 2.1){
-            oilrigs++;
-        }else if(voxel.type === 3){
-            forests++;
-        }else if(voxel.type === 3.1){
-            forestFactories++;
-        }else if(voxel.type === 4){
-            deserts++;
-        }else if(voxel.type === 4.1){
-            desertFactories++;
-        }else if(voxel.type === 5){
-            Mountains++;
-        }else if(voxel.type === 6){
-            cities++;
-        }else if(voxel.type === 6.1){
-            towns++;
+        if (tempMouseTimer2 > 0) {
+            tempMouseTimer2--;
         }
 
-        if(selected.length > 0) {
-            if (voxel.id === selected[0]) {
-                if(voxel.id === clickSelected[0]){
-                    voxel.animateUp(2);
-                }else{
-                    if(voxel.cardSelected === false){
-                        voxel.animateUp(0);
-                    }
-                }
-            } else {
-                if(voxel.id === clickSelected[0]){
-                    voxel.animateUp(2);
-                }else{
-                    if(voxel.cardSelected === false){
-                        voxel.animateUp(1);
-                    }
-                }
+        if (cardSelected !== 0) {
+            if (animationOffset < 200) {
+                animationOffset += 5;
+            }
+        } else {
+            if (animationOffset > 0) {
+                animationOffset -= 5;
             }
         }
 
-        if(voxels[i].id !== selected[0]) {
-            if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
-                ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
-                ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
-                ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 3))) {
+        //SKY FILL
+        ctx.fillStyle = "rgb(5, 8, 15)";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-                //voxels[i].animateUp(0);
+        for (var i = 0; i < voxels.length; i++) {
 
-                selected.unshift(voxels[i].id);
+            var voxel = voxels[i];
 
-                if(thisFrameClicked === true && tempMouseTimer < 1){
-                    if(voxels[i].id === clickSelected[0]) {
-                        clickSelected = [];
-                    }else{
-                        if(cardSelected !== 0 && tileSelectedByCard.length < cardNeedGive[cardSelected - 1][0]){
-                            clickSelected.unshift(voxels[i].id);
-                        }
-                        if(cardSelected !== 0){
-                            if(cards[cardSelected - 1][0] === voxels[i].type){
-                                tileSelectedByCard.unshift(voxels[i].id);
-                                //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
-                                //switchUpCards(cardSelected - 1);
-                            }
+            voxel.update();
+            voxel.draw();
+
+            if (voxels[i].type === 1) {
+                fields++;
+            } else if (voxel.type === 2) {
+                seas++;
+            } else if (voxel.type === 2.1) {
+                oilrigs++;
+            } else if (voxel.type === 3) {
+                forests++;
+            } else if (voxel.type === 3.1) {
+                forestFactories++;
+            } else if (voxel.type === 4) {
+                deserts++;
+            } else if (voxel.type === 4.1) {
+                desertFactories++;
+            } else if (voxel.type === 5) {
+                Mountains++;
+            } else if (voxel.type === 6) {
+                cities++;
+            } else if (voxel.type === 6.1) {
+                towns++;
+            }
+
+            if (selected.length > 0) {
+                if (voxel.id === selected[0]) {
+                    if (voxel.id === clickSelected[0]) {
+                        voxel.animateUp(2);
+                    } else {
+                        if (voxel.cardSelected === false) {
+                            voxel.animateUp(0);
                         }
                     }
-                    tempMouseTimer = 10;
-                }
-
-            } else {
-                if(thisFrameClicked === true) {
-                    if (voxels[i].id === clickSelected[0]) {
-                        clickSelected.unshift(999);
+                } else {
+                    if (voxel.id === clickSelected[0]) {
+                        voxel.animateUp(2);
+                    } else {
+                        if (voxel.cardSelected === false) {
+                            voxel.animateUp(1);
+                        }
                     }
                 }
             }
-        }else{
-            if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
-                ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
-                ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
-                ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 8))) {
 
-                if(thisFrameClicked === true && tempMouseTimer < 1){
-                    if(voxels[i].id === clickSelected[0]) {
-                        clickSelected = [];
-                    }else{
-                        if(cardSelected === 0){
-                            clickSelected.unshift(voxels[i].id);
-                        }
-                        if(cardSelected !== 0){
-                            if(cards[cardSelected - 1][0] === voxels[i].type){
-                                if(tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1]){
-                                    voxels[i].toBeDestroyed = true;
-                                }
-                                tileSelectedByCard.unshift(voxels[i].id);
-                                //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
-                                //switchUpCards(cardSelected - 1);
+            if (voxels[i].id !== selected[0]) {
+                if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
+                    ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
+                    ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
+                    ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 3))) {
+
+                    //voxels[i].animateUp(0);
+
+                    selected.unshift(voxels[i].id);
+
+                    if (thisFrameClicked === true && tempMouseTimer < 1) {
+                        if (voxels[i].id === clickSelected[0]) {
+                            clickSelected = [];
+                        } else {
+                            if (cardSelected !== 0 && tileSelectedByCard.length < cardNeedGive[cardSelected - 1][0]) {
+                                clickSelected.unshift(voxels[i].id);
                             }
-                            if(cards[cardSelected - 1][0] === 0){
-                                if(tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] - 1){
-                                    voxels[i].toBeDestroyed = true;
+                            if (cardSelected !== 0) {
+                                if (cards[cardSelected - 1][0] === voxels[i].type) {
+                                    tileSelectedByCard.unshift(voxels[i].id);
+                                    //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                    //switchUpCards(cardSelected - 1);
                                 }
-                                tileSelectedByCard.unshift(voxels[i].id);
                             }
                         }
-                        if(buildType !== 0) {
+                        tempMouseTimer = 10;
+                    }
+
+                } else {
+                    if (thisFrameClicked === true) {
+                        if (voxels[i].id === clickSelected[0]) {
+                            clickSelected.unshift(999);
+                        }
+                    }
+                }
+            } else {
+                if (((mousePosX > voxels[i].x + voxels[i].width / 3)) &&
+                    ((mousePosX < voxels[i].x + voxels[i].width - voxels[i].width / 3)) &&
+                    ((mousePosY > voxels[i].y + voxels[i].height / 8)) &&
+                    ((mousePosY < voxels[i].y + voxels[i].height - voxels[i].height / 8))) {
+
+                    if (thisFrameClicked === true && tempMouseTimer < 1) {
+                        if (voxels[i].id === clickSelected[0]) {
+                            clickSelected = [];
+                        } else {
+                            if (cardSelected === 0) {
+                                clickSelected.unshift(voxels[i].id);
+                            }
+                            if (cardSelected !== 0) {
+                                if (cards[cardSelected - 1][0] === voxels[i].type) {
+                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1]) {
+                                        voxels[i].toBeDestroyed = true;
+                                    }
+                                    tileSelectedByCard.unshift(voxels[i].id);
+                                    //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
+                                    //switchUpCards(cardSelected - 1);
+                                }
+                                if (cards[cardSelected - 1][0] === 0) {
+                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] - 1) {
+                                        voxels[i].toBeDestroyed = true;
+                                    }
+                                    tileSelectedByCard.unshift(voxels[i].id);
+                                }
+                            }
+                            if (buildType !== 0) {
+                                voxels[i].type = buildType;
+                            }
+                        }
+                        tempMouseTimer = 10;
+                    } else if (mouseHeld === true) {
+                        if (buildType !== 0) {
                             voxels[i].type = buildType;
                         }
                     }
-                    tempMouseTimer = 10;
-                }else if(mouseHeld === true){
-                    if(buildType !== 0) {
-                        voxels[i].type = buildType;
-                    }
+
+                } else {
+                    selected.unshift(999);
+
                 }
-
-            } else {
-                selected.unshift(999);
-
             }
+
         }
 
-    }
+        POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
+            + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
 
-    POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
-        + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
+        // PLAYER TURN ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-    // PLAYER TURN ---------------------------------------------------------------------------------------------------------------------------------------------------
+        /*if(frameCount % yearlength === 0){
+            if(cards.length < 2){
+                for(var m = 0; m < 2; m++){
+                    var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
-    if(frameCount % yearlength === 0){
-        if(cards.length < 2){
-            for(var m = 0; m < 2; m++){
+                    cards.push(cardCombos[randomx]);
+                    cardNeedGive.push(cardNeedGiveCombos[randomx]);
+
+                    cardYOffset[cards.length - 1] = 50;
+                }
+            }else if(cards.length < 3){
                 var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
                 cards.push(cardCombos[randomx]);
@@ -783,7 +815,10 @@ function game(){
 
                 cardYOffset[cards.length - 1] = 50;
             }
-        }else if(cards.length < 3){
+
+        }*/
+
+        if ((frameCount % yearlength === 0) && (cards.length < 3) && (POLUTION < LOSSPOINT)) {
             var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
             cards.push(cardCombos[randomx]);
@@ -792,789 +827,868 @@ function game(){
             cardYOffset[cards.length - 1] = 50;
         }
 
-    }
+        var xPosCard = [0, 0, 0];
+        var yPosCard = [0, 0, 0];
+        var cardWidth = WIDTH / 8;
+        var cardHalfWidth = cardWidth / 2;
+        var cardHeight = HEIGHT / 3.375;
+        var cardOffset = WIDTH / 10;
+        var cardMoveSpeed = 5;
 
-    var xPosCard = [0, 0, 0];
-    var yPosCard = [0, 0, 0];
-    var cardWidth = WIDTH/8;
-    var cardHalfWidth = cardWidth/2;
-    var cardHeight = HEIGHT/3.375;
-    var cardOffset = WIDTH/10;
-    var cardMoveSpeed = 5;
+        if (tempMouseTimer2 > 0) {
+            tempMouseTimer2--;
+        }
 
-    if(tempMouseTimer2 > 0){
-        tempMouseTimer2--;
-    }
+        if (cardSelected !== 0 && tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0]) {
+            tileSelectedByCard.splice(0, 1);
+        }
 
-    if(cardSelected !== 0 && tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0]){
-        tileSelectedByCard.splice(0, 1);
-    }
+        //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
-    //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
-
-    var clickCheck = false;
-    var opaqueCheck = false;
-
-    if (onClick(WIDTH/2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
-        tradeButtonOffset1 = 5;
-    }else{
-        tradeButtonOffset1 = 0;
-    }
-
-    if (onClick(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
-        tradeButtonOffset2 = 5;
-    }else{
-        tradeButtonOffset2 = 0;
-    }
-
-    if(cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
-        var biomesTraded = 0;
-        if (onClick(WIDTH/2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
-            for(var z = 0; z < tileSelectedByCard.length; z++) {
-                for(var p = 0; p < voxels.length; p++) {
-                    if (voxels[p].id === tileSelectedByCard[z]) {
-                        if(voxels[p].toBeDestroyed === false){
-                            voxels[p].type = (cards[cardSelected - 1][1]);
-                        }else{
-                            voxels[p].type = 0;
-                            voxels[p].toBeDestroyed = false;
-                        }
-                        //cardSelected = 0;
-                        biomesTraded++;
-                    }
-                }
-            }
-            cardNeedGive.splice(cardSelected - 1, 1);
-            cards.splice(cardSelected - 1, 1);
-            tempMouseTimer3 = 1;
+        if(POLUTION >= LOSSPOINT){
             tileSelectedByCard = [];
             cardSelected = 0;
         }
-    }
 
-    if(tempMouseTimer3 > 0){
-        tempMouseTimer3--;
-    }
+        var clickCheck = false;
+        var opaqueCheck = false;
 
-    if(cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
-        if (onClick(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
-            tileSelectedByCard = [];
-            cardSelected = 0;
-        }
-    }
-
-    for(var g = 0; g < cards.length; g++){
-
-        if(cardYOffset[g] < 0){
-            cardYOffset[g]+=cardMoveSpeed;
-        }
-
-        if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 8, HEIGHT / 3.375)) {
-            if(g + 1 === cardSelected){
-                cardOpacity = 0.3;
-            }
-            opaqueCheck = true;
+        if (onClick(WIDTH / 2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
+            tradeButtonOffset1 = 5;
         } else {
-            if(opaqueCheck === false){
-                cardOpacity = 1;
-            }
+            tradeButtonOffset1 = 0;
         }
 
-        if(onClick(cardPosX[g], HEIGHT - HEIGHT/8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)){
-            if(cardYOffset[g] < 100){
-                cardYOffset[g]+=cardMoveSpeed;
-            }
-        }else if(cardYOffset[g] > 0 && cardSelected !== (g+1)){
-            cardYOffset[g]-=cardMoveSpeed;
+        if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+            tradeButtonOffset2 = 5;
+        } else {
+            tradeButtonOffset2 = 0;
         }
 
-        if((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false) {
-            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
-                clickCheck = true;
-                if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
-                    cardSelected = g + 1;
-                } else {
-                    cardSelected = 0;
-                    tileSelectedByCard = [];
+        if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+            var biomesTraded = 0;
+            if (onClick(WIDTH / 2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
+                for (var z = 0; z < tileSelectedByCard.length; z++) {
+                    for (var p = 0; p < voxels.length; p++) {
+                        if (voxels[p].id === tileSelectedByCard[z]) {
+                            if (voxels[p].toBeDestroyed === false) {
+                                voxels[p].type = (cards[cardSelected - 1][1]);
+                            } else {
+                                voxels[p].type = 0;
+                                voxels[p].toBeDestroyed = false;
+                            }
+                            //cardSelected = 0;
+                            biomesTraded++;
+                        }
+                    }
                 }
-                tempMouseTimer2 = 20;
-                cardYOffset[g] = 100;
+                cardNeedGive.splice(cardSelected - 1, 1);
+                cards.splice(cardSelected - 1, 1);
+                tempMouseTimer3 = 1;
+                tileSelectedByCard = [];
+                cardSelected = 0;
+            }
+        }
+
+        if (tempMouseTimer3 > 0) {
+            tempMouseTimer3--;
+        }
+
+        if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+            if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+                tileSelectedByCard = [];
+                cardSelected = 0;
+            }
+        }
+
+        for (var g = 0; g < cards.length; g++) {
+
+            if (cardYOffset[g] < 0 && POLUTION < LOSSPOINT) {
+                cardYOffset[g] += cardMoveSpeed;
+            }else if (POLUTION > LOSSPOINT){
+                cardYOffset[g] -= cardMoveSpeed;
+            }
+
+            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 8, HEIGHT / 3.375)) {
+                if (g + 1 === cardSelected) {
+                    cardOpacity = 0.3;
+                }
+                opaqueCheck = true;
             } else {
-                if (clickCheck === false && cardSelected !== 0 && (tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0] || tileSelectedByCard.length === 0)) {
-                    //tileSelectedByCard = [];
-                    //cardSelected = 0;
+                if (opaqueCheck === false) {
+                    cardOpacity = 1;
                 }
             }
 
-            if(onClick(cardPosX[g], HEIGHT + HEIGHT/7 - cardYOffset[g] + animationOffset - HEIGHT/90, WIDTH/10, HEIGHT/45)){
-                switchUpCards(g);
+            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)) {
+                if (cardYOffset[g] < 100 && POLUTION < LOSSPOINT) {
+                    cardYOffset[g] += cardMoveSpeed;
+                }
+            } else if (cardYOffset[g] > 0 && cardSelected !== (g + 1) && POLUTION < LOSSPOINT) {
+                cardYOffset[g] -= cardMoveSpeed;
             }
-        }
-    }
 
-    //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
-
-    // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
-
-    if(frameCount % (60 * GAMESPEED) === 0){
-        TEMPPOINTS += 1;
-    }
-
-    if(frameCount % yearlength === 0){
-        yearVisible = true;
-        if(SEASON === "Spring"){
-            SEASON = "Summer";
-        }else if(SEASON === "Summer"){
-            SEASON = "Fall";
-        }else if(SEASON === "Fall"){
-            SEASON = "Winter";
-        }else if(SEASON === "Winter"){
-            SEASON = "Spring";
-            YEAR++;
-        }
-    }
-
-    for(var b = 0; b < 8; b++){
-        if(frameCount % yearlength === yearlength - 200 + b*25){
-            if(yearVisible === false){
-                yearVisible = true;
-            }else {
-                yearVisible = false;
-            }
-        }
-    }
-
-    if(TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0){
-        POINTS++;
-        tempTimer2 = 62;
-    }
-
-    if(tempTimer2 > 0){
-        tempTimer2--;
-    }
-
-    if(frameCount % yearlength === 0){
-
-        for(var f = 0; f < voxels.length; f++){
-
-            if(voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
-                var diceRollCity = Math.random();
-
-                if (diceRollCity < 0.3) {
-                    if (voxels[f].type === 6.1) {
-                        voxels[f].type = 6;
-                    }else{
-                        diceRollCity = 0.4;
+            if ((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && POLUTION < LOSSPOINT) {
+                if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
+                    clickCheck = true;
+                    if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
+                        cardSelected = g + 1;
+                    } else {
+                        cardSelected = 0;
+                        tileSelectedByCard = [];
+                    }
+                    tempMouseTimer2 = 20;
+                    cardYOffset[g] = 100;
+                } else {
+                    if (clickCheck === false && cardSelected !== 0 && (tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0] || tileSelectedByCard.length === 0)) {
+                        //tileSelectedByCard = [];
+                        //cardSelected = 0;
                     }
                 }
 
-                if(diceRollCity >= 0.3){
+                if (onClick(cardPosX[g], HEIGHT + HEIGHT / 7 - cardYOffset[g] + animationOffset - HEIGHT / 90, WIDTH / 10, HEIGHT / 45)) {
+                    switchUpCards(g);
+                }
+            }
+        }
 
-                    for (var m = 0; m < gridRoll.length; m++) {
-                        for (var n = 0; n < gridRoll[1].length; n++) {
-                            if (gridRoll[m][n] === voxels[f].id) {
+        //CARDMOUSEOVER END ---------------------------------------------------------------------------------------------------
 
-                                var diceRollCity2 = Math.floor(Math.random() * 4) + 1;
+        // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-                                if (diceRollCity2 === 1) {
-                                    if ((m > 1) && (voxels[gridRoll[m - 1][n]].type) !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
-                                        voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 2;
+        if (frameCount % (60 * GAMESPEED) === 0 && POLUTION < LOSSPOINT) {
+            TEMPPOINTS += 1;
+        }
+
+        if ((frameCount % yearlength === 0) && (POLUTION < LOSSPOINT)) {
+            yearVisible = true;
+            if (SEASON === "Spring") {
+                SEASON = "Summer";
+            } else if (SEASON === "Summer") {
+                SEASON = "Fall";
+            } else if (SEASON === "Fall") {
+                SEASON = "Winter";
+            } else if (SEASON === "Winter") {
+                SEASON = "Spring";
+                YEAR++;
+            }
+        }
+
+        for (var b = 0; b < 8; b++) {
+            if ((frameCount % yearlength === yearlength - 200 + b * 25) && POLUTION < LOSSPOINT) {
+                if (yearVisible === false) {
+                    yearVisible = true;
+                } else {
+                    yearVisible = false;
+                }
+            }
+        }
+
+        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0) {
+            POINTS++;
+            tempTimer2 = 62;
+        }
+
+        if (tempTimer2 > 0) {
+            tempTimer2--;
+        }
+
+        if (frameCount % yearlength === 0) {
+
+            for (var f = 0; f < voxels.length; f++) {
+
+                if (voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
+                    var diceRollCity = Math.random();
+
+                    if (diceRollCity < 0.3) {
+                        if (voxels[f].type === 6.1) {
+                            voxels[f].type = 6;
+                        } else {
+                            diceRollCity = 0.4;
+                        }
+                    }
+
+                    if (diceRollCity >= 0.3) {
+
+                        for (var m = 0; m < gridRoll.length; m++) {
+                            for (var n = 0; n < gridRoll[1].length; n++) {
+                                if (gridRoll[m][n] === voxels[f].id) {
+
+                                    var diceRollCity2 = Math.floor(Math.random() * 4) + 1;
+
+                                    if (diceRollCity2 === 1) {
+                                        if ((m > 1) && (voxels[gridRoll[m - 1][n]].type) !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
+                                            voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 2;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 2) {
-                                    if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
-                                        voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 3;
+                                    if (diceRollCity2 === 2) {
+                                        if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                            voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 3;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 3) {
-                                    if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && (voxels[gridRoll[m + 1][n]].type !== 0)) {
-                                        voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 4;
+                                    if (diceRollCity2 === 3) {
+                                        if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && (voxels[gridRoll[m + 1][n]].type !== 0)) {
+                                            voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 4;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 4) {
-                                    if ((n < mapSideLength - 1) && (voxels[gridRoll[m][n + 1]].type !== 5) && (voxels[gridRoll[m][n + 1]].type !== 0)) {
-                                        voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 1;
+                                    if (diceRollCity2 === 4) {
+                                        if ((n < mapSideLength - 1) && (voxels[gridRoll[m][n + 1]].type !== 5) && (voxels[gridRoll[m][n + 1]].type !== 0)) {
+                                            voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 1;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 1) {
-                                    if ((m > 1) && (voxels[gridRoll[m - 1][n]].type !== 5) && (voxels[gridRoll[m - 1][n]].type !== 0)) {
-                                        voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 2;
+                                    if (diceRollCity2 === 1) {
+                                        if ((m > 1) && (voxels[gridRoll[m - 1][n]].type !== 5) && (voxels[gridRoll[m - 1][n]].type !== 0)) {
+                                            voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 2;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 2) {
-                                    if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
-                                        voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
-                                    }else{
-                                        diceRollCity2 = 3;
+                                    if (diceRollCity2 === 2) {
+                                        if ((n > 0) && (voxels[gridRoll[m][n - 1]].type !== 5) && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                            voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
+                                        } else {
+                                            diceRollCity2 = 3;
+                                        }
                                     }
-                                }
 
-                                if (diceRollCity2 === 3) {
-                                    if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && voxels[gridRoll[m + 1][n]].type !== 0) {
-                                        voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
-                                    }else{
-                                        console.log("FAIL");
+                                    if (diceRollCity2 === 3) {
+                                        if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && voxels[gridRoll[m + 1][n]].type !== 0) {
+                                            voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
+                                        } else {
+                                            console.log("FAIL");
+                                        }
                                     }
-                                }
 
+                                }
                             }
                         }
+
                     }
 
                 }
-
             }
         }
-    }
 
-    if(selected.length > 1){
-        selected.splice(1, 1);
-    }
-
-    if(clickSelected.length > 1){
-        clickSelected.splice(1, 1);
-    }
-
-    window.onmousemove = logMouseMove;
-
-    if(tempMouseTimer > 0){
-        tempMouseTimer--;
-    }
-
-    if(thisFrameClicked === true){
-        if(mouseDownTimer < 20) {
-            mouseDownTimer++;
-        }else{
-            mouseHeld = true;
+        if (selected.length > 1) {
+            selected.splice(1, 1);
         }
 
-    }else{
-        mouseDownTimer = 0;
-    }
-
-    if (keys && keys[49]){buildType = 1;}
-    if (keys && keys[50]){buildType = 2;}
-    if (keys && keys[51]){buildType = 3;}
-    if (keys && keys[52]){buildType = 4;}
-    if (keys && keys[53]){buildType = 5;}
-    if (keys && keys[54]){buildType = 6.1;}
-    if (keys && keys[48]){buildType = 0;}
-
-    if (keys && keys[114] && frameTimer2 < 1){
-
-        if(DEBUG === false){
-            DEBUG = true;
-            frameTimer2 = 15;
-        }else{
-            DEBUG = false;
-            frameTimer2 = 15;
+        if (clickSelected.length > 1) {
+            clickSelected.splice(1, 1);
         }
 
-    }
+        window.onmousemove = logMouseMove;
 
-    if (keys && keys[27]){cardSelected = 0; tileSelectedByCard = [];}
-
-    if(frameTimer2 > 0){
-        frameTimer2--;
-    }
-
-
-    // DRAWING ---------------------------------------------------------------------------------------------------------------------------------
-
-    if(POLUTION < 10){
-        ctx.fillStyle = "rgba(51, 13, 13, 0)";
-    }else if(POLUTION < 25){
-        ctx.fillStyle = "rgba(51, 13, 13, 0.1)";
-    }else if(POLUTION < 40){
-        ctx.fillStyle = "rgba(51, 13, 13, 0.2)";
-    }else if(POLUTION < 50){
-        ctx.fillStyle = "rgba(51, 13, 13, 0.3)";
-    }else{
-        ctx.fillStyle = "rgba(51, 13, 13, 0.4)";
-    }
-
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    ctx.font = '20pt Courier New';
-    ctx.fillStyle = "rgb(255, 255, 255)";
-
-    ctx.textAlign="center";
-
-    if(POINTS > 9){
-        if(TEMPPOINTS % 60 > 9 && TEMPPOINTS !== 0){
-            ctx.fillText(POINTS + ":" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
-        }else{
-            ctx.fillText(POINTS + ":0" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+        if (tempMouseTimer > 0) {
+            tempMouseTimer--;
         }
-    }else{
-        if(TEMPPOINTS % 60 > 9  && TEMPPOINTS !== 0){
-            ctx.fillText("0" + POINTS + ":" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
-        }else{
-            ctx.fillText("0" + POINTS + ":0" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+
+        if (thisFrameClicked === true) {
+            if (mouseDownTimer < 20) {
+                mouseDownTimer++;
+            } else {
+                mouseHeld = true;
+            }
+
+        } else {
+            mouseDownTimer = 0;
         }
-    }
 
-    if(POLUTION < 0){
-        ctx.fillStyle = "rgb(0, 200, 0)";
-    }else if(POLUTION < 50){
-        ctx.fillStyle = "rgb(255, 140, 0)";
-    }else{
-        ctx.fillStyle = "rgb(200, 0, 0)";
-    }
+        if (keys && keys[49]) {
+            buildType = 1;
+        }
+        if (keys && keys[50]) {
+            buildType = 2;
+        }
+        if (keys && keys[51]) {
+            buildType = 3;
+        }
+        if (keys && keys[52]) {
+            buildType = 4;
+        }
+        if (keys && keys[53]) {
+            buildType = 5;
+        }
+        if (keys && keys[54]) {
+            buildType = 6.1;
+        }
+        if (keys && keys[48]) {
+            buildType = 0;
+        }
 
-    ctx.fillText("Pollution: " + POLUTION + "%",WIDTH/2,HEIGHT/6 - animationOffset);
+        if (keys && keys[114] && frameTimer2 < 1) {
 
-    ctx.font = '15pt Courier New';
-    ctx.fillStyle = "rgb(255, 255, 255)";
+            if (DEBUG === false) {
+                DEBUG = true;
+                frameTimer2 = 15;
+            } else {
+                DEBUG = false;
+                frameTimer2 = 15;
+            }
 
-    ctx.textAlign="left";
-    ctx.fillText("Fields: " + fields,WIDTH/90 - animationOffset,HEIGHT/10);
-    ctx.fillText("Seas: " + seas,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15));
-    ctx.fillText("Forests: " + forests,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*2);
-    ctx.fillText("Deserts: " + deserts,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*3);
-    ctx.fillText("Mountains: " + Mountains,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*4);
-    ctx.fillText("Cities: " + cities,WIDTH/90 - animationOffset,HEIGHT/10 + (HEIGHT/15)*5);
+        }
 
-    if(yearVisible === true) {
+        if (keys && keys[27]) {
+            cardSelected = 0;
+            tileSelectedByCard = [];
+        }
+
+        if (frameTimer2 > 0) {
+            frameTimer2--;
+        }
+
+
+        // DRAWING ---------------------------------------------------------------------------------------------------------------------------------
+
+        if (POLUTION < 10) {
+            ctx.fillStyle = "rgba(51, 13, 13, 0)";
+        } else if (POLUTION < 25) {
+            ctx.fillStyle = "rgba(51, 13, 13, 0.1)";
+        } else if (POLUTION < 40) {
+            ctx.fillStyle = "rgba(51, 13, 13, 0.2)";
+        } else if (POLUTION < 50) {
+            ctx.fillStyle = "rgba(51, 13, 13, 0.3)";
+        } else {
+            ctx.fillStyle = "rgba(51, 13, 13, 0.4)";
+        }
+
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.font = '20pt Courier New';
         ctx.fillStyle = "rgb(255, 255, 255)";
-    }else{
-        ctx.fillStyle = "rgb(200, 0, 0)";
-    }
 
-    ctx.textAlign = "center";
-    ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - HEIGHT/50 - animationOffset);
-
-    ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
-    ctx.fillRect(WIDTH - WIDTH/7 + animationOffset, HEIGHT/20, WIDTH/8, HEIGHT/2.5);
-
-    //GUI -------------------------------------------------------------------------------------------------------------------------------------------
-
-    for(var b = 0; b < cards.length; b++){
-        if(cards[b][0] === 1 && cards[b][1] === 3){
-            xPosCard[b] = 0;
-            if(cardNeedGive[b][0] === 2){
-                yPosCard[b] = 400;
-            }else if(cardNeedGive[b][0] === 3){
-                yPosCard[b] = 400;
-                xPosCard[b] = 900;
-            }
-        }else if(cards[b][0] === 1 && cards[b][1] === 2){
-            xPosCard[b] = 900;
-        }else if(cards[b][0] === 1 && cards[b][1] === 5){
-            xPosCard[b] = 1200;
-        }else if(cards[b][0] === 4 && cards[b][1] === 1){
-            xPosCard[b] = 300;
-            if(cardNeedGive[b][0] > 1){
-                yPosCard[b] = 400;
-                xPosCard[b] = 600;
-            }
-        }else if(cards[b][0] === 4 && cards[b][1] === 5){
-            xPosCard[b] = 600;
-        }else if(cards[b][0] === 3 && cards[b][1] === 5){
-            xPosCard[b] = 300;
-            yPosCard[b] = 400;
-        }else if(cards[b][0] === 0 && cards[b][1] === 0){
-            xPosCard[b] = 1200;
-            yPosCard[b] = 400;
-        }else{
-            xPosCard[b] = 0;
-        }
-    }
-
-    for(var q = 0; q < cards.length; q++) {
-        cardPosX[q] = WIDTH / 2 - cardHalfWidth - cardOffset * ((cards.length) / 2) + 2 * (WIDTH / 8 - WIDTH / 10) + cardOffset * q;
-    }
-
-    for(var l = 0; l < cards.length; l++){
-        if(cardSelected !== (l+1) || cardSelected === 0){
-            ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l] + animationOffset, WIDTH/8, cardHeight);
-            ctx.textAlign = "center";
-            ctx.font = "bold 8pt Courier";
-            ctx.fillStyle = "red";
-            ctx.fillText("Discard", cardPosX[l] + cardHalfWidth, HEIGHT + HEIGHT/7 - cardYOffset[l] + animationOffset);
-        }else{
-            ctx.globalAlpha = cardOpacity;
-            ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT/8 - cardYOffset[l], WIDTH/8, cardHeight);
-            ctx.globalAlpha = 1;
-        }
-    }
-
-    if(cardSelected !== 0 && !(cards.length < 1)){
-        if((cards[cardSelected - 1][0]) === 1){
-            word1 = "Field";
-        }else if((cards[cardSelected - 1][0]) === 4){
-            word1 = "Desert";
-        }
-
-        if(cards[cardSelected - 1][1] === 1){
-            word2 = "Field";
-        }else if(cards[cardSelected - 1][1] === 2){
-            word2 = "Sea";
-        }else if(cards[cardSelected - 1][1] === 3){
-            word2 = "Forest";
-        }else if(cards[cardSelected - 1][1] === 5){
-            word2 = "Mountain";
-        }
-    }
-
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    ctx.font = '15pt Courier New';
-
-    if(cardSelected !== 0){
-        num1 = cardNeedGive[cardSelected - 1][0];
-        num2 = cardNeedGive[cardSelected - 1][1];
-        cardChosen = cards[cardSelected - 1][0];
-    }
-    if(cardChosen !== 0){
-        ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
-    }else{
-        ctx.fillText("Pick any tile to destroy", WIDTH/2, (-150) + animationOffset);
-    }
-
-    if(num2 - num1 !== 0){
         ctx.textAlign = "center";
-        ctx.fillStyle = "white";
-        ctx.font = '10pt Courier New';
-        ctx.fillText("The last tile you pick (the one with the red cross) will be destroyed.", WIDTH/2, (-130) + animationOffset);
-    }
+
+        if (endGameTimer % 25 === 0 && endGameTimer > 0) {
+            if (timerRed === false) {
+                timerRed = true;
+            } else {
+                timerRed = false;
+            }
+        }
+
+        if(timerRed === true){
+            ctx.fillStyle = 'red';
+        }else{
+            ctx.fillStyle = 'white';
+        }
+
+        if (POINTS > 9) {
+            if (TEMPPOINTS % 60 > 9 && TEMPPOINTS !== 0) {
+                ctx.fillText(POINTS + ":" + (TEMPPOINTS % (60)), WIDTH / 2, HEIGHT / 10 - animationOffset);
+            } else {
+                ctx.fillText(POINTS + ":0" + (TEMPPOINTS % (60)), WIDTH / 2, HEIGHT / 10 - animationOffset);
+            }
+        } else {
+            if (TEMPPOINTS % 60 > 9 && TEMPPOINTS !== 0) {
+                ctx.fillText("0" + POINTS + ":" + (TEMPPOINTS % (60)), WIDTH / 2, HEIGHT / 10 - animationOffset);
+            } else {
+                ctx.fillText("0" + POINTS + ":0" + (TEMPPOINTS % (60)), WIDTH / 2, HEIGHT / 10 - animationOffset);
+            }
+        }
+
+        ctx.globalAlpha = GUIOpacity;
+
+        if (POLUTION < 0) {
+            ctx.fillStyle = "rgb(0, 200, 0)";
+        } else if (POLUTION < 50) {
+            ctx.fillStyle = "rgb(255, 140, 0)";
+        } else {
+            ctx.fillStyle = "rgb(200, 0, 0)";
+        }
+        ctx.fillText("Pollution: " + POLUTION + "%", WIDTH / 2, HEIGHT / 6 - animationOffset);
+
+        ctx.font = '15pt Courier New';
+        ctx.fillStyle = "rgb(255, 255, 255)";
+
+        ctx.textAlign = "left";
+        ctx.fillText("Fields: " + fields, WIDTH / 90 - animationOffset, HEIGHT / 10);
+        ctx.fillText("Seas: " + seas, WIDTH / 90 - animationOffset, HEIGHT / 10 + (HEIGHT / 15));
+        ctx.fillText("Forests: " + forests, WIDTH / 90 - animationOffset, HEIGHT / 10 + (HEIGHT / 15) * 2);
+        ctx.fillText("Deserts: " + deserts, WIDTH / 90 - animationOffset, HEIGHT / 10 + (HEIGHT / 15) * 3);
+        ctx.fillText("Mountains: " + Mountains, WIDTH / 90 - animationOffset, HEIGHT / 10 + (HEIGHT / 15) * 4);
+        ctx.fillText("Cities: " + cities, WIDTH / 90 - animationOffset, HEIGHT / 10 + (HEIGHT / 15) * 5);
+
+        if (yearVisible === true) {
+            ctx.fillStyle = "rgb(255, 255, 255)";
+        } else {
+            ctx.fillStyle = "rgb(200, 0, 0)";
+        }
+
+        ctx.textAlign = "center";
+        ctx.fillText("Year " + YEAR + " - " + SEASON, WIDTH / 2, HEIGHT / 4 - HEIGHT / 50 - animationOffset);
+
+        ctx.fillStyle = "rgba(30, 30, 30, 0.5)";
+        ctx.fillRect(WIDTH - WIDTH / 7 + animationOffset, HEIGHT / 20, WIDTH / 8, HEIGHT / 2.5);
+
+        ctx.globalAlpha = 1;
 
 
-    if(cardSelected !== 0 && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]){
+        //GUI -------------------------------------------------------------------------------------------------------------------------------------------
+
+        for (var b = 0; b < cards.length; b++) {
+            if (cards[b][0] === 1 && cards[b][1] === 3) {
+                xPosCard[b] = 0;
+                if (cardNeedGive[b][0] === 2) {
+                    yPosCard[b] = 400;
+                } else if (cardNeedGive[b][0] === 3) {
+                    yPosCard[b] = 400;
+                    xPosCard[b] = 900;
+                }
+            } else if (cards[b][0] === 1 && cards[b][1] === 2) {
+                xPosCard[b] = 900;
+            } else if (cards[b][0] === 1 && cards[b][1] === 5) {
+                xPosCard[b] = 1200;
+            } else if (cards[b][0] === 4 && cards[b][1] === 1) {
+                xPosCard[b] = 300;
+                if (cardNeedGive[b][0] > 1) {
+                    yPosCard[b] = 400;
+                    xPosCard[b] = 600;
+                }
+            } else if (cards[b][0] === 4 && cards[b][1] === 5) {
+                xPosCard[b] = 600;
+            } else if (cards[b][0] === 3 && cards[b][1] === 5) {
+                xPosCard[b] = 300;
+                yPosCard[b] = 400;
+            } else if (cards[b][0] === 0 && cards[b][1] === 0) {
+                xPosCard[b] = 1200;
+                yPosCard[b] = 400;
+            } else {
+                xPosCard[b] = 0;
+            }
+        }
+
+        for (var q = 0; q < cards.length; q++) {
+            cardPosX[q] = WIDTH / 2 - cardHalfWidth - cardOffset * ((cards.length) / 2) + 2 * (WIDTH / 8 - WIDTH / 10) + cardOffset * q;
+        }
+
+        for (var l = 0; l < cards.length; l++) {
+            if (cardSelected !== (l + 1) || cardSelected === 0) {
+                ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT / 8 - cardYOffset[l] + animationOffset, WIDTH / 8, cardHeight);
+                ctx.textAlign = "center";
+                ctx.font = "bold 8pt Courier";
+                ctx.fillStyle = "red";
+                ctx.fillText("Discard", cardPosX[l] + cardHalfWidth, HEIGHT + HEIGHT / 7 - cardYOffset[l] + animationOffset);
+            } else {
+                ctx.globalAlpha = cardOpacity;
+                ctx.drawImage(voxelsGUI, xPosCard[l], yPosCard[l], 300, 400, cardPosX[l], HEIGHT - HEIGHT / 8 - cardYOffset[l], WIDTH / 8, cardHeight);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        if (cardSelected !== 0 && !(cards.length < 1)) {
+            if ((cards[cardSelected - 1][0]) === 1) {
+                word1 = "Field";
+            } else if ((cards[cardSelected - 1][0]) === 4) {
+                word1 = "Desert";
+            }
+
+            if (cards[cardSelected - 1][1] === 1) {
+                word2 = "Field";
+            } else if (cards[cardSelected - 1][1] === 2) {
+                word2 = "Sea";
+            } else if (cards[cardSelected - 1][1] === 3) {
+                word2 = "Forest";
+            } else if (cards[cardSelected - 1][1] === 5) {
+                word2 = "Mountain";
+            }
+        }
+
         ctx.textAlign = "center";
         ctx.fillStyle = "white";
         ctx.font = '15pt Courier New';
-        var rectWidth = 150;
-        var rectHeight = 40;
-        ctx.fillStyle = "gray";
-        ctx.fillRect(WIDTH/2 - rectWidth, (-100) + animationOffset + tradeButtonOffset1, rectWidth, rectHeight);
-        ctx.fillStyle = "rgb(35, 35, 35)";
-        ctx.fillRect(WIDTH/2 - rectWidth + 2, (-100) + animationOffset + 2 + tradeButtonOffset1, rectWidth - 4, rectHeight - 4);
 
-        ctx.fillStyle = "white";
-        ctx.fillText("Accept", WIDTH/2 - rectWidth/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset1);
+        if (cardSelected !== 0) {
+            num1 = cardNeedGive[cardSelected - 1][0];
+            num2 = cardNeedGive[cardSelected - 1][1];
+            cardChosen = cards[cardSelected - 1][0];
+        }
+        if (cardChosen !== 0) {
+            ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH / 2, (-150) + animationOffset);
+        } else {
+            ctx.fillText("Pick any tile to destroy", WIDTH / 2, (-150) + animationOffset);
+        }
 
-        ctx.fillStyle = "gray";
-        ctx.fillRect(WIDTH/2, (-100) + animationOffset + tradeButtonOffset2, rectWidth, rectHeight);
-        ctx.fillStyle = "rgb(35, 35, 35)";
-        ctx.fillRect(WIDTH/2 + 2, (-100) + animationOffset + 2 + tradeButtonOffset2, rectWidth - 4, rectHeight - 4);
+        if (num2 - num1 !== 0) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "white";
+            ctx.font = '10pt Courier New';
+            ctx.fillText("The last tile you pick (the one with the red cross) will be destroyed.", WIDTH / 2, (-130) + animationOffset);
+        }
 
-        ctx.fillStyle = "white";
-        ctx.fillText("Decline", WIDTH/2 + rectWidth/2, (-100) + animationOffset + 2 + rectHeight/2 + tradeButtonOffset2);
-    }
 
-    //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
+        if (cardSelected !== 0 && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "white";
+            ctx.font = '15pt Courier New';
+            var rectWidth = 150;
+            var rectHeight = 40;
+            ctx.fillStyle = "gray";
+            ctx.fillRect(WIDTH / 2 - rectWidth, (-100) + animationOffset + tradeButtonOffset1, rectWidth, rectHeight);
+            ctx.fillStyle = "rgb(35, 35, 35)";
+            ctx.fillRect(WIDTH / 2 - rectWidth + 2, (-100) + animationOffset + 2 + tradeButtonOffset1, rectWidth - 4, rectHeight - 4);
 
-    if(clickSelected.length > 0){
-        for(i = 0; i < voxels.length; i++){
+            ctx.fillStyle = "white";
+            ctx.fillText("Accept", WIDTH / 2 - rectWidth / 2, (-100) + animationOffset + 2 + rectHeight / 2 + tradeButtonOffset1);
 
-            var selectedVoxelType;
+            ctx.fillStyle = "gray";
+            ctx.fillRect(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, rectWidth, rectHeight);
+            ctx.fillStyle = "rgb(35, 35, 35)";
+            ctx.fillRect(WIDTH / 2 + 2, (-100) + animationOffset + 2 + tradeButtonOffset2, rectWidth - 4, rectHeight - 4);
 
-            if(voxels[i].id === clickSelected[0]){
-                selectedVoxelType = voxels[i].type;
-                //break;
-            }
-            if(selectedVoxelType === 1){
+            ctx.fillStyle = "white";
+            ctx.fillText("Decline", WIDTH / 2 + rectWidth / 2, (-100) + animationOffset + 2 + rectHeight / 2 + tradeButtonOffset2);
+        }
 
-                ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+        //TOOLTIP -----------------------------------------------------------------------------------------------------------------------------------------
 
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
+        ctx.globalAlpha = GUIOpacity;
 
-                ctx.textAlign="center";
-                ctx.fillText("Fields" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
+        if (clickSelected.length > 0) {
+            for (i = 0; i < voxels.length; i++) {
 
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
+                var selectedVoxelType;
 
-                ctx.fillText(fieldDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(fieldDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(fieldDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(fieldPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
+                if (voxels[i].id === clickSelected[0]) {
+                    selectedVoxelType = voxels[i].type;
+                    //break;
                 }
+                if (selectedVoxelType === 1) {
 
-                ctx.fillText("Pollution: " + fieldPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
+                    ctx.drawImage(voxelsG, 0, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
 
-            }else if(selectedVoxelType === 2){
-                ctx.drawImage(voxelsG, 300, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
+                    ctx.textAlign = "center";
+                    ctx.fillText("Fields", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
 
-                ctx.textAlign="center";
-                ctx.fillText("Sea" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
 
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
+                    ctx.fillText(fieldDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(fieldDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(fieldDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
 
-                ctx.fillText(seaDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(seaDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(seaDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
+                    ctx.font = '10pt Courier New';
+                    if (fieldPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
 
-                ctx.font = '10pt Courier New';
-                if(seaPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
+                    ctx.fillText("Pollution: " + fieldPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 2) {
+                    ctx.drawImage(voxelsG, 300, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Sea", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(seaDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(seaDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(seaDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (seaPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + seaPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+                } else if (selectedVoxelType === 2.1) {
+                    ctx.drawImage(voxelsG, 300, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Oil Rig", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(oilRigDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(oilRigDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(oilRigDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (oilRigPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + oilRigPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+                } else if (selectedVoxelType === 3) {
+
+                    ctx.drawImage(voxelsG, 600, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Forest", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(forestDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(forestDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(forestDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (forestPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + forestPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 3.1) {
+
+                    ctx.drawImage(voxelsG, 600, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Industrial Unit", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(forestFactoryDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(forestFactoryDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(forestFactoryDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (forestFactoryPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + forestFactoryPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 4) {
+
+                    ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Desert", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(desertDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(desertDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(desertDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (desertPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + desertPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 4.1) {
+
+                    ctx.drawImage(voxelsG, 900, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Factory", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(desertFactoryDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(desertFactoryDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(desertFactoryDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (desertFactoryPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 5) {
+
+                    ctx.drawImage(voxelsG, 1500, 800, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Mountains", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(MountainDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(MountainDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(MountainDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (MountainPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + MountainPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 6) {
+
+                    ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("City", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(cityDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(cityDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(cityDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (cityPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + cityPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
+                } else if (selectedVoxelType === 6.1) {
+
+                    ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
+
+                    ctx.font = '12pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.textAlign = "center";
+                    ctx.fillText("Town", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
+
+                    ctx.font = '9pt Courier New';
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+
+                    ctx.fillText(townDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
+                    ctx.fillText(townDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
+                    ctx.fillText(townDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
+
+                    ctx.font = '10pt Courier New';
+                    if (townPol <= 0) {
+                        ctx.fillStyle = "rgb(0, 200, 0)";
+                    } else {
+                        ctx.fillStyle = "rgb(200, 0, 0)";
+                    }
+
+                    ctx.fillText("Pollution: " + townPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
+
                 }
-
-                ctx.fillText("Pollution: " + seaPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-            }else if(selectedVoxelType === 2.1){
-                ctx.drawImage(voxelsG, 300, 400, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("Oil Rig" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(oilRigDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(oilRigDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(oilRigDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(oilRigPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + oilRigPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-            }else if(selectedVoxelType === 3){
-
-                ctx.drawImage(voxelsG, 600, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("Forest" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(forestDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(forestDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(forestDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(forestPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + forestPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-
-            }else if(selectedVoxelType === 3.1){
-
-                ctx.drawImage(voxelsG, 600, 400, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("Industrial Unit" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(forestFactoryDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(forestFactoryDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(forestFactoryDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(forestFactoryPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + forestFactoryPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-
-            }else if(selectedVoxelType === 4){
-
-                ctx.drawImage(voxelsG, 900, 0, 298, 400, WIDTH - WIDTH/9 + animationOffset, HEIGHT/18, WIDTH/15, WIDTH/11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("Desert" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(desertDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(desertDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(desertDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(desertPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + desertPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-
-            }else if(selectedVoxelType === 4.1) {
-
-                ctx.drawImage(voxelsG, 900, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign = "center";
-                ctx.fillText("Factory", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(desertFactoryDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
-                ctx.fillText(desertFactoryDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
-                ctx.fillText(desertFactoryDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
-
-                ctx.font = '10pt Courier New';
-                if (desertFactoryPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                } else {
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + desertFactoryPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
-
-            }else if(selectedVoxelType === 5) {
-
-                ctx.drawImage(voxelsG, 1500, 800, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign = "center";
-                ctx.fillText("Mountains", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(MountainDesc1, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + HEIGHT / 40 + HEIGHT / 50);
-                ctx.fillText(MountainDesc2, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 2 + HEIGHT / 50);
-                ctx.fillText(MountainDesc3, WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 3 + HEIGHT / 50);
-
-                ctx.font = '10pt Courier New';
-                if (MountainPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                } else {
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + MountainPol.toString() + "%", WIDTH - WIDTH / 13 + animationOffset, HEIGHT / 4 + (HEIGHT / 40) * 5 + HEIGHT / 50);
-
-            }else if(selectedVoxelType === 6){
-
-                ctx.drawImage(voxelsG, 1200, 400, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("City" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(cityDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(cityDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(cityDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(cityPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + cityPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-
-            }else if(selectedVoxelType === 6.1){
-
-                ctx.drawImage(voxelsG, 1200, 0, 298, 400, WIDTH - WIDTH / 9 + animationOffset, HEIGHT / 18, WIDTH / 15, WIDTH / 11.25);
-
-                ctx.font = '12pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.textAlign="center";
-                ctx.fillText("Town" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4);
-
-                ctx.font = '9pt Courier New';
-                ctx.fillStyle = "rgb(255, 255, 255)";
-
-                ctx.fillText(townDesc1 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + HEIGHT/40 + HEIGHT/50);
-                ctx.fillText(townDesc2 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*2 + HEIGHT/50);
-                ctx.fillText(townDesc3 , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*3 + HEIGHT/50);
-
-                ctx.font = '10pt Courier New';
-                if(townPol <= 0) {
-                    ctx.fillStyle = "rgb(0, 200, 0)";
-                }else{
-                    ctx.fillStyle = "rgb(200, 0, 0)";
-                }
-
-                ctx.fillText("Pollution: " + townPol.toString() + "%" , WIDTH - WIDTH/13 + animationOffset, HEIGHT/4 + (HEIGHT/40)*5 + HEIGHT/50);
-
             }
         }
+
+        ctx.globalAlpha = 1;
+
+        if(POLUTION >= 50){
+            endGameTimer++;
+            if(GUIOpacity > 0.005){
+                GUIOpacity -= 0.005;
+            }
+
+            if(endGameTimer === 300){
+                gameRunning = false;
+                GAMESTATE = "LOSS";
+            }
+        }
+
+        if(winYears[LEVEL] === YEAR){
+            gameRunning = false;
+            GAMESTATE = "WIN";
+        }
+
+        forests = 0;
+        deserts = 0;
+        fields = 0;
+        seas = 0;
+        cities = 0;
+        oilrigs = 0;
+        towns = 0;
+        desertFactories = 0;
+        forestFactories = 0;
+        Mountains = 0;
+
+    }else{
+
+        menuAnimationTimer++;
+
+        ctx.fillStyle = "rgb(5, 8, 15)";
+        ctx.globalAlpha = blackScreen1Opacity;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.globalAlpha = 1;
+
+        if(GAMESTATE === "LOSS"){
+
+            if(blackScreen1Opacity < 0.8){
+                blackScreen1Opacity+= 0.005;
+            }
+
+            ctx.font = '20pt Courier New';
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.fillText("Game Over", WIDTH/2, HEIGHT/3);
+
+        }else if(GAMESTATE === "WIN"){
+
+            if(blackScreen1Opacity < 0.8){
+                blackScreen1Opacity+= 0.005;
+            }
+
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.fillText("You Win!", WIDTH/2, HEIGHT/2);
+        }
+
     }
 
-    forests = 0;
-    deserts = 0;
-    fields = 0;
-    seas = 0;
-    cities = 0;
-    oilrigs = 0;
-    towns = 0;
-    desertFactories = 0;
-    forestFactories = 0;
-    Mountains = 0;
-
-    if(gameRunning === true) {
-
-
-
-        /* HIDE ALL DIVS
-        document.getElementById("startMenu").setAttribute("hidden", "hidden");
-        document.getElementById("resetMenu").setAttribute("hidden", "hidden");
-        document.getElementById("instructionsMenu").setAttribute("hidden", "hidden");
-        */
-
-        /* SPAWNING
-        if(frameCount % spawnRate === 0){
-            addWave();
-        }
-        */
 
         /* ON LOSS
         if(Lose condition){
@@ -1583,13 +1697,12 @@ function game(){
         }
         */
 
-    }
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
 function Start(){
-    if(gameRunning == false){
+    if(gameRunning === false){
         SCORE = 0;
         frameCount = 0;
 
