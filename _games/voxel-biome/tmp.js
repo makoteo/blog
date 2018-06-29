@@ -13,7 +13,7 @@ var POLUTION = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
-var GAMESPEED = 2;
+var GAMESPEED = 10; //DEFAULT 2
 
 var DEBUG = false;
 
@@ -167,6 +167,8 @@ var actionSelected = 0;
 var tempMouseTimer2 = 0;
 var tempMouseTimer3 = 0;
 
+var tempTimer2 = 0;
+
 var cardYOffset = [0, 0, 0];
 
 var cardSelected = 0;
@@ -181,7 +183,8 @@ var cardCombos = [
     [1, 3],
     [3, 5],
     [4, 1],
-    [1, 3]
+    [1, 3],
+    [0, 0]
 
 ];
 
@@ -195,7 +198,8 @@ var cardNeedGiveCombos = [
     [2, 1],
     [3, 2],
     [2, 1],
-    [3, 2]
+    [3, 2],
+    [1, 1]
 
 ];
 
@@ -217,6 +221,7 @@ var word2 = "";
 
 var num1 = 0;
 var num2 = 0;
+var cardChosen = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -542,23 +547,24 @@ function Voxel(x, y, width, height, type){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-var maxGridLength = gridTest[0].length;
+var map = gridTest;
+var maxGridLength = map[0].length;
 
-for(var i = 0; i < gridTest[0].length; i++) {
+for(var i = 0; i < map.length; i++) {
     for(var j = 0; j < maxGridLength; j++) {
-        if(gridTest[i][j] === 0){
+        if(map[i][j] === 0){
 
-        }else if(gridTest[i][j] === 1){
+        }else if(map[i][j] === 1){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
-        }else if(gridTest[i][j] === 2){
+        }else if(map[i][j] === 2){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
-        }else if(gridTest[i][j] === 3){
+        }else if(map[i][j] === 3){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
-        }else if(gridTest[i][j] === 4){
+        }else if(map[i][j] === 4){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
-        }else if(gridTest[i][j] === 5){
+        }else if(map[i][j] === 5){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5));
-        }else if(gridTest[i][j] === 6){
+        }else if(map[i][j] === 6){
             voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15)) - WIDTH/50), (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
@@ -713,6 +719,12 @@ function game(){
                                 tileSelectedByCard.unshift(voxels[i].id);
                                 //voxels[i].fallAwayAndReplace(cards[cardSelected - 1][1]);
                                 //switchUpCards(cardSelected - 1);
+                            }
+                            if(cards[cardSelected - 1][0] === 0){
+                                if(tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] - 1){
+                                    voxels[i].toBeDestroyed = true;
+                                }
+                                tileSelectedByCard.unshift(voxels[i].id);
                             }
                         }
                         if(buildType !== 0) {
@@ -875,7 +887,10 @@ function game(){
 
     // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-    TEMPPOINTS += (((fields) + (seas) + (forests * 2) - (deserts) + (Mountains))/1000) * GAMESPEED;
+    if(frameCount % (60 * GAMESPEED) === 0){
+        TEMPPOINTS += 1;
+    }
+
     if(frameCount % yearlength === 0){
         yearVisible = true;
         if(SEASON === "Spring"){
@@ -900,7 +915,14 @@ function game(){
         }
     }
 
-    POINTS = Math.round(TEMPPOINTS);
+    if(TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0){
+        POINTS++;
+        tempTimer2 = 62;
+    }
+
+    if(tempTimer2 > 0){
+        tempTimer2--;
+    }
 
     if(frameCount % yearlength === 0){
 
@@ -1024,7 +1046,20 @@ function game(){
     ctx.fillStyle = "rgb(255, 255, 255)";
 
     ctx.textAlign="center";
-    ctx.fillText("Points: " + POINTS,WIDTH/2,HEIGHT/10 - animationOffset);
+
+    if(POINTS > 9){
+        if(TEMPPOINTS % 60 > 9 && TEMPPOINTS !== 0){
+            ctx.fillText(POINTS + ":" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+        }else{
+            ctx.fillText(POINTS + ":0" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+        }
+    }else{
+        if(TEMPPOINTS % 60 > 9  && TEMPPOINTS !== 0){
+            ctx.fillText("0" + POINTS + ":" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+        }else{
+            ctx.fillText("0" + POINTS + ":0" + (TEMPPOINTS % (60)),WIDTH/2,HEIGHT/10 - animationOffset);
+        }
+    }
 
     if(POLUTION < 0){
         ctx.fillStyle = "rgb(0, 200, 0)";
@@ -1085,6 +1120,9 @@ function game(){
         }else if(cards[b][0] === 3 && cards[b][1] === 5){
             xPosCard[b] = 300;
             yPosCard[b] = 400;
+        }else if(cards[b][0] === 0 && cards[b][1] === 0){
+            xPosCard[b] = 1200;
+            yPosCard[b] = 400;
         }else{
             xPosCard[b] = 0;
         }
@@ -1133,8 +1171,13 @@ function game(){
     if(cardSelected !== 0){
         num1 = cardNeedGive[cardSelected - 1][0];
         num2 = cardNeedGive[cardSelected - 1][1];
+        cardChosen = cards[cardSelected - 1][0];
     }
-    ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+    if(cardChosen !== 0){
+        ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH/2, (-150) + animationOffset);
+    }else{
+        ctx.fillText("Pick any tile to destroy", WIDTH/2, (-150) + animationOffset);
+    }
 
     if(num2 - num1 !== 0){
         ctx.textAlign = "center";
