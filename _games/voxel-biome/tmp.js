@@ -208,7 +208,6 @@ var cardCombos = [
 
     [1, 2],
     [1, 3],
-    [1, 3],
     [1, 5],
     [4, 1],
     [4, 5],
@@ -220,7 +219,7 @@ var cardCombos = [
 
 ];
 
-var cardNeedGiveCombos = [
+var cardNeedGiveCombos = [ // REMEMBER TO UPDATE ALONG WITH CARD COMBOS
 
     [1, 1],
     [1, 1],
@@ -580,7 +579,7 @@ function Voxel(x, y, width, height, type){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 if(LEVEL === 0){
-    cardLevelLimitation = 6;
+    cardLevelLimitation = 0; // 6
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
 }
@@ -759,7 +758,7 @@ function game(){
                             }
                             if (cardSelected !== 0) {
                                 if (cards[cardSelected - 1][0] === voxels[i].type) {
-                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1]) {
+                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] && tileSelectedByCard.length <= cardNeedGive[cardSelected - 1][0] - 1) {
                                         voxels[i].toBeDestroyed = true;
                                     }
                                     tileSelectedByCard.unshift(voxels[i].id);
@@ -767,7 +766,7 @@ function game(){
                                     //switchUpCards(cardSelected - 1);
                                 }
                                 if (cards[cardSelected - 1][0] === 0) {
-                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] - 1) {
+                                    if (tileSelectedByCard.length >= cardNeedGive[cardSelected - 1][1] - 1 && tileSelectedByCard.length <= cardNeedGive[cardSelected - 1][0] - 1) {
                                         voxels[i].toBeDestroyed = true;
                                     }
                                     tileSelectedByCard.unshift(voxels[i].id);
@@ -871,14 +870,20 @@ function game(){
                 for (var z = 0; z < tileSelectedByCard.length; z++) {
                     for (var p = 0; p < voxels.length; p++) {
                         if (voxels[p].id === tileSelectedByCard[z]) {
-                            if (voxels[p].toBeDestroyed === false) {
-                                voxels[p].type = (cards[cardSelected - 1][1]);
-                            } else {
-                                voxels[p].type = 0;
-                                voxels[p].toBeDestroyed = false;
+                            if(cardNeedGive[cardSelected - 1][0] !== 0 && voxels[p].type !== cardCombos[cardSelected - 1][0]){
+                                console.log("Hey!");
+                                tileSelectedByCard = [];
+                                cardSelected = 0;
+                            }else{
+                                if (voxels[p].toBeDestroyed === false) {
+                                    voxels[p].type = (cards[cardSelected - 1][1]);
+                                } else {
+                                    voxels[p].type = 0;
+                                    voxels[p].toBeDestroyed = false;
+                                }
+                                //cardSelected = 0;
+                                biomesTraded++;
                             }
-                            //cardSelected = 0;
-                            biomesTraded++;
                         }
                     }
                 }
