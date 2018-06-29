@@ -870,11 +870,7 @@ function game(){
                 for (var z = 0; z < tileSelectedByCard.length; z++) {
                     for (var p = 0; p < voxels.length; p++) {
                         if (voxels[p].id === tileSelectedByCard[z]) {
-                            if(cardNeedGive[cardSelected - 1][0] !== 0 && voxels[p].type !== cardCombos[cardSelected - 1][0]){
-                                console.log("Hey!");
-                                tileSelectedByCard = [];
-                                cardSelected = 0;
-                            }else{
+                            if((voxels[p].type === cards[cardSelected - 1][0])){
                                 if (voxels[p].toBeDestroyed === false) {
                                     voxels[p].type = (cards[cardSelected - 1][1]);
                                 } else {
@@ -883,6 +879,16 @@ function game(){
                                 }
                                 //cardSelected = 0;
                                 biomesTraded++;
+                            }else if (cards[cardSelected - 1][0] === 0) {
+
+                                voxels[p].type = 0;
+                                voxels[p].toBeDestroyed = false;
+
+                            }else if(voxels[p].type === cards[cardSelected - 1][0]){
+
+                                tileSelectedByCard = [];
+                                cardSelected = 0;
+
                             }
                         }
                     }
@@ -1073,7 +1079,7 @@ function game(){
                                         if ((m < mapSideLength) && (voxels[gridRoll[m + 1][n]].type !== 5) && voxels[gridRoll[m + 1][n]].type !== 0) {
                                             voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                         } else {
-                                            console.log("FAIL");
+
                                         }
                                     }
 
