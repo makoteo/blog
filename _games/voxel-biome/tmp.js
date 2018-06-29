@@ -29,10 +29,10 @@ var animationOffset = 0;
 
 var levelOneGrid = [
 
-    [3, 3, 3, 1, 1],
-    [3, 6, 1, 2, 3],
-    [1, 1, 2, 2, 1],
+    [1, 1, 3, 1, 1],
     [1, 3, 2, 2, 1],
+    [1, 1, 2, 2, 1],
+    [3, 6, 1, 2, 3],
     [3, 1, 1, 3, 1]
 
 ];
@@ -117,14 +117,14 @@ var desertFactories = 0;
 var forestFactories = 0;
 var Mountains = 0;
 
-var forestPol = -6;
-var fieldPol = -3;
-var seaPol = -2;
+var forestPol = -5;
+var fieldPol = -2;
+var seaPol = -1;
 var desertPol = +1;
-var townPol = +3;
+var townPol = +5;
 var cityPol = +8;
 var oilRigPol = +10;
-var desertFactoryPol = +12;
+var desertFactoryPol = +15;
 var forestFactoryPol = +12;
 var MountainPol = -1;
 
@@ -969,33 +969,65 @@ function game(){
 
                 if(diceRollCity >= 0.3){
 
-                    var diceRollCity2 = Math.floor(Math.random() * 4);
-
                     for (var m = 0; m < gridRoll.length; m++) {
                         for (var n = 0; n < gridRoll[1].length; n++) {
                             if (gridRoll[m][n] === voxels[f].id) {
 
+                                var diceRollCity2 = Math.floor(Math.random() * 4);
+
+                                console.log("Check " + voxels[f].id);
+
                                 if (diceRollCity2 === 1) {
                                     if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity2 = 2;
                                     }
                                 }
 
                                 if (diceRollCity2 === 2) {
                                     if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity2 = 3;
                                     }
                                 }
 
                                 if (diceRollCity2 === 3) {
                                     if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity2 = 4;
                                     }
                                 }
 
                                 if (diceRollCity2 === 4) {
                                     if (n < mapSideLength - 1 && voxels[gridRoll[m][n + 1]].type !== 5 && voxels[gridRoll[m][n + 1]].type !== 0) {
                                         voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity = 1;
+                                    }
+                                }
+
+                                if (diceRollCity2 === 1) {
+                                    if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
+                                        voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity2 = 2;
+                                    }
+                                }
+
+                                if (diceRollCity2 === 2) {
+                                    if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
+                                        voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
+                                    }else{
+                                        diceRollCity2 = 3;
+                                    }
+                                }
+
+                                if (diceRollCity2 === 3) {
+                                    if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
+                                        voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }
                                 }
 
