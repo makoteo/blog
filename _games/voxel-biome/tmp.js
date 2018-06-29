@@ -9,6 +9,7 @@ var HIGHSCORE = 0;
 var TEMPPOINTS = 0;
 var POINTS = 0;
 var POLUTION = 0;
+var LEVEL = 0;
 
 var YEAR = 1;
 var SEASON = "Spring";
@@ -26,7 +27,17 @@ var mouseHeld = false;
 
 var animationOffset = 0;
 
-var gridTest = [
+var levelOneGrid = [
+
+    [1, 2, 2, 2, 2],
+    [2, 1, 1, 1, 1],
+    [2, 1, 1, 1, 1],
+    [2, 1, 1, 1, 1],
+    [2, 1, 1, 1, 1]
+
+];
+
+var firstMapGrid = [ // It has been a privilege using this map for every test up until levels were created. It will stay here in honor of it's contribution.
 
     [1, 2, 2, 2, 2, 2, 1, 1],
     [2, 1, 1, 1, 1, 2, 1, 1],
@@ -71,8 +82,6 @@ var gridRoll = [
     [],
     []
 ];
-
-var mapSideLength = gridTest[0].length;
 
 var selected = [];
 var clickSelected = [];
@@ -547,25 +556,28 @@ function Voxel(x, y, width, height, type){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-var map = gridTest;
+var map = levelOneGrid;
+var mapSideLength = map[0].length;
 var maxGridLength = map[0].length;
+
+var downwardsOffset = (8 - mapSideLength) * HEIGHT/28;
 
 for(var i = 0; i < map.length; i++) {
     for(var j = 0; j < maxGridLength; j++) {
         if(map[i][j] === 0){
 
         }else if(map[i][j] === 1){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 1));
         }else if(map[i][j] === 2){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 2));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 2));
         }else if(map[i][j] === 3){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 3));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 3));
         }else if(map[i][j] === 4){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 4));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 4));
         }else if(map[i][j] === 5){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 5));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 5));
         }else if(map[i][j] === 6){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15)) - WIDTH/50), (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength), WIDTH/16, WIDTH/12, 6.1));
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15)) - WIDTH/50), (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
