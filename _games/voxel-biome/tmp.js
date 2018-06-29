@@ -14,7 +14,7 @@ var LEVEL = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
-var GAMESPEED = 10; //DEFAULT 2
+var GAMESPEED = 2; //DEFAULT 2
 
 var DEBUG = false;
 
@@ -29,11 +29,11 @@ var animationOffset = 0;
 
 var levelOneGrid = [
 
-    [3, 3, 3, 1, 3],
-    [3, 6, 2, 2, 3],
-    [1, 2, 2, 2, 1],
-    [3, 2, 2, 2, 3],
-    [1, 1, 3, 3, 1]
+    [3, 3, 3, 1, 1],
+    [3, 6, 1, 2, 3],
+    [1, 1, 2, 2, 1],
+    [1, 3, 2, 2, 1],
+    [3, 1, 1, 3, 1]
 
 ];
 
@@ -170,7 +170,7 @@ var MountainDesc3 = "Big plus!";
 
 var frameTimer2 = 0;
 var yearVisible = true;
-var yearlength = 1800;
+var yearlength = 1200;
 
 var actionSelected = 0;
 
@@ -217,9 +217,9 @@ var cardNeedGiveCombos = [
 
 var cardPosX = [0, 0, 0];
 
-var cards = [[1, 2], [1, 3], [1, 5]];
+var cards = [];
 
-var cardNeedGive = [[1, 1], [1, 1], [1, 1]];
+var cardNeedGive = [];
 
 var cardOpacity = 1;
 
@@ -560,7 +560,9 @@ function Voxel(x, y, width, height, type){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 if(LEVEL === 0){
-    cardLevelLimitation = 5;
+    cardLevelLimitation = 7;
+    cards = [[1, 3], [1, 5]];
+    cardNeedGive = [[1, 1], [1, 1]];
 }
 
 var map = levelOneGrid;
@@ -771,7 +773,16 @@ function game(){
     // PLAYER TURN ---------------------------------------------------------------------------------------------------------------------------------------------------
 
     if(frameCount % yearlength === 0){
-        if(cards.length < 3){
+        if(cards.length < 2){
+            for(var m = 0; m < 2; m++){
+                var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
+
+                cards.push(cardCombos[randomx]);
+                cardNeedGive.push(cardNeedGiveCombos[randomx]);
+
+                cardYOffset[cards.length - 1] = 50;
+            }
+        }else if(cards.length < 3){
             var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
             cards.push(cardCombos[randomx]);
@@ -955,7 +966,8 @@ function game(){
                         diceRollCity = 0.4;
                     }
                 }
-                if (diceRollCity >= 0.3){
+
+                if(diceRollCity >= 0.3){
 
                     var diceRollCity2 = Math.floor(Math.random() * 4);
 
@@ -967,15 +979,21 @@ function game(){
                                     if (m > 1 && voxels[gridRoll[m - 1][n]].type !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
                                         voxels[gridRoll[m - 1][n]].turnToCityTerritory = true;
                                     }
-                                } else if (diceRollCity2 === 2) {
+                                }
+
+                                if (diceRollCity2 === 2) {
                                     if (n > 0 && voxels[gridRoll[m][n - 1]].type !== 5 && (voxels[gridRoll[m][n - 1]].type !== 0)) {
                                         voxels[gridRoll[m][n - 1]].turnToCityTerritory = true;
                                     }
-                                } else if (diceRollCity2 === 3) {
+                                }
+
+                                if (diceRollCity2 === 3) {
                                     if (m < mapSideLength && voxels[gridRoll[m + 1][n]].type !== 5 && voxels[gridRoll[m + 1][n]].type !== 0) {
                                         voxels[gridRoll[m + 1][n]].turnToCityTerritory = true;
                                     }
-                                }else{
+                                }
+
+                                if (diceRollCity2 === 4) {
                                     if (n < mapSideLength - 1 && voxels[gridRoll[m][n + 1]].type !== 5 && voxels[gridRoll[m][n + 1]].type !== 0) {
                                         voxels[gridRoll[m][n + 1]].turnToCityTerritory = true;
                                     }
