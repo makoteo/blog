@@ -1305,6 +1305,8 @@ function game(){
                 word1 = "Field";
             } else if ((cards[cardSelected - 1][0]) === 4) {
                 word1 = "Desert";
+            }else if (cards[cardSelected - 1][0] === 3) {
+                word2 = "Forest";
             }
 
             if (cards[cardSelected - 1][1] === 1) {
