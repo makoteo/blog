@@ -27,6 +27,13 @@ var GAMESTATE = "GAME";
 
 var voxels = [];
 
+var buttonTimers = [
+
+    [],
+    []
+
+];
+
 var frameCount = 0;
 
 var thisFrameClicked = false;
@@ -202,6 +209,8 @@ var frameTimer2 = 0;
 var yearVisible = true;
 var yearlength = 1200;
 
+var tempEndGameTimer = 20;
+
 var actionSelected = 0;
 
 var tempMouseTimer2 = 0;
@@ -244,6 +253,15 @@ var cardNeedGiveCombos = [ // REMEMBER TO UPDATE ALONG WITH CARD COMBOS
     [1, 1]
 
 ];
+
+var cardRig = [ // 99 = Pause
+
+    [1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
+    [99]
+
+];
+
+var cardRiggedNum = 0;
 
 var cardPosX = [0, 0, 0];
 
@@ -590,7 +608,7 @@ function Voxel(x, y, width, height, type){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 if(LEVEL === 0){
-    cardLevelLimitation = 0; // 6
+    cardLevelLimitation = 6; // 6
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
 }
@@ -829,12 +847,21 @@ function game(){
         }*/
 
         if ((frameCount % yearlength === 0) && (cards.length < 3) && (gameEnd === false)) {
-            var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
+            if(cardRig[LEVEL][cardRiggedNum] !== 99){
+                cards.push(cardCombos[cardRig[LEVEL][cardRiggedNum]]);
+                cardNeedGive.push(cardNeedGiveCombos[cardRig[LEVEL][cardRiggedNum]]);
 
-            cards.push(cardCombos[randomx]);
-            cardNeedGive.push(cardNeedGiveCombos[randomx]);
+                cardRiggedNum++;
 
-            cardYOffset[cards.length - 1] = 50;
+                cardYOffset[cards.length - 1] = 50;
+            }else {
+                var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
+
+                cards.push(cardCombos[randomx]);
+                cardNeedGive.push(cardNeedGiveCombos[randomx]);
+
+                cardYOffset[cards.length - 1] = 50;
+            }
         }
 
         var xPosCard = [0, 0, 0];
@@ -927,7 +954,7 @@ function game(){
 
             if (cardYOffset[g] < 0 && gameEnd === false) {
                 cardYOffset[g] += cardMoveSpeed;
-            }else if (POLUTION > LOSSPOINT){
+            }else if (gameEnd === true){
                 cardYOffset[g] -= cardMoveSpeed;
             }
 
@@ -978,7 +1005,7 @@ function game(){
 
         // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-        if (frameCount % (60 * GAMESPEED) === 0 && gameEnd === false) {
+        if (frameCount % (120) === 0 && gameEnd === false) {
             TEMPPOINTS += 1;
         }
 
@@ -1859,11 +1886,14 @@ function game(){
                         endGamePollution--;
                     }
 
+                    if(tempEndGameTimer > 0){
+                        tempEndGameTimer--;
+                    }
                 }
 
             }
 
-            if(endGamePollution === POLUTION){
+            if(endGamePollution === POLUTION && ENDTEMPTIME === TEMPPOINTS && tempEndGameTimer === 0){
 
                 if(yearRequiredOpacity < 0.995){
                     yearRequiredOpacity += 0.005
