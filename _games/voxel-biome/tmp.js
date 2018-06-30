@@ -11,6 +11,9 @@ var POINTS = 0;
 var POLUTION = 0;
 var LEVEL = 0;
 
+var ENDTEMPTIME = 0;
+var ENDTIME = 0;
+
 var YEAR = 1;
 var SEASON = "Spring";
 
@@ -44,7 +47,6 @@ var menuAnimationTimer = 0;
 var GUIOpacity = 1;
 
 var timeSurvivedOpacity = 0;
-var timeSurvivedText = 0;
 
 var levelOneGrid = [
 
@@ -329,13 +331,13 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            ctx.drawImage(voxelsG, 0, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 0, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac1;
-            ctx.drawImage(voxelsG, 0, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 0, 1, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac3;
-            ctx.drawImage(voxelsG, 0, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 0, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = 1;
 
@@ -358,16 +360,16 @@ function Voxel(x, y, width, height, type){
                 }
             }*/
 
-            ctx.drawImage(voxelsG, 300, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 300, 1, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac1;
-            ctx.drawImage(voxelsG, 300, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 300, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = 1;
 
         }else if(this.type === 2.1) { //SEA
 
-            ctx.drawImage(voxelsG, 300, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 300, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 3) { //FOREST
 
@@ -394,18 +396,18 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            ctx.drawImage(voxelsG, 600, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 600, 1, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac1;
-            ctx.drawImage(voxelsG, 600, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 600, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac3;
-            ctx.drawImage(voxelsG, 900, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 900, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = 1;
 
         }else if(this.type === 3.1) { // FOREST FACTORY
-            ctx.drawImage(voxelsG, 600, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 600, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 4) { //DESERT
 
             if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall" ) {
@@ -418,10 +420,10 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            ctx.drawImage(voxelsG, 900, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 900, 1, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = this.opac1;
-            ctx.drawImage(voxelsG, 1800, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 1800, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
             ctx.globalAlpha = 1;
 
@@ -429,14 +431,14 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }else if(this.type === 4.1) { //DESERT
-            ctx.drawImage(voxelsG, 900, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 900, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
         }else if(this.type === 5) { //MOUNTAIN
 
-            ctx.drawImage(voxelsG, 1500, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 1500, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 6) { //TOWN
 
-            ctx.drawImage(voxelsG, 1200, 400, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            ctx.drawImage(voxelsG, 1200, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 6.1) {
             this.internalTimer = 0; //---------------------------------------- REMEMBER TO MOVE THIS LINE ALONG...
@@ -884,7 +886,7 @@ function game(){
                                 voxels[p].type = 0;
                                 voxels[p].toBeDestroyed = false;
 
-                            }else if(voxels[p].type === cards[cardSelected - 1][0]){
+                            }else if(voxels[p].type !== cards[cardSelected - 1][0]){
 
                                 tileSelectedByCard = [];
                                 cardSelected = 0;
@@ -1688,6 +1690,46 @@ function game(){
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.fillText("Game Over", WIDTH/2, HEIGHT/3);
+
+            if(timeSurvivedOpacity >= 0.8){
+                ENDTEMPTIME += 2;
+            }else if(blackScreen1Opacity >= 0.7){
+                timeSurvivedOpacity += 0.005
+            }
+
+            if(ENDTEMPTIME > TEMPPOINTS){
+                ENDTEMPTIME = TEMPPOINTS;
+                ENDTIME = POINTS;
+            }
+
+            if (ENDTEMPTIME % 60 === 0 && ENDTEMPTIME !== 0 && tempTimer2 === 0) {
+                ENDTIME++;
+                tempTimer2 = 62;
+            }
+
+            if (tempTimer2 > 0) {
+                tempTimer2--;
+            }
+
+            ctx.globalAlpha = timeSurvivedOpacity;
+
+            ctx.font = '15pt Courier New';
+
+            if (ENDTIME > 9) {
+                if (ENDTEMPTIME % 60 > 9 && ENDTEMPTIME !== 0) {
+                    ctx.fillText("Time Survived - " + ENDTIME + ":" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                } else {
+                    ctx.fillText("Time Survived - " + ENDTIME + ":0" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                }
+            } else {
+                if (ENDTEMPTIME % 60 > 9 && ENDTEMPTIME !== 0) {
+                    ctx.fillText("Time Survived - " + "0" + ENDTIME + ":" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                } else {
+                    ctx.fillText("Time Survived - " + "0" + ENDTIME + ":0" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                }
+            }
+
+            ctx.globalAlpha = 1;
 
         }else if(GAMESTATE === "WIN"){
 
