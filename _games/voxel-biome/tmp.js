@@ -19,7 +19,7 @@ var SEASON = "Spring";
 
 var LOSSPOINT = 50;
 
-var GAMESPEED = 2; //DEFAULT 2
+var GAMESPEED = 1; //DEFAULT 1
 
 var DEBUG = false;
 
@@ -29,8 +29,8 @@ var voxels = [];
 
 var buttonTimers = [
 
-    [],
-    []
+    [0],
+    [0]
 
 ];
 
@@ -55,6 +55,16 @@ var menuAnimationTimer = 0;
 
 var GUIOpacity = 1;
 
+var SeasonTimeSeconds = 10;
+var secondTimers = [
+
+    [0],
+    [0],
+    [0],
+    [0]
+
+];
+
 var timeSurvivedOpacity = 0;
 var yearRequiredOpacity = 0;
 var yearReachedOpacity = 0;
@@ -63,6 +73,8 @@ var pollutionOpacity = 0;
 var endGameYearRequired = 0;
 var endGameYearReached = 0;
 var endGamePollution = 0;
+
+var YearChangedAlready = false;
 
 var levelOneGrid = [
 
@@ -207,7 +219,7 @@ var MountainDesc3 = "Big plus!";
 
 var frameTimer2 = 0;
 var yearVisible = true;
-var yearlength = 1200;
+var yearlength = 600;
 
 var tempEndGameTimer = 20;
 
@@ -667,7 +679,12 @@ function game(){
         gameRunning = true;
     }
 
+    if(gameEnd === true){
+        GAMESPEED = 0;
+    }
+
     if(gameRunning === true) {
+
         frameCount += GAMESPEED;
 
         if (tempMouseTimer2 > 0) {
@@ -846,7 +863,13 @@ function game(){
 
         }*/
 
-        if ((frameCount % yearlength === 0) && (cards.length < 3) && (gameEnd === false)) {
+        for(var oof = 0; oof < secondTimers.length - 1; oof++){
+            if(secondTimers[oof] > 0 && gameEnd === false){
+                secondTimers[oof]--;
+            }
+        }
+
+        if (TEMPPOINTS % SeasonTimeSeconds === 0 && TEMPPOINTS !== 0 && (cards.length < 3) && (gameEnd === false) && secondTimers[0] < 1) {
             if(cardRig[LEVEL][cardRiggedNum] !== 99){
                 cards.push(cardCombos[cardRig[LEVEL][cardRiggedNum]]);
                 cardNeedGive.push(cardNeedGiveCombos[cardRig[LEVEL][cardRiggedNum]]);
@@ -862,6 +885,7 @@ function game(){
 
                 cardYOffset[cards.length - 1] = 50;
             }
+            secondTimers[0] = 100;
         }
 
         var xPosCard = [0, 0, 0];
@@ -1005,11 +1029,17 @@ function game(){
 
         // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-        if (frameCount % (120) === 0 && gameEnd === false) {
+        if (frameCount % (60 / GAMESPEED) === 0 && gameEnd === false) {
             TEMPPOINTS += 1;
+            YearChangedAlready = false;
         }
 
-        if ((frameCount % yearlength === 0) && (gameEnd === false)) {
+        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0 && gameEnd === false) {
+            POINTS++;
+            tempTimer2 = 62;
+        }
+
+        if ((TEMPPOINTS % SeasonTimeSeconds === 0) && TEMPPOINTS !== 0 && (gameEnd === false) && YearChangedAlready === false && secondTimers[1] < 1) {
             yearVisible = true;
             if (SEASON === "Spring") {
                 SEASON = "Summer";
@@ -1021,10 +1051,12 @@ function game(){
                 SEASON = "Spring";
                 YEAR++;
             }
+            YearChangedAlready = true;
+            secondTimers[1] = 100;
         }
 
-        for (var b = 0; b < 8; b++) {
-            if ((frameCount % yearlength === yearlength - 200 + b * 25) && gameEnd === false) {
+        for (var b = 0; b < 4; b++) {
+            if ((frameCount*GAMESPEED % yearlength === yearlength - 100 + (b * 25) && gameEnd === false)) {
                 if (yearVisible === false) {
                     yearVisible = true;
                 } else {
@@ -1033,16 +1065,11 @@ function game(){
             }
         }
 
-        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0 && gameEnd === false) {
-            POINTS++;
-            tempTimer2 = 62;
-        }
-
         if (tempTimer2 > 0) {
             tempTimer2--;
         }
 
-        if (frameCount % yearlength === 0) {
+        if (TEMPPOINTS % SeasonTimeSeconds === 0 && secondTimers[2] < 1 && TEMPPOINTS !== 0) {
 
             for (var f = 0; f < voxels.length; f++) {
 
@@ -1129,6 +1156,7 @@ function game(){
 
                 }
             }
+            secondTimers[2] = 100;
         }
 
         if (selected.length > 1) {
@@ -1176,6 +1204,21 @@ function game(){
         }
         if (keys && keys[48]) {
             buildType = 0;
+        }
+
+        if (keys && keys[81]) { // Q FOR FASTT FORWARD
+            if(buttonTimers[0] < 1){
+                if(GAMESPEED === 1){
+                    GAMESPEED = 5;
+                }else if(GAMESPEED === 5){
+                    GAMESPEED = 1;
+                }
+                buttonTimers[0] = 20;
+            }
+        }
+
+        if(buttonTimers[0] > 0){
+            buttonTimers[0]--;
         }
 
         if (keys && keys[114] && frameTimer2 < 1) {
