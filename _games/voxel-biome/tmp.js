@@ -38,6 +38,8 @@ var animationOffset = 0;
 
 var timerRed = false;
 
+var gameEnd = false;
+
 var winYears = [4, 1, 1];
 
 var blackScreen1Opacity = 0;
@@ -47,6 +49,13 @@ var menuAnimationTimer = 0;
 var GUIOpacity = 1;
 
 var timeSurvivedOpacity = 0;
+var yearRequiredOpacity = 0;
+var yearReachedOpacity = 0;
+var pollutionOpacity = 0;
+
+var endGameYearRequired = 0;
+var endGameYearReached = 0;
+var endGamePollution = 0;
 
 var levelOneGrid = [
 
@@ -819,7 +828,7 @@ function game(){
 
         }*/
 
-        if ((frameCount % yearlength === 0) && (cards.length < 3) && (POLUTION < LOSSPOINT)) {
+        if ((frameCount % yearlength === 0) && (cards.length < 3) && (gameEnd === false)) {
             var randomx = Math.floor(Math.random() * (cardCombos.length - cardLevelLimitation));
 
             cards.push(cardCombos[randomx]);
@@ -916,7 +925,7 @@ function game(){
 
         for (var g = 0; g < cards.length; g++) {
 
-            if (cardYOffset[g] < 0 && POLUTION < LOSSPOINT) {
+            if (cardYOffset[g] < 0 && gameEnd === false) {
                 cardYOffset[g] += cardMoveSpeed;
             }else if (POLUTION > LOSSPOINT){
                 cardYOffset[g] -= cardMoveSpeed;
@@ -934,14 +943,14 @@ function game(){
             }
 
             if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)) {
-                if (cardYOffset[g] < 100 && POLUTION < LOSSPOINT) {
+                if (cardYOffset[g] < 100 && gameEnd === false) {
                     cardYOffset[g] += cardMoveSpeed;
                 }
-            } else if (cardYOffset[g] > 0 && cardSelected !== (g + 1) && POLUTION < LOSSPOINT) {
+            } else if (cardYOffset[g] > 0 && cardSelected !== (g + 1) && gameEnd === false) {
                 cardYOffset[g] -= cardMoveSpeed;
             }
 
-            if ((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && POLUTION < LOSSPOINT) {
+            if ((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && gameEnd === false) {
                 if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
                     clickCheck = true;
                     if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
@@ -969,11 +978,11 @@ function game(){
 
         // CITY TURN ---------------------------------------------------------------------------------------------------------------------------------
 
-        if (frameCount % (60 * GAMESPEED) === 0 && POLUTION < LOSSPOINT) {
+        if (frameCount % (60 * GAMESPEED) === 0 && gameEnd === false) {
             TEMPPOINTS += 1;
         }
 
-        if ((frameCount % yearlength === 0) && (POLUTION < LOSSPOINT)) {
+        if ((frameCount % yearlength === 0) && (gameEnd === false)) {
             yearVisible = true;
             if (SEASON === "Spring") {
                 SEASON = "Summer";
@@ -988,7 +997,7 @@ function game(){
         }
 
         for (var b = 0; b < 8; b++) {
-            if ((frameCount % yearlength === yearlength - 200 + b * 25) && POLUTION < LOSSPOINT) {
+            if ((frameCount % yearlength === yearlength - 200 + b * 25) && gameEnd === false) {
                 if (yearVisible === false) {
                     yearVisible = true;
                 } else {
@@ -997,7 +1006,7 @@ function game(){
             }
         }
 
-        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0) {
+        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0 && gameEnd === false) {
             POINTS++;
             tempTimer2 = 62;
         }
@@ -1645,6 +1654,7 @@ function game(){
 
         if(POLUTION >= 50){
             endGameTimer++;
+            gameEnd = true;
             if(GUIOpacity > 0.005){
                 GUIOpacity -= 0.005;
             }
@@ -1655,9 +1665,18 @@ function game(){
             }
         }
 
-        if(winYears[LEVEL] === YEAR){
-            gameRunning = false;
-            GAMESTATE = "WIN";
+        if(winYears[LEVEL] === YEAR && !(POLUTION >= LOSSPOINT)){
+            endGameTimer++;
+            gameEnd = true;
+
+            if(GUIOpacity > 0.005){
+                GUIOpacity -= 0.005;
+            }
+
+            if(endGameTimer === 300){
+                gameRunning = false;
+                GAMESTATE = "WIN";
+            }
         }
 
         forests = 0;
@@ -1686,15 +1705,66 @@ function game(){
                 blackScreen1Opacity+= 0.005;
             }
 
-            ctx.font = '20pt Courier New';
+            ctx.font = '25pt Courier New';
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             ctx.fillText("Game Over", WIDTH/2, HEIGHT/3);
 
-            if(timeSurvivedOpacity >= 0.8){
+            if(timeSurvivedOpacity >= 0.7 && ENDTEMPTIME !== TEMPPOINTS){
                 ENDTEMPTIME += 2;
             }else if(blackScreen1Opacity >= 0.7){
                 timeSurvivedOpacity += 0.005
+            }
+
+            if(ENDTEMPTIME === TEMPPOINTS){
+
+                if(pollutionOpacity < 0.995){
+                    pollutionOpacity += 0.005
+                }
+
+                if(pollutionOpacity >= 0.8){
+                    if(endGamePollution < POLUTION && POLUTION > 0){
+                        endGamePollution++;
+                    }else if(endGamePollution > POLUTION && POLUTION < 0){
+                        endGamePollution--;
+                    }
+
+                }
+
+            }
+
+            if(endGamePollution === POLUTION){
+
+                if(yearRequiredOpacity < 0.995){
+                    yearRequiredOpacity += 0.005
+                }
+
+                if(yearRequiredOpacity >= 0.8){
+
+                    if(menuAnimationTimer % 10 === 0){
+                        if(endGameYearRequired < winYears[LEVEL]){
+                            endGameYearRequired++;
+                        }
+                    }
+
+                }
+            }
+
+            if(endGameYearRequired === winYears[LEVEL]){
+
+                if(yearReachedOpacity < 0.995){
+                    yearReachedOpacity += 0.005
+                }
+
+                if(yearReachedOpacity >= 0.8){
+                    if(menuAnimationTimer % 10 === 0) {
+                        if (endGameYearReached < YEAR) {
+                            endGameYearReached++;
+                        }
+                    }
+
+                }
+
             }
 
             if(ENDTEMPTIME > TEMPPOINTS){
@@ -1702,8 +1772,10 @@ function game(){
                 ENDTIME = POINTS;
             }
 
-            if (ENDTEMPTIME % 60 === 0 && ENDTEMPTIME !== 0 && tempTimer2 === 0) {
-                ENDTIME++;
+            if (ENDTEMPTIME % 60 === 0 && ENDTEMPTIME !== 0) {
+                if(ENDTIME < POINTS) {
+                    ENDTIME++;
+                }
                 tempTimer2 = 62;
             }
 
@@ -1729,7 +1801,33 @@ function game(){
                 }
             }
 
+            ctx.globalAlpha = pollutionOpacity;
+            ctx.fillText("Pollution - " + endGamePollution + "%", WIDTH / 2, HEIGHT / 2 - HEIGHT/20);
+
+            ctx.globalAlpha = yearRequiredOpacity;
+            ctx.fillText("Year Required - " + endGameYearRequired, WIDTH / 2, HEIGHT / 2);
+
+            ctx.globalAlpha = yearReachedOpacity;
+            ctx.fillText("Year Reached - " + endGameYearReached, WIDTH / 2, HEIGHT / 2 + HEIGHT/20);
+
             ctx.globalAlpha = 1;
+
+
+            if(thisFrameClicked === true){
+                ENDTEMPTIME = TEMPPOINTS;
+                ENDTIME = POINTS;
+                endGamePollution = POLUTION;
+                endGameYearRequired = winYears[LEVEL];
+                endGameYearReached = YEAR;
+
+                timeSurvivedOpacity = 1;
+                pollutionOpacity = 1;
+                yearReachedOpacity = 1;
+                yearRequiredOpacity = 1;
+            }
+
+
+
 
         }else if(GAMESTATE === "WIN"){
 
@@ -1737,9 +1835,126 @@ function game(){
                 blackScreen1Opacity+= 0.005;
             }
 
+            ctx.font = '25pt Courier New';
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
-            ctx.fillText("You Win!", WIDTH/2, HEIGHT/2);
+            ctx.fillText("You Win!", WIDTH/2, HEIGHT/3);
+
+            if(timeSurvivedOpacity >= 0.7 && ENDTEMPTIME !== TEMPPOINTS){
+                ENDTEMPTIME += 2;
+            }else if(blackScreen1Opacity >= 0.7){
+                timeSurvivedOpacity += 0.005
+            }
+
+            if(ENDTEMPTIME === TEMPPOINTS){
+
+                if(pollutionOpacity < 0.995){
+                    pollutionOpacity += 0.005
+                }
+
+                if(pollutionOpacity >= 0.8){
+                    if(endGamePollution < POLUTION && POLUTION > 0){
+                        endGamePollution++;
+                    }else if(endGamePollution > POLUTION && POLUTION < 0){
+                        endGamePollution--;
+                    }
+
+                }
+
+            }
+
+            if(endGamePollution === POLUTION){
+
+                if(yearRequiredOpacity < 0.995){
+                    yearRequiredOpacity += 0.005
+                }
+
+                if(yearRequiredOpacity >= 0.8){
+
+                    if(menuAnimationTimer % 10 === 0){
+                        if(endGameYearRequired < winYears[LEVEL]){
+                            endGameYearRequired++;
+                        }
+                    }
+
+                }
+            }
+
+            if(endGameYearRequired === winYears[LEVEL]){
+
+                if(yearReachedOpacity < 0.995){
+                    yearReachedOpacity += 0.005
+                }
+
+                if(yearReachedOpacity >= 0.8){
+                    if(menuAnimationTimer % 10 === 0) {
+                        if (endGameYearReached < YEAR) {
+                            endGameYearReached++;
+                        }
+                    }
+
+                }
+
+            }
+
+            if(ENDTEMPTIME > TEMPPOINTS){
+                ENDTEMPTIME = TEMPPOINTS;
+                ENDTIME = POINTS;
+            }
+
+            if (ENDTEMPTIME % 60 === 0 && ENDTEMPTIME !== 0) {
+                if(ENDTIME !== POINTS) {
+                    ENDTIME++;
+                }
+                tempTimer2 = 62;
+            }
+
+            if (tempTimer2 > 0) {
+                tempTimer2--;
+            }
+
+            ctx.globalAlpha = timeSurvivedOpacity;
+
+            ctx.font = '15pt Courier New';
+
+            if (ENDTIME > 9) {
+                if (ENDTEMPTIME % 60 > 9 && ENDTEMPTIME !== 0) {
+                    ctx.fillText("Time Survived - " + ENDTIME + ":" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                } else {
+                    ctx.fillText("Time Survived - " + ENDTIME + ":0" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                }
+            } else {
+                if (ENDTEMPTIME % 60 > 9 && ENDTEMPTIME !== 0) {
+                    ctx.fillText("Time Survived - " + "0" + ENDTIME + ":" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                } else {
+                    ctx.fillText("Time Survived - " + "0" + ENDTIME + ":0" + (ENDTEMPTIME % (60)), WIDTH / 2, HEIGHT / 2 - HEIGHT/10);
+                }
+            }
+
+            ctx.globalAlpha = pollutionOpacity;
+            ctx.fillText("Pollution - " + endGamePollution + "%", WIDTH / 2, HEIGHT / 2 - HEIGHT/20);
+
+            ctx.globalAlpha = yearRequiredOpacity;
+            ctx.fillText("Year Required - " + endGameYearRequired, WIDTH / 2, HEIGHT / 2);
+
+            ctx.globalAlpha = yearReachedOpacity;
+            ctx.fillText("Year Reached - " + endGameYearReached, WIDTH / 2, HEIGHT / 2 + HEIGHT/20);
+
+            ctx.globalAlpha = 1;
+
+
+            if(thisFrameClicked === true){
+                ENDTEMPTIME = TEMPPOINTS;
+                ENDTIME = POINTS;
+                endGamePollution = POLUTION;
+                endGameYearRequired = winYears[LEVEL];
+                endGameYearReached = YEAR;
+
+                timeSurvivedOpacity = 1;
+                pollutionOpacity = 1;
+                yearReachedOpacity = 1;
+                yearRequiredOpacity = 1;
+            }
         }
 
     }
