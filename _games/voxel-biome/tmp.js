@@ -1056,7 +1056,7 @@ function game(){
         }
 
         for (var b = 0; b < 4; b++) {
-            if ((frameCount*GAMESPEED % yearlength === yearlength - 100 + (b * 25) && gameEnd === false)) {
+            if ((frameCount % yearlength === yearlength - 100/GAMESPEED + (b * 25 / GAMESPEED) && gameEnd === false)) {
                 if (yearVisible === false) {
                     yearVisible = true;
                 } else {
