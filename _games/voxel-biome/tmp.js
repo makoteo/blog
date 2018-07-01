@@ -49,7 +49,7 @@ var timerRed = false;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3];
+var winYears = [3, 4, 3, 4];
 
 var blackScreen1Opacity = 0;
 
@@ -79,7 +79,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 2;
+var LEVEL = 3;
 
 var levelZeroGrid = [
 
@@ -108,6 +108,17 @@ var levelTwoGrid = [
     [1, 3, 5, 3, 1],
     [1, 6, 3, 3, 1],
     [3, 1, 1, 3, 3]
+
+];
+
+var levelThreeGrid = [
+
+    [3, 3, 3, 3, 3, 3],
+    [1, 3, 4, 3, 4, 3],
+    [3, 4, 2, 2, 3, 3],
+    [4, 4, 2, 2, 3, 1],
+    [1, 1, 4, 4, 6, 3],
+    [3, 4, 3, 1, 3, 1]
 
 ];
 
@@ -296,7 +307,7 @@ var cardRig = [ // 99 = Pause
     [2, 0, 1, 2, 1, 1, 2, 99],
     [1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
     [4, 1, 2, 4, 1, 0, 1, 2 ,4, 99],
-    [99]
+    [1, 3, 1, 2, 0, 4, 2, 1, 2, 0, 2, 99]
 
 ];
 
@@ -662,6 +673,11 @@ if(LEVEL === 0){
     map = levelTwoGrid;
     cardLevelLimitation = 5; // 6
     cards = [[1, 3], [1, 3]];
+    cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 3){
+    map = levelThreeGrid;
+    cardLevelLimitation = 4; // 6
+    cards = [[1, 2], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
 }
 
