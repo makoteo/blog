@@ -9,7 +9,6 @@ var HIGHSCORE = 0;
 var TEMPPOINTS = 0;
 var POINTS = 0;
 var POLUTION = 0;
-var LEVEL = 0;
 
 var ENDTEMPTIME = 0;
 var ENDTIME = 0;
@@ -17,9 +16,12 @@ var ENDTIME = 0;
 var YEAR = 1;
 var SEASON = "Spring";
 
+var PAUSED = false;
+
 var LOSSPOINT = 50;
 
 var GAMESPEED = 1; //DEFAULT 1
+var SAVEGAMESPEED = 1;
 
 var DEBUG = false;
 
@@ -47,7 +49,7 @@ var timerRed = false;
 
 var gameEnd = false;
 
-var winYears = [4, 1, 1];
+var winYears = [3, 4, 3];
 
 var blackScreen1Opacity = 0;
 
@@ -56,6 +58,7 @@ var menuAnimationTimer = 0;
 var GUIOpacity = 1;
 
 var SeasonTimeSeconds = 10;
+
 var secondTimers = [
 
     [0],
@@ -76,6 +79,18 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
+var LEVEL = 2;
+
+var levelZeroGrid = [
+
+    [1, 3, 1, 1, 1],
+    [1, 1, 1, 3, 3],
+    [3, 1, 6, 1, 3],
+    [1, 1, 1, 1, 1],
+    [1, 1, 1, 3, 3]
+
+];
+
 var levelOneGrid = [
 
     [1, 2, 2, 1, 1],
@@ -83,6 +98,16 @@ var levelOneGrid = [
     [1, 1, 1, 1, 1],
     [3, 6, 1, 1, 3],
     [3, 1, 1, 3, 1]
+
+];
+
+var levelTwoGrid = [
+
+    [1, 3, 3, 1, 1],
+    [3, 3, 5, 5, 3],
+    [1, 3, 5, 3, 1],
+    [1, 6, 3, 3, 1],
+    [3, 1, 1, 3, 3]
 
 ];
 
@@ -242,9 +267,9 @@ var cardCombos = [
     [1, 3],
     [1, 5],
     [4, 1],
+    [3, 5],
     [4, 5],
     [1, 3],
-    [3, 5],
     [4, 1],
     [1, 3],
     [0, 0]
@@ -257,9 +282,9 @@ var cardNeedGiveCombos = [ // REMEMBER TO UPDATE ALONG WITH CARD COMBOS
     [1, 1],
     [1, 1],
     [1, 1],
+    [3, 2],
     [1, 1],
     [2, 1],
-    [3, 2],
     [2, 1],
     [3, 2],
     [1, 1]
@@ -268,7 +293,9 @@ var cardNeedGiveCombos = [ // REMEMBER TO UPDATE ALONG WITH CARD COMBOS
 
 var cardRig = [ // 99 = Pause
 
+    [2, 0, 1, 2, 1, 1, 2, 99],
     [1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
+    [4, 1, 2, 4, 1, 0, 1, 2 ,4, 99],
     [99]
 
 ];
@@ -562,7 +589,7 @@ function Voxel(x, y, width, height, type){
             }
         }
 
-        if(this.internalTimer === 0){
+        if(this.internalTimer <= 0){
 
             this.cityProperty = true;
             if(this.type === 1){
@@ -619,13 +646,25 @@ function Voxel(x, y, width, height, type){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
+var map = levelZeroGrid;
+
 if(LEVEL === 0){
+    map = levelZeroGrid;
+    cardLevelLimitation = 7; // 7
+    cards = [[1, 3], [1, 5]];
+    cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 1){
+    map = levelOneGrid;
     cardLevelLimitation = 6; // 6
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 2){
+    map = levelTwoGrid;
+    cardLevelLimitation = 5; // 6
+    cards = [[1, 3], [1, 3]];
+    cardNeedGive = [[1, 1], [1, 1]];
 }
 
-var map = levelOneGrid;
 var mapSideLength = map[0].length;
 var maxGridLength = map[0].length;
 
@@ -685,7 +724,17 @@ function game(){
 
     if(gameRunning === true) {
 
-        frameCount += GAMESPEED;
+        if(PAUSED === true){
+            if(GAMESPEED !== 0){
+                SAVEGAMESPEED = GAMESPEED;
+            }
+            GAMESPEED = 0;
+        }else{
+            GAMESPEED = SAVEGAMESPEED;
+        }
+        if(PAUSED === false){
+            frameCount += GAMESPEED;
+        }
 
         if (tempMouseTimer2 > 0) {
             tempMouseTimer2--;
@@ -709,7 +758,9 @@ function game(){
 
             var voxel = voxels[i];
 
-            voxel.update();
+            if(PAUSED === false){
+                voxel.update();
+            }
             voxel.draw();
 
             if (voxels[i].type === 1) {
@@ -906,121 +957,123 @@ function game(){
 
         //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
-        if(POLUTION >= LOSSPOINT){
-            tileSelectedByCard = [];
-            cardSelected = 0;
-        }
+        if(PAUSED === false) {
+            if (POLUTION >= LOSSPOINT) {
+                tileSelectedByCard = [];
+                cardSelected = 0;
+            }
 
-        var clickCheck = false;
-        var opaqueCheck = false;
+            var clickCheck = false;
+            var opaqueCheck = false;
 
-        if (onClick(WIDTH / 2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
-            tradeButtonOffset1 = 5;
-        } else {
-            tradeButtonOffset1 = 0;
-        }
-
-        if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
-            tradeButtonOffset2 = 5;
-        } else {
-            tradeButtonOffset2 = 0;
-        }
-
-        if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
-            var biomesTraded = 0;
             if (onClick(WIDTH / 2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
-                for (var z = 0; z < tileSelectedByCard.length; z++) {
-                    for (var p = 0; p < voxels.length; p++) {
-                        if (voxels[p].id === tileSelectedByCard[z]) {
-                            if((voxels[p].type === cards[cardSelected - 1][0])){
-                                if (voxels[p].toBeDestroyed === false) {
-                                    voxels[p].type = (cards[cardSelected - 1][1]);
-                                } else {
+                tradeButtonOffset1 = 5;
+            } else {
+                tradeButtonOffset1 = 0;
+            }
+
+            if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+                tradeButtonOffset2 = 5;
+            } else {
+                tradeButtonOffset2 = 0;
+            }
+
+            if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer3 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+                var biomesTraded = 0;
+                if (onClick(WIDTH / 2 - 150, (-100) + animationOffset + tradeButtonOffset1, 150, 40)) {
+                    for (var z = 0; z < tileSelectedByCard.length; z++) {
+                        for (var p = 0; p < voxels.length; p++) {
+                            if (voxels[p].id === tileSelectedByCard[z]) {
+                                if ((voxels[p].type === cards[cardSelected - 1][0])) {
+                                    if (voxels[p].toBeDestroyed === false) {
+                                        voxels[p].type = (cards[cardSelected - 1][1]);
+                                    } else {
+                                        voxels[p].type = 0;
+                                        voxels[p].toBeDestroyed = false;
+                                    }
+                                    //cardSelected = 0;
+                                    biomesTraded++;
+                                } else if (cards[cardSelected - 1][0] === 0) {
+
                                     voxels[p].type = 0;
                                     voxels[p].toBeDestroyed = false;
+
+                                } else if (voxels[p].type !== cards[cardSelected - 1][0]) {
+
+                                    tileSelectedByCard = [];
+                                    cardSelected = 0;
+
                                 }
-                                //cardSelected = 0;
-                                biomesTraded++;
-                            }else if (cards[cardSelected - 1][0] === 0) {
-
-                                voxels[p].type = 0;
-                                voxels[p].toBeDestroyed = false;
-
-                            }else if(voxels[p].type !== cards[cardSelected - 1][0]){
-
-                                tileSelectedByCard = [];
-                                cardSelected = 0;
-
                             }
                         }
                     }
-                }
-                cardNeedGive.splice(cardSelected - 1, 1);
-                cards.splice(cardSelected - 1, 1);
-                tempMouseTimer3 = 1;
-                tileSelectedByCard = [];
-                cardSelected = 0;
-            }
-        }
-
-        if (tempMouseTimer3 > 0) {
-            tempMouseTimer3--;
-        }
-
-        if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
-            if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
-                tileSelectedByCard = [];
-                cardSelected = 0;
-            }
-        }
-
-        for (var g = 0; g < cards.length; g++) {
-
-            if (cardYOffset[g] < 0 && gameEnd === false) {
-                cardYOffset[g] += cardMoveSpeed;
-            }else if (gameEnd === true){
-                cardYOffset[g] -= cardMoveSpeed;
-            }
-
-            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 8, HEIGHT / 3.375)) {
-                if (g + 1 === cardSelected) {
-                    cardOpacity = 0.3;
-                }
-                opaqueCheck = true;
-            } else {
-                if (opaqueCheck === false) {
-                    cardOpacity = 1;
+                    cardNeedGive.splice(cardSelected - 1, 1);
+                    cards.splice(cardSelected - 1, 1);
+                    tempMouseTimer3 = 1;
+                    tileSelectedByCard = [];
+                    cardSelected = 0;
                 }
             }
 
-            if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)) {
-                if (cardYOffset[g] < 100 && gameEnd === false) {
+            if (tempMouseTimer3 > 0) {
+                tempMouseTimer3--;
+            }
+
+            if (cardSelected !== 0 && (thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && tileSelectedByCard.length === cardNeedGive[cardSelected - 1][0]) {
+                if (onClick(WIDTH / 2, (-100) + animationOffset + tradeButtonOffset2, 150, 40)) {
+                    tileSelectedByCard = [];
+                    cardSelected = 0;
+                }
+            }
+
+            for (var g = 0; g < cards.length; g++) {
+
+                if (cardYOffset[g] < 0 && gameEnd === false) {
                     cardYOffset[g] += cardMoveSpeed;
+                } else if (gameEnd === true) {
+                    cardYOffset[g] -= cardMoveSpeed;
                 }
-            } else if (cardYOffset[g] > 0 && cardSelected !== (g + 1) && gameEnd === false) {
-                cardYOffset[g] -= cardMoveSpeed;
-            }
 
-            if ((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && gameEnd === false) {
-                if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
-                    clickCheck = true;
-                    if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
-                        cardSelected = g + 1;
-                    } else {
-                        cardSelected = 0;
-                        tileSelectedByCard = [];
+                if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g], WIDTH / 8, HEIGHT / 3.375)) {
+                    if (g + 1 === cardSelected) {
+                        cardOpacity = 0.3;
                     }
-                    tempMouseTimer2 = 20;
-                    cardYOffset[g] = 100;
+                    opaqueCheck = true;
                 } else {
-                    if (clickCheck === false && cardSelected !== 0 && (tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0] || tileSelectedByCard.length === 0)) {
-                        //tileSelectedByCard = [];
-                        //cardSelected = 0;
+                    if (opaqueCheck === false) {
+                        cardOpacity = 1;
                     }
                 }
 
-                if (onClick(cardPosX[g], HEIGHT + HEIGHT / 7 - cardYOffset[g] + animationOffset - HEIGHT / 90, WIDTH / 10, HEIGHT / 45)) {
-                    switchUpCards(g);
+                if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, cardOffset, cardHeight)) {
+                    if (cardYOffset[g] < 100 && gameEnd === false) {
+                        cardYOffset[g] += cardMoveSpeed;
+                    }
+                } else if (cardYOffset[g] > 0 && cardSelected !== (g + 1) && gameEnd === false) {
+                    cardYOffset[g] -= cardMoveSpeed;
+                }
+
+                if ((thisFrameClicked) && (tempMouseTimer2 < 1) && mouseHeld === false && gameEnd === false) {
+                    if (onClick(cardPosX[g], HEIGHT - HEIGHT / 8 - cardYOffset[g] + animationOffset, WIDTH / 10, HEIGHT / 3.375)) {
+                        clickCheck = true;
+                        if (cardSelected !== (g + 1) && tempMouseTimer2 < 1) {
+                            cardSelected = g + 1;
+                        } else {
+                            cardSelected = 0;
+                            tileSelectedByCard = [];
+                        }
+                        tempMouseTimer2 = 20;
+                        cardYOffset[g] = 100;
+                    } else {
+                        if (clickCheck === false && cardSelected !== 0 && (tileSelectedByCard.length > cardNeedGive[cardSelected - 1][0] || tileSelectedByCard.length === 0)) {
+                            //tileSelectedByCard = [];
+                            //cardSelected = 0;
+                        }
+                    }
+
+                    if (onClick(cardPosX[g], HEIGHT + HEIGHT / 7 - cardYOffset[g] + animationOffset - HEIGHT / 90, WIDTH / 10, HEIGHT / 45)) {
+                        switchUpCards(g);
+                    }
                 }
             }
         }
@@ -1208,10 +1261,10 @@ function game(){
 
         if (keys && keys[81]) { // Q FOR FASTT FORWARD
             if(buttonTimers[0] < 1){
-                if(GAMESPEED === 1){
-                    GAMESPEED = 5;
-                }else if(GAMESPEED === 5){
-                    GAMESPEED = 1;
+                if(SAVEGAMESPEED === 1){
+                    SAVEGAMESPEED = 5;
+                }else if(SAVEGAMESPEED === 5){
+                    SAVEGAMESPEED = 1;
                 }
                 buttonTimers[0] = 20;
             }
@@ -1327,7 +1380,6 @@ function game(){
         ctx.fillRect(WIDTH - WIDTH / 7 + animationOffset, HEIGHT / 20, WIDTH / 8, HEIGHT / 2.5);
 
         ctx.globalAlpha = 1;
-
 
         //GUI -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1451,7 +1503,7 @@ function game(){
 
         ctx.globalAlpha = GUIOpacity;
 
-        if (clickSelected.length > 0) {
+        if (clickSelected.length > 0 && PAUSED === false) {
             for (i = 0; i < voxels.length; i++) {
 
                 var selectedVoxelType;
@@ -1722,9 +1774,21 @@ function game(){
 
         ctx.globalAlpha = 1;
 
+        if(GAMESPEED > 1){
+            ctx.fillStyle = "rgba(255, 255, 255, 0.01)";
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            ctx.textAlign = "right";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.font = '20pt Courier New';
+            ctx.fillText("Speed x5", WIDTH - WIDTH/30, HEIGHT - HEIGHT / 30);
+        }
+
         if(POLUTION >= 50){
             endGameTimer++;
             gameEnd = true;
+            SAVEGAMESPEED = 1;
+            PAUSED = false;
             if(GUIOpacity > 0.005){
                 GUIOpacity -= 0.005;
             }
@@ -1738,7 +1802,8 @@ function game(){
         if(winYears[LEVEL] === YEAR && !(POLUTION >= LOSSPOINT)){
             endGameTimer++;
             gameEnd = true;
-
+            SAVEGAMESPEED = 1;
+            PAUSED = false;
             if(GUIOpacity > 0.005){
                 GUIOpacity -= 0.005;
             }
@@ -1828,8 +1893,14 @@ function game(){
 
                 if(yearReachedOpacity >= 0.8){
                     if(menuAnimationTimer % 10 === 0) {
-                        if (endGameYearReached < YEAR) {
-                            endGameYearReached++;
+                        if(YEAR === winYears[LEVEL]){
+                            if (endGameYearReached < YEAR - 1) {
+                                endGameYearReached++;
+                            }
+                        }else{
+                            if (endGameYearReached < YEAR) {
+                                endGameYearReached++;
+                            }
                         }
                     }
 
@@ -2032,6 +2103,30 @@ function game(){
 
     }
 
+    if (keys && keys[32]) {
+        if(buttonTimers[1] < 1){
+            if(PAUSED === true){
+                PAUSED = false;
+            }else{
+                PAUSED = true;
+            }
+            buttonTimers[1] = 20;
+        }
+    }
+
+    if(buttonTimers[1] > 0){
+        buttonTimers[1]--;
+    }
+
+    if(PAUSED === true && gameRunning === true && endGameTimer === 0){
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.textAlign = "right";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.font = '20pt Courier New';
+        ctx.fillText("Paused", WIDTH - WIDTH/30, HEIGHT - HEIGHT / 30);
+    }
 
         /* ON LOSS
         if(Lose condition){
