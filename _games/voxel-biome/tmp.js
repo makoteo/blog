@@ -51,7 +51,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3, 4, 4, 5];
+var winYears = [3, 4, 3, 4, 4, 5, 4, 10];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -64,7 +64,9 @@ var levelNames = [
     "Forest Peak",
     "Pond CrystalMoor",
     "The Loopy Hills",
-    "SharkFin Beach"
+    "SharkFin Beach",
+    "The Forested Isles",
+    "Lake Sardine"
 
 ];
 
@@ -94,7 +96,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 5;
+var LEVEL = 7;
 
 var levelZeroGrid = [
 
@@ -157,6 +159,31 @@ var levelFiveGrid = [
     [4, 4, 4, 4, 4, 4, 4],
     [4, 2, 4, 4, 2, 2, 4],
     [2, 2, 2, 2, 2, 2, 2]
+
+];
+
+var levelSixGrid = [
+
+    [2, 2, 2, 2, 2, 4, 3],
+    [2, 3, 3, 4, 2, 4, 3],
+    [3, 5, 1, 1, 2, 2, 4],
+    [5, 3, 6, 3, 4, 2, 2],
+    [5, 1, 5, 1, 4, 4, 2],
+    [2, 3, 3, 4, 3, 4, 2],
+    [2, 2, 1, 3, 1, 2, 2]
+
+];
+
+var levelSevenGrid = [
+
+    [1, 1, 3, 3, 3, 1, 1, 3],
+    [3, 1, 1, 2, 2, 2, 2, 1],
+    [1, 3, 4, 2, 2, 1, 2, 4],
+    [3, 1, 4, 2, 2, 2, 2, 4],
+    [1, 2, 2, 2, 2, 2, 2, 3],
+    [1, 1, 1, 2, 4, 4, 1, 3],
+    [1, 3, 3, 2, 1, 1, 1, 3],
+    [3, 1, 1, 3, 1, 3, 1, 1]
 
 ];
 
@@ -347,7 +374,9 @@ var cardRig = [ // 99 = Pause
     [4, 1, 2, 4, 1, 0, 1, 2 ,4, 99],
     [1, 3, 1, 2, 0, 4, 2, 1, 2, 0, 2, 99],
     [0, 1, 5, 0, 2, 1, 1, 99],
-    [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99]
+    [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
+    [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
+    [99]
 
 ];
 
@@ -729,6 +758,16 @@ if(LEVEL === 0){
     cardLevelLimitation = 2; // 2
     cards = [[1, 3], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 6){
+    map = levelSixGrid;
+    cardLevelLimitation = 2; // 2
+    cards = [[1, 3], [4, 1]];
+    cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 7){
+    map = levelSevenGrid;
+    cardLevelLimitation = 1; // 2
+    cards = [[1, 2], [1, 3]];
+    cardNeedGive = [[1, 1], [1, 1]];
 }
 
 var mapSideLength = map[0].length;
@@ -781,7 +820,9 @@ function switchUpCards(cardNumber){
 function game(){
 
     if(GAMESTATE === "GAME"){
-        gameRunning = false;
+        gameRunning = true;
+        blackScreen2Opacity = 0;
+        /*gameRunning = false;
         startTimer++;
 
         if(startTimer < 100){
@@ -802,7 +843,7 @@ function game(){
 
         ctx.globalAlpha = levelNameOpacity;
         ctx.fillText("Level " + LEVEL + " - " + levelNames[LEVEL], WIDTH/2, HEIGHT/2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 1;*/
     }
 
     if(gameEnd === true){
@@ -1523,10 +1564,10 @@ function game(){
         if (cardSelected !== 0 && !(cards.length < 1)) {
             if ((cards[cardSelected - 1][0]) === 1) {
                 word1 = "Field";
-            } else if ((cards[cardSelected - 1][0]) === 4) {
-                word1 = "Desert";
             }else if (cards[cardSelected - 1][0] === 3) {
-                word2 = "Forest";
+                word1 = "Forest";
+            }else if ((cards[cardSelected - 1][0]) === 4) {
+                word1 = "Desert";
             }
 
             if (cards[cardSelected - 1][1] === 1) {
