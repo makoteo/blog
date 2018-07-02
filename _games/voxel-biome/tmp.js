@@ -49,7 +49,7 @@ var timerRed = false;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3, 4];
+var winYears = [3, 4, 3, 4, 4, 5];
 
 var blackScreen1Opacity = 0;
 
@@ -79,7 +79,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 3;
+var LEVEL = 5;
 
 var levelZeroGrid = [
 
@@ -119,6 +119,29 @@ var levelThreeGrid = [
     [4, 4, 2, 2, 3, 1],
     [1, 1, 4, 4, 6, 3],
     [3, 4, 3, 1, 3, 1]
+
+];
+
+var levelFourGrid = [
+
+    [1, 3, 4, 4, 2, 5],
+    [4, 2, 2, 2, 5, 3],
+    [2, 5, 5, 3, 5, 1],
+    [5, 3, 1, 5, 3, 1],
+    [5, 1, 1, 3, 6, 3],
+    [3, 1, 3, 1, 1, 1]
+
+];
+
+var levelFiveGrid = [
+
+    [3, 5, 3, 1, 5, 5, 3],
+    [1, 3, 3, 3, 3, 1, 3],
+    [3, 1, 3, 3, 1, 3, 1],
+    [1, 4, 6, 1, 1, 4, 1],
+    [4, 4, 4, 4, 4, 4, 4],
+    [4, 2, 4, 4, 2, 2, 4],
+    [2, 2, 2, 2, 2, 2, 2]
 
 ];
 
@@ -307,7 +330,9 @@ var cardRig = [ // 99 = Pause
     [2, 0, 1, 2, 1, 1, 2, 99],
     [1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
     [4, 1, 2, 4, 1, 0, 1, 2 ,4, 99],
-    [1, 3, 1, 2, 0, 4, 2, 1, 2, 0, 2, 99]
+    [1, 3, 1, 2, 0, 4, 2, 1, 2, 0, 2, 99],
+    [0, 1, 5, 0, 2, 1, 1, 99],
+    [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99]
 
 ];
 
@@ -671,13 +696,23 @@ if(LEVEL === 0){
     cardNeedGive = [[1, 1], [1, 1]];
 }else if(LEVEL === 2){
     map = levelTwoGrid;
-    cardLevelLimitation = 5; // 6
+    cardLevelLimitation = 5; // 5
     cards = [[1, 3], [1, 3]];
     cardNeedGive = [[1, 1], [1, 1]];
 }else if(LEVEL === 3){
     map = levelThreeGrid;
-    cardLevelLimitation = 4; // 6
+    cardLevelLimitation = 4; // 4
     cards = [[1, 2], [4, 1]];
+    cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 4){
+    map = levelFourGrid;
+    cardLevelLimitation = 4; // 4
+    cards = [[1, 3], [4, 1]];
+    cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 5){
+    map = levelFiveGrid;
+    cardLevelLimitation = 2; // 2
+    cards = [[1, 3], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
 }
 
@@ -1138,7 +1173,7 @@ function game(){
             tempTimer2--;
         }
 
-        if (TEMPPOINTS % SeasonTimeSeconds === 0 && secondTimers[2] < 1 && TEMPPOINTS !== 0) {
+        if (TEMPPOINTS % SeasonTimeSeconds === 0 && secondTimers[2] < 1 && TEMPPOINTS !== 0 && PAUSED === false) {
 
             for (var f = 0; f < voxels.length; f++) {
 
