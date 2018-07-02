@@ -43,15 +43,30 @@ var mouseHeld = false;
 
 var endGameTimer = 0;
 
-var animationOffset = 0;
+var animationOffset = 160;
 
 var timerRed = false;
+
+var startTimer = 0;
 
 var gameEnd = false;
 
 var winYears = [3, 4, 3, 4, 4, 5];
 
 var blackScreen1Opacity = 0;
+var blackScreen2Opacity = 1;
+var levelNameOpacity = 0;
+
+var levelNames = [
+
+    "Tutorial Meadow",
+    "Lakes Edge",
+    "Forest Peak",
+    "Pond CrystalMoor",
+    "The Loopy Hills",
+    "SharkFin Beach"
+
+];
 
 var menuAnimationTimer = 0;
 
@@ -766,7 +781,28 @@ function switchUpCards(cardNumber){
 function game(){
 
     if(GAMESTATE === "GAME"){
-        gameRunning = true;
+        gameRunning = false;
+        startTimer++;
+
+        if(startTimer < 100){
+            levelNameOpacity += 0.005;
+        }else if(startTimer > 200){
+            if(levelNameOpacity > 0.005){
+                levelNameOpacity -= 0.005;
+            }
+            gameRunning = true;
+        }
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.font = '15pt Courier New';
+
+        ctx.globalAlpha = levelNameOpacity;
+        ctx.fillText("Level " + LEVEL + " - " + levelNames[LEVEL], WIDTH/2, HEIGHT/2);
+        ctx.globalAlpha = 1;
     }
 
     if(gameEnd === true){
@@ -795,7 +831,7 @@ function game(){
             if (animationOffset < 200) {
                 animationOffset += 5;
             }
-        } else {
+        } else if(blackScreen2Opacity < 0.5){
             if (animationOffset > 0) {
                 animationOffset -= 5;
             }
@@ -1514,9 +1550,9 @@ function game(){
             cardChosen = cards[cardSelected - 1][0];
         }
         if (cardChosen !== 0) {
-            ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH / 2, (-150) + animationOffset);
+            ctx.fillText("Pick " + num1 + " " + word1 + "(s) to turn into " + num2 + " " + word2 + "(s)", WIDTH / 2, (-170) + animationOffset);
         } else {
-            ctx.fillText("Pick any tile to destroy", WIDTH / 2, (-150) + animationOffset);
+            ctx.fillText("Pick any tile to destroy", WIDTH / 2, (-170) + animationOffset);
         }
 
         if (num2 - num1 !== 0) {
@@ -1824,6 +1860,22 @@ function game(){
         }
 
         ctx.globalAlpha = 1;
+
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        if(blackScreen2Opacity > 0.005){
+            blackScreen2Opacity -= 0.005;
+        }
+
+        ctx.globalAlpha = blackScreen2Opacity;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = levelNameOpacity;
+        ctx.fillText("Level " + LEVEL + " - " + levelNames[LEVEL], WIDTH/2, HEIGHT/2);
+        ctx.globalAlpha = 1;
+
 
         if(GAMESPEED > 1){
             ctx.fillStyle = "rgba(255, 255, 255, 0.01)";
