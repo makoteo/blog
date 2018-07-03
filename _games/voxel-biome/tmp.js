@@ -96,7 +96,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 5; //7
+var LEVEL = 7; //7
 
 var levelZeroGrid = [
 
@@ -822,7 +822,7 @@ function game(){
     if(GAMESTATE === "GAME"){
         gameRunning = true;
         blackScreen2Opacity = 0;
-        /*gameRunning = false;
+        gameRunning = false;
         startTimer++;
 
         if(startTimer < 100){
@@ -843,7 +843,7 @@ function game(){
 
         ctx.globalAlpha = levelNameOpacity;
         ctx.fillText("Level " + LEVEL + " - " + levelNames[LEVEL], WIDTH/2, HEIGHT/2);
-        ctx.globalAlpha = 1;*/
+        ctx.globalAlpha = 1;
     }
 
     if(gameEnd === true){
