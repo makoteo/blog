@@ -376,7 +376,7 @@ var cardRig = [ // 99 = Pause
     [0, 1, 5, 0, 2, 1, 1, 99],
     [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
-    [3, 2, 1, 5, 0, 1, 5, 1, 4, 1, 5, 6, 99]
+    [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99]
 
 ];
 
@@ -1215,7 +1215,7 @@ function game(){
             YearChangedAlready = false;
         }
 
-        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0 && gameEnd === false) {
+        if (TEMPPOINTS % 60 === 0 && TEMPPOINTS !== 0 && tempTimer2 === 0 && gameEnd === false && PAUSED === false) {
             POINTS++;
             tempTimer2 = 62;
         }
@@ -1246,7 +1246,7 @@ function game(){
             }
         }
 
-        if (tempTimer2 > 0) {
+        if (tempTimer2 > 0 && PAUSED === false) {
             tempTimer2--;
         }
 
@@ -1256,6 +1256,10 @@ function game(){
 
                 if (voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
                     var diceRollCity = Math.random();
+
+                    if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
+                        diceRollCity = 1;
+                    }
 
                     if (diceRollCity < 0.3) {
                         if (voxels[f].type === 6.1) {
@@ -1277,22 +1281,24 @@ function game(){
                                     // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
 
                                     if(LEVEL === 7){
-                                        if(voxels[f].id === 18 && TEMPPOINTS < 40 && POINTS < 1){
+                                        if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 1;
-                                        }else if(voxels[f].id === 18 && TEMPPOINTS >= 40 && POINTS < 1){
+                                        }else if(voxels[f].id === 18 && TEMPPOINTS >= 30 && POINTS < 1){
                                             diceRollCity2 = 2;
-                                        }else if(voxels[f].id === 17 && TEMPPOINTS < 60 && POINTS < 1){
+                                        }else if(voxels[f].id === 17 && TEMPPOINTS < 59 && POINTS < 1){
                                             diceRollCity2 = 2;
                                         }else if(voxels[f].id === 17 && TEMPPOINTS >= 60 && POINTS === 1){
                                             diceRollCity2 = 3;
-                                        }else if(voxels[f].id === 25 && TEMPPOINTS <= 80 && POINTS === 1){
+                                        }else if(voxels[f].id === 25 && TEMPPOINTS <= 90 && POINTS === 1){
                                             diceRollCity2 = 2;
-                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 80 && POINTS === 1){
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS <= 80 && POINTS === 1){
                                             diceRollCity2 = 2;
-                                        }else if(voxels[f].id === 24 && TEMPPOINTS < 90  && POINTS === 1){
+                                        }else if(voxels[f].id === 24 && TEMPPOINTS <= 90  && POINTS === 1){
                                             diceRollCity2 = 3;
-                                        }else if(voxels[f].id === 32 && TEMPPOINTS < 110  && POINTS === 1){
+                                        }else if(voxels[f].id === 32 && TEMPPOINTS <= 110  && POINTS === 1){
                                             diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 2  && POINTS <= 1 && TEMPPOINTS <= 30){
+                                            diceRollCity2 = 0;
                                         }
                                     }
 
@@ -2274,6 +2280,7 @@ function game(){
     if (keys && keys[32]) {
         if(buttonTimers[1] < 1){
             if(PAUSED === true){
+                secondTimers[0] = 62;
                 PAUSED = false;
             }else{
                 PAUSED = true;
