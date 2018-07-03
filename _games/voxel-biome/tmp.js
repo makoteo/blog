@@ -51,7 +51,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3, 4, 4, 5, 4, 10];
+var winYears = [3, 4, 3, 4, 4, 5, 4, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -176,12 +176,12 @@ var levelSixGrid = [
 
 var levelSevenGrid = [
 
-    [1, 1, 3, 3, 3, 1, 1, 3],
+    [1, 3, 1, 1, 1, 3, 1, 3],
     [3, 1, 1, 2, 2, 2, 2, 1],
-    [1, 3, 4, 2, 2, 1, 2, 4],
+    [1, 3, 6, 2, 2, 1, 2, 4],
     [3, 1, 4, 2, 2, 2, 2, 4],
-    [1, 2, 2, 2, 2, 2, 2, 3],
-    [1, 1, 1, 2, 4, 4, 1, 3],
+    [3, 2, 2, 2, 2, 2, 2, 3],
+    [3, 1, 1, 2, 4, 4, 1, 3],
     [1, 3, 3, 2, 1, 1, 1, 3],
     [3, 1, 1, 3, 1, 3, 1, 1]
 
@@ -376,7 +376,7 @@ var cardRig = [ // 99 = Pause
     [0, 1, 5, 0, 2, 1, 1, 99],
     [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
-    [99]
+    [3, 2, 1, 5, 0, 1, 5, 1, 4, 1, 5, 6, 99]
 
 ];
 
@@ -766,8 +766,8 @@ if(LEVEL === 0){
 }else if(LEVEL === 7){
     map = levelSevenGrid;
     cardLevelLimitation = 1; // 2
-    cards = [[1, 2], [1, 3]];
-    cardNeedGive = [[1, 1], [1, 1]];
+    cards = [[1, 3]];
+    cardNeedGive = [[1, 1]];
 }
 
 var mapSideLength = map[0].length;
@@ -1048,7 +1048,7 @@ function game(){
             }
         }
 
-        if (TEMPPOINTS % SeasonTimeSeconds === 0 && TEMPPOINTS !== 0 && (cards.length < 3) && (gameEnd === false) && secondTimers[0] < 1) {
+        if (TEMPPOINTS % SeasonTimeSeconds === 0 && TEMPPOINTS !== 0 && (cards.length < 3) && (gameEnd === false) && secondTimers[0] < 1 && PAUSED === false) {
             if(cardRig[LEVEL][cardRiggedNum] !== 99){
                 cards.push(cardCombos[cardRig[LEVEL][cardRiggedNum]]);
                 cardNeedGive.push(cardNeedGiveCombos[cardRig[LEVEL][cardRiggedNum]]);
@@ -1272,6 +1272,30 @@ function game(){
                                 if (gridRoll[m][n] === voxels[f].id) {
 
                                     var diceRollCity2 = Math.floor(Math.random() * 4) + 1;
+
+
+                                    // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                    if(LEVEL === 7){
+                                        if(voxels[f].id === 18 && TEMPPOINTS < 40 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 18 && TEMPPOINTS >= 40 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 17 && TEMPPOINTS < 60 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 17 && TEMPPOINTS >= 60 && POINTS === 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 25 && TEMPPOINTS <= 80 && POINTS === 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 80 && POINTS === 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 24 && TEMPPOINTS < 90  && POINTS === 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 32 && TEMPPOINTS < 110  && POINTS === 1){
+                                            diceRollCity2 = 3;
+                                        }
+                                    }
+
 
                                     if (diceRollCity2 === 1) {
                                         if ((m > 1) && (voxels[gridRoll[m - 1][n]].type) !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
