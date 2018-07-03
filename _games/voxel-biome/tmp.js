@@ -51,7 +51,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3, 4, 4, 5, 4, 5];
+var winYears = [3, 4, 3, 4, 4, 5, 4, 5, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -66,7 +66,8 @@ var levelNames = [
     "The Loopy Hills",
     "SharkFin Beach",
     "The Forested Isles",
-    "Lake Sardine"
+    "Lake Sardine",
+    "The Eerie Mountains"
 
 ];
 
@@ -184,6 +185,19 @@ var levelSevenGrid = [
     [3, 1, 1, 2, 4, 4, 1, 3],
     [1, 3, 3, 2, 1, 1, 1, 3],
     [3, 1, 1, 3, 1, 3, 1, 1]
+
+];
+
+var levelEightGrid = [
+
+    [5, 5, 5, 5, 5, 1, 1, 1],
+    [5, 5, 5, 5, 1, 3, 3, 1],
+    [2, 2, 2, 4, 1, 1, 3, 3],
+    [5, 5, 2, 2, 4, 4, 1, 1],
+    [5, 1, 4, 2, 2, 2, 1, 3],
+    [1, 3, 1, 1, 4, 2, 4, 1],
+    [3, 6, 1, 3, 1, 1, 1, 1],
+    [1, 3, 1, 3, 3, 3, 3, 1]
 
 ];
 
@@ -376,7 +390,8 @@ var cardRig = [ // 99 = Pause
     [0, 1, 5, 0, 2, 1, 1, 99],
     [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
-    [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99]
+    [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99],
+    [1, 0, 3, 8, 1, 0,  99]
 
 ];
 
@@ -768,6 +783,11 @@ if(LEVEL === 0){
     cardLevelLimitation = 1; // 2
     cards = [[1, 3]];
     cardNeedGive = [[1, 1]];
+}else if(LEVEL === 8){
+    map = levelEightGrid;
+    cardLevelLimitation = 1; // 2
+    cards = [[1, 3]];
+    cardNeedGive = [[1, 1]];
 }
 
 var mapSideLength = map[0].length;
@@ -812,6 +832,186 @@ function switchUpCards(cardNumber){
     cardNeedGive.splice(cardSelected - 1, 1);
 
     cardSelected = 0;
+
+}
+
+function reset(){
+
+    gameRunning = true;
+    SCORE = 0;
+    GAMESCORE = 0;
+    HIGHSCORE = 0;
+
+    TEMPPOINTS = 0;
+    POINTS = 0;
+    POLUTION = 0;
+
+    ENDTEMPTIME = 0;
+    ENDTIME = 0;
+
+    YEAR = 1;
+    SEASON = "Spring";
+
+    PAUSED = false;
+
+    GAMESPEED = 1; //DEFAULT 1
+    SAVEGAMESPEED = 1;
+
+    DEBUG = false;
+
+    GAMESTATE = "GAME";
+
+    voxels = [];
+
+    buttonTimers = [
+
+        [0],
+        [0]
+
+    ];
+
+    frameCount = 0;
+
+    thisFrameClicked = false;
+    mouseHeld = false;
+
+    endGameTimer = 0;
+
+    animationOffset = 160;
+
+    timerRed = false;
+
+    startTimer = 0;
+
+    gameEnd = false;
+
+    winYears = [3, 4, 3, 4, 4, 5, 4, 5];
+
+    blackScreen1Opacity = 0;
+    blackScreen2Opacity = 1;
+    levelNameOpacity = 0;
+
+    menuAnimationTimer = 0;
+
+    GUIOpacity = 1;
+
+    SeasonTimeSeconds = 10;
+
+    secondTimers = [
+
+        [0],
+        [0],
+        [0],
+        [0]
+
+    ];
+
+    timeSurvivedOpacity = 0;
+    yearRequiredOpacity = 0;
+    yearReachedOpacity = 0;
+    pollutionOpacity = 0;
+
+    endGameYearRequired = 0;
+    endGameYearReached = 0;
+    endGamePollution = 0;
+
+    YearChangedAlready = false;
+
+    LEVEL = 7; //7
+
+    gridRoll = [
+
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+
+    ];
+
+    selected = [];
+    clickSelected = [];
+
+    currentID = 0;
+
+    mouseDownTimer = 0;
+    tempMouseTimer = 0;
+
+    buildType = 0;
+
+    forests = 0;
+    deserts = 0;
+    fields = 0;
+    seas = 0;
+    towns = 0;
+    cities = 0;
+    oilrigs = 0;
+    desertFactories = 0;
+    forestFactories = 0;
+    Mountains = 0;
+
+    frameTimer2 = 0;
+    yearVisible = true;
+    yearlength = 600;
+
+    tempEndGameTimer = 20;
+
+    actionSelected = 0;
+
+    tempMouseTimer2 = 0;
+    tempMouseTimer3 = 0;
+
+    tempTimer2 = 0;
+
+    cardYOffset = [0, 0, 0];
+
+    cardSelected = 0;
+
+    cardRiggedNum = 0;
+
+    cardPosX = [0, 0, 0];
+
+    cards = [];
+
+    cardNeedGive = [];
+
+    cardOpacity = 1;
+
+    tileSelectedByCard = [];
+
+    tradeButtonOffset1 = 0;
+    tradeButtonOffset2 = 0;
+
+    word1 = "";
+    word2 = "";
+
+    num1 = 0;
+    num2 = 0;
+    cardChosen = 0;
 
 }
 
@@ -1303,6 +1503,22 @@ function game(){
                                             diceRollCity2 = 3;
                                         }else if(voxels[f].id === 2  && POINTS <= 1 && TEMPPOINTS <= 30){
                                             diceRollCity2 = 0;
+                                        }
+                                    }else if(LEVEL === 8){
+                                        if(voxels[f].id === 49 && TEMPPOINTS < 29 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 50 && TEMPPOINTS < 49 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 58 && TEMPPOINTS < 59 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 59 && TEMPPOINTS < 69 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 60 && TEMPPOINTS < 79 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 61 && TEMPPOINTS < 89 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 62 && TEMPPOINTS < 99 && POINTS === 1){
+                                            diceRollCity2 = 4;
                                         }
                                     }
 
