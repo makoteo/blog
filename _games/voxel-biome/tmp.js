@@ -96,7 +96,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 7;
+var LEVEL = 5; //7
 
 var levelZeroGrid = [
 
@@ -274,7 +274,7 @@ var desertPol = +1;
 var townPol = +5;
 var cityPol = +8;
 var oilRigPol = +10;
-var desertFactoryPol = +15;
+var desertFactoryPol = +10;
 var forestFactoryPol = +12;
 var MountainPol = -1;
 
@@ -1017,7 +1017,7 @@ function game(){
         }
 
         POLUTION = (fields * fieldPol) + (seas * seaPol) + (forests * forestPol) + (deserts * desertPol)
-            + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol);
+            + (cities * cityPol) + (oilrigs * oilRigPol) + (towns * townPol) + (forestFactories * forestFactoryPol) + (Mountains * MountainPol) + (desertFactories * desertFactoryPol);
 
         // PLAYER TURN ---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1279,6 +1279,10 @@ function game(){
 
 
                                     // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                    if(LEVEL === 5 && TEMPPOINTS < 40 && POINTS < 1){
+                                        diceRollCity2 = 2;
+                                    }
 
                                     if(LEVEL === 7){
                                         if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
