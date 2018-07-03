@@ -820,8 +820,8 @@ function switchUpCards(cardNumber){
 function game(){
 
     if(GAMESTATE === "GAME"){
-        gameRunning = true;
-        blackScreen2Opacity = 0;
+        //gameRunning = true;
+        //blackScreen2Opacity = 0;
         gameRunning = false;
         startTimer++;
 
