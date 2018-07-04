@@ -1,3 +1,11 @@
+
+// Hey!! Hope you're only looking at how I coded this and not trying to hack it :/
+
+// Made by: MakoTeo - Martin
+
+// June 14th
+
+
 var versionCode = "Alpha 0.9";
 var WIDTH = 1200;
 var HEIGHT = 675;
@@ -97,7 +105,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 5; //7
+var LEVEL = 7; //7
 
 var levelZeroGrid = [
 
@@ -1469,6 +1477,8 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 5 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 23){
                         diceRollCity = 1;
+                    }else if(LEVEL === 6 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 23){
+                        diceRollCity = 1;
                     }else if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
                         diceRollCity = 1;
                     }
@@ -1623,7 +1633,34 @@ function game(){
                                             diceRollCity2 = 2;
                                         }
 
+                                    }else if(LEVEL === 6){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Whole point is to block city on #29 by placing lake on #29
+
+                                        if(voxels[f].id === 23 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 23 && TEMPPOINTS < 29 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 22 && TEMPPOINTS < 39 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 36 && TEMPPOINTS < 49 && TEMPPOINTS > 49 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 29 && TEMPPOINTS < 49 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 24 && TEMPPOINTS < 49 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 31 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 38 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }
+
                                     }else if(LEVEL === 7){
+
+                                        //Place mountain on 00:20 on #25 instead of the obvious #2... On 00:40, place lake on #16 and you should be okay
+
                                         if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 1;
                                         }else if(voxels[f].id === 18 && TEMPPOINTS >= 30 && POINTS < 1){
