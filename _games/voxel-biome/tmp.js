@@ -97,7 +97,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 3; //7
+var LEVEL = 4; //7
 
 var levelZeroGrid = [
 
@@ -1465,6 +1465,8 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 3 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 28){
                         diceRollCity = 1;
+                    }else if(LEVEL === 4 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 28){
+                        diceRollCity = 1;
                     }else if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
                         diceRollCity = 1;
                     }
@@ -1556,7 +1558,7 @@ function game(){
 
                                         // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
 
-                                        //Whole point is to trade #10 for grass in time
+                                        //Whole point is to trade #10 for grass on 00:20
 
                                         if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
                                             diceRollCity2 = 2;
@@ -1566,7 +1568,30 @@ function game(){
                                             diceRollCity2 = 1;
                                         }else if(voxels[f].id === 16 && TEMPPOINTS < 59 && POINTS < 1){
                                             diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 10 && TEMPPOINTS < 59 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 10 && TEMPPOINTS < 69 && POINTS === 1){
+                                            diceRollCity2 = 1;
                                         }
+
+                                    }else if(LEVEL === 4){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Whole point is to trade #10 for grass on 00:20
+
+                                        if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 28 && TEMPPOINTS < 29 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 22 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 27 && TEMPPOINTS < 39 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 26 && TEMPPOINTS < 49 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }
+
 
                                     }else if(LEVEL === 7){
                                         if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
