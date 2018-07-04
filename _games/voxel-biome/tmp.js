@@ -51,7 +51,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 4, 3, 4, 4, 5, 4, 5, 5];
+var winYears = [3, 3, 3, 4, 4, 5, 4, 5, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -97,7 +97,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 7; //7
+var LEVEL = 3; //7
 
 var levelZeroGrid = [
 
@@ -384,7 +384,7 @@ var cardNeedGiveCombos = [ // REMEMBER TO UPDATE ALONG WITH CARD COMBOS
 var cardRig = [ // 99 = Pause
 
     [2, 0, 1, 2, 1, 1, 2, 99],
-    [1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
+    [1, 1, 0, 3, 2, 1, 2, 1, 2, 1, 99],
     [4, 1, 2, 4, 1, 0, 1, 2 ,4, 99],
     [1, 3, 1, 2, 0, 4, 2, 1, 2, 0, 2, 99],
     [0, 1, 5, 0, 2, 1, 1, 99],
@@ -1020,9 +1020,9 @@ function reset(){
 function game(){
 
     if(GAMESTATE === "GAME"){
-        //gameRunning = true;
-        //blackScreen2Opacity = 0;
-        gameRunning = false;
+        gameRunning = true;
+        blackScreen2Opacity = 0;
+        /*gameRunning = false;
         startTimer++;
 
         if(startTimer < 100){
@@ -1043,7 +1043,7 @@ function game(){
 
         ctx.globalAlpha = levelNameOpacity;
         ctx.fillText("Level " + LEVEL + " - " + levelNames[LEVEL], WIDTH/2, HEIGHT/2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 1;*/
     }
 
     if(gameEnd === true){
@@ -1457,7 +1457,15 @@ function game(){
                 if (voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
                     var diceRollCity = Math.random();
 
-                    if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
+                    if(LEVEL === 0 && TEMPPOINTS === 10 && voxels[f].id === 12) {
+                        diceRollCity = 1;
+                    }else if(LEVEL === 1 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 16){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 2 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 16){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 3 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 28){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
                         diceRollCity = 1;
                     }
 
@@ -1484,7 +1492,83 @@ function game(){
                                         diceRollCity2 = 2;
                                     }
 
-                                    if(LEVEL === 7){
+                                    if(LEVEL === 0){//TUTORIAL
+
+                                        //FIRST MOVE HAS TO BE MOUNTAIN ON TOWNS 4 (BY TUTORIAL)
+
+                                        if(voxels[f].id === 12 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 12 && TEMPPOINTS < 29 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 12 && TEMPPOINTS < 39 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }
+
+                                    }else if(LEVEL === 1){
+
+                                        //FIRST MOVE HAS TO BE MOUNTAIN ON TOWNS 1 -- Least Pollution Option... Basically an Easy Level where you follow instructions
+
+                                        if(voxels[f].id === 16 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 29 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 12 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 39 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 19 && POINTS === 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 11 && TEMPPOINTS < 39 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 17 && TEMPPOINTS < 39 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 17 && TEMPPOINTS < 49 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 21){
+                                            if(TEMPPOINTS < 50 && TEMPPOINTS > 30 && POINTS < 1){
+                                                diceRollCity2 = 4;
+                                            }else{
+                                                diceRollCity2 = 0;
+                                            }
+                                        }else if(voxels[f].id === 18 && TEMPPOINTS < 19 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 19 && TEMPPOINTS < 39 && POINTS === 1){
+                                            diceRollCity2 = 1;
+                                        }
+
+                                    }else if(LEVEL === 2){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Mostly a tutorial for how to trade multiple blocks... Not any big strategy...
+
+                                        if(voxels[f].id === 16 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 29 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 39 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 15 && TEMPPOINTS < 49 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }
+
+                                    }else if(LEVEL === 3){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Whole point is to trade #10 for grass in time
+
+                                        if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 28 && TEMPPOINTS < 29 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 22 && TEMPPOINTS < 49 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 16 && TEMPPOINTS < 59 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }
+
+                                    }else if(LEVEL === 7){
                                         if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 1;
                                         }else if(voxels[f].id === 18 && TEMPPOINTS >= 30 && POINTS < 1){
