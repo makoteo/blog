@@ -51,7 +51,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 3, 3, 4, 4, 5, 4, 5, 5];
+var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -97,7 +97,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 4; //7
+var LEVEL = 5; //7
 
 var levelZeroGrid = [
 
@@ -1467,6 +1467,8 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 4 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 28){
                         diceRollCity = 1;
+                    }else if(LEVEL === 5 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 23){
+                        diceRollCity = 1;
                     }else if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
                         diceRollCity = 1;
                     }
@@ -1489,10 +1491,6 @@ function game(){
 
 
                                     // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
-
-                                    if(LEVEL === 5 && TEMPPOINTS < 40 && POINTS < 1){
-                                        diceRollCity2 = 2;
-                                    }
 
                                     if(LEVEL === 0){//TUTORIAL
 
@@ -1578,7 +1576,7 @@ function game(){
 
                                         // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
 
-                                        //Whole point is to trade #10 for grass on 00:20
+                                        //Place Water on #26 one more 00:10 to block path...
 
                                         if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
                                             diceRollCity2 = 1;
@@ -1592,6 +1590,38 @@ function game(){
                                             diceRollCity2 = 3;
                                         }
 
+                                    }else if(LEVEL === 5){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Whole point is to trade #14 for empty on 00:10 on the 3 tree to 2 mountain trade (16 and 15 as mountains) and #32 to Lake on 00:50 requiring 00:20 to be
+                                        // #32 from desert to grass
+
+                                        if(voxels[f].id === 23 && POINTS < 5){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 30 && TEMPPOINTS < 49 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 21 && TEMPPOINTS < 39 && TEMPPOINTS > 29 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 14 && TEMPPOINTS < 49 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 31 && TEMPPOINTS < 59 && TEMPPOINTS > 49 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 31 && POINTS >= 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 22 && TEMPPOINTS < 59 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 22 && TEMPPOINTS < 29 && TEMPPOINTS > 19 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 37){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 35){
+                                            diceRollCity2 = 0;
+                                        }
+
+                                        if(TEMPPOINTS < 30 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }
 
                                     }else if(LEVEL === 7){
                                         if(voxels[f].id === 18 && TEMPPOINTS < 29 && POINTS < 1){
