@@ -59,7 +59,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5];
+var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -75,7 +75,8 @@ var levelNames = [
     "SharkFin Beach",
     "The Forested Isles",
     "Lake Sardine",
-    "The Eerie Mountains"
+    "The Eerie Mountains",
+    "Dragon-Tail Desert"
 
 ];
 
@@ -105,7 +106,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 8; //7
+var LEVEL = 9; //8 - DONE
 
 var levelZeroGrid = [
 
@@ -208,6 +209,22 @@ var levelEightGrid = [
     [1, 3, 1, 3, 4, 3, 3, 1]
 
 ];
+
+var levelNineGrid = [
+
+    [4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 1, 3, 3, 4, 4, 4],
+    [4, 1, 3, 1, 2, 1, 4, 4],
+    [4, 3, 2, 2, 2, 3, 4, 4],
+    [4, 3, 2, 2, 6, 4, 4, 4],
+    [4, 1, 3, 1, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4],
+    [4, 4, 4, 4, 4, 4, 4, 4]
+
+];
+
+// testGridDo = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+//for(var i = 1; i < 9; i++){for(var j = 0; j < 7; j++){testGridDo[i][j] = voxels[gridRoll[i][j]].type}}
 
 var firstMapGrid = [ // It has been a privilege using this map for every test up until levels were created. It will stay here in honor of it's contribution.
 
@@ -399,7 +416,8 @@ var cardRig = [ // 99 = Pause
     [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
     [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99],
-    [1, 3, 0, 1, 5, 1, 8, 1, 8, 1, 0, 2, 3, 1, 4, 5, 1, 1, 0, 99]
+    [1, 3, 0, 1, 5, 1, 8, 1, 8, 1, 0, 2, 3, 1, 4, 5, 1, 1, 0, 99],
+    [3, 2, 2, 1, 2, 3, 2, 1, 1, 3, 1, 2, 0, 9, 3, 1, 99]
 
 ];
 
@@ -796,6 +814,11 @@ if(LEVEL === 0){
     cardLevelLimitation = 1; // 2
     cards = [[4, 1]];
     cardNeedGive = [[1, 1]];
+}else if(LEVEL === 9){
+    map = levelNineGrid;
+    cardLevelLimitation = 0; // 2
+    cards = [[4, 1], [4, 1]];
+    cardNeedGive = [[1, 1], [1, 1]];
 }
 
 var mapSideLength = map[0].length;
@@ -1489,6 +1512,10 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 8 && (TEMPPOINTS === 40 || TEMPPOINTS === 50 || TEMPPOINTS === 30 || TEMPPOINTS === 60) && voxels[f].id === 39){
                         diceRollCity = 1;
+                    }else if(LEVEL === 9 && (TEMPPOINTS === 20 || TEMPPOINTS === 10 || TEMPPOINTS === 30) && voxels[f].id === 36){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 9 && (TEMPPOINTS === 20 || TEMPPOINTS === 10 || TEMPPOINTS === 30 || TEMPPOINTS === 40 || TEMPPOINTS === 50) && voxels[f].id === 44){
+                        diceRollCity = 1;
                     }
 
                     if (diceRollCity < 0.3) {
@@ -1729,8 +1756,34 @@ function game(){
                                         }
 
 
+                                    }else if(LEVEL === 9){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        // Trade #37, #44 and #52 for fields asap... City on #45 only moves to #46!!
+
+                                        if(voxels[f].id === 36 && TEMPPOINTS < 29 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 36 && TEMPPOINTS < 38 && TEMPPOINTS > 28 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 44 && TEMPPOINTS < 28 && TEMPPOINTS > 17 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 44 && TEMPPOINTS < 17 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 44 && TEMPPOINTS > 28 && TEMPPOINTS < 48 && POINTS < 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 44 && TEMPPOINTS > 48 && POINTS < 1 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 44 && TEMPPOINTS > 88 && TEMPPOINTS < 98 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 45 && POINTS === 1){
+                                            diceRollCity2 = 4;
+                                        }
+
+
                                     }
 
+                                    // CITY MOVE SCRIPT -------------------------------------------------------------------------------------------------------------------
 
                                     if (diceRollCity2 === 1) {
                                         if ((m > 1) && (voxels[gridRoll[m - 1][n]].type) !== 5 && (voxels[gridRoll[m - 1][n]].type !== 0)) {
