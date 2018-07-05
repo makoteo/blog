@@ -3,7 +3,7 @@
 
 // Made by: MakoTeo - Martin
 
-// June 14th
+// Started - June 14th
 
 
 var versionCode = "Alpha 0.9";
@@ -59,7 +59,7 @@ var startTimer = 0;
 
 var gameEnd = false;
 
-var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5];
+var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -76,7 +76,8 @@ var levelNames = [
     "The Forested Isles",
     "Lake Sardine",
     "The Eerie Mountains",
-    "Dragon-Tail Desert"
+    "Dragon-Tail Desert",
+    "The IronShade Province"
 
 ];
 
@@ -106,7 +107,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 9; //8 - DONE
+var LEVEL = 10; //9 - DONE
 
 var levelZeroGrid = [
 
@@ -220,6 +221,19 @@ var levelNineGrid = [
     [4, 1, 3, 1, 4, 4, 4, 4],
     [4, 4, 4, 4, 4, 4, 4, 4],
     [4, 4, 4, 4, 4, 4, 4, 4]
+
+];
+
+var levelTenGrid = [
+
+    [1, 4, 2, 2, 2, 1, 3, 1],
+    [3, 3, 4, 2, 3, 4, 3, 4],
+    [5, 1, 1, 3, 1, 5, 6, 1],
+    [5, 4, 4, 1, 5, 2, 2, 3],
+    [3, 4, 4, 4, 5, 3, 2, 1],
+    [3, 1, 4, 5, 1, 3, 1, 4],
+    [4, 3, 6, 1, 3, 4, 1, 1],
+    [4, 1, 2, 2, 4, 1, 3, 1]
 
 ];
 
@@ -417,7 +431,8 @@ var cardRig = [ // 99 = Pause
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
     [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99],
     [1, 3, 0, 1, 5, 1, 8, 1, 8, 1, 0, 2, 3, 1, 4, 5, 1, 1, 0, 99],
-    [3, 2, 2, 1, 2, 3, 2, 1, 1, 3, 1, 2, 0, 9, 3, 1, 99]
+    [3, 2, 2, 1, 2, 3, 2, 1, 1, 3, 1, 2, 0, 9, 3, 1, 99],
+    [2, 1, 5, 0, 9, 5, 3, 1, 8, 3, 2, 9, 1, 8, 5, 6, 99]
 
 ];
 
@@ -806,19 +821,24 @@ if(LEVEL === 0){
     cardNeedGive = [[1, 1], [1, 1]];
 }else if(LEVEL === 7){
     map = levelSevenGrid;
-    cardLevelLimitation = 1; // 2
+    cardLevelLimitation = 1; // 1
     cards = [[1, 3]];
     cardNeedGive = [[1, 1]];
 }else if(LEVEL === 8){
     map = levelEightGrid;
-    cardLevelLimitation = 1; // 2
+    cardLevelLimitation = 1; // 1
     cards = [[4, 1]];
     cardNeedGive = [[1, 1]];
 }else if(LEVEL === 9){
     map = levelNineGrid;
-    cardLevelLimitation = 0; // 2
+    cardLevelLimitation = 0; // 0
     cards = [[4, 1], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
+}else if(LEVEL === 10){
+    map = levelTenGrid;
+    cardLevelLimitation = 0; // 0
+    cards = [[1, 3]];
+    cardNeedGive = [[1, 1]];
 }
 
 var mapSideLength = map[0].length;
@@ -1516,6 +1536,10 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 9 && (TEMPPOINTS === 20 || TEMPPOINTS === 10 || TEMPPOINTS === 30 || TEMPPOINTS === 40 || TEMPPOINTS === 50) && voxels[f].id === 44){
                         diceRollCity = 1;
+                    }else if(LEVEL === 10 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30 || TEMPPOINTS === 40 || TEMPPOINTS === 50) && voxels[f].id === 50){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 10 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30 || TEMPPOINTS === 40 || TEMPPOINTS === 50) && voxels[f].id === 22){
+                        diceRollCity = 1;
                     }
 
                     if (diceRollCity < 0.3) {
@@ -1780,6 +1804,60 @@ function game(){
                                             diceRollCity2 = 4;
                                         }
 
+
+                                    }else if(LEVEL === 10){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        // Ignore mountain trade on 00:10
+                                        // 00:20 - #51 Field to Mountain
+                                        // 00:30 - #13 to Mountain
+                                        // 00:40 - #39 to Water
+                                        // 00:50 - Destroy #41
+                                        // 01:00 - #42 to Mountain
+                                        // Continue in a Low Pollution Style
+
+                                        if(voxels[f].id === 22 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 23 && POINTS < 1 && TEMPPOINTS < 48){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 23 && POINTS < 1 && TEMPPOINTS > 48){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 31 && POINTS === 1 && TEMPPOINTS < 69){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 50 && TEMPPOINTS < 19 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 50 && POINTS < 1 && TEMPPOINTS > 19  && TEMPPOINTS < 28){
+                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 50 && POINTS < 1 && TEMPPOINTS > 28  && TEMPPOINTS < 39){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 50 && POINTS < 1 && TEMPPOINTS > 38){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 49 && POINTS < 1 && TEMPPOINTS > 38  && TEMPPOINTS < 49){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 33 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 22 && POINTS < 1 && TEMPPOINTS > 38  && TEMPPOINTS < 49){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 14 && POINTS < 1 && TEMPPOINTS > 48  && TEMPPOINTS < 59){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 14 && POINTS === 1){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 41 && POINTS < 1 && TEMPPOINTS > 48  && TEMPPOINTS < 59){
+                                            diceRollCity2 = 0;
+                                        }else if(voxels[f].id === 41 && POINTS === 1 && TEMPPOINTS < 69){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 50 && POINTS === 1 && TEMPPOINTS < 79 && TEMPPOINTS > 69){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 22 && POINTS < 1 && TEMPPOINTS > 19  && TEMPPOINTS < 29){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 42 && POINTS < 1 && TEMPPOINTS > 19  && TEMPPOINTS < 29){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 48){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 51 && POINTS < 1){
+                                            diceRollCity2 = 4;
+                                        }
 
                                     }
 
