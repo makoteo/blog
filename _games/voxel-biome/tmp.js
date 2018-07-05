@@ -105,7 +105,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 7; //7
+var LEVEL = 8; //7
 
 var levelZeroGrid = [
 
@@ -201,11 +201,11 @@ var levelEightGrid = [
     [5, 5, 5, 5, 5, 1, 1, 1],
     [5, 5, 5, 5, 1, 3, 3, 1],
     [2, 2, 2, 4, 1, 1, 3, 3],
-    [5, 5, 2, 2, 4, 4, 1, 1],
-    [5, 1, 4, 2, 2, 2, 1, 3],
-    [1, 3, 1, 1, 4, 2, 4, 1],
-    [3, 6, 1, 3, 1, 1, 1, 1],
-    [1, 3, 1, 3, 3, 3, 3, 1]
+    [5, 5, 2, 2, 1, 2, 2, 4],
+    [5, 1, 4, 2, 2, 2, 1, 1],
+    [1, 3, 1, 2, 1, 6, 1, 1],
+    [3, 1, 1, 2, 2, 1, 1, 1],
+    [1, 3, 1, 3, 4, 3, 3, 1]
 
 ];
 
@@ -399,7 +399,7 @@ var cardRig = [ // 99 = Pause
     [4, 3, 1, 1, 0, 1, 3, 0, 3, 4, 7, 99],
     [3, 0, 1, 3, 8, 4, 5, 7, 3, 1, 4, 99],
     [3, 2, 1, 0, 5, 1, 5, 1, 5, 4, 5, 6, 99],
-    [1, 0, 3, 8, 1, 0,  99]
+    [1, 3, 0, 1, 5, 1, 8, 1, 8, 1, 0, 2, 3, 1, 4, 5, 1, 1, 0, 99]
 
 ];
 
@@ -794,7 +794,7 @@ if(LEVEL === 0){
 }else if(LEVEL === 8){
     map = levelEightGrid;
     cardLevelLimitation = 1; // 2
-    cards = [[1, 3]];
+    cards = [[4, 1]];
     cardNeedGive = [[1, 1]];
 }
 
@@ -1481,6 +1481,14 @@ function game(){
                         diceRollCity = 1;
                     }else if(LEVEL === 7 && TEMPPOINTS === 30 && voxels[f].id === 18){
                         diceRollCity = 1;
+                    }else if(LEVEL === 8 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 45){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 8 && (TEMPPOINTS === 40 || TEMPPOINTS === 50 || TEMPPOINTS === 30 || TEMPPOINTS === 60) && voxels[f].id === 38){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 8 && (TEMPPOINTS === 40 || TEMPPOINTS === 50 || TEMPPOINTS === 30) && voxels[f].id === 46){
+                        diceRollCity = 1;
+                    }else if(LEVEL === 8 && (TEMPPOINTS === 40 || TEMPPOINTS === 50 || TEMPPOINTS === 30 || TEMPPOINTS === 60) && voxels[f].id === 39){
+                        diceRollCity = 1;
                     }
 
                     if (diceRollCity < 0.3) {
@@ -1681,21 +1689,46 @@ function game(){
                                             diceRollCity2 = 0;
                                         }
                                     }else if(LEVEL === 8){
-                                        if(voxels[f].id === 49 && TEMPPOINTS < 29 && POINTS < 1){
+
+                                        // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //Whole point is to not use the 2nd DESERT - FIELD card because you'll later get a DESERT - MOUNATIN (the other one is gonna be FIELD - WATER)...
+
+                                        // DESTROY #44 pm 01:10 is also a good move
+
+                                        if(voxels[f].id === 45 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 4;
-                                        }else if(voxels[f].id === 50 && TEMPPOINTS < 49 && POINTS < 1){
+                                        }else if(voxels[f].id === 46 && TEMPPOINTS < 39 && POINTS < 1){
                                             diceRollCity2 = 3;
-                                        }else if(voxels[f].id === 58 && TEMPPOINTS < 59 && POINTS < 1){
+                                        }else if(voxels[f].id === 46 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 54 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 62 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 61 && TEMPPOINTS > 39 && POINTS < 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 38 && TEMPPOINTS > 29 && POINTS < 1){
                                             diceRollCity2 = 4;
-                                        }else if(voxels[f].id === 59 && TEMPPOINTS < 69 && POINTS === 1){
+                                        }else if(voxels[f].id === 38 && TEMPPOINTS < 19 && POINTS === 1){
                                             diceRollCity2 = 4;
-                                        }else if(voxels[f].id === 60 && TEMPPOINTS < 79 && POINTS === 1){
-                                            diceRollCity2 = 4;
-                                        }else if(voxels[f].id === 61 && TEMPPOINTS < 89 && POINTS === 1){
-                                            diceRollCity2 = 4;
-                                        }else if(voxels[f].id === 62 && TEMPPOINTS < 99 && POINTS === 1){
-                                            diceRollCity2 = 4;
+                                        }else if(voxels[f].id === 39 && TEMPPOINTS < 89 && POINTS < 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 39 && TEMPPOINTS < 89 && POINTS === 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 31 && TEMPPOINTS < 99 && POINTS === 1){
+                                            diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 53 && TEMPPOINTS < 99 && POINTS <= 1){
+                                            diceRollCity2 = 3;
+                                        }else if(voxels[f].id === 61 && TEMPPOINTS < 99 && POINTS <= 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 60 && TEMPPOINTS < 109 && POINTS <= 1){
+                                            diceRollCity2 = 2;
+                                        }else if(voxels[f].id === 59 && TEMPPOINTS < 119 && POINTS <= 1){
+                                            diceRollCity2 = 2;
                                         }
+
+
                                     }
 
 
