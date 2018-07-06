@@ -107,7 +107,7 @@ var endGamePollution = 0;
 
 var YearChangedAlready = false;
 
-var LEVEL = 6; //10 - DONE
+var LEVEL = 10; //10 - DONE
 
 var levelZeroGrid = [
 
@@ -387,6 +387,8 @@ var tempTimer2 = 0;
 var cardYOffset = [0, 0, 0];
 
 var cardSelected = 0;
+
+var seasonBleepTimer = -1;
 
 var cardLevelLimitation = 0;
 
@@ -1487,13 +1489,46 @@ function game(){
             secondTimers[1] = 100;
         }
 
+        if(TEMPPOINTS > 10 && TEMPPOINTS <= 100){
+            if(TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length) === "8" || TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length) === "9"){
+                seasonBleepTimer += GAMESPEED;
+                if(seasonBleepTimer % 5 <= 4 && seasonBleepTimer !== -1 && GAMESPEED > 1){
+                    seasonBleepTimer = Math.round(seasonBleepTimer / 10) * 10;
+                }
+            }
+        }else if(TEMPPOINTS <= 10){
+            if(TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length - 1) === "8" || TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length - 1) === "9"){
+                seasonBleepTimer += GAMESPEED;
+                if(seasonBleepTimer % 5 <= 4 && seasonBleepTimer !== -1 && GAMESPEED > 1){
+                    seasonBleepTimer = Math.round(seasonBleepTimer / 10) * 10;
+                }
+            }
+        }else if(TEMPPOINTS > 100){
+            if(TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length + 1) === "8" || TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length + 1) === "9"){
+                seasonBleepTimer += GAMESPEED;
+                if(seasonBleepTimer % 5 <= 4 && seasonBleepTimer !== -1 && GAMESPEED > 1){
+                    seasonBleepTimer = Math.round(seasonBleepTimer / 10) * 10;
+                }
+            }
+        }
+
+        //seasonBleepTimer
         for (var b = 0; b < 4; b++) {
-            if ((frameCount % yearlength === yearlength - 100/GAMESPEED + (b * 25 / GAMESPEED) && gameEnd === false)) {
+            if ((seasonBleepTimer === b * 30 && gameEnd === false)) {
                 if (yearVisible === false) {
                     yearVisible = true;
                 } else {
                     yearVisible = false;
                 }
+            }
+        }
+        if(TEMPPOINTS <= 100){
+            if(TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length) === "0"){
+                seasonBleepTimer = -1;
+            }
+        }else {
+            if (TEMPPOINTS.toString().charAt(TEMPPOINTS.toString.length + 1) === "0") {
+                seasonBleepTimer = -1;
             }
         }
 
