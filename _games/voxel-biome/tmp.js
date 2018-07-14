@@ -306,6 +306,9 @@ backGroundGame.src = "BackGroundVoxelGame.png";
 var titleGame = new Image();
 titleGame.src = "Title.png";
 
+var buttonGUI = new Image();
+buttonGUI.src = "Button.png";
+
 var currentID = 0;
 
 var mousePos;
@@ -2904,6 +2907,12 @@ function game(){
             PAUSED = true;
             ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
             ctx.drawImage(titleGame, 0, 0, 1020, 300, WIDTH/2 - WIDTH*0.53125/2, HEIGHT/9, WIDTH*0.53125, HEIGHT*0.277);
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - WIDTH/8, HEIGHT/2.2, WIDTH/4, HEIGHT/12);
+            ctx.font = '30pt Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+            ctx.fillText("Play", WIDTH/2, HEIGHT/2.2 + HEIGHT/20);
 
         }
 
