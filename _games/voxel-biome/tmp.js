@@ -45,6 +45,15 @@ var buttonTimers = [
 
 ];
 
+var menuButtonWidths = [
+
+    0,
+    0,
+    0,
+    0
+
+];
+
 var frameCount = 0;
 
 var thisFrameClicked = false;
@@ -65,6 +74,9 @@ var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
 var levelNameOpacity = 0;
+var transitionBlackOpacity = 1;
+
+var stateToTransitionTo = "";
 
 var levelNames = [
 
@@ -2903,18 +2915,77 @@ function game(){
             }
         }else if(GAMESTATE === "MENU"){
 
+            window.onmousemove = logMouseMove;
+
             gameRunning = false;
             PAUSED = true;
             ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
             ctx.drawImage(titleGame, 0, 0, 1020, 300, WIDTH/2 - WIDTH*0.53125/2, HEIGHT/9, WIDTH*0.53125, HEIGHT*0.277);
 
-            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - WIDTH/8, HEIGHT/2.2, WIDTH/4, HEIGHT/12);
-            ctx.font = '30pt Courier New';
+            ctx.font = '25pt Courier New';
             ctx.textAlign = 'center';
             ctx.fillStyle = 'white';
+
+            for(var gi = 0; gi < menuButtonWidths.length; gi++){
+                if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[gi]/2, HEIGHT/2.2 + gi * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[gi], HEIGHT/12*0.85)){
+                    if(menuButtonWidths[gi] < 96){
+                        menuButtonWidths[gi]+=8;
+                    }
+                }else if(menuButtonWidths[gi] > 0){
+                    menuButtonWidths[gi]-=6;
+                }
+
+                if(thisFrameClicked === true && onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[gi]/2, HEIGHT/2.2 + gi * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[gi], HEIGHT/12*0.85)){
+                    console.log(gi);
+                    if(gi === 0){
+                        stateToTransitionTo = "GAME";
+                    }
+                }
+            }
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[0]/2, HEIGHT/2.2, (WIDTH/4)*0.85 + menuButtonWidths[0], HEIGHT/12*0.85);
             ctx.fillText("Play", WIDTH/2, HEIGHT/2.2 + HEIGHT/20);
 
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[1]/2, HEIGHT/2.2 + HEIGHT/8, WIDTH/4*0.85 + menuButtonWidths[1], HEIGHT/12*0.85);
+            ctx.fillText("Options", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8);
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[2]/2, HEIGHT/2.2 + (HEIGHT/8)*2, WIDTH/4*0.85 + menuButtonWidths[2], HEIGHT/12*0.85);
+            ctx.fillText("Achievements", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*2);
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
+            ctx.fillText("Glossary", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3);
+
+            ctx.textAlign = 'left';
+            ctx.font = '20pt Courier New';
+            ctx.fillText("Makoteo", WIDTH/60, HEIGHT - HEIGHT/45);
+            ctx.textAlign = 'right';
+            ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
+
+            thisFrameClicked = false;
         }
+
+        if(stateToTransitionTo !== ""){
+            if(transitionBlackOpacity < 0.99){
+                transitionBlackOpacity += 0.01
+            }else{
+                GAMESTATE = stateToTransitionTo;
+                if(stateToTransitionTo === "GAME"){
+                    PAUSED = false;
+                }else{
+                    PAUSED = true;
+                }
+                stateToTransitionTo = "";
+            }
+        }else{
+            if(transitionBlackOpacity > 0.01){
+                transitionBlackOpacity -= 0.01
+            }
+        }
+
+        ctx.globalAlpha = transitionBlackOpacity;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.globalAlpha = 1;
 
     }
 
