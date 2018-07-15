@@ -50,6 +50,7 @@ var menuButtonWidths = [
     0,
     0,
     0,
+    0,
     0
 
 ];
@@ -96,6 +97,8 @@ var levelNames = [
 
 var menuAnimationTimer = 0;
 
+var mainMenuFrameCount = 0;
+
 var GUIOpacity = 1;
 
 var SeasonTimeSeconds = 10;
@@ -108,6 +111,12 @@ var secondTimers = [
     [0]
 
 ];
+
+var checkBoxValues = [0, 0, 0];
+var bigButtonWidths = [0, 0];
+var arrowWidths = [0, 0];
+
+var blockPage = 0;
 
 var timeSurvivedOpacity = 0;
 var yearRequiredOpacity = 0;
@@ -321,13 +330,26 @@ titleGame.src = "Title.png";
 var buttonGUI = new Image();
 buttonGUI.src = "Button.png";
 
+var checkBoxGUI = new Image();
+checkBoxGUI.src = "CheckBoxDesign.png";
+
+var bigButtonGUI = new Image();
+bigButtonGUI.src = "BigButton.png";
+
+var glossaryGUI = new Image();
+glossaryGUI.src = "GlossaryDesign.png";
+
 var currentID = 0;
+
+var cardPage = 0;
 
 var mousePos;
 var mousePosX;
 var mousePosY;
 var mouseDownTimer = 0;
 var tempMouseTimer = 0;
+
+var menuMouseTimer = 0;
 
 var buildType = 0;
 
@@ -2917,10 +2939,13 @@ function game(){
 
             window.onmousemove = logMouseMove;
 
+            var menugraphicY = Math.sin(mainMenuFrameCount);
+            mainMenuFrameCount += 0.03;
+
             gameRunning = false;
             PAUSED = true;
             ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
-            ctx.drawImage(titleGame, 0, 0, 1020, 300, WIDTH/2 - WIDTH*0.53125/2, HEIGHT/9, WIDTH*0.53125, HEIGHT*0.277);
+            ctx.drawImage(titleGame, 0, 0, 1020, 300, WIDTH/2 - WIDTH*0.53125/2, HEIGHT/9 + menugraphicY * 5, WIDTH*0.53125, HEIGHT*0.277);
 
             ctx.font = '25pt Courier New';
             ctx.textAlign = 'center';
@@ -2939,7 +2964,14 @@ function game(){
                     console.log(gi);
                     if(gi === 0){
                         stateToTransitionTo = "GAME";
+                    }else if(gi === 1){
+                        stateToTransitionTo = "OPTIONS";
+                    }else if(gi === 2){
+                        stateToTransitionTo = "ACHIEVEMENTS";
+                    }else if(gi === 3){
+                        stateToTransitionTo = "GLOSSARY";
                     }
+                    menuMouseTimer = 20;
                 }
             }
 
@@ -2962,11 +2994,201 @@ function game(){
             ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
 
             thisFrameClicked = false;
+        }else if(GAMESTATE === "OPTIONS"){
+            ctx.font = '25pt Courier New';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = 'white';
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            ctx.fillText("CheckBox 1", WIDTH/2 + HEIGHT/12, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/8*2);
+            ctx.drawImage(checkBoxGUI, 75 * checkBoxValues[0], 0, 75, 75, WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/8*2 - HEIGHT/18, HEIGHT/12, HEIGHT/12);
+
+            ctx.fillText("CheckBox 2", WIDTH/2 + HEIGHT/12, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/8);
+            ctx.drawImage(checkBoxGUI, 75 * checkBoxValues[1], 0, 75, 75, WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/8 - HEIGHT/18, HEIGHT/12, HEIGHT/12);
+
+            ctx.fillText("CheckBox 3", WIDTH/2 + HEIGHT/12, HEIGHT/2.2 + HEIGHT/20);
+            ctx.drawImage(checkBoxGUI, 75 * checkBoxValues[2], 0, 75, 75, WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/18, HEIGHT/12, HEIGHT/12);
+
+            for(var hi = -2; hi < checkBoxValues.length - 2; hi++){
+                if(thisFrameClicked === true && onClick(WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8*hi - HEIGHT/18, HEIGHT/12, HEIGHT/12)){
+                    if(menuMouseTimer < 1){
+                        if(checkBoxValues[hi+2] === 0){
+                            checkBoxValues[hi+2] = 1;
+                        }else{
+                            checkBoxValues[hi+2] = 0;
+                        }
+                        menuMouseTimer = 20;
+                    }
+                }
+            }
+
+        }else if(GAMESTATE === "ACHIEVEMENTS"){
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+        }else if(GAMESTATE === "GLOSSARY"){
+
+            if(onClick(WIDTH/2 - WIDTH/30 - WIDTH*0.2 - bigButtonWidths[0]/2, HEIGHT/2 - WIDTH*0.15 - bigButtonWidths[0]/2, WIDTH*0.2 + bigButtonWidths[0], WIDTH*0.2 + bigButtonWidths[0])){
+                if(bigButtonWidths[0] < 48){
+                    bigButtonWidths[0]+=8;
+                }
+                if(thisFrameClicked === true){
+                    stateToTransitionTo = "BLOCK GLOSSARY";
+                }
+            }else if(bigButtonWidths[0] > 0){
+                bigButtonWidths[0]-=6;
+            }
+
+            if(onClick(WIDTH/2 + WIDTH/30 - bigButtonWidths[1]/2, HEIGHT/2 - WIDTH*0.15 - bigButtonWidths[1]/2, WIDTH*0.2 + bigButtonWidths[1], WIDTH*0.2 + bigButtonWidths[1])){
+                if(bigButtonWidths[1] < 48){
+                    bigButtonWidths[1]+=8;
+                }
+                if(thisFrameClicked === true){
+                    stateToTransitionTo = "CARD GLOSSARY";
+                }
+            }else if(bigButtonWidths[1] > 0){
+                bigButtonWidths[1]-=6;
+            }
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            ctx.font = '25pt Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+
+            ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 - WIDTH/30 - WIDTH*0.2 - bigButtonWidths[0]/2, HEIGHT/2 - WIDTH*0.15 - bigButtonWidths[0]/2, WIDTH*0.2 + bigButtonWidths[0], WIDTH*0.2 + bigButtonWidths[0]);
+            ctx.fillText("Blocks", WIDTH/2 - WIDTH/30 - WIDTH*0.1, HEIGHT/2 + WIDTH*0.03 + bigButtonWidths[0]/2, WIDTH*0.2);
+            ctx.drawImage(voxelsG, 0, 0, 299, 400, WIDTH/2 - WIDTH/30 - WIDTH*0.14 - bigButtonWidths[0]/4, HEIGHT/2 - WIDTH*0.14 + bigButtonWidths[0]/4 - bigButtonWidths[0]/2, WIDTH/11.5 + bigButtonWidths[0]/2, HEIGHT/4.6875 + bigButtonWidths[0]/2);
+
+            ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + WIDTH/30 - bigButtonWidths[1]/2, HEIGHT/2 - WIDTH*0.15 - bigButtonWidths[1]/2, WIDTH*0.2 + bigButtonWidths[1], WIDTH*0.2 + bigButtonWidths[1]);
+            ctx.fillText("Cards", WIDTH/2 + WIDTH/30 + WIDTH*0.1, HEIGHT/2 + WIDTH*0.03 + bigButtonWidths[1]/2, WIDTH*0.2);
+            ctx.drawImage(voxelsGUI, 0, 0, 300, 400, WIDTH/2 + WIDTH/30 + WIDTH*0.1 - WIDTH/24 - bigButtonWidths[1]/4, HEIGHT/2 - WIDTH*0.12 + bigButtonWidths[1]/4 - bigButtonWidths[1]/2, WIDTH/11.5 + bigButtonWidths[1]/2, HEIGHT/4.6875 + bigButtonWidths[1]/2);
+
+        }else if(GAMESTATE === "BLOCK GLOSSARY"){
+
+            if(onClick(WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0])){
+                if(arrowWidths[0] < 16){
+                    arrowWidths[0]+=8;
+                }
+                if(thisFrameClicked === true){
+                    blockPage = 0;
+                }
+            }else if(arrowWidths[0] > 0){
+                arrowWidths[0]-=6;
+            }
+            if(onClick(WIDTH - WIDTH/15 - WIDTH/24 - arrowWidths[1]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[1]/2, WIDTH/24 + arrowWidths[1], HEIGHT/6.75 + arrowWidths[1])){
+                if(arrowWidths[1] < 16){
+                    arrowWidths[1]+=8;
+                }
+                if(thisFrameClicked === true){
+                    blockPage = 1;
+                }
+            }else if(arrowWidths[1] > 0){
+                arrowWidths[1]-=6;
+            }
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            if(blockPage === 1){
+                ctx.drawImage(glossaryGUI, 0, 0, 100, 100, WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0]);
+            }else {
+                ctx.drawImage(glossaryGUI, 0, 100, 100, 100, WIDTH - WIDTH / 15 - WIDTH / 24 - arrowWidths[1] / 2, HEIGHT / 2 - HEIGHT / 7.75 - arrowWidths[1] / 2, WIDTH / 24 + arrowWidths[1], HEIGHT / 6.75 + arrowWidths[1]);
+            }
+
+            if(blockPage === 0){
+                ctx.drawImage(glossaryGUI, 100, 0, 1200, 800, WIDTH/2 - WIDTH*0.35, HEIGHT/2 - HEIGHT*0.45, WIDTH *0.7, HEIGHT*0.8);
+            }else{
+                ctx.drawImage(glossaryGUI, 1300, 0, 1200, 800, WIDTH/2 - WIDTH*0.35, HEIGHT/2 - HEIGHT*0.45, WIDTH *0.7, HEIGHT*0.8);
+            }
+
+        }else if(GAMESTATE === "CARD GLOSSARY"){
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            if(onClick(WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0])){
+                if(arrowWidths[0] < 16){
+                    arrowWidths[0]+=8;
+                }
+                if(thisFrameClicked === true){
+                    cardPage = 0;
+                }
+            }else if(arrowWidths[0] > 0){
+                arrowWidths[0]-=6;
+            }
+            if(onClick(WIDTH - WIDTH/15 - WIDTH/24 - arrowWidths[1]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[1]/2, WIDTH/24 + arrowWidths[1], HEIGHT/6.75 + arrowWidths[1])){
+                if(arrowWidths[1] < 16){
+                    arrowWidths[1]+=8;
+                }
+                if(thisFrameClicked === true){
+                    cardPage = 1;
+                }
+            }else if(arrowWidths[1] > 0){
+                arrowWidths[1]-=6;
+            }
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            if(cardPage === 1){
+                ctx.drawImage(glossaryGUI, 0, 0, 100, 100, WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0]);
+            }else {
+                ctx.drawImage(glossaryGUI, 0, 100, 100, 100, WIDTH - WIDTH / 15 - WIDTH / 24 - arrowWidths[1] / 2, HEIGHT / 2 - HEIGHT / 7.75 - arrowWidths[1] / 2, WIDTH / 24 + arrowWidths[1], HEIGHT / 6.75 + arrowWidths[1]);
+            }
+
+            if(cardPage === 0){
+                ctx.drawImage(glossaryGUI, 100, 800, 1200, 800, WIDTH/2 - WIDTH*0.35, HEIGHT/2 - HEIGHT*0.45, WIDTH *0.7, HEIGHT*0.8);
+            }else{
+                ctx.drawImage(glossaryGUI, 1300, 800, 1200, 800, WIDTH/2 - WIDTH*0.35, HEIGHT/2 - HEIGHT*0.45, WIDTH *0.7, HEIGHT*0.8);
+            }
+
+        }
+
+        if(GAMESTATE !== "GAME" && GAMESTATE !== "LOSS" && GAMESTATE !== "WIN" && GAMESTATE !== "MENU" && GAMESTATE !== "BLOCK GLOSSARY" && GAMESTATE !== "CARD GLOSSARY"){
+            if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                if(menuButtonWidths[3] < 96){
+                    menuButtonWidths[3]+=8;
+                }
+            }else if(menuButtonWidths[3] > 0){
+                menuButtonWidths[3]-=6;
+            }
+            if(thisFrameClicked === true && onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                stateToTransitionTo = "MENU";
+            }
+            ctx.font = '25pt Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
+            ctx.fillText("Back", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3);
+        }else if( GAMESTATE === "BLOCK GLOSSARY" || GAMESTATE === "CARD GLOSSARY"){
+
+            if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8) + HEIGHT/24, (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                if(menuButtonWidths[3] < 96){
+                    menuButtonWidths[3]+=8;
+                }
+            }else if(menuButtonWidths[3] > 0){
+                menuButtonWidths[3]-=6;
+            }
+            if(thisFrameClicked === true && onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8) + HEIGHT/24, (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                stateToTransitionTo = "GLOSSARY";
+            }
+            ctx.font = '25pt Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3  + HEIGHT/24, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
+            ctx.fillText("Back", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3 + HEIGHT/24);
+
+        }
+
+        if(GAMESTATE !== "GAME"){
+            if(menuMouseTimer > 0){
+                menuMouseTimer--;
+            }
         }
 
         if(stateToTransitionTo !== ""){
-            if(transitionBlackOpacity < 0.99){
-                transitionBlackOpacity += 0.01
+            if(transitionBlackOpacity < 0.98){
+                transitionBlackOpacity += 0.02
             }else{
                 GAMESTATE = stateToTransitionTo;
                 if(stateToTransitionTo === "GAME"){
@@ -2977,8 +3199,8 @@ function game(){
                 stateToTransitionTo = "";
             }
         }else{
-            if(transitionBlackOpacity > 0.01){
-                transitionBlackOpacity -= 0.01
+            if(transitionBlackOpacity > 0.02){
+                transitionBlackOpacity -= 0.02;
             }
         }
 
@@ -2990,7 +3212,7 @@ function game(){
     }
 
     if (keys && keys[32]) {
-        if(buttonTimers[1] < 1){
+        if(buttonTimers[1] < 1 && gameRunning === true){
             if(PAUSED === true){
                 secondTimers[0] = 62;
                 PAUSED = false;
