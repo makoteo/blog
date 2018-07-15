@@ -120,6 +120,8 @@ var arrowWidths = [0, 0];
 
 var blockPage = 0;
 
+var menuMouseTimer = 0;
+
 var timeSurvivedOpacity = 0;
 var yearRequiredOpacity = 0;
 var yearReachedOpacity = 0;
@@ -833,30 +835,44 @@ function Voxel(x, y, width, height, type){
 function menuBigButton(level){
 
     this.level = level;
-    this.position = this.level - levelSelectorMenuLevelSelected;
     this.xOffset = 0;
     this.yOffset = 0;
     this.width = 0.3*WIDTH;
     this.height = 0.3*WIDTH;
+    this.moveVelocity = WIDTH/24;
 
     this.draw = function(){
 
         ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.1 + this.yOffset - this.width/2, this.width, this.height);
 
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.font = '15pt Courier New';
+        ctx.fillText("Level " + this.level, this.xOffset + WIDTH/2, HEIGHT/2 + this.height/2 - HEIGHT * 0.18);
+        ctx.font = '10pt Courier New';
+        ctx.fillText(levelNames[this.level], this.xOffset + WIDTH/2, HEIGHT/2 + this.height/2 - HEIGHT * 0.15);
+
     }
 
     this.update = function(){
 
+        this.position = this.level - levelSelectorMenuLevelSelected;
+
         if(this.xOffset < this.position * WIDTH/3){
-            this.xOffset+=3;
-        }else if(this.xOffset > this.position * WIDTH/3){
-            this.xOffset-=3;
+            this.xOffset+=this.moveVelocity;
+        }else if(this.xOffset > (this.position) * WIDTH/3){
+            this.xOffset-=this.moveVelocity;
         }
 
         if(this.position !== 0){
             if(this.width > WIDTH*0.2){
-                this.width-=2;
-                this.height-=2;
+                this.width-=4;
+                this.height-=4;
+            }
+        }else{
+            if(this.width < WIDTH*0.3){
+                this.width+=4;
+                this.height+=4;
             }
         }
 
@@ -864,60 +880,58 @@ function menuBigButton(level){
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
-
 var map = levelZeroGrid;
-
-if(LEVEL === 0){
+if (LEVEL === 0) {
     map = levelZeroGrid;
     cardLevelLimitation = 7; // 7
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 1){
+} else if (LEVEL === 1) {
     map = levelOneGrid;
     cardLevelLimitation = 6; // 6
     cards = [[1, 3], [1, 5]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 2){
+} else if (LEVEL === 2) {
     map = levelTwoGrid;
     cardLevelLimitation = 5; // 5
     cards = [[1, 3], [1, 3]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 3){
+} else if (LEVEL === 3) {
     map = levelThreeGrid;
     cardLevelLimitation = 4; // 4
     cards = [[1, 2], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 4){
+} else if (LEVEL === 4) {
     map = levelFourGrid;
     cardLevelLimitation = 4; // 4
     cards = [[1, 3], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 5){
+} else if (LEVEL === 5) {
     map = levelFiveGrid;
     cardLevelLimitation = 2; // 2
     cards = [[1, 3], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 6){
+} else if (LEVEL === 6) {
     map = levelSixGrid;
     cardLevelLimitation = 2; // 2
     cards = [[1, 3], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 7){
+} else if (LEVEL === 7) {
     map = levelSevenGrid;
     cardLevelLimitation = 1; // 1
     cards = [[1, 3]];
     cardNeedGive = [[1, 1]];
-}else if(LEVEL === 8){
+} else if (LEVEL === 8) {
     map = levelEightGrid;
     cardLevelLimitation = 1; // 1
     cards = [[4, 1]];
     cardNeedGive = [[1, 1]];
-}else if(LEVEL === 9){
+} else if (LEVEL === 9) {
     map = levelNineGrid;
     cardLevelLimitation = 0; // 0
     cards = [[4, 1], [4, 1]];
     cardNeedGive = [[1, 1], [1, 1]];
-}else if(LEVEL === 10){
+} else if (LEVEL === 10) {
     map = levelTenGrid;
     cardLevelLimitation = 0; // 0
     cards = [[1, 3]];
@@ -927,30 +941,122 @@ if(LEVEL === 0){
 var mapSideLength = map[0].length;
 var maxGridLength = map[0].length;
 
-var downwardsOffset = (8 - mapSideLength) * HEIGHT/28;
+var downwardsOffset = (8 - mapSideLength) * HEIGHT / 28;
 
-for(var i = 0; i < map.length; i++) {
-    for(var j = 0; j < maxGridLength; j++) {
-        if(map[i][j] === 0){
+for (var i = 0; i < map.length; i++) {
+    for (var j = 0; j < maxGridLength; j++) {
+        if (map[i][j] === 0) {
 
-        }else if(map[i][j] === 1){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 1));
-        }else if(map[i][j] === 2){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 2));
-        }else if(map[i][j] === 3){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 3));
-        }else if(map[i][j] === 4){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 4));
-        }else if(map[i][j] === 5){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 5));
-        }else if(map[i][j] === 6){
-            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH/50, (HEIGHT / 14 * j/2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT/33 * maxGridLength) + downwardsOffset, WIDTH/16, WIDTH/12, 6.1));
+        } else if (map[i][j] === 1) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 1));
+        } else if (map[i][j] === 2) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 2));
+        } else if (map[i][j] === 3) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 3));
+        } else if (map[i][j] === 4) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 4));
+        } else if (map[i][j] === 5) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 5));
+        } else if (map[i][j] === 6) {
+            voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 6.1));
         }
         //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
     }
     //width--;
 }
 
+function loadGame() {
+
+    voxels = [];
+    gridRoll = [];
+    currentID = 0;
+
+    reset();
+
+    if (LEVEL === 0) {
+        map = levelZeroGrid;
+        cardLevelLimitation = 7; // 7
+        cards = [[1, 3], [1, 5]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 1) {
+        map = levelOneGrid;
+        cardLevelLimitation = 6; // 6
+        cards = [[1, 3], [1, 5]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 2) {
+        map = levelTwoGrid;
+        cardLevelLimitation = 5; // 5
+        cards = [[1, 3], [1, 3]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 3) {
+        map = levelThreeGrid;
+        cardLevelLimitation = 4; // 4
+        cards = [[1, 2], [4, 1]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 4) {
+        map = levelFourGrid;
+        cardLevelLimitation = 4; // 4
+        cards = [[1, 3], [4, 1]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 5) {
+        map = levelFiveGrid;
+        cardLevelLimitation = 2; // 2
+        cards = [[1, 3], [4, 1]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 6) {
+        map = levelSixGrid;
+        cardLevelLimitation = 2; // 2
+        cards = [[1, 3], [4, 1]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 7) {
+        map = levelSevenGrid;
+        cardLevelLimitation = 1; // 1
+        cards = [[1, 3]];
+        cardNeedGive = [[1, 1]];
+    } else if (LEVEL === 8) {
+        map = levelEightGrid;
+        cardLevelLimitation = 1; // 1
+        cards = [[4, 1]];
+        cardNeedGive = [[1, 1]];
+    } else if (LEVEL === 9) {
+        map = levelNineGrid;
+        cardLevelLimitation = 0; // 0
+        cards = [[4, 1], [4, 1]];
+        cardNeedGive = [[1, 1], [1, 1]];
+    } else if (LEVEL === 10) {
+        map = levelTenGrid;
+        cardLevelLimitation = 0; // 0
+        cards = [[1, 3]];
+        cardNeedGive = [[1, 1]];
+    }
+
+    mapSideLength = map[0].length;
+    maxGridLength = map[0].length;
+
+    var downwardsOffset = (8 - mapSideLength) * HEIGHT / 28;
+
+    for (var i = 0; i < map.length; i++) {
+        for (var j = 0; j < maxGridLength; j++) {
+            if (map[i][j] === 0) {
+
+            } else if (map[i][j] === 1) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 1));
+            } else if (map[i][j] === 2) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 2));
+            } else if (map[i][j] === 3) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 3));
+            } else if (map[i][j] === 4) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 4));
+            } else if (map[i][j] === 5) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 5));
+            } else if (map[i][j] === 6) {
+                voxels.push(new Voxel(WIDTH - ((WIDTH / 33 * (j - i + 1)) - (WIDTH / 33 * (-15))) - WIDTH / 50, (HEIGHT / 14 * j / 2) + ((i - 2) * HEIGHT / 28) + ((maxGridLength + 10) * HEIGHT / 29) - (HEIGHT / 33 * maxGridLength) + downwardsOffset, WIDTH / 16, WIDTH / 12, 6.1));
+            }
+            //voxels.push(new Voxel((WIDTH / 10 * (j + 3)) + (i * WIDTH/20), HEIGHT - ((HEIGHT / 30 * 9) - (HEIGHT / 30 * (i + 1))), 75, 75));
+        }
+        //width--;
+    }
+}
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
 function onClick(xObj, yObj, widthObj, heightObj){
@@ -997,13 +1103,6 @@ function reset(){
 
     voxels = [];
 
-    buttonTimers = [
-
-        [0],
-        [0]
-
-    ];
-
     frameCount = 0;
 
     thisFrameClicked = false;
@@ -1019,7 +1118,7 @@ function reset(){
 
     gameEnd = false;
 
-    winYears = [3, 4, 3, 4, 4, 5, 4, 5];
+    winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
 
     blackScreen1Opacity = 0;
     blackScreen2Opacity = 1;
@@ -1031,15 +1130,6 @@ function reset(){
 
     SeasonTimeSeconds = 10;
 
-    secondTimers = [
-
-        [0],
-        [0],
-        [0],
-        [0]
-
-    ];
-
     timeSurvivedOpacity = 0;
     yearRequiredOpacity = 0;
     yearReachedOpacity = 0;
@@ -1050,8 +1140,6 @@ function reset(){
     endGamePollution = 0;
 
     YearChangedAlready = false;
-
-    LEVEL = 7; //7
 
     gridRoll = [
 
@@ -3036,13 +3124,60 @@ function game(){
             ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
 
             if(levelSelectors.length < 2){
-                levelSelectors.push(new menuBigButton(0));
-                levelSelectors.push(new menuBigButton(1));
+                for(i = 0; i <= 10; i++){
+                    levelSelectors.push(new menuBigButton(i));
+                }
             }
 
             for(var i = 0; i < levelSelectors.length; i++){
                 levelSelectors[i].draw();
                 levelSelectors[i].update();
+            }
+
+            if(onClick(WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0])){
+                if(arrowWidths[0] < 16){
+                    arrowWidths[0]+=8;
+                }
+                if(thisFrameClicked === true && menuMouseTimer < 1){
+                    if(levelSelectorMenuLevelSelected > 0){
+                        levelSelectorMenuLevelSelected--;
+                    }
+                    menuMouseTimer = 20;
+                }
+            }else if(arrowWidths[0] > 0){
+                arrowWidths[0]-=6;
+            }
+            if(onClick(WIDTH - WIDTH/15 - WIDTH/24 - arrowWidths[1]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[1]/2, WIDTH/24 + arrowWidths[1], HEIGHT/6.75 + arrowWidths[1])){
+                if(arrowWidths[1] < 16){
+                    arrowWidths[1]+=8;
+                }
+                if(thisFrameClicked === true && menuMouseTimer < 1){
+                    if(levelSelectorMenuLevelSelected < 10){
+                        levelSelectorMenuLevelSelected++;
+                    }
+                    menuMouseTimer = 20;
+                }
+            }else if(arrowWidths[1] > 0){
+                arrowWidths[1]-=6;
+            }
+
+            if(onClick(WIDTH/2 - levelSelectors[levelSelectorMenuLevelSelected].width/2, HEIGHT/2 - HEIGHT*0.1 + levelSelectors[levelSelectorMenuLevelSelected].yOffset - levelSelectors[levelSelectorMenuLevelSelected].width/2,
+                    levelSelectors[levelSelectorMenuLevelSelected].width, levelSelectors[levelSelectorMenuLevelSelected].height) && thisFrameClicked === true){
+                LEVEL = levelSelectorMenuLevelSelected;
+
+                stateToTransitionTo = "GAME";
+
+            }
+
+            if(levelSelectorMenuLevelSelected > 0){
+                ctx.drawImage(glossaryGUI, 0, 0, 100, 100, WIDTH/15 - arrowWidths[0]/2, HEIGHT/2 - HEIGHT/7.75 - arrowWidths[0]/2, WIDTH/24 + arrowWidths[0], HEIGHT/6.75 + arrowWidths[0]);
+            }
+            if(levelSelectorMenuLevelSelected < 10){
+                ctx.drawImage(glossaryGUI, 0, 100, 100, 100, WIDTH - WIDTH / 15 - WIDTH / 24 - arrowWidths[1] / 2, HEIGHT / 2 - HEIGHT / 7.75 - arrowWidths[1] / 2, WIDTH / 24 + arrowWidths[1], HEIGHT / 6.75 + arrowWidths[1]);
+            }
+
+            if(menuMouseTimer > 0){
+                menuMouseTimer--;
             }
 
         }else if(GAMESTATE === "OPTIONS"){
@@ -3229,6 +3364,25 @@ function game(){
             ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3  + HEIGHT/24, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
             ctx.fillText("Back", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3 + HEIGHT/24);
 
+        }else if((GAMESTATE === "WIN" || GAMESTATE === "LOSS") && endGameYearReached === YEAR){
+
+            if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8) + HEIGHT/24, (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                if(menuButtonWidths[3] < 96){
+                    menuButtonWidths[3]+=8;
+                }
+            }else if(menuButtonWidths[3] > 0){
+                menuButtonWidths[3]-=6;
+            }
+            if(thisFrameClicked === true && onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8) + HEIGHT/24, (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
+                stateToTransitionTo = "LEVEL PICK";
+            }
+            ctx.font = '25pt Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+
+            ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3  + HEIGHT/24, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
+            ctx.fillText("Levels", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3 + HEIGHT/24);
+
         }
 
         if(GAMESTATE !== "GAME"){
@@ -3244,6 +3398,7 @@ function game(){
                 GAMESTATE = stateToTransitionTo;
                 if(stateToTransitionTo === "GAME"){
                     PAUSED = false;
+                    loadGame();
                 }else{
                     PAUSED = true;
                 }
