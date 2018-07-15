@@ -57,6 +57,8 @@ var menuButtonWidths = [
 
 var frameCount = 0;
 
+var levelSelectorMenuLevelSelected = 0;
+
 var thisFrameClicked = false;
 var mouseHeld = false;
 
@@ -113,7 +115,7 @@ var secondTimers = [
 ];
 
 var checkBoxValues = [0, 0, 0];
-var bigButtonWidths = [0, 0];
+var bigButtonWidths = [0, 0, 0];
 var arrowWidths = [0, 0];
 
 var blockPage = 0;
@@ -490,6 +492,8 @@ var cards = [];
 
 var cardNeedGive = [];
 
+var levelSelectors = [];
+
 var cardOpacity = 1;
 
 var tileSelectedByCard = [];
@@ -823,6 +827,39 @@ function Voxel(x, y, width, height, type){
         if(this.type === 0 || this.type === 5){
             this.cityProperty = false;
         }
+    }
+}
+
+function menuBigButton(level){
+
+    this.level = level;
+    this.position = this.level - levelSelectorMenuLevelSelected;
+    this.xOffset = 0;
+    this.yOffset = 0;
+    this.width = 0.3*WIDTH;
+    this.height = 0.3*WIDTH;
+
+    this.draw = function(){
+
+        ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.1 + this.yOffset - this.width/2, this.width, this.height);
+
+    }
+
+    this.update = function(){
+
+        if(this.xOffset < this.position * WIDTH/3){
+            this.xOffset+=3;
+        }else if(this.xOffset > this.position * WIDTH/3){
+            this.xOffset-=3;
+        }
+
+        if(this.position !== 0){
+            if(this.width > WIDTH*0.2){
+                this.width-=2;
+                this.height-=2;
+            }
+        }
+
     }
 }
 
@@ -2963,7 +3000,7 @@ function game(){
                 if(thisFrameClicked === true && onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[gi]/2, HEIGHT/2.2 + gi * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[gi], HEIGHT/12*0.85)){
                     console.log(gi);
                     if(gi === 0){
-                        stateToTransitionTo = "GAME";
+                        stateToTransitionTo = "LEVEL PICK";
                     }else if(gi === 1){
                         stateToTransitionTo = "OPTIONS";
                     }else if(gi === 2){
@@ -2994,6 +3031,20 @@ function game(){
             ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
 
             thisFrameClicked = false;
+        }else if(GAMESTATE === "LEVEL PICK"){
+
+            ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            if(levelSelectors.length < 2){
+                levelSelectors.push(new menuBigButton(0));
+                levelSelectors.push(new menuBigButton(1));
+            }
+
+            for(var i = 0; i < levelSelectors.length; i++){
+                levelSelectors[i].draw();
+                levelSelectors[i].update();
+            }
+
         }else if(GAMESTATE === "OPTIONS"){
             ctx.font = '25pt Courier New';
             ctx.textAlign = 'right';
