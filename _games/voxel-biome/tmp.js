@@ -881,11 +881,12 @@ function menuBigButton(level){
             ctx.save();
             ctx.fillStyle = 'green';
             if(this.position === 0){
+                ctx.translate(WIDTH/2 + this.width/3 + (this.xOffset), HEIGHT/2 - this.height/2);
                 ctx.font = '40pt Courier New';
             }else{
+                ctx.translate(WIDTH/2 + this.width/3 + (this.xOffset) + HEIGHT/60, HEIGHT/2 - this.height/2 - HEIGHT/25);
                 ctx.font = '20pt Courier New';
             }
-            ctx.translate(WIDTH/2 + this.width/3 + (this.xOffset), HEIGHT/2 - this.height/2);
             ctx.rotate(Math.PI/4);
             ctx.textAlign = "center";
             ctx.fillText("Passed", 0, 0);
