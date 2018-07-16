@@ -343,6 +343,9 @@ bigButtonGUI.src = "BigButton.png";
 var glossaryGUI = new Image();
 glossaryGUI.src = "GlossaryDesign.png";
 
+var thumbNails = new Image();
+thumbNails.src = "ThumbNails.png";
+
 var currentID = 0;
 
 var cardPage = 0;
@@ -424,6 +427,8 @@ var yearVisible = true;
 var yearlength = 600;
 
 var tempEndGameTimer = 20;
+
+var levelStates = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
 
 var actionSelected = 0;
 
@@ -845,12 +850,47 @@ function menuBigButton(level){
 
         ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.1 + this.yOffset - this.width/2, this.width, this.height);
 
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.font = '15pt Courier New';
-        ctx.fillText("Level " + this.level, this.xOffset + WIDTH/2, HEIGHT/2 + this.height/2 - HEIGHT * 0.18);
-        ctx.font = '10pt Courier New';
-        ctx.fillText(levelNames[this.level], this.xOffset + WIDTH/2, HEIGHT/2 + this.height/2 - HEIGHT * 0.15);
+        if(this.position === 0){
+            ctx.font = '10pt Courier New';
+            ctx.fillText("(7Y8D1C3M)", this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.07 - (0.3*WIDTH - this.width)/2); //FIX TEXT APPEAR EARLY
+        }
+
+        if(this.level !== 0 && !(levelStates[this.level - 1] === 2 || levelStates[this.level - 1] === 3)){
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = '15pt Courier New';
+            ctx.fillText("???", this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.12 - (0.3*WIDTH - this.width)/2);
+            ctx.font = '12pt Courier New';
+            ctx.fillText("???", this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.095 - (0.3*WIDTH - this.width)/2);
+            ctx.font = '40pt Courier New';
+            ctx.fillText("?", this.xOffset + WIDTH/2, HEIGHT/2 - HEIGHT*0.4 + (0.18*WIDTH));
+            ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.1 + this.yOffset - this.width/2, this.width, this.height);
+        }else{
+            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = '15pt Courier New';
+            ctx.fillText("Level " + this.level, this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.12 - (0.3*WIDTH - this.width)/2);
+            ctx.font = '12pt Courier New';
+            ctx.fillText(levelNames[this.level], this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.095 - (0.3*WIDTH - this.width)/2);
+            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
+        }
+        //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
+
+        if(levelStates[this.level]=== 2 || levelStates[this.level]=== 3){
+            ctx.save();
+            ctx.fillStyle = 'green';
+            if(this.position === 0){
+                ctx.font = '40pt Courier New';
+            }else{
+                ctx.font = '20pt Courier New';
+            }
+            ctx.translate(WIDTH/2 + this.width/3 + (this.xOffset), HEIGHT/2 - this.height/2);
+            ctx.rotate(Math.PI/4);
+            ctx.textAlign = "center";
+            ctx.fillText("Passed", 0, 0);
+            ctx.restore();
+        }
 
     }
 
@@ -2754,6 +2794,12 @@ function game(){
 
             if(endGameTimer === 300){
                 gameRunning = false;
+                //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
+                if(levelStates[LEVEL] === 2){
+                    levelStates[LEVEL] = 3;
+                }else {
+                    levelStates[LEVEL] = 1;
+                }
                 GAMESTATE = "LOSS";
             }
         }
@@ -2769,6 +2815,12 @@ function game(){
 
             if(endGameTimer === 300){
                 gameRunning = false;
+                //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
+                if(levelStates[LEVEL] === 0){
+                    levelStates[LEVEL] = 2;
+                }else if(levelStates[LEVEL] === 1){
+                    levelStates[LEVEL] = 3;
+                }
                 GAMESTATE = "WIN";
             }
         }
@@ -3163,9 +3215,11 @@ function game(){
 
             if(onClick(WIDTH/2 - levelSelectors[levelSelectorMenuLevelSelected].width/2, HEIGHT/2 - HEIGHT*0.1 + levelSelectors[levelSelectorMenuLevelSelected].yOffset - levelSelectors[levelSelectorMenuLevelSelected].width/2,
                     levelSelectors[levelSelectorMenuLevelSelected].width, levelSelectors[levelSelectorMenuLevelSelected].height) && thisFrameClicked === true){
-                LEVEL = levelSelectorMenuLevelSelected;
+                if(levelSelectors[levelSelectorMenuLevelSelected].level === 0 || (levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 2 || levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 3)) {
+                    LEVEL = levelSelectorMenuLevelSelected;
 
-                stateToTransitionTo = "GAME";
+                    stateToTransitionTo = "GAME";
+                }
 
             }
 
