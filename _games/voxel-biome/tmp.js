@@ -2401,7 +2401,7 @@ function game(){
             ctx.fillRect(WIDTH - WIDTH/3.5, HEIGHT - HEIGHT/3.5, WIDTH/4, HEIGHT/4);
             ctx.fillStyle = 'white';
             ctx.textAlign = 'left';
-            ctx.fillText("Polution over time: ", WIDTH - WIDTH/3.5 + WIDTH/40, HEIGHT - HEIGHT/3.5 + HEIGHT/20);
+            ctx.fillText("Pollution over time: ", WIDTH - WIDTH/3.5 + WIDTH/40, HEIGHT - HEIGHT/3.5 + HEIGHT/20);
 
             ctx.font = '5pt Courier New';
             ctx.fillText("0", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/40);
