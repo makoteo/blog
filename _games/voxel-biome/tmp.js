@@ -120,6 +120,8 @@ var arrowWidths = [0, 0];
 
 var blockPage = 0;
 
+var polutionPoints = [];
+
 var menuMouseTimer = 0;
 
 var timeSurvivedOpacity = 0;
@@ -921,6 +923,14 @@ function menuBigButton(level){
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
+
+if(localStorage.getItem(("levelStates")) === null){
+    localStorage.setItem("levelStates", JSON.stringify(levelStates));
+}else{
+    levelStates = JSON.parse(localStorage.getItem("levelStates"));
+}
+
+
 var map = levelZeroGrid;
 if (LEVEL === 0) {
     map = levelZeroGrid;
@@ -1132,6 +1142,8 @@ function reset(){
 
     YEAR = 1;
     SEASON = "Spring";
+
+    polutionPoints = [];
 
     PAUSED = false;
 
@@ -1722,6 +1734,10 @@ function game(){
             }
         }
 
+        if(frameCount === 1){
+            polutionPoints.push(POLUTION);
+        }
+
         //seasonBleepTimer
         for (var b = 0; b < 4; b++) {
             if ((seasonBleepTimer === b * 30 && gameEnd === false)) {
@@ -1747,6 +1763,8 @@ function game(){
         }
 
         if (TEMPPOINTS % SeasonTimeSeconds === 0 && secondTimers[2] < 1 && TEMPPOINTS !== 0 && PAUSED === false) {
+
+            polutionPoints.push(POLUTION);
 
             for (var f = 0; f < voxels.length; f++) {
 
@@ -1820,7 +1838,11 @@ function game(){
 
                                     }else if(LEVEL === 1){
 
-                                        //FIRST MOVE HAS TO BE MOUNTAIN ON TOWNS 1 -- Least Pollution Option... Basically an Easy Level where you follow instructions
+                                        //FIRST MOVE HAS TO BE MOUNTAIN ON TOWNS 4 -- Least Pollution Option... Basically an Easy Level where you follow instructions
+
+                                        //00:10 - Mountain on #17
+                                        //00:30 - Water on #22
+                                        //00:50 - Mountain on #13
 
                                         if(voxels[f].id === 16 && TEMPPOINTS < 19 && POINTS < 1){
                                             diceRollCity2 = 1;
@@ -1872,10 +1894,15 @@ function game(){
 
                                         //Whole point is to trade #10 for grass on 00:20
 
+                                        //00:00 - #27 Desert to Field, Field to Water
+                                        //00:20 - #10 to field
+
                                         if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
                                             diceRollCity2 = 2;
                                         }else if(voxels[f].id === 28 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 1;
+                                        }else if(voxels[f].id === 28 && POINTS < 1){
+                                            diceRollCity2 = 0;
                                         }else if(voxels[f].id === 22 && TEMPPOINTS < 49 && POINTS < 1){
                                             diceRollCity2 = 1;
                                         }else if(voxels[f].id === 16 && TEMPPOINTS < 59 && POINTS < 1){
@@ -1890,7 +1917,8 @@ function game(){
 
                                         // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
 
-                                        //Place Water on #26 one more 00:10 to block path...
+                                        //Place Water on #26 on 00:10 to block path...
+                                        //Depends on situation, Usually block #23 and #33
 
                                         if(voxels[f].id === 28 && TEMPPOINTS < 19 && POINTS < 1){
                                             diceRollCity2 = 1;
@@ -1907,6 +1935,8 @@ function game(){
                                     }else if(LEVEL === 5){
 
                                         // 1 = LEFT, 2 = UP, 3 = RIGHT, 4 = DOWN
+
+                                        //3-2, D-F, F-Fo
 
                                         //Whole point is to trade #14 for empty on 00:10 on the 3 tree to 2 mountain trade (16 and 15 as mountains) and #32 to Lake on 00:50 requiring 00:20 to be
                                         // #32 from desert to grass
@@ -2365,6 +2395,28 @@ function game(){
 
         //GUI -------------------------------------------------------------------------------------------------------------------------------------------
 
+        if(DEBUG === true){
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.font = '10pt Courier New';
+            ctx.fillRect(WIDTH - WIDTH/3.5, HEIGHT - HEIGHT/3.5, WIDTH/4, HEIGHT/4);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'left';
+            ctx.fillText("Polution over time: ", WIDTH - WIDTH/3.5 + WIDTH/40, HEIGHT - HEIGHT/3.5 + HEIGHT/20);
+
+            ctx.font = '5pt Courier New';
+            ctx.fillText("0", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/40);
+            ctx.fillText("100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*100 + HEIGHT/40);
+            ctx.fillText("-100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*-100 + HEIGHT/40);
+
+            for(var t = 0; t <= polutionPoints.length; t++){
+                ctx.strokeStyle = 'white';
+                ctx.beginPath();
+                ctx.moveTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t] + HEIGHT/50);
+                ctx.lineTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t+1)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t+1] + HEIGHT/50);
+                ctx.stroke();
+            }
+        }
+
         for (var b = 0; b < cards.length; b++) {
             if (cards[b][0] === 1 && cards[b][1] === 3) {
                 xPosCard[b] = 0;
@@ -2801,6 +2853,7 @@ function game(){
                 }else {
                     levelStates[LEVEL] = 1;
                 }
+                localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 GAMESTATE = "LOSS";
             }
         }
@@ -2822,6 +2875,7 @@ function game(){
                 }else if(levelStates[LEVEL] === 1){
                     levelStates[LEVEL] = 3;
                 }
+                localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 GAMESTATE = "WIN";
             }
         }
@@ -3522,7 +3576,6 @@ function Start(){
         //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
         //document.getElementById("scorediv").removeAttribute("hidden");
         //document.getElementById("gamescorediv").removeAttribute("hidden");
-        HIGHSCORE = localStorage.getItem("HighScoreBusiness");
         gameRunning = true;
     }
 }
