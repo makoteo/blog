@@ -2020,7 +2020,7 @@ function game(){
 
                                         //Whole point is to not use the 2nd DESERT - FIELD card because you'll later get a DESERT - MOUNATIN (the other one is gonna be FIELD - WATER)...
 
-                                        // DESTROY #44 pm 01:10 is also a good move
+                                        // DESTROY #44 on 01:10 is also a good move
 
                                         if(voxels[f].id === 45 && TEMPPOINTS < 29 && POINTS < 1){
                                             diceRollCity2 = 4;
@@ -2405,14 +2405,14 @@ function game(){
 
             ctx.font = '5pt Courier New';
             ctx.fillText("0", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/40);
-            ctx.fillText("100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*100 + HEIGHT/40);
-            ctx.fillText("-100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*-100 + HEIGHT/40);
+            ctx.fillText("100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*100 + HEIGHT/50);
+            ctx.fillText("-100", WIDTH - WIDTH/3.5 + WIDTH/100, HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*-100 + HEIGHT/50);
 
             for(var t = 0; t <= polutionPoints.length; t++){
                 ctx.strokeStyle = 'white';
                 ctx.beginPath();
-                ctx.moveTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t] + HEIGHT/50);
-                ctx.lineTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t+1)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t+1] + HEIGHT/50);
+                ctx.moveTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t] + HEIGHT/55);
+                ctx.lineTo(WIDTH - WIDTH/3.5 + WIDTH/30 + (t+1)*(WIDTH/5/(polutionPoints.length - 1)), HEIGHT - HEIGHT/3.5 + HEIGHT/8 - (HEIGHT/4 / 600)*polutionPoints[t+1] + HEIGHT/55);
                 ctx.stroke();
             }
         }
