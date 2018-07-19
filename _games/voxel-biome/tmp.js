@@ -43,6 +43,9 @@ var TEMPPOINTS = 0;
 var POINTS = 0;
 var POLUTION = 0;
 
+var FULLSCREEN = false;
+var fullScreenTimer = 0;
+
 var ENDTEMPTIME = 0;
 var ENDTIME = 0;
 
@@ -3580,6 +3583,39 @@ function game(){
         ctx.fillText("Paused", WIDTH - WIDTH/30, HEIGHT - HEIGHT / 30);
     }
 
+    var tempCanvas = document.getElementById("myCanvas");
+
+    if(fullScreenTimer > 0){
+        fullScreenTimer--;
+    }
+    var height = document.documentElement.clientHeight
+
+    console.log(height + " + " + screen.height);
+
+    if (height === screen.height && FULLSCREEN === false) {
+        unloadScrollBars();
+        tempCanvas.width = document.body.clientWidth;
+        tempCanvas.height = tempCanvas.width*0.5625;
+        WIDTH = tempCanvas.width;
+        HEIGHT = tempCanvas.height;
+        document.getElementById("canvasHolder").style.position = "absolute";
+        document.getElementById("canvasHolder").style.left = '0px';
+        document.getElementById("canvasHolder").style.top = '0px';
+        document.getElementById("canvasHolder").style.border ='0px solid lightgray';
+        FULLSCREEN = true;
+    }
+
+    if (height !== screen.height && FULLSCREEN === true) {
+        unloadScrollBars();
+        tempCanvas.width = 1200;
+        tempCanvas.height = 675;
+        WIDTH = tempCanvas.width;
+        HEIGHT = tempCanvas.height;
+        document.getElementById("canvasHolder").style.position = "relative";
+        document.getElementById("canvasHolder").style.border ='3px solid lightgray';
+        FULLSCREEN = false;
+    }
+
         /* ON LOSS
         if(Lose condition){
             gameRunning = false;
@@ -3676,3 +3712,19 @@ function showPage() {
 }
 
 loadPage();
+
+var myEl = document.getElementById('myCanvas');
+
+myEl.addEventListener('click', function() {
+    unloadScrollBars();
+}, false);
+
+function reloadScrollBars() {
+    document.documentElement.style.overflow = 'auto';  // firefox, chrome
+    document.body.scroll = "yes"; // ie only
+}
+
+function unloadScrollBars() {
+    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+    document.body.scroll = "no"; // ie only
+}
