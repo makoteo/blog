@@ -4,8 +4,12 @@ layout: default
 
 **Hi!!** These are all the games I currently have here. Feel free to play some if you're bored!! 
 
+(Showing all games)
+
 [Annoying Cube](./games/flying-cube/index.html).
 
 [The Business (Discontinued)](./games/the-business-dev/index.html).
 
 [Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
+
+[Voxel Biome (Still in Developement)](./games/defend-the-castle/index.html).
