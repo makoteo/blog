@@ -869,6 +869,8 @@ function Voxel(x, y, width, height, type){
 
 function menuBigButton(level){
 
+    this.pinglag = 0;
+    this.pinglagposition = -1;
     this.level = level;
     this.xOffset = 0;
     this.yOffset = 0;
@@ -929,10 +931,13 @@ function menuBigButton(level){
 
         this.position = this.level - levelSelectorMenuLevelSelected;
 
-        if(this.xOffset < this.position * WIDTH/3){
+        if(this.xOffset < this.position * WIDTH/3 && (this.pinglag === 0 || this.pinglag === 1)){
             this.xOffset+=this.moveVelocity;
-        }else if(this.xOffset > (this.position) * WIDTH/3){
+            this.pinglag = 1;
+        }
+        if(this.xOffset > (this.position) * WIDTH/3 && (this.pinglag === 0 || this.pinglag === 2)){
             this.xOffset-=this.moveVelocity;
+            this.pinglag = 2;
         }
 
         if(this.position !== 0){
@@ -945,6 +950,11 @@ function menuBigButton(level){
                 this.width+=4;
                 this.height+=4;
             }
+        }
+
+        if(this.pinglagposition !== this.position){
+            this.pinglag = 0;
+            this.pinglagposition = this.position;
         }
 
     }
@@ -3602,8 +3612,10 @@ function game(){
         document.getElementById("canvasHolder").style.left = '0px';
         document.getElementById("canvasHolder").style.top = '0px';
         document.getElementById("canvasHolder").style.border ='0px solid lightgray';
-        document.getElementById("foo-pop").setAttribute('hidden', true);
-        document.getElementById("foo-boring").setAttribute('hidden', true);
+        if(document.getElementById("foo-pop") !== null) {
+            document.getElementById("foo-pop").setAttribute('hidden', true);
+            document.getElementById("foo-boring").setAttribute('hidden', true);
+        }
         FULLSCREEN = true;
     }
 
@@ -3615,8 +3627,10 @@ function game(){
         HEIGHT = tempCanvas.height;
         document.getElementById("canvasHolder").style.position = "relative";
         document.getElementById("canvasHolder").style.border ='3px solid lightgray';
-        document.getElementById("foo-pop").removeAttribute('hidden');
-        document.getElementById("foo-boring").removeAttribute('hidden');
+        if(document.getElementById("foo-pop") !== null){
+            document.getElementById("foo-pop").removeAttribute('hidden');
+            document.getElementById("foo-boring").removeAttribute('hidden');
+        }
         FULLSCREEN = false;
     }
 
