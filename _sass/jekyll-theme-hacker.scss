@@ -53,9 +53,9 @@ header {
  }
 
 footer {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.6);
   width: 100%;
-  border-top: 1px dashed $conifer; //header;
+  //border-top: 1px dashed $conifer; //header;
   padding: 20px 0;
   position: fixed;
   left: 0;
@@ -84,7 +84,7 @@ header h1:before {
 }
 
 header h2 {
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 300;
   color: #666;
 }
@@ -93,6 +93,7 @@ footer h2 {
   font-size: 18px;
   font-weight: 300;
   color: #666;
+  margin-left: 40pt;
 }
 
 #downloads .btn {
