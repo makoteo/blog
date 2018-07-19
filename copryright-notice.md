@@ -5,5 +5,3 @@ title: Biome
 ---
 
 [Back To Main Page](./index.md).
-
-{% include_relative tmp.html %}
