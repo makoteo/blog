@@ -1,7 +1,7 @@
 ---
 layout: default
-permalink: /games/copyright-notice/
-title: Biome
+permalink: /copyright-notice/
+title: Copyright Notice
 ---
 
 [Back To Main Page](./index.md).
