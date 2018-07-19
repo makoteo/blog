@@ -41,5 +41,5 @@ Simply said, be kind and fair. As for Youtubers or anyone promoting my content, 
 
 **Thank you for reading**
 
-*- Makoteo*
+*- Makoteo (Martin)*
 
