@@ -96,8 +96,14 @@ footer h2 {
   color: #666;
 }
 
+#foo-pop h2 {
+  font-size: 14px;
+  font-weight: 300;
+  color: #666;
+}
+
 [id^=foo]{
-  background:orange;
+  background: rgba(0, 0, 0, 0.7);
   padding:5px;
   font-size:25px;
 }
@@ -110,8 +116,13 @@ footer h2 {
 }
 #foo-pop{
   position:absolute;
-  height:70px;
-  right:0; left:0;
+  background: rgba(0, 0, 0, 0.6);
+  width: 100%;
+  //border-top: 1px dashed $conifer; //header;
+  padding: 10px 0;
+  left: 0;
+  bottom: 0;
+  text-align: center;
 }
 
 #downloads .btn {
