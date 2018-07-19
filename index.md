@@ -2,15 +2,15 @@
 layout: default
 ---
 
-<h2>**Hi!!** <h2>
+##**Hi!!** 
 
 These are all the games I currently have here. Feel free to play some if you're bored!! 
 
-<h3>Official Games:<h3>
+###Official Games:
 
 [Voxel Biome (Still in Developement)](./games/voxel-biome/index.html).
 
-<h3>Unofficial Games:<h3>
+###Unofficial Games:
 
 [Annoying Cube](./games/flying-cube/index.html).
 
