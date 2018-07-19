@@ -3588,7 +3588,7 @@ function game(){
     if(fullScreenTimer > 0){
         fullScreenTimer--;
     }
-    var height = document.documentElement.clientHeight
+    var height = document.documentElement.clientHeight;
 
     console.log(height + " + " + screen.height);
 
@@ -3602,17 +3602,21 @@ function game(){
         document.getElementById("canvasHolder").style.left = '0px';
         document.getElementById("canvasHolder").style.top = '0px';
         document.getElementById("canvasHolder").style.border ='0px solid lightgray';
+        document.getElementById("foo-pop").setAttribute('hidden', true);
+        document.getElementById("foo-boring").setAttribute('hidden', true);
         FULLSCREEN = true;
     }
 
     if (height !== screen.height && FULLSCREEN === true) {
-        unloadScrollBars();
+        reloadScrollBars();
         tempCanvas.width = 1200;
         tempCanvas.height = 675;
         WIDTH = tempCanvas.width;
         HEIGHT = tempCanvas.height;
         document.getElementById("canvasHolder").style.position = "relative";
         document.getElementById("canvasHolder").style.border ='3px solid lightgray';
+        document.getElementById("foo-pop").removeAttribute('hidden');
+        document.getElementById("foo-boring").removeAttribute('hidden');
         FULLSCREEN = false;
     }
 
