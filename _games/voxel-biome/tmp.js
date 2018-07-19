@@ -3731,12 +3731,6 @@ function showPage() {
 
 loadPage();
 
-var myEl = document.getElementById('myCanvas');
-
-myEl.addEventListener('click', function() {
-    unloadScrollBars();
-}, false);
-
 function reloadScrollBars() {
     document.documentElement.style.overflow = 'auto';  // firefox, chrome
     document.body.scroll = "yes"; // ie only
