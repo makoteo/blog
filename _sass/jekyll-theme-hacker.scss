@@ -96,6 +96,24 @@ footer h2 {
   color: #666;
 }
 
+[id^=foo]{
+  background:orange;
+  padding:5px;
+  font-size:25px;
+}
+
+#foo-boring{
+  position:fixed;
+  bottom:0;
+  right:0;
+  left:0;
+}
+#foo-pop{
+  position:absolute;
+  height:70px;
+  right:0; left:0;
+}
+
 #downloads .btn {
   display: inline-block;
   text-align: center;
