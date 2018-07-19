@@ -1,12 +1,37 @@
+// ------------------------------------------------
+// Copyright (c) 2018 Makoteo. All rights reserved.
+// ------------------------------------------------
 
-// Hey!! Hope you're only looking at how I coded this and not trying to hack it :/
+// ---------------------------------------------------------------------------------------------------------------------
+// Further Information:
+//
+//      'Me' and 'my' refers to me, Makoteo, the creator of this website. 'You' refers to you, the user of this website.
+//
+//      Youtubers/Lets Players:
+//
+//           You MAY record my games.
+//           You MUST give proper credit (Or at the very least not credit someone other than me with the creation of my games).
+//
+//           Do NOT claim my content as your own
+//
+//      Game Publishers:
+//
+//           You MUST give very clear and proper credit
+//
+//           Do NOT alter any of my games
+//           Do NOT claim my content as your own
+//
+//      Everyone Else:
+//
+//           You MUST give very clear and proper credit
+//
+//           Do NOT alter any of my games
+//           Do NOT claim my content as your own
+//
+//
+// ---------------------------------------------------------------------------------------------------------------------
 
-// Made by: MakoTeo - Martin
-
-// Started - June 14th
-
-
-var versionCode = "Alpha 0.9";
+var versionCode = "1.7.3";
 var WIDTH = 1200;
 var HEIGHT = 675;
 var gameRunning = false;
@@ -3220,9 +3245,12 @@ function game(){
             ctx.fillText("Glossary", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3);
 
             ctx.textAlign = 'left';
-            ctx.font = '20pt Courier New';
-            ctx.fillText("Makoteo", WIDTH/60, HEIGHT - HEIGHT/45);
+            ctx.font = '15pt Courier New';
+            ctx.fillText("\u00A9" + " 2018 Makoteo", WIDTH/60, HEIGHT - HEIGHT/25);
+            ctx.font = '10pt Courier New';
+            ctx.fillText("All rights reserved", WIDTH/60, HEIGHT - HEIGHT/45);
             ctx.textAlign = 'right';
+            ctx.font = '15pt Courier New';
             ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
 
             thisFrameClicked = false;
