@@ -15,7 +15,7 @@ Simply said, please don't do something that could be considered 'bad'.**
 Simply said, be kind and fair. As for Youtubers or anyone promoting my content, feel free to share my projects. Just, once again, credit
  me fully.**
 
-### Further Information for Content Creators/Publishers:
+### Information for Content Creators/Publishers:
 
 *Notice: 'Me' and 'my' refers to me, Makoteo, the creator of this website. 'You' refers to you, the user of this website.*
 
@@ -34,4 +34,12 @@ Simply said, be kind and fair. As for Youtubers or anyone promoting my content, 
 - Do NOT alter any of my games.
 
 - Do NOT claim my content as your own.
+
+### Further Information
+
+- Copyright placed on my games also applies to any music and textures in that game. 
+
+**Thank you for reading**
+
+*- Makoteo*
 
