@@ -3656,12 +3656,6 @@ function clickedFalse(){
     mouseHeld = false;
 }
 
-// ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
-
-function Reload() {
-    localStorage.setItem("HighScoreBusiness", 0);
-    //localStorage.clear();
-}
 
 // ---------------------------------------------------------- GAME LOOP ------------------------------------------------------------------------ //
 
@@ -3671,17 +3665,14 @@ function repeatOften() {
     requestAnimationFrame(repeatOften);
 }
 
-var myVar;
 
-function myFunction() {
-    myVar = setTimeout(showPage, 3000);
+function loadPage() {
+    setTimeout(function(){ showPage()}, 2000);
 }
 
 function showPage() {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("myDiv").style.display = "block";
-}
-
-if(document.getElementById("loader").style.display = "none"){
+    document.getElementById("loader").className += "fading";
     requestAnimationFrame(repeatOften);
 }
+
+loadPage();
