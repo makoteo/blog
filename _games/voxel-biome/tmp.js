@@ -3259,9 +3259,9 @@ function game(){
 
             ctx.textAlign = 'left';
             ctx.font = '15pt Courier New';
-            ctx.fillText("\u00A9" + " 2018 Makoteo", WIDTH/60, HEIGHT - HEIGHT/25);
+            ctx.fillText("\u00A9" + " 2018 Martin Feranec", WIDTH/60, HEIGHT - HEIGHT/25);
             ctx.font = '10pt Courier New';
-            ctx.fillText("All rights reserved", WIDTH/60, HEIGHT - HEIGHT/45);
+            ctx.fillText("All rights reserved", WIDTH/20, HEIGHT - HEIGHT/45);
             ctx.textAlign = 'right';
             ctx.font = '15pt Courier New';
             ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
