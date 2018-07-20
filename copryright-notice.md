@@ -6,6 +6,8 @@ title: Copyright Notice
 
 [Back To Main Page](./index.md).
 
+*Notice: Makoteo refers to Martin Feranec, the creator of this website and all the games on it.*
+
 ### Terms and Conditions
 
 **Basically, don't do anything that could possibly make me upset. For example, don't make a website that uses my creations to generate a profit.

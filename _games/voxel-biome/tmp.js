@@ -1,5 +1,5 @@
 // ------------------------------------------------
-// Copyright (c) 2018 Makoteo. All rights reserved.
+// Copyright (c) 2018 Makoteo (Martin Feranec). All rights reserved.
 // ------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1382,7 +1382,7 @@ function game(){
         }
 
         if (cardSelected !== 0) {
-            if (animationOffset < 200) {
+            if ((animationOffset < 200 && FULLSCREEN === false) || (animationOffset < WIDTH/6 + WIDTH/50 && FULLSCREEN === true)) {
                 animationOffset += 5;
             }
         } else if(blackScreen2Opacity < 0.5){
@@ -3599,8 +3599,6 @@ function game(){
         fullScreenTimer--;
     }
     var height = document.documentElement.clientHeight;
-
-    console.log(height + " + " + screen.height);
 
     if (height === screen.height && FULLSCREEN === false) {
         unloadScrollBars();
