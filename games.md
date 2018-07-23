@@ -3,35 +3,7 @@ layout: default
 title: Games
 ---
 
-{::nomarkdown}
-<ul>
-  <li><a class="active" href="#games" selected>Games</a></li>
-  <li><a href="#news">Posts</a></li>
-  <li><a href="#contact">Information</a></li>
-  <li><a href="#about">About</a></li>
-</ul>
-<br>
-{:/}
-
-<ul>
-  {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
-
-{::nomarkdown}
-
 <center><h1>Games!</h1></center>
-
-<div class="custom-select" style="width:200px;">
-  <select id="gamesPicked">
-    <option value="0" selected>All</option>
-    <option value="1">Official</option>
-    <option value="2">Unofficial</option>
-  </select>
-</div>
 
 <br>
 <br>

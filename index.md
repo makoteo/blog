@@ -3,31 +3,13 @@ layout: default
 title: Main
 ---
 
-{::nomarkdown}
-<ul>
-  <li><a class="active" href="#games" selected>Games</a></li>
-  <li><a href="#news">Posts</a></li>
-  <li><a href="#contact">Information</a></li>
-  <li><a href="#about">About</a></li>
-</ul>
-<br>
-{:/}
-
 ## **Hi!!** 
 
-Welcome to the website. Below are my games! 
-
-<ul>
-  {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
+Welcome to the website.
 
 {::nomarkdown}
 
-<center><h1>Games!</h1></center>
+<center><h3><a href="./games/">Popular Games:</h3></center>
 
 <div class="custom-select" style="width:200px;">
   <select id="gamesPicked">
@@ -190,3 +172,17 @@ document.addEventListener("click", function(){
 
 
 {:/}
+
+{::nomarkdown}
+
+<center><h3>New Posts:</h3></center>
+
+{:/}
+
+<ul>
+  {% for post in site.posts %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
