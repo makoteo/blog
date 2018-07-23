@@ -137,13 +137,13 @@ var gamePicked = e.options[e.selectedIndex].value;
 
 console.log(gamePicked);
 
-if(gamePicked = 0){
+if(gamePicked == 0){
     document.getElementById('GamesTitle').innerHTML = "All";
     console.log("Hi!!");
-}else if(gamePicked = 1){
+}else if(gamePicked == 1){
       document.getElementById('GamesTitle').innerHTML = "Official";
       console.log("Hi!!");
-}else if(gamePicked = 2){
+}else if(gamePicked == 2){
     document.getElementById('GamesTitle').innerHTML = "Unofficial";
     console.log("Hi!!");
 }
