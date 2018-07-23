@@ -23,7 +23,7 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 <table>
     <tr>
-        <th><b>Unnoficial Games</b></th>
+        <th style="width:20px"><b>Unnoficial Games</b></th>
         <th></th>
     </tr>
     <tr>
