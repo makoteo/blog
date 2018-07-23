@@ -118,7 +118,7 @@ document.addEventListener("click", closeAllSelect);
 <table>
   {% for post in site.posts %}
     <tr>
-      <td><a href="{{ post.url }}">{{ post.title }}</a></td>
+      <td><a href="/blog/{{ post.url }}">{{ post.title }}</a></td>
     </tr>
   {% endfor %}
 </table>
