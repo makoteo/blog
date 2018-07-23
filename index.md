@@ -19,8 +19,8 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 [Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
 
-| Games: | |
+| Unofficial Games: | |
 |-------|--------|
-| [![Test Image](/assets/PageImages/500TestImage.png)](./games/flying-cube/index.html) | A cool game |
+| [![Click to play Annoying Cube!](/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg)](./games/flying-cube/index.html) | A cool game |
 | pink lady | jazz |
 | honeycrisp | granny smith |
