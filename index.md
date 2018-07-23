@@ -5,7 +5,7 @@ title: Games
 
 {::nomarkdown}
 <ul>
-  <li><a class="active" href="#home">Games</a></li>
+  <li><a class="active" href="#games">Games</a></li>
   <li><a href="#news">Posts</a></li>
   <li><a href="#contact">Information</a></li>
   <li><a href="#about">About</a></li>
@@ -19,6 +19,8 @@ Welcome to the website. Below are my games!
 
 {::nomarkdown}
 
+<center><h1>Games!</h1></center>
+
 <table>
     <tr>
         <th style="width:20px"><b>Unofficial Games</b></th>
@@ -30,7 +32,7 @@ Welcome to the website. Below are my games!
     </tr>
     <tr>
         <td><a href="./games/the-business-dev/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
-        <td><a href="./games/the-business-dev/index.html"><b>The Business </b></a> <b style="color:red;">- Discontinued</b> <br> <p>An original game based on an interesting loss system. Control with arrow keys. Collect coins to generate profit. </p></td>
+        <td><a href="./games/the-business-dev/index.html"><b>The Business</b></a> <b style="color:red;">- Discontinued</b> <br> <p>An original game based on an interesting loss system. Control with arrow keys. Collect coins to generate profit. </p></td>
     </tr>
     <tr>
         <td><a href="./games/defend-the-castle/index.html"><img src="/blog/assets/PageImages/SideScrollerThingyThing.jpg"></a></td>
@@ -45,7 +47,7 @@ Welcome to the website. Below are my games!
     </tr>
     <tr>
         <td id="columnTest"><a href="./games/voxel-biome/index.html"><img src="/blog/assets/PageImages/VoxelBiomeThingy.jpg"></a></td>
-        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b> <br></a> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
+        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
 </table>
 
