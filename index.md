@@ -28,7 +28,7 @@ These are all the games I currently have here. Feel free to play some if you're 
     </tr>
     <tr>
         <td id="columnTest"><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
-        <td><b>Annoying Cube</b> <br> <p>A basic copy of the loved original 'Flappy Bird'</p> <p>A basic copy of the loved original 'Flappy Bird'</p></td>
+        <td><b>Annoying Cube</b> <br> <p style="line-height:0.3;">A basic copy of the well known original 'Flappy Bird'. Has some furhter additions though! Pick between</p> <p style="line-height:0.3;">two different game modes! Use Space or the mouse to jump. </p></td>
     </tr>
     <tr>
         <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
