@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Main
+title: Games
 ---
 
 {::nomarkdown}
@@ -12,10 +12,6 @@ title: Main
 </ul>
 <br>
 {:/}
-
-## **Hi!!** 
-
-Welcome to the website. Below are my games! 
 
 <ul>
   {% for post in site.posts %}
