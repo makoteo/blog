@@ -148,6 +148,19 @@ if(gamePicked == 0){
     console.log("Hi!!");
 }
 
+document.addEventListener("click", function(){
+   if(gamePicked == 0){
+       document.getElementById('GamesTitle').innerHTML = "All";
+       console.log("Hi!!");
+   }else if(gamePicked == 1){
+         document.getElementById('GamesTitle').innerHTML = "Official";
+         console.log("Hi!!");
+   }else if(gamePicked == 2){
+       document.getElementById('GamesTitle').innerHTML = "Unofficial";
+       console.log("Hi!!");
+   }
+});
+
 </script>
 
 
