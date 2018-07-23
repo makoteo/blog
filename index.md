@@ -137,10 +137,13 @@ var gamePicked = e.options[e.selectedIndex].value;
 
 if(gamePicked === 0){
     document.getElementById('GamesTitle').innerHTML = "<b>All</b>";
+    console.log("Hi!!");
 }else if(gamePicked === 1){
       document.getElementById('GamesTitle').innerHTML = "<b>Official</b>";
+      console.log("Hi!!");
 }else if(gamePicked === 2){
     document.getElementById('GamesTitle').innerHTML = "<b>Unofficial</b>";
+    console.log("Hi!!");
 }
 
 </script>
