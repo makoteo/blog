@@ -3,6 +3,8 @@ layout: default
 title: Games
 ---
 
+{::nomarkdown}
+
 <center><h1>Games!</h1></center>
 
 <br>
