@@ -18,3 +18,9 @@ These are all the games I currently have here. Feel free to play some if you're 
 [The Business (Discontinued)](./games/the-business-dev/index.html).
 
 [Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
+
+| Priority apples | Second priority | Third priority |
+|-------|--------|---------|
+| ambrosia | gala | red delicious |
+| pink lady | jazz | macintosh |
+| honeycrisp | granny smith | fuji |
