@@ -27,7 +27,7 @@ Welcome to the website.
         <td><a href="./games/flying-cube/index.html"><b>Annoying Cube</b></a> <br> <p style="line-height:1.1;">A basic copy of the well known original 'Flappy Bird'. Has some further additions though! Pick between two different game modes! Use Space or the mouse to jump. </p></td>
     </tr>
     <tr class="all unofficial">
-        <td><a href="./games">More Games!</a></td>
+        <td><center><a href="./games">More Games!</a></center></td>
     </tr>
 </table>
 
