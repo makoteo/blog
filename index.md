@@ -172,7 +172,7 @@ document.addEventListener("click", function(){
        y[i].setAttribute('hidden', true);
    }
    
-   for(var j = 0; i < x.length; j++){
+   for(var j = 0; j < x.length; j++){
        x[j].removeAttribute('hidden');
    }
    
