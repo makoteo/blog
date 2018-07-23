@@ -30,6 +30,8 @@ Welcome to the website. Below are my games!
 </div>
 
 <br>
+<br>
+<br>
 
 <table>
     <tr>
