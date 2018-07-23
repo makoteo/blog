@@ -29,6 +29,8 @@ Welcome to the website. Below are my games!
   </select>
 </div>
 
+<br>
+
 <table>
     <tr>
         <th style="width:20px"><b>Unofficial Games</b></th>
