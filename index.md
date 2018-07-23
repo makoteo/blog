@@ -17,6 +17,14 @@ title: Games
 
 Welcome to the website. Below are my games! 
 
+<ul>
+  {% for post in site.posts %}
+    <li>
+      <a href="{{ post.url }}">{{ post.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
+
 {::nomarkdown}
 
 <center><h1>Games!</h1></center>
