@@ -23,7 +23,7 @@ Welcome to the website. Below are my games!
 
 <div class="dropdown">
   <select name="gameTypes" class="dropbtn">
-    <option value="1" class="dropdown-content">Link 1</option>
+    <option value="1" class="dropdown-content" selected>Link 1</option>
     <option value="2" class="dropdown-content">Link 2</option>
     <option value="3" class="dropdown-content">Link 3</option>
   </select>
