@@ -62,6 +62,9 @@ var SAVEGAMESPEED = 1;
 var DEBUG = false;
 var GUIHIDE = false;
 
+var tutorialPage = 0;
+var tutorialShowing = false;
+
 var GAMESTATE = "MENU";
 
 var voxels = [];
@@ -101,6 +104,7 @@ var startTimer = 0;
 var gameEnd = false;
 
 var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
+var speedUpLimits = [2, 2, 2, 3, 3, 3, 4, 4, 4, 4];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -1207,6 +1211,9 @@ function reset(){
 
     startTimer = 0;
 
+    tutorialPage = 0;
+    tutorialShowing = false;
+
     gameEnd = false;
 
     winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
@@ -2294,9 +2301,9 @@ function game(){
             buildType = 0;
         }
 
-        if (keys && keys[81]) { // Q FOR FASTT FORWARD
+        if (keys && keys[81]) { // Q FOR FAST FORWARD
             if(buttonTimers[0] < 1){
-                if(SAVEGAMESPEED === 1){
+                if(SAVEGAMESPEED === 1 && speedUpLimits[LEVEL] <= YEAR){
                     SAVEGAMESPEED = 5;
                 }else if(SAVEGAMESPEED === 5){
                     SAVEGAMESPEED = 1;
