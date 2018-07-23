@@ -132,7 +132,7 @@ document.addEventListener("click", closeAllSelect);
 </script>
 
 <script>
-var e = document.getElementById("gamesPicked');
+var e = document.getElementById('gamesPicked');
 var gamePicked = e.options[e.selectedIndex].value;
 
 if(gamePicked === 0){
