@@ -23,7 +23,7 @@ Welcome to the website. Below are my games!
 
 <div class="custom-select" style="width:200px;">
   <select id="gamesPicked">
-    <option value="0">All</option>
+    <option value="0" selected>All</option>
     <option value="1">Official</option>
     <option value="2">Unofficial</option>
   </select>
@@ -134,6 +134,8 @@ document.addEventListener("click", closeAllSelect);
 <script>
 var e = document.getElementById('gamesPicked');
 var gamePicked = e.options[e.selectedIndex].value;
+
+console.log(gamePicked);
 
 if(gamePicked === 0){
     document.getElementById('GamesTitle').innerHTML = "All";
