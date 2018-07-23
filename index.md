@@ -21,6 +21,6 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 | Games: | |
 |-------|--------|
-| ![Test Image]({{ "/assets/PageImages/500TestImage.png"}}) | A cool game |
+| [![Test Image]({{ "/assets/PageImages/500TestImage.png"}})] (./games/flying-cube/index.html) | A cool game |
 | pink lady | jazz |
 | honeycrisp | granny smith |
