@@ -23,14 +23,15 @@ Welcome to the website. Below are my games!
 
 <table>
     <tr>
-        <div class="dropdown">
-          <button class="dropbtn">Dropdown</button>
-          <select name="gameTypes" class="dropdown-content">
-            <option value="1">Link 1</option>
-            <option value="2">Link 2</option>
-            <option value="3">Link 3</option>
-          </div>
-        </div>
+        <th>
+            <div class="dropdown">
+              <select name="gameTypes" class="dropbtn">
+                <option value="1" class="dropdown-content">Link 1</option>
+                <option value="2" class="dropdown-content">Link 2</option>
+                <option value="3" class="dropdown-content">Link 3</option>
+              </div>
+            </div>
+        </th>
     </tr>
 </table>
 
