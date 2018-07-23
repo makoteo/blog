@@ -31,7 +31,6 @@ Welcome to the website. Below are my games!
 
 <br>
 <br>
-<br>
 
 <table>
     <tr>
