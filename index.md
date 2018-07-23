@@ -21,6 +21,6 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 | Unofficial Games: | |
 |-------|--------|
-| [![Click to play Annoying Cube!](/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg)](./games/flying-cube/index.html) | {::nomarkdown}Checking <br> Line break{:/} |
-| pink lady | jazz |
-| honeycrisp | granny smith |
+| [![Click to play Annoying Cube!](/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg)](./games/flying-cube/index.html) {::nomarkdown}Checking <br> Line break{:/} |
+| pink lady |
+| honeycrisp |
