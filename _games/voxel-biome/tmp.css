@@ -5,13 +5,31 @@
     top: 50%;
     z-index: 1;
     margin: -75px 0 0 -75px;
-    border: 16px solid #f3f3f3;
+    border: 16px solid #4084be;
     border-radius: 50%;
-    border-top: 16px solid #3498db;
+    border-top: 16px solid #206791;
     width: 120px;
     height: 120px;
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
+}
+
+#loaderM {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    margin: -75px 0 0 -75px;
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    color: #24459d;
+    font-size: 100px;
+    font-family: "Courier New";
+    font-weight: bold;
+    -webkit-animation: spinNeg 2s linear infinite;
+    animation: spinNeg 2s linear infinite;
+    text-align: center;
 }
 
 #loader.fading {
@@ -30,6 +48,16 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@-webkit-keyframes spinNeg {
+    0% { -webkit-transform: rotate(360deg); }
+    100% { -webkit-transform: rotate(0deg); }
+}
+
+@keyframes spinNeg {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
 }
 
 div.relative {
