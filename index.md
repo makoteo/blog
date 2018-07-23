@@ -24,6 +24,7 @@ These are all the games I currently have here. Feel free to play some if you're 
 <table>
     <tr>
         <th><b>Unnoficial Games</b></th>
+        <th></th>
     </tr>
     <tr>
         <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
