@@ -29,7 +29,8 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 <table>
     <tr>
-        <td><img src="/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></td>
+        <td><img src="blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></td>
+        <td>Next Column</td>
     </tr>
 </table>
 
