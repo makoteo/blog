@@ -240,10 +240,11 @@ th {
 }
 
 td {
-  text-align: left;
-  padding: 5px 10px;
+  //text-align: left;
+  //padding: 5px 10px;
   word-wrap:break-word;
   white-space: normal;
+  //max-width:150px;
 }
 
 hr {
