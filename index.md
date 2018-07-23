@@ -5,7 +5,7 @@ title: Games
 
 {::nomarkdown}
 <ul>
-  <li><a class="active" href="#games">Games</a></li>
+  <li><a class="active" href="#games" selected>Games</a></li>
   <li><a href="#news">Posts</a></li>
   <li><a href="#contact">Information</a></li>
   <li><a href="#about">About</a></li>
@@ -22,10 +22,10 @@ Welcome to the website. Below are my games!
 <center><h1>Games!</h1></center>
 
 <div class="custom-select" style="width:200px;">
-  <select>
-    <option value="0">Unofficial</option>
+  <select id="gamesPicked">
+    <option value="0">All</option>
     <option value="1">Official</option>
-    <option value="2">In developement</option>
+    <option value="2">Unofficial</option>
   </select>
 </div>
 
@@ -34,8 +34,12 @@ Welcome to the website. Below are my games!
 
 <table>
     <tr>
-        <th style="width:20px"><b>Unofficial Games</b></th>
+        <th style="width:20px"><b id="GamesTitle">Unofficial Games</b></th>
         <th></th>
+    </tr>
+    <tr>
+        <td id="columnTest"><a href="./games/voxel-biome/index.html"><img src="/blog/assets/PageImages/VoxelBiomeThingy.jpg"></a></td>
+        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
     <tr>
         <td id="columnTest"><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
@@ -48,17 +52,6 @@ Welcome to the website. Below are my games!
     <tr>
         <td><a href="./games/defend-the-castle/index.html"><img src="/blog/assets/PageImages/SideScrollerThingyThing.jpg"></a></td>
         <td><a href="./games/defend-the-castle/index.html"><b>Defend the Castle</b></a> <b style="color:red;">- Discontinued</b> <br> <p>A shot at making a 'defend the castle' type game. Wasn't ever finished however.</p></td>
-    </tr>
-</table>
-
-<table>
-    <tr>
-        <th style="width:20px"><b>Official Games</b></th>
-        <th></th>
-    </tr>
-    <tr>
-        <td id="columnTest"><a href="./games/voxel-biome/index.html"><img src="/blog/assets/PageImages/VoxelBiomeThingy.jpg"></a></td>
-        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
 </table>
 
@@ -136,6 +129,17 @@ function closeAllSelect(elmnt) {
 /*if the user clicks anywhere outside the select box,
 then close all select boxes:*/
 document.addEventListener("click", closeAllSelect);</script>
+
+var e = document.getElementById("gamesPicked');
+var gamePicked = e.options[e.selectedIndex].value;
+
+if(gamePicked === 0){
+    document.getElementById('gamesTitle').innerHtml = "All";
+}else if(gamePicked === 1){
+      document.getElementById('gamesTitle').innerHtml = "Official";
+}else if(gamePicked === 2){
+    document.getElementById('gamesTitle').innerHtml = "Unofficial";
+}
 
 </script>
 
