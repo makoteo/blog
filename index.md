@@ -23,12 +23,25 @@ Welcome to the website. Below are my games!
 
 <table>
     <tr>
+        <div class="dropdown">
+          <button class="dropbtn">Dropdown</button>
+          <select name="gameTypes" class="dropdown-content">
+            <option value="1">Link 1</option>
+            <option value="2">Link 2</option>
+            <option value="3">Link 3</option>
+          </div>
+        </div>
+    </tr>
+</table>
+
+<table>
+    <tr>
         <th style="width:20px"><b>Unofficial Games</b></th>
         <th></th>
     </tr>
     <tr>
         <td id="columnTest"><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
-        <td><a href="./games/flying-cube/index.html"><b>Annoying Cube</b></a> <br> <p style="line-height:1.1;">A basic copy of the well known original 'Flappy Bird'. Has some furhter additions though! Pick between two different game modes! Use Space or the mouse to jump. </p></td>
+        <td><a href="./games/flying-cube/index.html"><b>Annoying Cube</b></a> <br> <p style="line-height:1.1;">A basic copy of the well known original 'Flappy Bird'. Has some further additions though! Pick between two different game modes! Use Space or the mouse to jump. </p></td>
     </tr>
     <tr>
         <td><a href="./games/the-business-dev/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
@@ -50,6 +63,13 @@ Welcome to the website. Below are my games!
         <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
 </table>
+
+<script>
+
+var gamesSelect = document.getElementById("gameTypes");
+var selectedGames = gamesSelect.options[gamesSelect.selectedIndex].value;
+
+</script>
 
 
 {:/}
