@@ -22,9 +22,9 @@ These are all the games I currently have here. Feel free to play some if you're 
 {::nomarkdown}
 
 <table>
-    <th>
-        <td>Unnoficial Games</td>
-    </th>
+    <tr>
+        <th><b>Unnoficial Games</b></th>
+    </tr>
     <tr>
         <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
         <td>Next Column</td>
