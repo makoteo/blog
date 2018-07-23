@@ -19,8 +19,8 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 [Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
 
-| Priority apples | Second priority | Third priority |
-|-------|--------|---------|
-| ambrosia | gala | red delicious |
-| pink lady | jazz | macintosh |
-| honeycrisp | granny smith | fuji |
+| Games: | |
+|-------|--------|
+| ![Test Image]({{ "/500_Test_Image.png"}}) | A cool game |
+| pink lady | jazz |
+| honeycrisp | granny smith |
