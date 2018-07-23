@@ -27,12 +27,7 @@ Welcome to the website.
         <td><a href="./games/flying-cube/index.html"><b>Annoying Cube</b></a> <br> <p style="line-height:1.1;">A basic copy of the well known original 'Flappy Bird'. Has some further additions though! Pick between two different game modes! Use Space or the mouse to jump. </p></td>
     </tr>
     <tr class="all unofficial">
-        <td><a href="./games/the-business-dev/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
-        <td><a href="./games/the-business-dev/index.html"><b>The Business</b></a> <b style="color:red;">- Discontinued</b> <br> <p>An original game based on an interesting loss system. Control with arrow keys. Collect coins to generate profit. </p></td>
-    </tr>
-    <tr class="all unofficial">
-        <td><a href="./games/defend-the-castle/index.html"><img src="/blog/assets/PageImages/SideScrollerThingyThing.jpg"></a></td>
-        <td><a href="./games/defend-the-castle/index.html"><b>Defend the Castle</b></a> <b style="color:red;">- Discontinued</b> <br> <p>A shot at making a 'defend the castle' type game. Wasn't ever finished however.</p></td>
+        <td><a href="./games">More Games!</a></td>
     </tr>
 </table>
 
