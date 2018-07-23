@@ -19,15 +19,12 @@ These are all the games I currently have here. Feel free to play some if you're 
 
 [Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
 
-| Unofficial Games: | |
-|-------|--------|
-| [![Click to play Annoying Cube!](/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg)](./games/flying-cube/index.html) | {::nomarkdown}Checking <br> Line break{:/} |
-| pink lady | jazz |
-| honeycrisp | granny smith |
-
 {::nomarkdown}
 
 <table>
+    <th>
+        <td>Unnoficial Games</td>
+    </th>
     <tr>
         <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
         <td>Next Column</td>
