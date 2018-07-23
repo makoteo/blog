@@ -444,9 +444,9 @@ var oilRigDesc1 = "They're taking";
 var oilRigDesc2 = "the seas too!";
 var oilRigDesc3 = "More pollution!!";
 
-var desertFactoryDesc1 = "They're taking";
-var desertFactoryDesc2 = "the deserts as";
-var desertFactoryDesc3 = "well?!";
+var desertFactoryDesc1 = "Apparently they";
+var desertFactoryDesc2 = "make rocket parts.";
+var desertFactoryDesc3 = "More Pollution!";
 
 var forestFactoryDesc1 = "No no no...";
 var forestFactoryDesc2 = "This is getting";
