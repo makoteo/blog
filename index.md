@@ -5,25 +5,13 @@ title: Games
 
 ## **Hi!!** 
 
-These are all the games I currently have here. Feel free to play some if you're bored!! 
-
-### Official Games:
-
-[Voxel Biome (Still in Developement)](./games/voxel-biome/index.html).
-
-### Unofficial Games:
-
-[Annoying Cube](./games/flying-cube/index.html).
-
-[The Business (Discontinued)](./games/the-business-dev/index.html).
-
-[Defend the Castle (Early Alpha)](./games/defend-the-castle/index.html).
+Welcome to the website. Below are my games! 
 
 {::nomarkdown}
 
 <table>
     <tr>
-        <th style="width:20px"><b>Unnoficial Games</b></th>
+        <th style="width:20px"><b>Unofficial Games</b></th>
         <th></th>
     </tr>
     <tr>
@@ -31,12 +19,23 @@ These are all the games I currently have here. Feel free to play some if you're 
         <td><b>Annoying Cube</b> <br> <p style="line-height:1.1;">A basic copy of the well known original 'Flappy Bird'. Has some furhter additions though! Pick between two different game modes! Use Space or the mouse to jump. </p></td>
     </tr>
     <tr>
-        <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
+        <td><a href="./games/the-business-dev/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
         <td><b>The Business </b> <b style="color:red;">- Discontinued</b> <br> <p>An original game based on an interesting loss system. Control with arrow keys. Collect coins to generate profit. </p></td>
     </tr>
     <tr>
-        <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/SideScrollerThingyThing.jpg"></a></td>
+        <td><a href="./games/defend-the-castle/index.html"><img src="/blog/assets/PageImages/SideScrollerThingyThing.jpg"></a></td>
         <td><b>Defend the Castle</b> <b style="color:red;">- Discontinued</b> <br> <p>A shot at making a 'defend the castle' type game. Wasn't ever finished however.</p></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <th style="width:20px"><b>Official Games</b></th>
+        <th></th>
+    </tr>
+    <tr>
+        <td id="columnTest"><a href="./games/voxel-biome/index.html"><img src="/blog/assets/PageImages/VoxelBiomeThingy.jpg"></a></td>
+        <td><b>Voxel Biome</b> <br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
 </table>
 
