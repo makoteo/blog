@@ -9,7 +9,7 @@ Welcome to the website.
 
 {::nomarkdown}
 
-<center><h3><a href="./games/">Popular Games:</h3></center>
+<center><h3><a href="./games">Popular Games:</a></h3></center>
 
 <div class="custom-select" style="width:200px;">
   <select id="gamesPicked">
