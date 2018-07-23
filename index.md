@@ -34,7 +34,7 @@ Welcome to the website. Below are my games!
 
 <table>
     <tr>
-        <th style="width:20px" id="GamesTitle"><b>Unofficial Games</b></th>
+        <th style="width:20px"><b id="GamesTitle">Unofficial Games</b></th>
         <th></th>
     </tr>
     <tr>
@@ -136,13 +136,13 @@ var e = document.getElementById('gamesPicked');
 var gamePicked = e.options[e.selectedIndex].value;
 
 if(gamePicked === 0){
-    document.getElementById('GamesTitle').innerHTML = "<b>All</b>";
+    document.getElementById('GamesTitle').innerHTML = "All";
     console.log("Hi!!");
 }else if(gamePicked === 1){
-      document.getElementById('GamesTitle').innerHTML = "<b>Official</b>";
+      document.getElementById('GamesTitle').innerHTML = "Official";
       console.log("Hi!!");
 }else if(gamePicked === 2){
-    document.getElementById('GamesTitle').innerHTML = "<b>Unofficial</b>";
+    document.getElementById('GamesTitle').innerHTML = "Unofficial";
     console.log("Hi!!");
 }
 
