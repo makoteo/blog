@@ -21,11 +21,11 @@ Welcome to the website. Below are my games!
 
 <center><h1>Games!</h1></center>
 
-<div class="dropdown">
-  <select name="gameTypes" class="dropbtn">
-    <option value="1" class="dropdown-content" selected>Link 1</option>
-    <option value="2" class="dropdown-content">Link 2</option>
-    <option value="3" class="dropdown-content">Link 3</option>
+<div class="custom-select" style="width:200px;">
+  <select>
+    <option value="0">Unofficial</option>
+    <option value="1">Official</option>
+    <option value="2">In developement</option>
   </select>
 </div>
 
