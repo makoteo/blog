@@ -64,9 +64,6 @@ Welcome to the website. Below are my games!
 
 <script>
 
-var gamesSelect = document.getElementById("gameTypes");
-var selectedGames = gamesSelect.options[gamesSelect.selectedIndex].value;
-
 </script>
 
 
