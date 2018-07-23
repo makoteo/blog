@@ -134,11 +134,11 @@ var e = document.getElementById("gamesPicked');
 var gamePicked = e.options[e.selectedIndex].value;
 
 if(gamePicked === 0){
-    document.getElementById('GamesTitle').innerHtml = "All";
+    document.getElementById('GamesTitle').innerHTML = "All";
 }else if(gamePicked === 1){
-      document.getElementById('GamesTitle').innerHtml = "Official";
+      document.getElementById('GamesTitle').innerHTML = "Official";
 }else if(gamePicked === 2){
-    document.getElementById('GamesTitle').innerHtml = "Unofficial";
+    document.getElementById('GamesTitle').innerHTML = "Unofficial";
 }
 
 </script>
