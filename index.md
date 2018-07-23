@@ -11,20 +11,11 @@ Welcome to the website.
 
 <center><h3><a href="./games">Popular Games:</a></h3></center>
 
-<div class="custom-select" style="width:200px;">
-  <select id="gamesPicked">
-    <option value="0" selected>All</option>
-    <option value="1">Official</option>
-    <option value="2">Unofficial</option>
-  </select>
-</div>
-
-<br>
 <br>
 
 <table>
     <tr>
-        <th style="width:20px"><b id="GamesTitle">All</b></th>
+        <th style="width:20px"><b id="GamesTitle">Popular</b></th>
         <th></th>
     </tr>
     <tr class="all official">
@@ -121,56 +112,6 @@ then close all select boxes:*/
 document.addEventListener("click", closeAllSelect);
 </script>
 
-<script>
-var e = document.getElementById('gamesPicked');
-var gamePicked = e.options[e.selectedIndex].value;
-
-console.log(gamePicked);
-
-if(gamePicked == 0){
-    document.getElementById('GamesTitle').innerHTML = "All";
-    console.log("Hi!!");
-}else if(gamePicked == 1){
-      document.getElementById('GamesTitle').innerHTML = "Official";
-      console.log("Hi!!");
-}else{
-    document.getElementById('GamesTitle').innerHTML = "Unofficial";
-    console.log("Hi!!");
-}
-
-document.addEventListener("click", function(){
-   e = document.getElementById('gamesPicked');
-   gamePicked = e.options[e.selectedIndex].value;
-   var x = document.getElementsByClassName("all");
-   if(gamePicked == 0){
-       document.getElementById('GamesTitle').innerHTML = "All";
-       console.log("Hi!!");
-       x = document.getElementsByClassName("all");
-   }else if(gamePicked == 1){
-         document.getElementById('GamesTitle').innerHTML = "Official";
-         console.log("Hi!!");
-         x = document.getElementsByClassName("official");
-   }else{
-       document.getElementById('GamesTitle').innerHTML = "Unofficial";
-       console.log("Hi!!");
-       x = document.getElementsByClassName("unofficial");
-   }
-   
-   y = document.getElementsByClassName("all");
-   
-   for(var i = 0; i < y.length; i++){
-       y[i].setAttribute('hidden', true);
-   }
-   
-   for(var j = 0; j < x.length; j++){
-       x[j].removeAttribute('hidden');
-   }
-   
-});
-
-</script>
-
-
 {:/}
 
 {::nomarkdown}
@@ -179,10 +120,10 @@ document.addEventListener("click", function(){
 
 {:/}
 
-<ul>
+<table>
   {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-    </li>
+    <tr>
+      <td><a href="{{ post.url }}">{{ post.title }}</a></td>
+    </tr>
   {% endfor %}
-</ul>
+</table>
