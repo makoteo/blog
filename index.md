@@ -31,7 +31,7 @@ These are all the games I currently have here. Feel free to play some if you're 
         <td><b>Annoying Cube</b> <br> <p>A basic copy of the loved original 'Flappy Bird'</p></td>
     </tr>
     <tr>
-        <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>
+        <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/BusinessNotScaled.jpg"></a></td>
         <td>Next Column</td>
     </tr>
     <tr>

@@ -231,18 +231,19 @@ table {
   width: 100%;
   margin: 0 0 20px 0;
   table-layout: fixed;
+  border: 1px solid #3EAA9B;
 }
 
 th {
   text-align: left;
-  border-bottom: 1px dashed #b5e853;
+  border-bottom: 1px dashed #3EAA9B;
   padding: 5px 10px;
   width: 150px;
 }
 
 #columnTest {
 
-  width: 100px;
+  //width: 100px;
 
 }
 
