@@ -7,8 +7,8 @@ author: Martin Feranec
 tags: test_post
 ---
 
-I wrote anotehr post to figure out if they work
+I wrote another post to figure out if they work
 
 But I think they should.
 
-If they don't, that's going to be a little dissaponting.
+If they don't, that's going to be a little disappointing.
