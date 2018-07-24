@@ -14,8 +14,6 @@ title: Games
     <option value="2">Unofficial</option>
   </select>
 </div>
-
-<br>
 <br>
 
 <table>
