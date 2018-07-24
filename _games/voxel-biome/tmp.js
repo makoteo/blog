@@ -3700,12 +3700,6 @@ function game(){
                         TUTORIALPAUSED = true;
                         PAUSED = false;
                     }
-
-                    if(tutorialPage === 24 || tutorialPage === 26){
-                        console.log("here!");
-                        PAUSED = false;
-                        tutorialShowing = false;
-                    }
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
                     clickSelected = [];
