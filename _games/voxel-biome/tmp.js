@@ -813,8 +813,10 @@ function Voxel(x, y, width, height, type){
         }
 
         if(this.turnToCityTerritory === true){
-            if(this.internalTimer > 0 && TUTORIALPAUSED === false) {
-                this.internalTimer-=GAMESPEED;
+            if(this.internalTimer > 0) {
+                if (TUTORIALPAUSED === false){
+                    this.internalTimer-=GAMESPEED;
+                }
             }else{
                 this.turnToCityTerritory = false;
             }
