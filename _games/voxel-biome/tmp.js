@@ -467,7 +467,12 @@ var tutorial = [
     ["Do you see the cards at the", "bottom of your screen?"],
     ["Click on the one that shows", "the field turning into a", "mountain."],
     ["Now, click on the voxel with", "the blue square on it", "and click accept."],
-    ["As you can see, that blocked the city"]
+    ["As you can see, the field", "turned into a mountain, which", "can block city movement"],
+    ["Try blocking the next move", "on your own"],
+    ["Good job! You're getting", "the hang of this"],
+    ["As you can see, we have no", "more 'field to mountain'", "trades"],
+    ["However, this isn't a problem", "as water can also block", "cities"],
+    ["Trade the field for water"]
 
 ];
 
@@ -1841,7 +1846,7 @@ function game(){
                 if (voxels[f].type === 6 || voxels[f].type === 3.1 || voxels[f].type === 4.1 || voxels[f].type === 6.1) {
                     var diceRollCity = Math.random();
 
-                    if(LEVEL === 0 && TEMPPOINTS === 10 && voxels[f].id === 12) {
+                    if(LEVEL === 0 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 12) {
                         diceRollCity = 1;
                     }else if(LEVEL === 1 && (TEMPPOINTS === 10 || TEMPPOINTS === 20 || TEMPPOINTS === 30) && voxels[f].id === 16){
                         diceRollCity = 1;
@@ -3634,10 +3639,17 @@ function game(){
         if(tutorialShowing === false && LEVEL === 0 && tutorialSeen === false){
             if((TEMPPOINTS === 3 || TEMPPOINTS === 4 || TEMPPOINTS === 6 || TEMPPOINTS === 7
                 || TEMPPOINTS === 11 || TEMPPOINTS === 13 || TEMPPOINTS === 14
-                || TEMPPOINTS === 15) && tutorialSeparationTimer < 1){
+                || TEMPPOINTS === 15 || TEMPPOINTS === 17 || TEMPPOINTS === 31) && tutorialSeparationTimer < 1){
                 tutorialShowing = true;
                 PAUSED = true;
             }
+        }
+
+        if((TEMPPOINTS === 25 && voxels[7].type === 5 && tutorialSeparationTimer === 0)){
+            PAUSED = true;
+            tutorialShowing = true;
+        }else if((TEMPPOINTS === 25 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
+            //Go to Extra section
         }
 
         if(tutorialShowing === true){
@@ -3654,10 +3666,20 @@ function game(){
                     tutorialPage++;
                 }
             }
+            if((TEMPPOINTS === 14 && voxels[17].type === 5 && tutorialSeparationTimer === 0)){
+                TUTORIALPAUSED = false;
+                tutorialPage++;
+                PAUSED = false;
+                tutorialShowing = false;
+                tutorialMouseTimer = 20;
+                tempMouseTimer = 20;
+                clickSelected = [];
+                tutorialSeparationTimer = 61;
+            }
             ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/3.15 - WIDTH/32, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length) - HEIGHT/64, WIDTH/16, HEIGHT/32) && tutorialPage !== 10){
                 ctx.fillStyle = 'rgb(200, 200, 255)';
-                if((thisFrameClicked === true && tutorialMouseTimer === 0) || (TEMPPOINTS === 14 && voxels[17].type === 5 && tutorialMouseTimer === 0)){
+                if((thisFrameClicked === true && tutorialMouseTimer === 0)){
                     if(tutorialPage !== 8){
                         tutorialShowing = false;
                         PAUSED = false;
@@ -3672,7 +3694,7 @@ function game(){
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
                     clickSelected = [];
-                    if(tutorialPage !== 3 && tutorialPage !== 7){
+                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 14 && tutorialPage !== 15 && tutorialPage !== 16){
                         tutorialSeparationTimer = 61;
                     }
                 }
@@ -3680,7 +3702,7 @@ function game(){
                 ctx.fillStyle = 'rgb(150, 150, 150)';
             }
             //1, 5, 8, 9
-            if(tutorialPage !== 10){
+            if(tutorialPage !== 10 && tutorialPage !== 9){
                 if(tutorialPage === 1 || tutorialPage === 5 || tutorialPage === 8){
                     ctx.fillText("Yes", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length));
                 }else{
