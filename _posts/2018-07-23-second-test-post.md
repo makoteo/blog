@@ -3,7 +3,7 @@ layout: post
 title:  "Testing another post"
 date:   2018-07-23 20:04:00 -0600
 category: test
-author: Martin Feranec
+author: Martin
 tags: test_post
 ---
 

@@ -53,6 +53,7 @@ var YEAR = 1;
 var SEASON = "Spring";
 
 var PAUSED = false;
+var TUTORIALPAUSED = false;
 
 var LOSSPOINT = 50;
 
@@ -455,9 +456,21 @@ var MountainDesc3 = "Big plus!";
 
 var tutorial = [
 
-    ["Welcome to Voxel Biome!! A game", "of strategy and timing"]
+    ["Welcome to Voxel Biome!! A game", "of strategy and timing"],
+    ["Do you see that town in the ", "middle of your screen?"],
+    ["That's your enemy."],
+    ["It'll try to spread around the", "world and destroy all the", "nature on it"],
+    ["You must stop that"],
+    ["Do you see that blue square?"],
+    ["The city is about to spread there"],
+    ["Thankfully, we can stop that"],
+    ["Do you see the cards at the", "bottom of your screen?"],
+    ["Click on the one that shows", "the field turning into a", "mountain."],
 
 ];
+
+var tutorialMouseTimer = 0;
+var tutorialSeparationTimer = 0;
 
 var tutorialSeen = false;
 var tutorialPage = 0;
@@ -1613,7 +1626,7 @@ function game(){
 
         //CARD CLICK/MOUSEOVER --------------------------------------------------------------------------------------------------------
 
-        if(PAUSED === false) {
+        if(PAUSED === false || TUTORIALPAUSED === true) {
             if (POLUTION >= LOSSPOINT) {
                 tileSelectedByCard = [];
                 cardSelected = 0;
@@ -3591,7 +3604,7 @@ function game(){
             if(PAUSED === true && tutorialShowing === false){
                 secondTimers[0] = 62;
                 PAUSED = false;
-            }else{
+            }else if(LEVEL !== 0 || (LEVEL === 0 && POINTS >= 1)){
                 PAUSED = true;
             }
             buttonTimers[1] = 20;
@@ -3602,7 +3615,7 @@ function game(){
         buttonTimers[1]--;
     }
 
-    if(PAUSED === true && gameRunning === true && endGameTimer === 0 && tutorialShowing === false){
+    if(PAUSED === true && gameRunning === true && endGameTimer === 0 && tutorialShowing === false && TUTORIALPAUSED === false){
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -3614,15 +3627,19 @@ function game(){
 
 
     if(gameRunning === true){
-        if(tutorialShowing === false && LEVEL === 0 && TEMPPOINTS === 3 && tutorialSeen === false){
-            tutorialShowing = true;
-            PAUSED = true;
+        if(tutorialShowing === false && LEVEL === 0 && tutorialSeen === false){
+            if((TEMPPOINTS === 3 || TEMPPOINTS === 4 || TEMPPOINTS === 6 || TEMPPOINTS === 7
+                || TEMPPOINTS === 11 || TEMPPOINTS === 13 || TEMPPOINTS === 14
+                || TEMPPOINTS === 15) && tutorialSeparationTimer < 1){
+                tutorialShowing = true;
+                PAUSED = true;
+            }
         }
 
         if(tutorialShowing === true){
             console.log("Tutorial!");
-            ctx.fillStyle = "rgba(10, 10, 10, 0.7)";
-            ctx.fillRect(WIDTH/2 - WIDTH/6, HEIGHT/2 - HEIGHT/6 + WIDTH/32*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 - WIDTH/32*(tutorial[tutorialPage].length));
+            ctx.fillStyle = "rgba(10, 10, 10, 0.8)";
+            ctx.fillRect(WIDTH/2 - WIDTH/6, HEIGHT/2 - HEIGHT/6 - WIDTH/64*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 + WIDTH/64*(tutorial[tutorialPage].length));
             ctx.textAlign = 'center';
             ctx.fillStyle = 'rgb(200, 200, 200)';
             ctx.font = '18px Courier New';
@@ -3632,10 +3649,39 @@ function game(){
             ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/32, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32 - HEIGHT/64, WIDTH/16, HEIGHT/32)){
                 ctx.fillStyle = 'rgb(200, 200, 255)';
+                if(thisFrameClicked === true && tutorialMouseTimer === 0){
+                    tempMouseTimer = 10;
+                    if(tutorialPage !== 8){
+                        tutorialShowing = false;
+                        PAUSED = false;
+                    }
+                    if(tutorialPage !== 8){
+                        tutorialPage++;
+                    }else{
+                        TUTORIALPAUSED = true;
+                        PAUSED = false;
+                        if(cardSelected === 1 || cardSelected === 2){
+                            tutorialPage++;
+                        }
+                    }
+                    tutorialMouseTimer = 20;
+                    tempMouseTimer = 20;
+                    clickSelected = [];
+                    if(tutorialPage !== 3 && tutorialPage !== 7){
+                        tutorialSeparationTimer = 61;
+                    }
+                }
             }else{
                 ctx.fillStyle = 'rgb(150, 150, 150)';
             }
             ctx.fillText("Next", WIDTH/2 , HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32);
+        }
+
+        if(tutorialMouseTimer > 0){
+            tutorialMouseTimer--;
+        }
+        if(tutorialSeparationTimer > 0){
+            tutorialSeparationTimer--;
         }
     }
     var tempCanvas = document.getElementById("myCanvas");
@@ -3656,7 +3702,7 @@ function game(){
         ctx.textAlign = 'center';
         ctx.font = '25pt Courier New';
         ctx.fillStyle = 'white';
-        ctx.fillText("Press F11 to exit full screen mode.", WIDTH/2, HEIGHT/2)
+        ctx.fillText("Press F11 to exit full screen mode.", WIDTH/2, HEIGHT/2);
         ctx.globalAlpha = 1;
     }
     var height = document.documentElement.clientHeight;
