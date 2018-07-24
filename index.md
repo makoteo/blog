@@ -9,7 +9,7 @@ Welcome to the website.
 
 {::nomarkdown}
 
-<center><h3><a href="./games">Popular Games:</a></h3></center>
+<center><a href="./games"><h3>Popular Games:</h3></a></center>
 
 <br>
 
