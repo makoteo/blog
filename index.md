@@ -28,7 +28,7 @@ Welcome to the website.
     </tr>
     <tr class="all unofficial">
         <td></td>
-        <td style="width:100%"><a href="./games">More Games!</a></td>
+        <td style="width:100%" id="bottomCentered"><a href="./games">More Games!</a></td>
     </tr>
 </table>
 
