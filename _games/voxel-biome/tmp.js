@@ -466,6 +466,8 @@ var tutorial = [
     ["Thankfully, we can stop that"],
     ["Do you see the cards at the", "bottom of your screen?"],
     ["Click on the one that shows", "the field turning into a", "mountain."],
+    ["Now, click on the voxel with", "the blue square on it"],
+    ["As you can see, that blocked the city"]
 
 ];
 
@@ -3658,8 +3660,11 @@ function game(){
                     if(tutorialPage !== 8){
                         tutorialPage++;
                     }else{
+                        tutorialPage++;
                         TUTORIALPAUSED = true;
                         PAUSED = false;
+                    }
+                    if(tutorialPage === 9){
                         if(cardSelected === 1 || cardSelected === 2){
                             tutorialPage++;
                         }
