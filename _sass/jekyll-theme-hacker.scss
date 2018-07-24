@@ -221,10 +221,9 @@ li a:hover {
 }
 
 #bottomCentered {
-
   width: 100%;
-  transform:translateX(50%);
-
+  text-align: center;
+  transform: translate(-10%);
 }
 
 .custom-select {
