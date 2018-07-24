@@ -813,7 +813,7 @@ function Voxel(x, y, width, height, type){
         }
 
         if(this.turnToCityTerritory === true){
-            if(this.internalTimer > 0) {
+            if(this.internalTimer > 0 && TUTORIALPAUSED === false) {
                 this.internalTimer-=GAMESPEED;
             }else{
                 this.turnToCityTerritory = false;
@@ -1403,7 +1403,7 @@ function game(){
         }else{
             GAMESPEED = SAVEGAMESPEED;
         }
-        if(PAUSED === false){
+        if(PAUSED === false && TUTORIALPAUSED === false){
             frameCount += GAMESPEED;
         }
 
@@ -3648,6 +3648,11 @@ function game(){
             for(var i = 0; i < tutorial[tutorialPage].length; i++){
                 ctx.fillText(tutorial[tutorialPage][i], WIDTH/2, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
             }
+            if(tutorialPage === 9){
+                if(cardSelected === 1 || cardSelected === 2){
+                    tutorialPage++;
+                }
+            }
             ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/32, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32 - HEIGHT/64, WIDTH/16, HEIGHT/32)){
                 ctx.fillStyle = 'rgb(200, 200, 255)';
@@ -3663,11 +3668,6 @@ function game(){
                         tutorialPage++;
                         TUTORIALPAUSED = true;
                         PAUSED = false;
-                    }
-                    if(tutorialPage === 9){
-                        if(cardSelected === 1 || cardSelected === 2){
-                            tutorialPage++;
-                        }
                     }
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
