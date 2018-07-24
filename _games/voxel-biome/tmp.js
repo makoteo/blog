@@ -471,9 +471,18 @@ var tutorial = [
     ["Try blocking the next move", "on your own"],
     ["Good job! You're getting", "the hang of this"],
     ["As you can see, we have no", "more 'field to mountain'", "trades"],
-    ["However, this isn't a problem", "as water can also block", "cities"],
-    ["Trade the field for water"]
-
+    ["However, this isn't a problem", "as water can also block", "cities (oil rigs can't spread)"],
+    ["Trade the field for water"],
+    ["Great job!! Now that you know", "how trading tiles works,", "you know most of the game"], //17
+    ["The two primary strategies you", "should use are blocking", "and decreasing pollution"],
+    ["Blocking is what you've been", "doing so far. Basically,", "blocking the city's path"],
+    ["Decreasing pollution is trading", "tiles for tiles with", "a lower pollution."],
+    ["The field -> forest trade is", "a good example of this."],
+    ["If you want to know more,", "read about individual tiles", "in the glossary"],
+    ["Anyways, your goal is to keep", "the pollution low. This", "is often easier said than done"],
+    ["To end this off, good luck!"],
+    ["What are you doing?!"], //25
+    ["Pick out the field -> mountain", "card and click on the", "tile with the blue square."]
 ];
 
 var tutorialMouseTimer = 0;
@@ -3639,17 +3648,17 @@ function game(){
         if(tutorialShowing === false && LEVEL === 0 && tutorialSeen === false){
             if((TEMPPOINTS === 3 || TEMPPOINTS === 4 || TEMPPOINTS === 6 || TEMPPOINTS === 7
                 || TEMPPOINTS === 11 || TEMPPOINTS === 13 || TEMPPOINTS === 14
-                || TEMPPOINTS === 15 || TEMPPOINTS === 17 || TEMPPOINTS === 31) && tutorialSeparationTimer < 1){
+                || TEMPPOINTS === 15 || TEMPPOINTS === 17 || TEMPPOINTS === 31 || TEMPPOINTS === 41) && tutorialSeparationTimer < 1){
                 tutorialShowing = true;
                 PAUSED = true;
             }
         }
 
-        if((TEMPPOINTS === 25 && voxels[7].type === 5 && tutorialSeparationTimer === 0)){
+        if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0)){
             PAUSED = true;
             tutorialShowing = true;
-        }else if((TEMPPOINTS === 25 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
-            //Go to Extra section
+        }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
+            tutorialPage = 25;
         }
 
         if(tutorialShowing === true){
@@ -3684,17 +3693,23 @@ function game(){
                         tutorialShowing = false;
                         PAUSED = false;
                     }
-                    if(tutorialPage !== 8){
+                    if(tutorialPage !== 8 && tutorialPage !== 24 && tutorialPage !== 26){
                         tutorialPage++;
-                    }else{
+                    }else if(tutorialPage === 8){
                         tutorialPage++;
                         TUTORIALPAUSED = true;
                         PAUSED = false;
                     }
+
+                    if(tutorialPage === 24 || tutorialPage === 26){
+                        console.log("here!");
+                        PAUSED = false;
+                        tutorialShowing = false;
+                    }
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
                     clickSelected = [];
-                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 14 && tutorialPage !== 15 && tutorialPage !== 16){
+                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 15 && tutorialPage !== 16  && !(tutorialPage > 17 && tutorialPage <= 24)){
                         tutorialSeparationTimer = 61;
                     }
                 }
