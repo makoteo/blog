@@ -62,9 +62,6 @@ var SAVEGAMESPEED = 1;
 var DEBUG = false;
 var GUIHIDE = false;
 
-var tutorialPage = 0;
-var tutorialShowing = false;
-
 var GAMESTATE = "MENU";
 
 var voxels = [];
@@ -455,6 +452,16 @@ var forestFactoryDesc3 = "really bad...";
 var MountainDesc1 = "They block cities";
 var MountainDesc2 = "from spreading.";
 var MountainDesc3 = "Big plus!";
+
+var tutorial = [
+
+    ["Welcome to Voxel Biome!! A game", "of strategy and timing"]
+
+];
+
+var tutorialSeen = false;
+var tutorialPage = 0;
+var tutorialShowing = false;
 
 var frameTimer2 = 0;
 var yearVisible = true;
@@ -1210,9 +1217,6 @@ function reset(){
     timerRed = false;
 
     startTimer = 0;
-
-    tutorialPage = 0;
-    tutorialShowing = false;
 
     gameEnd = false;
 
@@ -3576,7 +3580,7 @@ function game(){
 
     if (keys && keys[32]) {
         if(buttonTimers[1] < 1 && gameRunning === true){
-            if(PAUSED === true){
+            if(PAUSED === true && tutorialShowing === false){
                 secondTimers[0] = 62;
                 PAUSED = false;
             }else{
@@ -3590,7 +3594,7 @@ function game(){
         buttonTimers[1]--;
     }
 
-    if(PAUSED === true && gameRunning === true && endGameTimer === 0){
+    if(PAUSED === true && gameRunning === true && endGameTimer === 0 && tutorialShowing === false){
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -3600,6 +3604,32 @@ function game(){
         ctx.fillText("Paused", WIDTH - WIDTH/30, HEIGHT - HEIGHT / 30);
     }
 
+
+    if(gameRunning === true){
+        if(tutorialShowing === false && LEVEL === 0 && TEMPPOINTS === 3 && tutorialSeen === false){
+            tutorialShowing = true;
+            PAUSED = true;
+        }
+
+        if(tutorialShowing === true){
+            console.log("Tutorial!");
+            ctx.fillStyle = "rgba(10, 10, 10, 0.7)";
+            ctx.fillRect(WIDTH/2 - WIDTH/6, HEIGHT/2 - HEIGHT/6 + WIDTH/32*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 - WIDTH/32*(tutorial[tutorialPage].length));
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            ctx.font = '18px Courier New';
+            for(var i = 0; i < tutorial[tutorialPage].length; i++){
+                ctx.fillText(tutorial[tutorialPage][i], WIDTH/2 - WIDTH/8, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
+            }
+            ctx.textAlign = 'center';
+            if(onClick(WIDTH/2 - WIDTH/32, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32 - HEIGHT/64, WIDTH/16, HEIGHT/32)){
+                ctx.fillStyle = 'gray';
+            }else{
+                ctx.fillStyle = 'white';
+            }
+            ctx.fillText("Next", WIDTH/2 , HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32);
+        }
+    }
     var tempCanvas = document.getElementById("myCanvas");
 
     if(fullScreenTimer > 0){
@@ -3731,7 +3761,12 @@ function loadPage() {
 
 function showPage() {
     document.getElementById("loader").className += "fading";
+    setTimeout(function(){ deleteLoader()}, 100);
     requestAnimationFrame(repeatOften);
+}
+
+function deleteLoader(){
+    document.getElementById("loader").setAttribute('hidden', true);
 }
 
 loadPage();
