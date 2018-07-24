@@ -555,6 +555,10 @@ var word2 = "";
 var num1 = 0;
 var num2 = 0;
 var cardChosen = 0;
+
+var popUpText = "";
+var popUpTimer = 0;
+var popUpOpacity = 0;
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Voxel(x, y, width, height, type){
@@ -3356,6 +3360,10 @@ function game(){
             ctx.fillText("CheckBox 3", WIDTH/2 + HEIGHT/12, HEIGHT/2.2 + HEIGHT/20);
             ctx.drawImage(checkBoxGUI, 75 * checkBoxValues[2], 0, 75, 75, WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/18, HEIGHT/12, HEIGHT/12);
 
+            ctx.textAlign = 'center';
+            ctx.font = '18pt Courier New'
+            ctx.fillText("(Press F11 to enter full screen mode)", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8);
+
             for(var hi = -2; hi < checkBoxValues.length - 2; hi++){
                 if(thisFrameClicked === true && onClick(WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8*hi - HEIGHT/18, HEIGHT/12, HEIGHT/12)){
                     if(menuMouseTimer < 1){
@@ -3615,17 +3623,17 @@ function game(){
             console.log("Tutorial!");
             ctx.fillStyle = "rgba(10, 10, 10, 0.7)";
             ctx.fillRect(WIDTH/2 - WIDTH/6, HEIGHT/2 - HEIGHT/6 + WIDTH/32*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 - WIDTH/32*(tutorial[tutorialPage].length));
-            ctx.textAlign = 'left';
-            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgb(200, 200, 200)';
             ctx.font = '18px Courier New';
             for(var i = 0; i < tutorial[tutorialPage].length; i++){
-                ctx.fillText(tutorial[tutorialPage][i], WIDTH/2 - WIDTH/8, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
+                ctx.fillText(tutorial[tutorialPage][i], WIDTH/2, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
             }
             ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/32, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32 - HEIGHT/64, WIDTH/16, HEIGHT/32)){
-                ctx.fillStyle = 'gray';
+                ctx.fillStyle = 'rgb(200, 200, 255)';
             }else{
-                ctx.fillStyle = 'white';
+                ctx.fillStyle = 'rgb(150, 150, 150)';
             }
             ctx.fillText("Next", WIDTH/2 , HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32);
         }
@@ -3635,9 +3643,26 @@ function game(){
     if(fullScreenTimer > 0){
         fullScreenTimer--;
     }
+
+    if(popUpTimer > 0){
+        popUpTimer--;
+        popUpOpacity = 1
+    }
+    if(popUpOpacity > 0.01){
+        popUpOpacity -= 0.01;
+        ctx.globalAlpha = popUpOpacity;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        ctx.fillRect(0, HEIGHT/2 - HEIGHT/16, WIDTH, HEIGHT/8);
+        ctx.textAlign = 'center';
+        ctx.font = '25pt Courier New';
+        ctx.fillStyle = 'white';
+        ctx.fillText("Press F11 to exit full screen mode.", WIDTH/2, HEIGHT/2)
+        ctx.globalAlpha = 1;
+    }
     var height = document.documentElement.clientHeight;
 
     if (height === screen.height && FULLSCREEN === false) {
+        popUpTimer = 100;
         unloadScrollBars();
         tempCanvas.width = document.body.clientWidth;
         tempCanvas.height = tempCanvas.width*0.5625;
