@@ -7,6 +7,14 @@ title: Games
 
 <center><h1>Games!</h1></center>
 
+<div class="custom-select" style="width:200px;">
+  <select id="gamesPicked">
+    <option value="0" selected>All</option>
+    <option value="1">Official</option>
+    <option value="2">Unofficial</option>
+  </select>
+</div>
+
 <br>
 <br>
 
