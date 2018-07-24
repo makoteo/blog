@@ -466,7 +466,7 @@ var tutorial = [
     ["Thankfully, we can stop that"],
     ["Do you see the cards at the", "bottom of your screen?"],
     ["Click on the one that shows", "the field turning into a", "mountain."],
-    ["Now, click on the voxel with", "the blue square on it"],
+    ["Now, click on the voxel with", "the blue square on it", "and click accept."],
     ["As you can see, that blocked the city"]
 
 ];
@@ -3641,14 +3641,13 @@ function game(){
         }
 
         if(tutorialShowing === true){
-            console.log("Tutorial!");
             ctx.fillStyle = "rgba(10, 10, 10, 0.8)";
-            ctx.fillRect(WIDTH/2 - WIDTH/6, HEIGHT/2 - HEIGHT/6 - WIDTH/64*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 + WIDTH/64*(tutorial[tutorialPage].length));
+            ctx.fillRect(WIDTH/2 - WIDTH/2.1, HEIGHT/2 + HEIGHT/12 - WIDTH/64*(tutorial[tutorialPage].length/2), WIDTH/3, HEIGHT/3 + WIDTH/64*(tutorial[tutorialPage].length));
             ctx.textAlign = 'center';
             ctx.fillStyle = 'rgb(200, 200, 200)';
             ctx.font = '18px Courier New';
             for(var i = 0; i < tutorial[tutorialPage].length; i++){
-                ctx.fillText(tutorial[tutorialPage][i], WIDTH/2, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
+                ctx.fillText(tutorial[tutorialPage][i], WIDTH/2 - WIDTH/3.15, HEIGHT/2 + HEIGHT/4 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
             }
             if(tutorialPage === 9){
                 if(cardSelected === 1 || cardSelected === 2){
@@ -3656,10 +3655,9 @@ function game(){
                 }
             }
             ctx.textAlign = 'center';
-            if(onClick(WIDTH/2 - WIDTH/32, HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32 - HEIGHT/64, WIDTH/16, HEIGHT/32)){
+            if(onClick(WIDTH/2 - WIDTH/3.15 - WIDTH/32, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length) - HEIGHT/64, WIDTH/16, HEIGHT/32) && tutorialPage !== 10){
                 ctx.fillStyle = 'rgb(200, 200, 255)';
-                if(thisFrameClicked === true && tutorialMouseTimer === 0){
-                    tempMouseTimer = 10;
+                if((thisFrameClicked === true && tutorialMouseTimer === 0) || (TEMPPOINTS === 14 && voxels[17].type === 5 && tutorialMouseTimer === 0)){
                     if(tutorialPage !== 8){
                         tutorialShowing = false;
                         PAUSED = false;
@@ -3681,7 +3679,14 @@ function game(){
             }else{
                 ctx.fillStyle = 'rgb(150, 150, 150)';
             }
-            ctx.fillText("Next", WIDTH/2 , HEIGHT/2 - WIDTH/64*(tutorial[tutorialPage].length/2) - WIDTH/64*(tutorial[tutorialPage].length/2) + (tutorial[tutorialPage].length + 2)*HEIGHT/32);
+            //1, 5, 8, 9
+            if(tutorialPage !== 10){
+                if(tutorialPage === 1 || tutorialPage === 5 || tutorialPage === 8){
+                    ctx.fillText("Yes", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length));
+                }else{
+                    ctx.fillText("Next", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 +  WIDTH/32*(tutorial[tutorialPage].length));
+                }
+            }
         }
 
         if(tutorialMouseTimer > 0){
