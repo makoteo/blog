@@ -3681,26 +3681,26 @@ function game(){
             }
         }
 
-        if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0)){
+        if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && LEVEL === 0)){
             PAUSED = true;
             tutorialShowing = true;
-        }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
+        }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0)){
             tutorialPage = 28;
             PAUSED = true;
             tutorialShowing = true;
         }
 
-        if(TEMPPOINTS === 28 && voxels[7].type !== 5 && tutorialSeparationTimer === 0){
+        if(TEMPPOINTS === 28 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0){
             tutorialPage = 29;
             PAUSED = true;
             tutorialShowing = true;
         }
 
-        if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
+        if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0){
             tutorialPage = 15;
             PAUSED = true;
             tutorialShowing = true;
-        }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
+        }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0){
             tutorialPage = 31;
             GAMESTATE = "LOSS";
             gameRunning = false;
