@@ -20,7 +20,7 @@ Welcome to the website.
     </tr>
     <tr class="all official">
         <td><a href="./games/voxel-biome/index.html"><img src="/blog/assets/PageImages/VoxelBiomeThingy.jpg"></a></td>
-        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
+        <td><a href="./games/voxel-biome/index.html"><b>Voxel Biome (In developement)</b></a><br> <p style="line-height:1.1;">A puzzle/strategy game with voxel graphics. Use cards to trade different biomes to save the enviroment from destruction.</p></td>
     </tr>
     <tr class="all unofficial">
         <td><a href="./games/flying-cube/index.html"><img src="/blog/assets/PageImages/ThumbnailAnnoyingCubeNotScaled.jpg"></a></td>

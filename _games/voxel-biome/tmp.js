@@ -1025,6 +1025,11 @@ if(localStorage.getItem(("levelStates")) === null){
     levelStates = JSON.parse(localStorage.getItem("levelStates"));
 }
 
+if(localStorage.getItem(("tutorialSeen")) === null){
+    localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
+}else{
+    tutorialSeen = JSON.parse(localStorage.getItem("tutorialSeen"));
+}
 
 var map = levelZeroGrid;
 if (LEVEL === 0) {
@@ -2952,6 +2957,7 @@ function game(){
                     levelStates[LEVEL] = 1;
                 }
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
+                localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
                 GAMESTATE = "LOSS";
             }
         }
@@ -2974,6 +2980,7 @@ function game(){
                     levelStates[LEVEL] = 3;
                 }
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
+                localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
                 GAMESTATE = "WIN";
             }
         }
@@ -3681,26 +3688,26 @@ function game(){
             }
         }
 
-        if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && LEVEL === 0)){
+        if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && LEVEL === 0 && tutorialSeen === false)){
             PAUSED = true;
             tutorialShowing = true;
-        }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0)){
+        }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0 && tutorialSeen === false)){
             tutorialPage = 28;
             PAUSED = true;
             tutorialShowing = true;
         }
 
-        if(TEMPPOINTS === 28 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0){
+        if(TEMPPOINTS === 28 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && LEVEL === 0 && tutorialSeen === false){
             tutorialPage = 29;
             PAUSED = true;
             tutorialShowing = true;
         }
 
-        if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0){
+        if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0 && tutorialSeen === false){
             tutorialPage = 15;
             PAUSED = true;
             tutorialShowing = true;
-        }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0){
+        }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29 && LEVEL === 0 && tutorialSeen === false){
             tutorialPage = 31;
             GAMESTATE = "LOSS";
             gameRunning = false;
@@ -3761,7 +3768,7 @@ function game(){
                         TUTORIALPAUSED = false;
                         tutorialShowing = false;
                         tutorialSeparationTimer = 61;
-                        if(tutorialPage === 36){
+                        if(tutorialPage === 37){
                             tutorialSeen = true;
                         }
                     }
