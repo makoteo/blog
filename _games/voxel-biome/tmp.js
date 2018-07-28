@@ -465,10 +465,11 @@ var tutorial = [
     ["The city is about to spread there"],
     ["Thankfully, we can stop that"],
     ["Do you see the cards at the", "bottom of your screen?"],
-    ["Click on the one that shows", "the field turning into a", "mountain."],
+    ["Click on either one that shows", "the field turning into a", "mountain."],
     ["Now, click on the voxel with", "the blue square on it", "and click accept."],
-    ["As you can see, the field", "turned into a mountain, which", "can block city movement"],
-    ["Try blocking the next move", "on your own"],
+    ["As you can see, the field", "turned into a mountain, as ", "shown on the card"],
+    ["Mountains can block cities,", "which is why we made this", "trade"], //12
+    ["Try blocking the next move", "on your own using the field", "to mountain trade."],
     ["Good job! You're getting", "the hang of this"],
     ["As you can see, we have no", "more 'field to mountain'", "trades"],
     ["However, this isn't a problem", "as water can also block", "cities (oil rigs can't spread)"],
@@ -476,12 +477,13 @@ var tutorial = [
     ["Great job!! Now that you know", "how trading tiles works,", "you know most of the game"], //17
     ["The two primary strategies you", "should use are blocking", "and decreasing pollution"],
     ["Blocking is what you've been", "doing so far. Basically,", "blocking the city's path"],
+    ["Note, the city can only move", "to adjacent tiles."],
     ["Decreasing pollution is trading", "tiles for tiles with", "a lower pollution."],
     ["The field -> forest trade is", "a good example of this."],
     ["If you want to know more,", "read about individual tiles", "in the glossary"],
     ["Anyways, your goal is to keep", "the pollution low. This", "is often easier said than done"],
-    ["To end this off, good luck!"],
-    ["What are you doing?!"], //25
+    ["To end this off, good luck!"], // PAUSE OR SPEED UP LEVEL
+    ["What are you doing?!"], //27
     ["Pick out the field -> mountain", "card and click on the", "tile with the blue square."]
 ];
 
@@ -3392,8 +3394,11 @@ function game(){
             ctx.drawImage(checkBoxGUI, 75 * checkBoxValues[2], 0, 75, 75, WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 - HEIGHT/18, HEIGHT/12, HEIGHT/12);
 
             ctx.textAlign = 'center';
-            ctx.font = '18pt Courier New'
-            ctx.fillText("(Press F11 to enter full screen mode)", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8);
+            ctx.font = '15pt Courier New';
+            ctx.fillText("Additional Controls: Space to Pause, Q to fast forward,", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8);
+            ctx.fillText("F1 to hide UI, F3 to debug", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8 + HEIGHT/40);
+            ctx.fillText("(Press F11 to enter full screen mode)", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/6 + HEIGHT/40);
+            ctx.fillText("(Only do this at the start of a game)", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/6 + HEIGHT/40*2);
 
             for(var hi = -2; hi < checkBoxValues.length - 2; hi++){
                 if(thisFrameClicked === true && onClick(WIDTH/2 + HEIGHT/12*2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8*hi - HEIGHT/18, HEIGHT/12, HEIGHT/12)){
@@ -3648,7 +3653,7 @@ function game(){
         if(tutorialShowing === false && LEVEL === 0 && tutorialSeen === false){
             if((TEMPPOINTS === 3 || TEMPPOINTS === 4 || TEMPPOINTS === 6 || TEMPPOINTS === 7
                 || TEMPPOINTS === 11 || TEMPPOINTS === 13 || TEMPPOINTS === 14
-                || TEMPPOINTS === 15 || TEMPPOINTS === 17 || TEMPPOINTS === 31 || TEMPPOINTS === 41) && tutorialSeparationTimer < 1){
+                || TEMPPOINTS === 15 || TEMPPOINTS === 16 || TEMPPOINTS === 17 || TEMPPOINTS === 31 || TEMPPOINTS === 41) && tutorialSeparationTimer < 1){
                 tutorialShowing = true;
                 PAUSED = true;
             }
@@ -3658,7 +3663,9 @@ function game(){
             PAUSED = true;
             tutorialShowing = true;
         }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
-            tutorialPage = 25;
+            tutorialPage = 27;
+            PAUSED = true;
+            tutorialShowing = true;
         }
 
         if(tutorialShowing === true){
@@ -3670,8 +3677,20 @@ function game(){
             for(var i = 0; i < tutorial[tutorialPage].length; i++){
                 ctx.fillText(tutorial[tutorialPage][i], WIDTH/2 - WIDTH/3.15, HEIGHT/2 + HEIGHT/4 - WIDTH/64*(tutorial[tutorialPage].length/2) + i*HEIGHT/32);
             }
+            if(onClick(WIDTH/2 - WIDTH/3.15 - WIDTH/32, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length) - HEIGHT/64, WIDTH/16, HEIGHT/32) && tutorialPage !== 10) {
+                ctx.fillStyle = 'rgb(200, 200, 255)';
+            }else{
+                ctx.fillStyle = 'rgb(150, 150, 150)';
+            }
+            if(tutorialPage !== 10 && tutorialPage !== 9){
+                if(tutorialPage === 1 || tutorialPage === 5 || tutorialPage === 8){
+                    ctx.fillText("Yes", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length));
+                }else{
+                    ctx.fillText("Next", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 +  WIDTH/32*(tutorial[tutorialPage].length));
+                }
+            }
             if(tutorialPage === 9){
-                if(cardSelected === 1 || cardSelected === 2){
+                if(cardSelected === 3 || cardSelected === 2){
                     tutorialPage++;
                 }
             }
@@ -3687,37 +3706,36 @@ function game(){
             }
             ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/3.15 - WIDTH/32, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length) - HEIGHT/64, WIDTH/16, HEIGHT/32) && tutorialPage !== 10){
-                ctx.fillStyle = 'rgb(200, 200, 255)';
                 if((thisFrameClicked === true && tutorialMouseTimer === 0)){
                     if(tutorialPage !== 8){
                         tutorialShowing = false;
                         PAUSED = false;
                     }
-                    if(tutorialPage !== 8 && tutorialPage !== 24 && tutorialPage !== 26){
+                    if(tutorialPage !== 8 && tutorialPage !== 27 && tutorialPage !== 29){
                         tutorialPage++;
                     }else if(tutorialPage === 8){
                         tutorialPage++;
                         TUTORIALPAUSED = true;
                         PAUSED = false;
                     }
+
+                    if(tutorialPage === 27 || tutorialPage === 29){
+                        PAUSED = false;
+                        TUTORIALPAUSED = false;
+                        tutorialShowing = false;
+                        tutorialSeparationTimer = 61;
+                    }
+
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
-                    clickSelected = [];
-                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 15 && tutorialPage !== 16  && !(tutorialPage > 17 && tutorialPage <= 24)){
+                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 16 && tutorialPage !== 17  && !(tutorialPage > 18 && tutorialPage <= 26) && !(tutorialPage>27 && tutorialPage<=28)){
                         tutorialSeparationTimer = 61;
                     }
                 }
             }else{
-                ctx.fillStyle = 'rgb(150, 150, 150)';
+
             }
             //1, 5, 8, 9
-            if(tutorialPage !== 10 && tutorialPage !== 9){
-                if(tutorialPage === 1 || tutorialPage === 5 || tutorialPage === 8){
-                    ctx.fillText("Yes", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length));
-                }else{
-                    ctx.fillText("Next", WIDTH/2 - WIDTH/3.15, HEIGHT - HEIGHT/4 +  WIDTH/32*(tutorial[tutorialPage].length));
-                }
-            }
         }
 
         if(tutorialMouseTimer > 0){
