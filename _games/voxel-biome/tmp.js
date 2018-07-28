@@ -492,7 +492,8 @@ var tutorial = [
     ["There's one more thing we", "haven't discussed."],
     ["Trading multiple tiles for", "multiple tiles"],
     ["Cards with numbers on them do", "exactly this."],
-    ["They trade to or three tiles", "for one or two (one tile", " is deleted.)"]
+    ["They trade two or three tiles", "for one or two (one tile", " is deleted.)"],
+    [""]
 ];
 
 var tutorialMouseTimer = 0;
@@ -3673,7 +3674,9 @@ function game(){
         if(tutorialShowing === false && LEVEL === 2 && tutorialSeen === false){
             if((TEMPPOINTS === 3 && tutorialSeparationTimer < 1)){
                 tutorialShowing = true;
-                tutorialPage = 33;
+                if(tutorialPage === 0){
+                    tutorialPage = 33;
+                }
                 PAUSED = true;
             }
         }
@@ -3753,7 +3756,7 @@ function game(){
                         PAUSED = false;
                     }
 
-                    if(tutorialPage === 27 || tutorialPage === 29 || tutorialPage === 36){
+                    if(tutorialPage === 27 || tutorialPage === 29 || tutorialPage === 37){
                         PAUSED = false;
                         TUTORIALPAUSED = false;
                         tutorialShowing = false;
