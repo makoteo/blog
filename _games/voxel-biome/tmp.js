@@ -3698,7 +3698,7 @@ function game(){
             PAUSED = true;
             tutorialShowing = true;
         }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
-            tutorialPage = 30;
+            tutorialPage = 31;
             GAMESTATE = "LOSS";
             gameRunning = false;
         }
