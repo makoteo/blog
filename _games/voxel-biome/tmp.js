@@ -466,7 +466,7 @@ var tutorial = [
     ["Thankfully, we can stop that"],
     ["Do you see the cards at the", "bottom of your screen?"],
     ["Click on either one that shows", "the field turning into a", "mountain."],
-    ["Now, click on the voxel with", "the blue square on it", "and click accept."],
+    ["Now, click on the tile with", "the blue square on it", "and click accept."],
     ["As you can see, the field", "turned into a mountain, as ", "shown on the card"],
     ["Mountains can block cities,", "which is why we made this", "trade"], //12
     ["Try blocking the next move", "on your own using the field", "to mountain trade."],
@@ -483,6 +483,7 @@ var tutorial = [
     ["If you want to know more,", "read about individual tiles", "in the glossary"],
     ["Anyways, your goal is to keep", "the pollution low. This", "is often easier said than done"],
     ["To end this off, good luck!"], // PAUSE OR SPEED UP LEVEL
+    [""],
     ["What are you doing?!"], //27
     ["Pick out the field -> mountain", "card and click on the", "tile with the blue square."]
 ];
@@ -3663,9 +3664,24 @@ function game(){
             PAUSED = true;
             tutorialShowing = true;
         }else if((TEMPPOINTS === 27 && voxels[7].type !== 5 && tutorialSeparationTimer === 0)){
-            tutorialPage = 27;
+            tutorialPage = 28;
             PAUSED = true;
             tutorialShowing = true;
+        }
+
+        if(TEMPPOINTS === 28 && voxels[7].type !== 5 && tutorialSeparationTimer === 0){
+            tutorialPage = 29;
+            PAUSED = true;
+            tutorialShowing = true;
+        }
+
+        if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
+            tutorialPage = 14;
+            PAUSED = true;
+            tutorialShowing = true;
+        }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
+            GAMESTATE = "LOSS";
+            gameRunning = false;
         }
 
         if(tutorialShowing === true){
@@ -3704,7 +3720,6 @@ function game(){
                 clickSelected = [];
                 tutorialSeparationTimer = 61;
             }
-            ctx.textAlign = 'center';
             if(onClick(WIDTH/2 - WIDTH/3.15 - WIDTH/32, HEIGHT - HEIGHT/4 + WIDTH/32*(tutorial[tutorialPage].length) - HEIGHT/64, WIDTH/16, HEIGHT/32) && tutorialPage !== 10){
                 if((thisFrameClicked === true && tutorialMouseTimer === 0)){
                     if(tutorialPage !== 8){
@@ -3728,7 +3743,7 @@ function game(){
 
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
-                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 16 && tutorialPage !== 17  && !(tutorialPage > 18 && tutorialPage <= 26) && !(tutorialPage>27 && tutorialPage<=28)){
+                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 16 && tutorialPage !== 17  && !(tutorialPage > 18 && tutorialPage <= 26) && !(tutorialPage>=28 && tutorialPage<=30)){
                         tutorialSeparationTimer = 61;
                     }
                 }
