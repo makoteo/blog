@@ -3694,7 +3694,7 @@ function game(){
         }
 
         if(TEMPPOINTS === 31 && voxels[7].type === 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
-            tutorialPage = 14;
+            tutorialPage = 15;
             PAUSED = true;
             tutorialShowing = true;
         }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
@@ -3758,6 +3758,9 @@ function game(){
                         TUTORIALPAUSED = false;
                         tutorialShowing = false;
                         tutorialSeparationTimer = 61;
+                        if(tutorialPage === 36){
+                            tutorialSeen = true;
+                        }
                     }
 
                     tutorialMouseTimer = 20;
