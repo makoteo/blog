@@ -466,7 +466,7 @@ var tutorial = [
     ["Thankfully, we can stop that"],
     ["Do you see the cards at the", "bottom of your screen?"],
     ["Click on either one that shows", "the field turning into a", "mountain."],
-    ["Now, click on the tile with", "the blue square on it", "and click accept."],
+    ["Now, click on the tile with", "the blue square on it", "and click accept."], //10
     ["As you can see, the field", "turned into a mountain, as ", "shown on the card"],
     ["Mountains can block cities,", "which is why we made this", "trade"], //12
     ["Try blocking the next move", "on your own using the field", "to mountain trade."],
@@ -474,18 +474,25 @@ var tutorial = [
     ["As you can see, we have no", "more 'field to mountain'", "trades"],
     ["However, this isn't a problem", "as water can also block", "cities (oil rigs can't spread)"],
     ["Trade the field for water"],
-    ["Great job!! Now that you know", "how trading tiles works,", "you know most of the game"], //17
+    ["Great job!! Now that you know", "how trading tiles works,", "you know most of the game"], //18
     ["The two primary strategies you", "should use are blocking", "and decreasing pollution"],
-    ["Blocking is what you've been", "doing so far. Basically,", "blocking the city's path"],
+    ["Blocking is what you've been", "doing so far. Basically,", "blocking the city's path"], //20
     ["Note, the city can only move", "to adjacent tiles."],
     ["Decreasing pollution is trading", "tiles for tiles with", "a lower pollution."],
     ["The field -> forest trade is", "a good example of this."],
     ["If you want to know more,", "read about individual tiles", "in the glossary"],
     ["Anyways, your goal is to keep", "the pollution low. This", "is often easier said than done"],
     ["To end this off, good luck!"], // PAUSE OR SPEED UP LEVEL
+    [""], //27
+    ["What are you doing?!"],
+    ["Pick out the field -> mountain", "card and click on the", "tile with the blue square."],
+    [""], // 30
+    ["Huh... Peculiar..."],
     [""],
-    ["What are you doing?!"], //27
-    ["Pick out the field -> mountain", "card and click on the", "tile with the blue square."]
+    ["There's one more thing we", "haven't discussed."],
+    ["Trading multiple tiles for", "multiple tiles"],
+    ["Cards with numbers on them do", "exactly this."],
+    ["They trade to or three tiles", "for one or two (one tile", " is deleted.)"]
 ];
 
 var tutorialMouseTimer = 0;
@@ -1374,6 +1381,9 @@ function reset(){
     num1 = 0;
     num2 = 0;
     cardChosen = 0;
+
+    tutorialPage = 0;
+    tutorialShowing = false;
 
 }
 
@@ -3660,6 +3670,14 @@ function game(){
             }
         }
 
+        if(tutorialShowing === false && LEVEL === 2 && tutorialSeen === false){
+            if((TEMPPOINTS === 3 && tutorialSeparationTimer < 1)){
+                tutorialShowing = true;
+                tutorialPage = 33;
+                PAUSED = true;
+            }
+        }
+
         if((TEMPPOINTS === 27 && voxels[7].type === 5 && tutorialSeparationTimer === 0)){
             PAUSED = true;
             tutorialShowing = true;
@@ -3680,6 +3698,7 @@ function game(){
             PAUSED = true;
             tutorialShowing = true;
         }else if(TEMPPOINTS === 31 && voxels[7].type !== 5 && tutorialSeparationTimer === 0 && tutorialPage === 29){
+            tutorialPage = 30;
             GAMESTATE = "LOSS";
             gameRunning = false;
         }
@@ -3734,7 +3753,7 @@ function game(){
                         PAUSED = false;
                     }
 
-                    if(tutorialPage === 27 || tutorialPage === 29){
+                    if(tutorialPage === 27 || tutorialPage === 29 || tutorialPage === 36){
                         PAUSED = false;
                         TUTORIALPAUSED = false;
                         tutorialShowing = false;
@@ -3743,7 +3762,7 @@ function game(){
 
                     tutorialMouseTimer = 20;
                     tempMouseTimer = 20;
-                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 16 && tutorialPage !== 17  && !(tutorialPage > 18 && tutorialPage <= 26) && !(tutorialPage>=28 && tutorialPage<=30)){
+                    if(tutorialPage !== 3 && tutorialPage !== 7 && tutorialPage !== 16 && tutorialPage !== 17  && !(tutorialPage > 18 && tutorialPage <= 26) && !(tutorialPage>=28 && tutorialPage<=30) && !(LEVEL === 2)){
                         tutorialSeparationTimer = 61;
                     }
                 }
