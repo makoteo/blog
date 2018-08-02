@@ -147,7 +147,20 @@ var secondTimers = [
 var achievementStates = [0, 0, 0, 0, 0, 0, 0, 0];
 var thingsCreatedForAchievments = [0, 0, 0];
 
-var achievmentBoxX = 0;
+var achievmentBoxY = 0;
+
+var achievments = [
+
+    ["Tree Planter!", "Plant 5 Trees"],
+    ["Mountain Grower!", "Create 5 Mountains"],
+    ["Grass Planter", "Make 5 Fields"],
+    ["You're not Shark Food!", "Beat Level 5"],
+    ["One of the Sardines!", "Beat Level 7"],
+    ["No dragons apparently...", "Beat Level 9"],
+    ["Nature Prevails", "Ending 1/2"],
+    ["Humanity Prevails", "Ending 2/2"]
+
+];
 
 var checkBoxValues = [0, 0, 0];
 var bigButtonWidths = [0, 0, 0];
@@ -1698,6 +1711,13 @@ function game(){
                                 if ((voxels[p].type === cards[cardSelected - 1][0])) {
                                     if (voxels[p].toBeDestroyed === false) {
                                         voxels[p].type = (cards[cardSelected - 1][1]);
+                                        if(voxels[p].type === 3){
+                                            thingsCreatedForAchievments[0]+=1;
+                                        }else if(voxels[p].type === 5){
+                                            thingsCreatedForAchievments[1]+=1;
+                                        }else if(voxels[p].type === 1){
+                                            thingsCreatedForAchievments[2]+=1;
+                                        }
                                     } else {
                                         voxels[p].type = 0;
                                         voxels[p].toBeDestroyed = false;
@@ -3442,6 +3462,21 @@ function game(){
         }else if(GAMESTATE === "ACHIEVEMENTS"){
 
             ctx.drawImage(backGroundGame, 0, 0, 1920, 1080, 0, 0, WIDTH, HEIGHT);
+
+            for(var t = 0; t < achievments.length; t++){
+                ctx.textAlign = 'center';
+                ctx.font = '15pt Courier New';
+                ctx.fillStyle = 'white';
+                if(achievementStates[t] === 0){
+                    ctx.fillText("???", WIDTH/2 - WIDTH/6, HEIGHT/8 + t*HEIGHT/15);
+                    ctx.fillText("-", WIDTH/2, HEIGHT/8 + t*HEIGHT/15);
+                    ctx.fillText("???", WIDTH/2 + WIDTH/6, HEIGHT/8 + t*HEIGHT/15);
+                }else{
+                    ctx.fillText(achievments[t][0], WIDTH/2 - WIDTH/6, HEIGHT/8 + t*HEIGHT/15);
+                    ctx.fillText("-", WIDTH/2, HEIGHT/8 + t*HEIGHT/15);
+                    ctx.fillText(achievments[t][1], WIDTH/2 + WIDTH/6, HEIGHT/8 + t*HEIGHT/15);
+                }
+            }
 
         }else if(GAMESTATE === "GLOSSARY"){
 
