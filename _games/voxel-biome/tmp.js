@@ -149,6 +149,8 @@ var thingsCreatedForAchievments = [0, 0, 0];
 
 var achievmentBoxY = 0;
 
+var achievementTimer = 0;
+
 var achievments = [
 
     ["Tree Planter!", "Plant 5 Trees"],
@@ -2935,8 +2937,54 @@ function game(){
                 }
             }
         }
-
         ctx.globalAlpha = 1;
+
+        if(thingsCreatedForAchievments[0] >= 5 && achievementStates[0] === 0){
+            achievementStates[0] = 3;
+        }
+
+        var achievement = -1;
+
+        for(var v = 0; v < achievementStates.length; v++){
+            if(achievementStates[v] === 3){
+                achievementTimer = 400;
+                achievementStates[v] = 2;
+            }
+            if(achievementStates[v] === 2 && achievementTimer === 0 && achievmentBoxY <= 0){
+                achievementStates[v] = 1;
+            }
+            if(achievementStates[v] === 2){
+                achievement = v;
+            }
+        }
+
+        if(achievementTimer > 0){
+            achievementTimer--;
+            if(achievmentBoxY < WIDTH/10){
+                achievmentBoxY+=WIDTH/240;
+            }
+        }else{
+            if(achievmentBoxY > 0){
+                achievmentBoxY-=WIDTH/240;
+            }
+        }
+
+        if(achievementTimer > 0){
+            achievementTimer--;
+        }
+
+        ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
+        ctx.fillRect(WIDTH - WIDTH/4, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
+        ctx.fillStyle = 'white';
+        if(achievement !== -1){
+            ctx.font = '15pt Courier New';
+            ctx.textAlign = 'left';
+            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/4 + WIDTH/50, achievmentBoxY - WIDTH/10 + WIDTH/50);
+            ctx.font = '10pt Courier New';
+            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/4 + WIDTH/50, achievmentBoxY - WIDTH/10 + WIDTH/25);
+        }
+
+        achievement = -1;
 
         ctx.fillStyle = "rgb(0, 0, 0)";
         if(blackScreen2Opacity > 0.005){
