@@ -1054,13 +1054,13 @@ if(localStorage.getItem(("tutorialSeen")) === null){
 if(localStorage.getItem(("achievementStates")) === null){
     localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
 }else{
-    levelStates = JSON.parse(localStorage.getItem("achievementStates"));
+    achievementStates = JSON.parse(localStorage.getItem("achievementStates"));
 }
 
 if(localStorage.getItem(("thingsForAchievements")) === null){
     localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
 }else{
-    levelStates = JSON.parse(localStorage.getItem("thingsForAchievements"));
+    thingsCreatedForAchievments = JSON.parse(localStorage.getItem("thingsForAchievements"));
 }
 
 var map = levelZeroGrid;
@@ -2996,14 +2996,14 @@ function game(){
         }
 
         ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
-        ctx.fillRect(WIDTH - WIDTH/4, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
+        ctx.fillRect(WIDTH - WIDTH/2.5, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
         ctx.fillStyle = 'white';
         if(achievement !== -1){
-            ctx.font = '10pt Courier New';
+            ctx.font = '11pt Courier New';
             ctx.textAlign = 'left';
-            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/4 + WIDTH/50, achievmentBoxY - WIDTH/10 + WIDTH/50);
+            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/50);
             ctx.font = '8pt Courier New';
-            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/4 + WIDTH/50, achievmentBoxY - WIDTH/10 + WIDTH/35);
+            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/30);
         }
 
         achievement = -1;
@@ -3734,30 +3734,26 @@ function game(){
             }
         }
 
-        if(stateToTransitionTo !== ""){
-            if(transitionBlackOpacity < 0.98){
-                transitionBlackOpacity += 0.02
-            }else{
-                GAMESTATE = stateToTransitionTo;
-                if(stateToTransitionTo === "GAME"){
-                    PAUSED = false;
-                    loadGame();
-                }else{
-                    PAUSED = true;
-                }
-                stateToTransitionTo = "";
-            }
+    }
+
+    if(stateToTransitionTo !== ""){
+        if(transitionBlackOpacity < 0.98){
+            transitionBlackOpacity += 0.02
         }else{
-            if(transitionBlackOpacity > 0.02){
-                transitionBlackOpacity -= 0.02;
+            GAMESTATE = stateToTransitionTo;
+            if(stateToTransitionTo === "GAME"){
+                PAUSED = false;
+                loadGame();
+            }else{
+                PAUSED = true;
+                gameRunning = false;
             }
+            stateToTransitionTo = "";
         }
-
-        ctx.globalAlpha = transitionBlackOpacity;
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
-        ctx.globalAlpha = 1;
-
+    }else{
+        if(transitionBlackOpacity > 0.02){
+            transitionBlackOpacity -= 0.02;
+        }
     }
 
     if (keys && keys[32]) {
@@ -3808,13 +3804,18 @@ function game(){
                 menuButtonWidths[1]+=8;
             }
             if(thisFrameClicked === true){
-                PAUSED = false;
+                gameRunning = false;
                 stateToTransitionTo = "MENU";
             }
         }else if(menuButtonWidths[1] > 0){
             menuButtonWidths[1]-=6;
         }
     }
+
+    ctx.globalAlpha = transitionBlackOpacity;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.globalAlpha = 1;
 
 
     if(gameRunning === true){
