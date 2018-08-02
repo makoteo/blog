@@ -2990,7 +2990,7 @@ function game(){
         if(achievementTimer > 0){
             achievementTimer--;
         }
-        if(achievementTimer === 1){
+        if(achievementTimer < 10 && achievementTimer > 0){
             localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
             localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
         }
