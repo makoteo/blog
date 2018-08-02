@@ -144,6 +144,11 @@ var secondTimers = [
 
 ];
 
+var achievementStates = [0, 0, 0, 0, 0, 0, 0, 0];
+var thingsCreatedForAchievments = [0, 0, 0];
+
+var achievmentBoxX = 0;
+
 var checkBoxValues = [0, 0, 0];
 var bigButtonWidths = [0, 0, 0];
 var arrowWidths = [0, 0];
@@ -944,7 +949,16 @@ function menuBigButton(level){
             ctx.fillText("(7Y8D1C3M)", this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.07 - (0.3*WIDTH - this.width)/2); //FIX TEXT APPEAR EARLY
         }
 
-        if(this.level !== 0 && !(levelStates[this.level - 1] === 2 || levelStates[this.level - 1] === 3)){
+        if(this.level === 0 || (this.level !== 0 && levelStates[this.level - 1] === 1) || (this.level !== 0 && levelStates[this.level - 1] === 3)){
+            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = '15pt Courier New';
+            ctx.fillText("Level " + this.level, this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.12 - (0.3*WIDTH - this.width)/2);
+            ctx.font = '12pt Courier New';
+            ctx.fillText(levelNames[this.level], this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.095 - (0.3*WIDTH - this.width)/2);
+            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
+        }else{
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.font = '15pt Courier New';
@@ -954,19 +968,10 @@ function menuBigButton(level){
             ctx.font = '40pt Courier New';
             ctx.fillText("?", this.xOffset + WIDTH/2, HEIGHT/2 - HEIGHT*0.4 + (0.18*WIDTH));
             ctx.drawImage(bigButtonGUI, 0, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.1 + this.yOffset - this.width/2, this.width, this.height);
-        }else{
-            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.font = '15pt Courier New';
-            ctx.fillText("Level " + this.level, this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.12 - (0.3*WIDTH - this.width)/2);
-            ctx.font = '12pt Courier New';
-            ctx.fillText(levelNames[this.level], this.xOffset + WIDTH/2, HEIGHT/2 + 0.1*WIDTH - HEIGHT * 0.095 - (0.3*WIDTH - this.width)/2);
-            ctx.drawImage(thumbNails, 400 * this.level, 0, 400, 400, WIDTH/2 + this.xOffset - this.width/2, HEIGHT/2 - HEIGHT*0.5 + (0.18*WIDTH - this.width/2), this.width, this.height);
         }
-        //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
+        //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
 
-        if(levelStates[this.level]=== 2 || levelStates[this.level]=== 3){
+        if(levelStates[this.level] === 1 || levelStates[this.level] === 3){
             ctx.save();
             ctx.fillStyle = 'green';
             if(this.position === 0){
@@ -1448,11 +1453,11 @@ function game(){
 
         if (cardSelected !== 0) {
             if ((animationOffset < 200 && FULLSCREEN === false) || (animationOffset < WIDTH/6 + WIDTH/50 && FULLSCREEN === true)) {
-                animationOffset += 5;
+                animationOffset += WIDTH/240;
             }
         } else if(blackScreen2Opacity < 0.5){
             if (animationOffset > 0) {
-                animationOffset -= 5;
+                animationOffset -= WIDTH/240;
             }
         }
 
@@ -1651,7 +1656,7 @@ function game(){
         var cardHalfWidth = cardWidth / 2;
         var cardHeight = HEIGHT / 3.375;
         var cardOffset = WIDTH / 10;
-        var cardMoveSpeed = 5;
+        var cardMoveSpeed = WIDTH/240;
 
         if (tempMouseTimer2 > 0) {
             tempMouseTimer2--;
@@ -2950,11 +2955,15 @@ function game(){
 
             if(endGameTimer === 300){
                 gameRunning = false;
-                //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
-                if(levelStates[LEVEL] === 2){
+                //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
+                if(levelStates[LEVEL] === 0){
+                    levelStates[LEVEL] = 2;
+                }else if(levelStates[LEVEL] === 1){
                     levelStates[LEVEL] = 3;
-                }else {
-                    levelStates[LEVEL] = 1;
+                }else if(levelStates[LEVEL] === 3){
+                    levelStates[LEVEL] = 3;
+                }else{
+                    levelStates[LEVEL] = 2;
                 }
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
@@ -2973,12 +2982,8 @@ function game(){
 
             if(endGameTimer === 300){
                 gameRunning = false;
-                //0 = Not Played, 1 = Not Passed, 2 = Passed without Loss, 3 = Passed with Loss
-                if(levelStates[LEVEL] === 0){
-                    levelStates[LEVEL] = 2;
-                }else if(levelStates[LEVEL] === 1){
-                    levelStates[LEVEL] = 3;
-                }
+                //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
+                levelStates[LEVEL] = 1;
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
                 GAMESTATE = "WIN";
@@ -3376,9 +3381,11 @@ function game(){
                 arrowWidths[1]-=6;
             }
 
+            //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
+
             if(onClick(WIDTH/2 - levelSelectors[levelSelectorMenuLevelSelected].width/2, HEIGHT/2 - HEIGHT*0.1 + levelSelectors[levelSelectorMenuLevelSelected].yOffset - levelSelectors[levelSelectorMenuLevelSelected].width/2,
                     levelSelectors[levelSelectorMenuLevelSelected].width, levelSelectors[levelSelectorMenuLevelSelected].height) && thisFrameClicked === true){
-                if(levelSelectors[levelSelectorMenuLevelSelected].level === 0 || (levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 2 || levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 3)) {
+                if(levelSelectors[levelSelectorMenuLevelSelected].level === 0 || (levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 1 || (levelStates[levelSelectors[levelSelectorMenuLevelSelected].level - 1] === 3))) {
                     LEVEL = levelSelectorMenuLevelSelected;
 
                     stateToTransitionTo = "GAME";
@@ -3646,7 +3653,7 @@ function game(){
             if(PAUSED === true && tutorialShowing === false){
                 secondTimers[0] = 62;
                 PAUSED = false;
-            }else if(LEVEL !== 0 || (LEVEL === 0 && POINTS >= 1)){
+            }else{
                 PAUSED = true;
             }
             buttonTimers[1] = 20;
@@ -3665,6 +3672,36 @@ function game(){
         ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
         ctx.font = '20pt Courier New';
         ctx.fillText("Paused", WIDTH - WIDTH/30, HEIGHT - HEIGHT / 30);
+
+        ctx.textAlign = 'center';
+
+        ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[0]/2, HEIGHT/2.2, WIDTH/4*0.85 + menuButtonWidths[0], HEIGHT/12*0.85);
+        ctx.fillText("Resume", WIDTH/2, HEIGHT/2.2 + HEIGHT/20);
+
+        ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[1]/2, HEIGHT/2.2 + HEIGHT/8, WIDTH/4*0.85 + menuButtonWidths[1], HEIGHT/12*0.85);
+        ctx.fillText("Back to Menu", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + HEIGHT/8);
+
+        if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[0]/2, HEIGHT/2.2, WIDTH/4*0.85 + menuButtonWidths[0], HEIGHT/12*0.85)){
+            if(menuButtonWidths[0] < 96){
+                menuButtonWidths[0]+=8;
+            }
+            if(thisFrameClicked === true) {
+                PAUSED = false;
+            }
+        }else if(menuButtonWidths[0] > 0){
+            menuButtonWidths[0]-=6;
+        }
+        if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[1]/2, HEIGHT/2.2 + HEIGHT/8, WIDTH/4*0.85 + menuButtonWidths[1], HEIGHT/12*0.85)){
+            if(menuButtonWidths[1] < 96){
+                menuButtonWidths[1]+=8;
+            }
+            if(thisFrameClicked === true){
+                PAUSED = false;
+                stateToTransitionTo = "MENU";
+            }
+        }else if(menuButtonWidths[1] > 0){
+            menuButtonWidths[1]-=6;
+        }
     }
 
 
@@ -3788,7 +3825,7 @@ function game(){
         if(tutorialMouseTimer > 0){
             tutorialMouseTimer--;
         }
-        if(tutorialSeparationTimer > 0){
+        if(tutorialSeparationTimer > 0 && PAUSED === false){
             tutorialSeparationTimer--;
         }
     }
