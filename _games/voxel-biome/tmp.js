@@ -2995,19 +2995,6 @@ function game(){
             localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
         }
 
-        ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
-        ctx.fillRect(WIDTH - WIDTH/2.5, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
-        ctx.fillStyle = 'white';
-        if(achievement !== -1){
-            ctx.font = '11pt Courier New';
-            ctx.textAlign = 'left';
-            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/50);
-            ctx.font = '8pt Courier New';
-            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/30);
-        }
-
-        achievement = -1;
-
         ctx.fillStyle = "rgb(0, 0, 0)";
         if(blackScreen2Opacity > 0.005){
             blackScreen2Opacity -= 0.005;
@@ -3098,10 +3085,25 @@ function game(){
         forestFactories = 0;
         Mountains = 0;
 
+        ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
+        ctx.fillRect(WIDTH - WIDTH/2.5, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
+        ctx.fillStyle = 'white';
+        if(achievement !== -1){
+            ctx.font = '11pt Courier New';
+            ctx.textAlign = 'left';
+            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/50);
+            ctx.font = '8pt Courier New';
+            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/30);
+        }
+
+        achievement = -1;
+
     }else{
 
         if(GAMESTATE === "LOSS" || GAMESTATE === "WIN"){
             menuAnimationTimer++;
+            localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
+            localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
         }
 
         ctx.globalAlpha = blackScreen1Opacity;
