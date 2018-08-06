@@ -2961,40 +2961,6 @@ function game(){
             achievementStates[2] = 3;
         }
 
-        var achievement = -1;
-
-        for(var v = 0; v < achievementStates.length; v++){
-            if(achievementStates[v] === 3){
-                achievementTimer = 400;
-                achievementStates[v] = 2;
-            }
-            if(achievementStates[v] === 2 && achievementTimer === 0 && achievmentBoxY <= 0){
-                achievementStates[v] = 1;
-            }
-            if(achievementStates[v] === 2){
-                achievement = v;
-            }
-        }
-
-        if(achievementTimer > 0){
-            achievementTimer--;
-            if(achievmentBoxY < WIDTH/10){
-                achievmentBoxY+=WIDTH/240;
-            }
-        }else{
-            if(achievmentBoxY > 0){
-                achievmentBoxY-=WIDTH/240;
-            }
-        }
-
-        if(achievementTimer > 0){
-            achievementTimer--;
-        }
-        if(achievementTimer < 10 && achievementTimer > 0){
-            localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
-            localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
-        }
-
         ctx.fillStyle = "rgb(0, 0, 0)";
         if(blackScreen2Opacity > 0.005){
             blackScreen2Opacity -= 0.005;
@@ -3050,6 +3016,13 @@ function game(){
 
         if(winYears[LEVEL] === YEAR && !(POLUTION >= LOSSPOINT)){
             endGameTimer++;
+            if(LEVEL === 5 && achievementStates[3] === 0){
+                achievementStates[3] = 3;
+            }else if(LEVEL === 7 && achievementStates[4] === 0){
+                achievementStates[4] = 3;
+            }else if(LEVEL === 9 && achievementStates[5] === 0){
+                achievementStates[5] = 3;
+            }
             gameEnd = true;
             SAVEGAMESPEED = 1;
             PAUSED = false;
@@ -3059,13 +3032,6 @@ function game(){
 
             if(endGameTimer === 300){
                 gameRunning = false;
-                if(LEVEL === 5 && achievementStates[3] === 0){
-                    achievementStates[3] = 3;
-                }else if(LEVEL === 7 && achievementStates[4] === 0){
-                    achievementStates[4] = 3;
-                }else if(LEVEL === 9 && achievementStates[5] === 0){
-                    achievementStates[5] = 3;
-                }
                 //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
                 levelStates[LEVEL] = 1;
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
@@ -3084,19 +3050,6 @@ function game(){
         desertFactories = 0;
         forestFactories = 0;
         Mountains = 0;
-
-        ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
-        ctx.fillRect(WIDTH - WIDTH/2.5, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
-        ctx.fillStyle = 'white';
-        if(achievement !== -1){
-            ctx.font = '11pt Courier New';
-            ctx.textAlign = 'left';
-            ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/50);
-            ctx.font = '8pt Courier New';
-            ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/30);
-        }
-
-        achievement = -1;
 
     }else{
 
@@ -3737,6 +3690,53 @@ function game(){
         }
 
     }
+
+    var achievement = -1;
+
+    for(var v = 0; v < achievementStates.length; v++){
+        if(achievementStates[v] === 3){
+            achievementTimer = 400;
+            achievementStates[v] = 2;
+        }
+        if(achievementStates[v] === 2 && achievementTimer === 0 && achievmentBoxY <= 0){
+            achievementStates[v] = 1;
+        }
+        if(achievementStates[v] === 2){
+            achievement = v;
+        }
+    }
+
+    if(achievementTimer > 0){
+        achievementTimer--;
+        if(achievmentBoxY < WIDTH/10){
+            achievmentBoxY+=WIDTH/240;
+        }
+    }else{
+        if(achievmentBoxY > 0){
+            achievmentBoxY-=WIDTH/240;
+        }
+    }
+
+    if(achievementTimer > 0){
+        achievementTimer--;
+    }
+    if(achievementTimer < 10 && achievementTimer > 0){
+        localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
+        localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
+    }
+
+    ctx.fillStyle = 'rgba(0, 0, 10, 0.5)';
+    ctx.fillRect(WIDTH - WIDTH/2.5, achievmentBoxY - WIDTH/10, WIDTH/5, HEIGHT/10);
+    ctx.fillStyle = 'white';
+    if(achievement !== -1){
+        ctx.font = '11pt Courier New';
+        ctx.textAlign = 'left';
+        ctx.fillText(achievments[achievement][0], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/50);
+        ctx.font = '8pt Courier New';
+        ctx.fillText(achievments[achievement][1], WIDTH - WIDTH/2.5 + WIDTH/40, achievmentBoxY - WIDTH/10 + WIDTH/30);
+    }
+
+    achievement = -1;
 
     if(stateToTransitionTo !== ""){
         if(transitionBlackOpacity < 0.98){
