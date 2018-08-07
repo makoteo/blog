@@ -683,6 +683,8 @@ function Voxel(x, y, width, height, type){
 
     this.cityProperty = false;
 
+    this.internalTimer2 = -1;
+
     this.battered = false;
 
     if(this.id/mapSideLength !== 0) {
@@ -999,6 +1001,12 @@ function Voxel(x, y, width, height, type){
         }
 
         if(cutSceneSeen === true){
+            this.internalTimer2 = 100;
+        }
+        if(this.internalTimer2 > 0){
+            this.internalTimer2--;
+        }
+        if(this.internalTimer2 === 0){
             this.battered = true;
         }
     }
@@ -1338,6 +1346,7 @@ function reset(){
     polutionPoints = [];
 
     PAUSED = false;
+    TUTORIALPAUSED = false;
 
     GAMESPEED = 1; //DEFAULT 1
     SAVEGAMESPEED = 1;
@@ -3083,6 +3092,8 @@ function game(){
                 GUIOpacity -= 0.005;
             }
 
+            TUTORIALPAUSED = true;
+
             if(endGameTimer === 300){
                 gameRunning = false;
                 //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
@@ -3122,6 +3133,8 @@ function game(){
             if(GUIOpacity > 0.005){
                 GUIOpacity -= 0.005;
             }
+
+            TUTORIALPAUSED = true;
 
             if(endGameTimer === 300){
                 gameRunning = false;
@@ -3790,7 +3803,7 @@ function game(){
                 if(cutScenePage < cutsceneTexts[whichCutscene].length - 1){
                     cutScenePage++;
                 }
-                cutsceneTimer = 50;
+                cutsceneTimer = 100;
             }else if(cutsceneWrittenText[cutScenePage].length < cutsceneTexts[whichCutscene][cutScenePage].length && cutsceneTimer < 1) {
                 cutsceneWrittenText[cutScenePage] += cutsceneTexts[whichCutscene][cutScenePage].charAt(cutsceneWrittenText[cutScenePage].length);
                 cutsceneTimer = 3;
