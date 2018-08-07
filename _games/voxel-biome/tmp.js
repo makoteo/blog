@@ -564,6 +564,7 @@ var cutSceneSeen = false;
 var cutScenePage = 0;
 
 var cutsceneTimer = 0;
+var cutsceneTimer2 = 0;
 
 var tutorialSeen = false;
 var tutorialPage = 0;
@@ -1000,7 +1001,7 @@ function Voxel(x, y, width, height, type){
             this.cityProperty = false;
         }
 
-        if(cutSceneSeen === true){
+        if(cutSceneSeen === true && this.internalTimer2 < 1){
             this.internalTimer2 = 100;
         }
         if(this.internalTimer2 > 0){
@@ -3800,21 +3801,28 @@ function game(){
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             ctx.drawImage(backGroundGame, 0, 0, 1600, 900, 0, 0, WIDTH, HEIGHT);
 
-            if(cutsceneWrittenText[cutScenePage].length === cutsceneTexts[whichCutscene][cutScenePage].length){
+            if(cutsceneWrittenText[cutScenePage].length === cutsceneTexts[whichCutscene][cutScenePage].length && cutsceneTimer === 0){
                 if(cutScenePage < cutsceneTexts[whichCutscene].length - 1){
                     cutScenePage++;
+                    cutsceneTimer2 = 50;
                 }
                 cutsceneTimer = 50;
             }else if(cutsceneWrittenText[cutScenePage].length < cutsceneTexts[whichCutscene][cutScenePage].length && cutsceneTimer < 1) {
                 cutsceneWrittenText[cutScenePage] += cutsceneTexts[whichCutscene][cutScenePage].charAt(cutsceneWrittenText[cutScenePage].length);
                 cutsceneTimer = 3;
+                cutsceneTimer2 = 50;
             }
 
             if(cutsceneTimer > 0){
                 cutsceneTimer--;
             }
+            if(cutsceneTimer2 > 0){
+                cutsceneTimer2--;
+            }
 
-            if((cutsceneTexts[whichCutscene].length === cutScenePage + 1) && cutsceneTimer === 0){
+            console.log(cutsceneTimer2);
+
+            if((cutsceneTexts[whichCutscene].length === cutScenePage + 1) && (cutsceneTimer2 <= 1) && (cutsceneWrittenText[cutScenePage].length === cutsceneTexts[whichCutscene][cutScenePage].length)){
                 cutSceneSeen = true;
                 stateToTransitionTo = "GAME";
                 endGameTimer = 0;
