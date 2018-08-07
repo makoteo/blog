@@ -3166,6 +3166,7 @@ function game(){
     }else{
 
         if(GAMESTATE === "LOSS" || GAMESTATE === "WIN"){
+            cutSceneSeen = false;
             menuAnimationTimer++;
             localStorage.setItem("achievementStates", JSON.stringify(achievementStates));
             localStorage.setItem("thingsForAchievements", JSON.stringify(thingsCreatedForAchievments));
@@ -3803,7 +3804,7 @@ function game(){
                 if(cutScenePage < cutsceneTexts[whichCutscene].length - 1){
                     cutScenePage++;
                 }
-                cutsceneTimer = 100;
+                cutsceneTimer = 50;
             }else if(cutsceneWrittenText[cutScenePage].length < cutsceneTexts[whichCutscene][cutScenePage].length && cutsceneTimer < 1) {
                 cutsceneWrittenText[cutScenePage] += cutsceneTexts[whichCutscene][cutScenePage].charAt(cutsceneWrittenText[cutScenePage].length);
                 cutsceneTimer = 3;
