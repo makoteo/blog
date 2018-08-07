@@ -519,6 +519,43 @@ var tutorial = [
 var tutorialMouseTimer = 0;
 var tutorialSeparationTimer = 0;
 
+var cutscenePlaying = false;
+
+var cutsceneTexts = [
+
+    ["Hi",
+    "Hello",
+    "How are you?",
+    "Fine Thanks"]
+
+];
+var cutsceneWrittenText = [
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+
+];
+
+var whichCutscene = 0;
+
+var cutScenePage = 0;
+
+var cutsceneTimer = 0;
+
 var tutorialSeen = false;
 var tutorialPage = 0;
 var tutorialShowing = false;
@@ -636,6 +673,8 @@ function Voxel(x, y, width, height, type){
     this.turnToCityTerritory = false;
 
     this.cityProperty = false;
+
+    this.battered = false;
 
     if(this.id/mapSideLength !== 0) {
         if(this.id/mapSideLength === 1) {
@@ -802,7 +841,11 @@ function Voxel(x, y, width, height, type){
 
         }else if(this.type === 6) { //TOWN
 
-            ctx.drawImage(voxelsG, 1200, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.battered === false){
+                ctx.drawImage(voxelsG, 1200, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            }else{
+                ctx.drawImage(voxelsG, 0, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
 
         }else if(this.type === 6.1) {
             this.internalTimer = 0; //---------------------------------------- REMEMBER TO MOVE THIS LINE ALONG...
@@ -817,12 +860,16 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.battered === false){
+                ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
-            ctx.globalAlpha = this.opac1;
-            ctx.drawImage(voxelsG, 1200, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+                ctx.globalAlpha = this.opac1;
+                ctx.drawImage(voxelsG, 1200, 800, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
-            ctx.globalAlpha = 1;
+                ctx.globalAlpha = 1;
+            }else{
+                ctx.drawImage(voxelsG, 300, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
 
         }
 
@@ -1063,6 +1110,9 @@ if(localStorage.getItem(("thingsForAchievements")) === null){
     thingsCreatedForAchievments = JSON.parse(localStorage.getItem("thingsForAchievements"));
 }
 
+cutscenePlaying = false;
+GAMESTATE = "CUTSCENE";
+
 var map = levelZeroGrid;
 if (LEVEL === 0) {
     map = levelZeroGrid;
@@ -1302,6 +1352,31 @@ function reset(){
     startTimer = 0;
 
     gameEnd = false;
+
+    cutsceneWrittenText = [
+
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+
+    ];
+
+    cutScenePage = 0;
+
+    cutsceneTimer = 0;
 
     winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
 
@@ -3626,7 +3701,7 @@ function game(){
 
         }
 
-        if(GAMESTATE !== "GAME" && GAMESTATE !== "LOSS" && GAMESTATE !== "WIN" && GAMESTATE !== "MENU" && GAMESTATE !== "BLOCK GLOSSARY" && GAMESTATE !== "CARD GLOSSARY"){
+        if(GAMESTATE !== "GAME" && GAMESTATE !== "LOSS" && GAMESTATE !== "WIN" && GAMESTATE !== "MENU" && GAMESTATE !== "BLOCK GLOSSARY" && GAMESTATE !== "CARD GLOSSARY" && GAMESTATE !== "CUTSCENE"){
             if(onClick(WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + 3 * (HEIGHT/8), (WIDTH/4)*0.85 + menuButtonWidths[3], HEIGHT/12*0.85)){
                 if(menuButtonWidths[3] < 96){
                     menuButtonWidths[3]+=8;
@@ -3680,6 +3755,40 @@ function game(){
 
             ctx.drawImage(buttonGUI, 0, 0, 400, 75, WIDTH/2 - (WIDTH/8*0.85) - menuButtonWidths[3]/2, HEIGHT/2.2 + (HEIGHT/8)*3  + HEIGHT/24, WIDTH/4*0.85 + menuButtonWidths[3], HEIGHT/12*0.85);
             ctx.fillText("Levels", WIDTH/2, HEIGHT/2.2 + HEIGHT/20 + (HEIGHT/8)*3 + HEIGHT/24);
+
+        }else if(GAMESTATE === "CUTSCENE"){
+
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            if(cutsceneWrittenText[cutScenePage].length === cutsceneTexts[0][cutScenePage].length){
+                if(cutScenePage < cutsceneTexts[whichCutscene].length - 1){
+                    cutScenePage++;
+                }
+                cutsceneTimer = 50;
+            }else if(cutsceneWrittenText[cutScenePage].length < cutsceneTexts[whichCutscene][cutScenePage].length && cutsceneTimer < 1) {
+                cutsceneWrittenText[cutScenePage] += cutsceneTexts[whichCutscene][cutScenePage].charAt(cutsceneWrittenText[cutScenePage].length);
+                cutsceneTimer = 3;
+            }
+
+            if(cutsceneTimer > 0){
+                cutsceneTimer--;
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.font = '15pt Courier New';
+            ctx.textAlign = 'left';
+            ctx.fillText(cutsceneWrittenText[0], WIDTH/15, HEIGHT/20);
+            ctx.textAlign = 'right';
+            ctx.fillText(cutsceneWrittenText[1], WIDTH - WIDTH/15, HEIGHT/20 + HEIGHT/15);
+            ctx.textAlign = 'left';
+            ctx.fillText(cutsceneWrittenText[2], WIDTH/15, HEIGHT/20 + 2*HEIGHT/15);
+            ctx.textAlign = 'right';
+            ctx.fillText(cutsceneWrittenText[3], WIDTH - WIDTH/15, HEIGHT/20 + 3*HEIGHT/15);
+            ctx.textAlign = 'left';
+            ctx.fillText(cutsceneWrittenText[4], WIDTH/15, HEIGHT/20 + 4*HEIGHT/15);
+            ctx.textAlign = 'right';
+            ctx.fillText(cutsceneWrittenText[5], WIDTH - WIDTH/15, HEIGHT/20 + 5*HEIGHT/15);
 
         }
 
