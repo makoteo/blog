@@ -102,7 +102,7 @@ var startTimer = 0;
 var gameEnd = false;
 
 var winYears = [3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5];
-var speedUpLimits = [2, 2, 2, 3, 3, 3, 4, 4, 4, 4];
+var speedUpLimits = [2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4];
 
 var blackScreen1Opacity = 0;
 var blackScreen2Opacity = 1;
@@ -519,14 +519,21 @@ var tutorial = [
 var tutorialMouseTimer = 0;
 var tutorialSeparationTimer = 0;
 
-var cutscenePlaying = false;
-
 var cutsceneTexts = [
 
-    ["Hi",
-    "Hello",
-    "How are you?",
-    "Fine Thanks"]
+    ["What the heck is going on?!",
+    "I don't know! Mother Nature seems to be turning on us...",
+    "Is it even possible that we'll get off this dumb polluted planet?",
+    "... No ...",
+    "WAIT WHAT?!",
+    "Well... All our labs have been destroyed...",
+    "So there's no rockets?",
+    "No... Humanity is... doomed...",
+    "..."],
+
+    ["Phew... Mother Nature has been quite hectic for the past few months.",
+    "Then again, it gained us some time. Plus, we still built the rockets, right?",
+    "Yup, we're getting off this polluted planet."]
 
 ];
 var cutsceneWrittenText = [
@@ -551,6 +558,8 @@ var cutsceneWrittenText = [
 ];
 
 var whichCutscene = 0;
+
+var cutSceneSeen = false;
 
 var cutScenePage = 0;
 
@@ -988,6 +997,10 @@ function Voxel(x, y, width, height, type){
         if(this.type === 0 || this.type === 5){
             this.cityProperty = false;
         }
+
+        if(cutSceneSeen === true){
+            this.battered = true;
+        }
     }
 }
 
@@ -1109,9 +1122,6 @@ if(localStorage.getItem(("thingsForAchievements")) === null){
 }else{
     thingsCreatedForAchievments = JSON.parse(localStorage.getItem("thingsForAchievements"));
 }
-
-cutscenePlaying = false;
-GAMESTATE = "CUTSCENE";
 
 var map = levelZeroGrid;
 if (LEVEL === 0) {
@@ -1373,6 +1383,8 @@ function reset(){
         ""
 
     ];
+
+    cutSceneSeen = false;
 
     cutScenePage = 0;
 
@@ -3085,7 +3097,13 @@ function game(){
                 }
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
-                GAMESTATE = "LOSS";
+                if(LEVEL === 10 && cutSceneSeen === false){
+                    whichCutscene = 1;
+                    stateToTransitionTo = "CUTSCENE";
+                    cutsceneTimer = 150;
+                }else{
+                    GAMESTATE = "LOSS";
+                }
             }
         }
 
@@ -3111,7 +3129,13 @@ function game(){
                 levelStates[LEVEL] = 1;
                 localStorage.setItem("levelStates", JSON.stringify(levelStates));
                 localStorage.setItem("tutorialSeen", JSON.stringify(tutorialSeen));
-                GAMESTATE = "WIN";
+                if(LEVEL === 10 && cutSceneSeen === false){
+                    whichCutscene = 0;
+                    stateToTransitionTo = "CUTSCENE";
+                    cutsceneTimer = 150;
+                }else{
+                    GAMESTATE = "WIN";
+                }
             }
         }
 
@@ -3760,8 +3784,9 @@ function game(){
 
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.drawImage(backGroundGame, 0, 0, 1600, 900, 0, 0, WIDTH, HEIGHT);
 
-            if(cutsceneWrittenText[cutScenePage].length === cutsceneTexts[0][cutScenePage].length){
+            if(cutsceneWrittenText[cutScenePage].length === cutsceneTexts[whichCutscene][cutScenePage].length){
                 if(cutScenePage < cutsceneTexts[whichCutscene].length - 1){
                     cutScenePage++;
                 }
@@ -3775,20 +3800,32 @@ function game(){
                 cutsceneTimer--;
             }
 
+            if((cutsceneTexts[whichCutscene].length === cutScenePage + 1) && cutsceneTimer === 0){
+                cutSceneSeen = true;
+                stateToTransitionTo = "GAME";
+                endGameTimer = 0;
+            }
+
             ctx.fillStyle = 'white';
             ctx.font = '15pt Courier New';
             ctx.textAlign = 'left';
-            ctx.fillText(cutsceneWrittenText[0], WIDTH/15, HEIGHT/20);
-            ctx.textAlign = 'right';
-            ctx.fillText(cutsceneWrittenText[1], WIDTH - WIDTH/15, HEIGHT/20 + HEIGHT/15);
-            ctx.textAlign = 'left';
-            ctx.fillText(cutsceneWrittenText[2], WIDTH/15, HEIGHT/20 + 2*HEIGHT/15);
-            ctx.textAlign = 'right';
-            ctx.fillText(cutsceneWrittenText[3], WIDTH - WIDTH/15, HEIGHT/20 + 3*HEIGHT/15);
-            ctx.textAlign = 'left';
-            ctx.fillText(cutsceneWrittenText[4], WIDTH/15, HEIGHT/20 + 4*HEIGHT/15);
-            ctx.textAlign = 'right';
-            ctx.fillText(cutsceneWrittenText[5], WIDTH - WIDTH/15, HEIGHT/20 + 5*HEIGHT/15);
+            ctx.fillText(cutsceneWrittenText[0], WIDTH/15, HEIGHT/5);
+            ctx.fillStyle = 'gray';
+            ctx.fillText(cutsceneWrittenText[1], WIDTH/8, HEIGHT/5 + HEIGHT/15);
+            ctx.fillStyle = 'white';
+            ctx.fillText(cutsceneWrittenText[2], WIDTH/15, HEIGHT/5 + 2*HEIGHT/15);
+            ctx.fillStyle = 'gray';
+            ctx.fillText(cutsceneWrittenText[3], WIDTH/8, HEIGHT/5 + 3*HEIGHT/15);
+            ctx.fillStyle = 'white';
+            ctx.fillText(cutsceneWrittenText[4], WIDTH/15, HEIGHT/5 + 4*HEIGHT/15);
+            ctx.fillStyle = 'gray';
+            ctx.fillText(cutsceneWrittenText[5], WIDTH/8, HEIGHT/5 + 5*HEIGHT/15);
+            ctx.fillStyle = 'white';
+            ctx.fillText(cutsceneWrittenText[6], WIDTH/15, HEIGHT/5 + 6*HEIGHT/15);
+            ctx.fillStyle = 'gray';
+            ctx.fillText(cutsceneWrittenText[7], WIDTH/8, HEIGHT/5 + 7*HEIGHT/15);
+            ctx.fillStyle = 'white';
+            ctx.fillText(cutsceneWrittenText[8], WIDTH/15, HEIGHT/5 + 8*HEIGHT/15);
 
         }
 
@@ -3852,7 +3889,7 @@ function game(){
             transitionBlackOpacity += 0.02
         }else{
             GAMESTATE = stateToTransitionTo;
-            if(stateToTransitionTo === "GAME"){
+            if(stateToTransitionTo === "GAME" && cutSceneSeen !== true){
                 PAUSED = false;
                 loadGame();
             }else{
