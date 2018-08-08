@@ -688,6 +688,8 @@ function Voxel(x, y, width, height, type){
 
     this.battered = false;
 
+    this.rocketPos = 0;
+
     if(this.id/mapSideLength !== 0) {
         if(this.id/mapSideLength === 1) {
             gridRoll[Math.ceil(this.id / (mapSideLength) + 1)].push(this.id);
@@ -706,9 +708,14 @@ function Voxel(x, y, width, height, type){
 
     this.randomChance = Math.random();
 
+    this.rocketRandom = Math.random();
+
     this.opac1 = 1;
     this.opac2 = 0;
     this.opac3 = 0;
+
+    this.randomDepart = Math.random()*100;
+    this.rocketAccel = WIDTH/600;
 
     this.falling = false;
     this.typeToChangeTo = 0;
@@ -853,10 +860,14 @@ function Voxel(x, y, width, height, type){
 
         }else if(this.type === 6) { //TOWN
 
-            if(this.battered === false){
+            if(this.battered === false || this.rocketRandom >= 0.7 && this.battered === true){
                 ctx.drawImage(voxelsG, 1200, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
             }else{
                 ctx.drawImage(voxelsG, 0, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
+
+            if(whichCutscene === 1 && this.rocketRandom >= 0.7 && this.randomDepart <=1){
+                ctx.drawImage(voxelsG, 602, 1200, 298, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
             }
 
         }else if(this.type === 6.1) {
@@ -872,7 +883,7 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            if(this.battered === false){
+            if(this.battered === false || this.rocketRandom >= 0.7 && this.battered === true){
                 ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
                 ctx.globalAlpha = this.opac1;
@@ -881,6 +892,10 @@ function Voxel(x, y, width, height, type){
                 ctx.globalAlpha = 1;
             }else{
                 ctx.drawImage(voxelsG, 300, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
+
+            if(whichCutscene === 1 && this.rocketRandom >= 0.7 && this.randomDepart <=1){
+                ctx.drawImage(voxelsG, 602, 1200, 298, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
             }
 
         }
@@ -1009,6 +1024,17 @@ function Voxel(x, y, width, height, type){
         }
         if(this.internalTimer2 === 0){
             this.battered = true;
+        }
+        if(this.battered === true){
+            if(this.randomDepart <= 1) {
+                this.rocketPos +=  this.rocketAccel;
+            }
+            if(this.rocketAccel > 0){
+                this.rocketAccel -= WIDTH/120000;
+            }
+            if(this.randomDepart > 1){
+                this.randomDepart--;
+            }
         }
     }
 }
@@ -3095,7 +3121,7 @@ function game(){
 
             TUTORIALPAUSED = true;
 
-            if(endGameTimer === 300){
+            if(endGameTimer === 350){
                 gameRunning = false;
                 //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
                 if(levelStates[LEVEL] === 0){
@@ -3137,7 +3163,7 @@ function game(){
 
             TUTORIALPAUSED = true;
 
-            if(endGameTimer === 300){
+            if(endGameTimer === 350){
                 gameRunning = false;
                 //0 = Not Played, 1 = Recently Passed, 2 = Lost (Not passed yet), 3 = Recently Lost (But passed at least once),
                 levelStates[LEVEL] = 1;
@@ -3819,8 +3845,6 @@ function game(){
             if(cutsceneTimer2 > 0){
                 cutsceneTimer2--;
             }
-
-            console.log(cutsceneTimer2);
 
             if((cutsceneTexts[whichCutscene].length === cutScenePage + 1) && (cutsceneTimer2 <= 1) && (cutsceneWrittenText[cutScenePage].length === cutsceneTexts[whichCutscene][cutScenePage].length)){
                 cutSceneSeen = true;
