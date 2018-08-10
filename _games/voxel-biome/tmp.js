@@ -714,7 +714,7 @@ function Voxel(x, y, width, height, type){
     this.opac2 = 0;
     this.opac3 = 0;
 
-    this.randomDepart = Math.random()*100;
+    this.randomDepart = Math.random()*100 + 1;
     this.rocketAccel = WIDTH/600;
 
     this.falling = false;
@@ -791,7 +791,22 @@ function Voxel(x, y, width, height, type){
 
         }else if(this.type === 2.1) { //SEA
 
-            ctx.drawImage(voxelsG, 300, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.battered === false){
+                ctx.drawImage(voxelsG, 300, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            }else{
+                if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall" ) {
+                    if(this.opac1 > 0.05){
+                        this.opac1 -= 0.05;
+                    }
+                }
+
+                ctx.drawImage(voxelsG, 300, 1, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+
+                ctx.globalAlpha = this.opac1;
+                ctx.drawImage(voxelsG, 300, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+
+                ctx.globalAlpha = 1;
+            }
 
         }else if(this.type === 3) { //FOREST
 
@@ -829,7 +844,11 @@ function Voxel(x, y, width, height, type){
             ctx.globalAlpha = 1;
 
         }else if(this.type === 3.1) { // FOREST FACTORY
-            ctx.drawImage(voxelsG, 600, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.battered === false){
+                ctx.drawImage(voxelsG, 600, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            }else{
+                ctx.drawImage(voxelsG, 300, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
         }else if(this.type === 4) { //DESERT
 
             if(SEASON === "Spring" || SEASON === "Summer" || SEASON === "Fall" ) {
@@ -853,21 +872,25 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 1500, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
         }else if(this.type === 4.1) { //DESERT
-            ctx.drawImage(voxelsG, 900, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            if(this.battered === false){
+                ctx.drawImage(voxelsG, 900, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
+            }else{
+                ctx.drawImage(voxelsG, 0, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
+            }
         }else if(this.type === 5) { //MOUNTAIN
 
             ctx.drawImage(voxelsG, 1500, 801, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
 
         }else if(this.type === 6) { //TOWN
 
-            if(this.battered === false || this.rocketRandom >= 0.7 && this.battered === true){
+            if((this.battered === false || (this.rocketRandom >= 0.5 && this.battered === true && whichCutscene === 1))){
                 ctx.drawImage(voxelsG, 1200, 401, 298, 399, this.x - width / 2, this.y - height / 2, width, height);
             }else{
                 ctx.drawImage(voxelsG, 0, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
-            if(whichCutscene === 1 && this.rocketRandom >= 0.7 && this.randomDepart <=1){
-                ctx.drawImage(voxelsG, 602, 1200, 298, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
+            if(whichCutscene === 1 && this.rocketRandom >= 0.5 && this.randomDepart <=1){
+                ctx.drawImage(voxelsG, 605, 1200, 295, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
             }
 
         }else if(this.type === 6.1) {
@@ -883,7 +906,7 @@ function Voxel(x, y, width, height, type){
                 }
             }
 
-            if(this.battered === false || this.rocketRandom >= 0.7 && this.battered === true){
+            if((this.battered === false || (this.rocketRandom >= 0.5 && this.battered === true && whichCutscene === 1))){
                 ctx.drawImage(voxelsG, 1200, 0, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
 
                 ctx.globalAlpha = this.opac1;
@@ -894,8 +917,8 @@ function Voxel(x, y, width, height, type){
                 ctx.drawImage(voxelsG, 300, 1200, 298, 400, this.x - width / 2, this.y - height / 2, width, height);
             }
 
-            if(whichCutscene === 1 && this.rocketRandom >= 0.7 && this.randomDepart <=1){
-                ctx.drawImage(voxelsG, 602, 1200, 298, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
+            if(whichCutscene === 1 && this.rocketRandom >= 0.5 && this.randomDepart <= 1){
+                ctx.drawImage(voxelsG, 605, 1200, 295, 400, this.x - width / 2, this.y - height / 2 - this.rocketPos, width, height);
             }
 
         }
@@ -1017,7 +1040,7 @@ function Voxel(x, y, width, height, type){
         }
 
         if(cutSceneSeen === true && this.internalTimer2 < 1){
-            this.internalTimer2 = 100;
+            this.internalTimer2 = 150;
         }
         if(this.internalTimer2 > 0){
             this.internalTimer2--;
