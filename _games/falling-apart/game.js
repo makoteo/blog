@@ -71,24 +71,50 @@ function Player(x, y, type){
     this.movingRight = false;
     this.update = function(){
 
+        this.tilePosX = Math.floor((this.x - this.width - xOffset + tileSize/2)/tileSize);
+        this.tilePosXRem = (this.x - this.width - xOffset + tileSize/2) % tileSize;
+
+        this.tilePosY = Math.floor((this.y - this.height - yOffset + tileSize/2)/tileSize);
+        this.tilePosYRem = (this.y - this.height - yOffset + tileSize/2) % tileSize;
+
         //COLLISION CHECK
         if(this.tilePosY > 0) {
             if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
-                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2) ||
-                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2)){
-                if(this.tilePosYRem < this.height/2 && this.tilePosXRem){
+                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
+                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
+                if(this.tilePosYRem < this.height/2){
                     this.movingUp = false;
                 }
             }
         }
         if(this.tilePosY < map.length) {
-            if(map[this.tilePosY + 1][this.tilePosX] === 1){
+            if(map[this.tilePosY + 1][this.tilePosX] === 1 ||
+                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
+                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
                 if(this.tilePosYRem > tileSize - this.height/2){
                     this.movingDown = false;
                 }
             }
         }
 
+        if(this.tilePosX > 0) {
+            if((map[this.tilePosY][this.tilePosX - 1] === 1) ||
+                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/2.5) ||
+                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
+                if(this.tilePosXRem < this.height/2){
+                    this.movingLeft = false;
+                }
+            }
+        }
+        if(this.tilePosX < map[0].length) {
+            if(map[this.tilePosY][this.tilePosX + 1] === 1 ||
+                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosYRem < this.width/2.5) ||
+                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
+                if(this.tilePosXRem > tileSize - this.height/2){
+                    this.movingRight = false;
+                }
+            }
+        }
 
         if(this.movingUp){
             this.y-= this.speed;
@@ -102,12 +128,6 @@ function Player(x, y, type){
         if(this.movingLeft){
             this.x-= this.speed;
         }
-
-        this.tilePosX = Math.floor((this.x - this.width - xOffset + tileSize/2)/tileSize);
-        this.tilePosXRem = (this.x - this.width - xOffset + tileSize/2) % tileSize;
-
-        this.tilePosY = Math.floor((this.y - this.height - yOffset + tileSize/2)/tileSize);
-        this.tilePosYRem = (this.y - this.height - yOffset + tileSize/2) % tileSize;
 
         console.log(this.tilePosX + " - " + this.tilePosXRem);
         console.log(this.tilePosY + " - " + this.tilePosYRem);
@@ -141,6 +161,8 @@ function game(){
     }
     for(var i = 0; i < players.length; i++) {
         //if(players[i].type === 0){
+        players[i].update();
+        players[i].draw();
             if(keys && keys[37]){
                 players[i].movingLeft = true;
             }else{
@@ -162,8 +184,6 @@ function game(){
                 players[i].movingDown = false;
             }
         //}
-        players[i].draw();
-        players[i].update();
     }
 }
 
