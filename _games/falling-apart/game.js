@@ -4,16 +4,17 @@ var WIDTH = 1200;
 var HEIGHT = 675;
 
 var map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 2, 1],
-    [1, 0, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 2, 1, 1, 1, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
 var tileSize;
@@ -86,27 +87,29 @@ function Player(x, y, type){
         //COLLISION CHECK
         if(this.tilePosY > 0) {
             if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
-                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
-                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
+                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/3) ||
+                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/3)){
                 if(this.tilePosYRem < this.height/2){
                     this.movingUp = false;
+                    //this.y -= this.tilePosYRem - this.height/2;
                 }
             }
         }
         if(this.tilePosY < map.length) {
             if(map[this.tilePosY + 1][this.tilePosX] === 1 ||
-                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
-                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
+                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/3) ||
+                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/3)){
                 if(this.tilePosYRem > tileSize - this.height/2){
                     this.movingDown = false;
+                    //this.y -= this.tilePosYRem - (tileSize - this.height/2);
                 }
             }
         }
 
         if(this.tilePosX > 0) {
             if((map[this.tilePosY][this.tilePosX - 1] === 1) ||
-                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/2.5) ||
-                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
+                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/3) ||
+                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/3)){
                 if(this.tilePosXRem < this.width/2){
                     this.movingLeft = false;
                 }
@@ -115,9 +118,9 @@ function Player(x, y, type){
 
         if(this.tilePosX < map[0].length) {
             if(map[this.tilePosY][this.tilePosX + 1] === 1 ||
-                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosYRem < this.width/2.5) ||
-                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
-                if(this.tilePosXRem > tileSize - this.height/2){
+                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosYRem < this.width/3) ||
+                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosYRem > tileSize - this.width/3)){
+                if(this.tilePosXRem > tileSize - this.width/2){
                     this.movingRight = false;
                 }
             }
@@ -239,8 +242,8 @@ function Bullet(x, y, orientation){
 }
 
 //CREATE TILES
-for(var i = 0; i < map.length; i++){
-    for(var j = 0; j < map[0].length; j++){
+for(var i = 0; i < map[0].length; i++){
+    for(var j = 0; j < map.length; j++){
         if(map[j][i] === 0){
             tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, 0));
         }else if(map[j][i] === 1) {
