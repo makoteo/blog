@@ -20,6 +20,7 @@ var tileSize;
 
 var tiles = [];
 var players = [];
+var bullets = [];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
@@ -54,8 +55,8 @@ function Player(x, y, type){
     this.x = x;
     this.y = y;
 
-    this.width = 30;
-    this.height = 30;
+    this.width = Math.round(tileSize/2);
+    this.height = Math.round(tileSize/2);
 
     this.tilePosX = 0;
     this.tilePosY = 0;
@@ -63,12 +64,17 @@ function Player(x, y, type){
     this.tilePosXRem = 0;
     this.tilePosYRem = 0;
 
-    this.speed = 3;
+    this.speed = Math.round(tileSize/20);
     this.type = type;
     this.movingUp = false;
     this.movingDown = false;
     this.movingLeft = false;
     this.movingRight = false;
+
+    this.reload = 0;
+
+    this.orientation = 0;
+
     this.update = function(){
 
         this.tilePosX = Math.floor((this.x - this.width - xOffset + tileSize/2)/tileSize);
@@ -82,7 +88,7 @@ function Player(x, y, type){
             if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
                 ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
                 ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
-                if(this.tilePosYRem < this.height/1.8){
+                if(this.tilePosYRem < this.height/2){
                     this.movingUp = false;
                 }
             }
@@ -101,11 +107,12 @@ function Player(x, y, type){
             if((map[this.tilePosY][this.tilePosX - 1] === 1) ||
                 ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/2.5) ||
                 ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
-                if(this.tilePosXRem < this.height/1.8){
+                if(this.tilePosXRem < this.width/2){
                     this.movingLeft = false;
                 }
             }
         }
+
         if(this.tilePosX < map[0].length) {
             if(map[this.tilePosY][this.tilePosX + 1] === 1 ||
                 ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosYRem < this.width/2.5) ||
@@ -114,6 +121,31 @@ function Player(x, y, type){
                     this.movingRight = false;
                 }
             }
+        }
+
+        if(this.movingUp){
+            this.orientation = 0;
+        }
+        else if(this.movingRight){
+            this.orientation = 2;
+        }
+        else if(this.movingDown){
+            this.orientation = 4;
+        }
+        else if(this.movingLeft){
+            this.orientation = 6;
+        }
+        if(this.movingUp && this.movingRight){
+            this.orientation = 1;
+        }
+        else if(this.movingRight && this.movingDown){
+            this.orientation = 3;
+        }
+        else if(this.movingDown && this.movingLeft){
+            this.orientation = 5;
+        }
+        else if(this.movingLeft && this.movingUp){
+            this.orientation = 9;
         }
 
         if(this.movingUp){
@@ -129,13 +161,80 @@ function Player(x, y, type){
             this.x-= this.speed;
         }
 
-        console.log(this.tilePosX + " - " + this.tilePosXRem);
-        console.log(this.tilePosY + " - " + this.tilePosYRem);
+        if(this.reload > 0){
+            this.reload--;
+        }
 
     }
     this.draw = function() {
         ctx.fillStyle = 'red';
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, 30, 30);
+        ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+    }
+    this.spawnBullet = function(){
+        if(this.reload === 0) {
+            bullets.push(new Bullet(this.x, this.y, this.orientation));
+            this.reload = 10;
+        }
+    }
+}
+
+function Bullet(x, y, orientation){
+    this.x = x;
+    this.y = y;
+
+    this.width = Math.round(tileSize/10);
+    this.height = Math.round(tileSize/10);
+
+    this.speed = Math.round(tileSize/10);
+
+    this.colliding = false;
+
+    this.orientation = orientation;
+    this.velX = 0;
+    this.velY = 0;
+
+    if(this.orientation === 0){
+        this.velX = 0;
+        this.velY = -this.speed;
+    }else if(this.orientation === 1){
+        this.velX = this.speed;
+        this.velY = -this.speed;
+    }else if(this.orientation === 2){
+        this.velX = this.speed;
+        this.velY = 0;
+    }else if(this.orientation === 3){
+        this.velX = this.speed;
+        this.velY = this.speed;
+    }else if(this.orientation === 4){
+        this.velX = 0;
+        this.velY = this.speed;
+    }else if(this.orientation === 5){
+        this.velX = -this.speed;
+        this.velY = this.speed;
+    }else if(this.orientation === 6){
+        this.velX = -this.speed;
+        this.velY = 0;
+    }else{
+        this.velX = -this.speed;
+        this.velY = -this.speed;
+    }
+
+    this.update = function(){
+        this.x += this.velX;
+        this.y += this.velY;
+
+        this.tilePosX = Math.floor((this.x - xOffset)/tileSize);
+        this.tilePosY = Math.floor((this.y - yOffset)/tileSize);
+
+        //COLLISION CHECK
+        if(map[this.tilePosY][this.tilePosX] === 1){
+            this.colliding = true;
+        }
+
+    }
+    this.draw = function(){
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
 
@@ -156,13 +255,15 @@ function game(){
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < tiles.length; i++){
-        tiles[i].update();
-        tiles[i].draw();
+        if(tiles[i].type !== 1){
+            tiles[i].update();
+            tiles[i].draw();
+        }
     }
     for(var i = 0; i < players.length; i++) {
-        //if(players[i].type === 0){
         players[i].update();
         players[i].draw();
+        if(players[i].type === 0){
             if(keys && keys[37]){
                 players[i].movingLeft = true;
             }else{
@@ -183,7 +284,24 @@ function game(){
             }else{
                 players[i].movingDown = false;
             }
-        //}
+            if(keys && keys[77]){
+                players[i].spawnBullet();
+            }
+        }
+    }
+
+    for(var i = 0; i < bullets.length; i++){
+        bullets[i].update();
+        bullets[i].draw();
+        if(bullets[i].colliding || bullets[i].x < 0 || bullets[i].y < 0 || bullets[i].x > WIDTH || bullets[i].y > HEIGHT){
+            bullets.splice(i, 1);
+        }
+    }
+    for(var i = 0; i < tiles.length; i++){
+        if(tiles[i].type === 1){
+            tiles[i].update();
+            tiles[i].draw();
+        }
     }
 }
 
