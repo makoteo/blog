@@ -82,7 +82,7 @@ function Player(x, y, type){
             if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
                 ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2.5) ||
                 ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2.5)){
-                if(this.tilePosYRem < this.height/2){
+                if(this.tilePosYRem < this.height/1.8){
                     this.movingUp = false;
                 }
             }
@@ -101,7 +101,7 @@ function Player(x, y, type){
             if((map[this.tilePosY][this.tilePosX - 1] === 1) ||
                 ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/2.5) ||
                 ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/2.5)){
-                if(this.tilePosXRem < this.height/2){
+                if(this.tilePosXRem < this.height/1.8){
                     this.movingLeft = false;
                 }
             }

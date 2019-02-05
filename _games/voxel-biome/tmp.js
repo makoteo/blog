@@ -3551,7 +3551,7 @@ function game(){
             ctx.fillText("All rights reserved", WIDTH/20, HEIGHT - HEIGHT/45);
             ctx.textAlign = 'right';
             ctx.font = '15pt Courier New';
-            ctx.fillText("1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
+            ctx.fillText("Alpha 1.7.3", WIDTH - WIDTH/60, HEIGHT - HEIGHT/45);
 
             thisFrameClicked = false;
         }else if(GAMESTATE === "LEVEL PICK"){
