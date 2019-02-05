@@ -73,8 +73,10 @@ function Player(x, y, type){
 
         //COLLISION CHECK
         if(this.tilePosY > 0) {
-            if(map[this.tilePosY - 1][this.tilePosX] === 1){
-                if(this.tilePosYRem < this.height/2){
+            if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
+                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/2) ||
+                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/2)){
+                if(this.tilePosYRem < this.height/2 && this.tilePosXRem){
                     this.movingUp = false;
                 }
             }
@@ -86,6 +88,7 @@ function Player(x, y, type){
                 }
             }
         }
+
 
         if(this.movingUp){
             this.y-= this.speed;
