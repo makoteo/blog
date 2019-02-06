@@ -12,7 +12,7 @@ var map = [
     [10, 12, 12, 12, 12, 12, 12, 10, 10, 10, 10, 10, 10, 11, 10],
     [10, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 10],
     [10, 12, 12, 12, 12, 12, 12, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    [10, 10, 10, 10, 27, 10, 10, 10, 10, 10, 10, 27, 10, 10, 10]
 ];
 
 /*
@@ -60,8 +60,7 @@ function Tile(x, y, width, height, type){
 
     if(this.type === wallType || this.type === 27){
         if((this.y - yOffset)/tileSize + 1 !== map.length){
-            if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === wallType ||
-                map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 27){
+            if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === wallType){
                 this.wallIntersect = true;
             }
         }
@@ -98,13 +97,12 @@ function Tile(x, y, width, height, type){
                 ctx.drawImage(tileMap, 0, 32, 64, 32, this.x, this.y, this.width, this.height/2);
             }else if((this.x - xOffset - tileSize/2)/tileSize === 0){
                 ctx.drawImage(tileMap, 32, 0, 32, 64, this.x, this.y - this.height/2, this.width/2, this.height);
-            }else if((this.y - yOffset - tileSize/2)/tileSize === map.length){
-                ctx.drawImage(tileMap, 0, 0, 64, 32, this.x, this.y, this.width, this.height/2);
-            }else if((this.x - xOffset - tileSize/2)/tileSize === map[0].length){
-                console.log("CHECK");
-                ctx.drawImage(tileMap, 0, 0, 32, 64, this.x + this.width, this.y - this.height, this.width/2, this.height);
+            }else if((this.y - yOffset - tileSize/2)/tileSize === map.length - 2){
+                ctx.drawImage(tileMap, 0, 0, 64, 32, this.x, this.y+this.height/2, this.width, this.height/2);
+            }else if((this.x - xOffset - tileSize/2)/tileSize === map[0].length - 2){
+                ctx.drawImage(tileMap, 0, 0, 32, 64, this.x + this.width/2, this.y - this.height/2, this.width/2, this.height);
             }else{
-                //ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y, this.width, this.height);
+                ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y - height/2, this.width, this.height);
             }
         }
     }
