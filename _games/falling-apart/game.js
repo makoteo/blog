@@ -4,18 +4,36 @@ var WIDTH = 1200;
 var HEIGHT = 675;
 
 var map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [10, 10, 27, 10, 10, 10, 10, 10, 10, 10, 10, 27, 10, 10, 10],
+    [27, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 27],
+    [10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10],
+    [10, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 10],
+    [10, 12, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 10],
+    [10, 12, 12, 12, 12, 12, 12, 10, 10, 10, 10, 10, 10, 11, 10],
+    [10, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 10],
+    [10, 12, 12, 12, 12, 12, 12, 10, 11, 11, 11, 11, 11, 11, 10],
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 ];
+
+/*
+GUIDE TO TILE TYPES:
+
+10 -> Wall (rewrite wallTexture to get different wall textures)
+
+11-25 -> Dedicated to Floor Tiles
+
+26 -> Door
+
+27-40 -> Windows and Other Ways to Fall out
+
+40-70 -> Detailing
+
+ */
+
+var wallType = 10;
+
+var tileMap = new Image();
+tileMap.src = "FallingApart.png";
 
 var tileSize;
 
@@ -37,18 +55,58 @@ function Tile(x, y, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
+
+    this.wallIntersect = false;
+
+    if(this.type === wallType || this.type === 27){
+        if((this.y - yOffset)/tileSize + 1 !== map.length){
+            if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === wallType ||
+                map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 27){
+                this.wallIntersect = true;
+            }
+        }
+    }
+
     this.update = function(){
 
-    }
+    };
     this.draw = function(){
-        if(this.type === 1){ //WALL
-            ctx.fillStyle = 'black';
-        }else if(this.type === 2){ //DOOR
-            ctx.fillStyle = 'gray';
-        }else{ //GROUND
-            ctx.fillStyle = 'white';
+        if(this.type === wallType){ //Wall
+            //ctx.fillStyle = 'black';
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
+
+            if(this.wallIntersect === false){
+                ctx.drawImage(tileMap, 0, 64, 64, 64, this.x, this.y, this.width, this.height);
+            }else{
+                ctx.drawImage(tileMap, 64, 64, 64, 64, this.x, this.y, this.width, this.height);
+            }
+        }else if(this.type === 26){ //Door
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        }else if(this.type === 11){ //Wooden Floor 1
+            ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y, this.width, this.height);
+        }else if(this.type === 12){ //Tile Floor 1
+            ctx.drawImage(tileMap, 64, 0, 64, 64, this.x, this.y, this.width, this.height);
+        }else if(this.type === 27){ //Window 1
+            if(this.wallIntersect === false){
+                ctx.drawImage(tileMap, 0, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }else{
+                ctx.drawImage(tileMap, 64, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }
+        }else if(this.type === 99){ //Tile Floor 1
+            if((this.y - yOffset - tileSize/2)/tileSize === 0){
+                ctx.drawImage(tileMap, 0, 32, 64, 32, this.x, this.y, this.width, this.height/2);
+            }else if((this.x - xOffset - tileSize/2)/tileSize === 0){
+                ctx.drawImage(tileMap, 32, 0, 32, 64, this.x, this.y - this.height/2, this.width/2, this.height);
+            }else if((this.y - yOffset - tileSize/2)/tileSize === map.length){
+                ctx.drawImage(tileMap, 0, 0, 64, 32, this.x, this.y, this.width, this.height/2);
+            }else if((this.x - xOffset - tileSize/2)/tileSize === map[0].length){
+                console.log("CHECK");
+                ctx.drawImage(tileMap, 0, 0, 32, 64, this.x + this.width, this.y - this.height, this.width/2, this.height);
+            }else{
+                //ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y, this.width, this.height);
+            }
         }
-        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
 
@@ -61,9 +119,6 @@ function Player(x, y, type){
 
     this.tilePosX = 0;
     this.tilePosY = 0;
-
-    this.tilePosXRem = 0;
-    this.tilePosYRem = 0;
 
     this.speed = Math.round(tileSize/20);
     this.type = type;
@@ -78,52 +133,70 @@ function Player(x, y, type){
 
     this.update = function(){
 
-        this.tilePosX = Math.floor((this.x - this.width - xOffset + tileSize/2)/tileSize);
-        this.tilePosXRem = (this.x - this.width - xOffset + tileSize/2) % tileSize;
-
-        this.tilePosY = Math.floor((this.y - this.height - yOffset + tileSize/2)/tileSize);
-        this.tilePosYRem = (this.y - this.height - yOffset + tileSize/2) % tileSize;
-
-        //COLLISION CHECK
-        if(this.tilePosY > 0) {
-            if((map[this.tilePosY - 1][this.tilePosX] === 1) ||
-                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/3) ||
-                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/3)){
-                if(this.tilePosYRem < this.height/2){
-                    this.movingUp = false;
-                    //this.y -= this.tilePosYRem - this.height/2;
-                }
-            }
+        if(this.movingUp){
+            this.y-= this.speed;
         }
-        if(this.tilePosY < map.length) {
-            if(map[this.tilePosY + 1][this.tilePosX] === 1 ||
-                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosXRem < this.width/3) ||
-                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosXRem > tileSize - this.width/3)){
-                if(this.tilePosYRem > tileSize - this.height/2){
-                    this.movingDown = false;
-                    //this.y -= this.tilePosYRem - (tileSize - this.height/2);
+        if(this.movingDown){
+            this.y+= this.speed;
+        }
+        if(this.movingRight){
+            this.x+= this.speed;
+        }
+        if(this.movingLeft){
+            this.x-= this.speed;
+        }
+
+        if(this.reload > 0){
+            this.reload--;
+        }
+
+        this.tilePosX = Math.floor((this.x - this.width - xOffset + tileSize/2)/tileSize);
+        this.tilePosY = Math.floor((this.y - this.height - yOffset + tileSize/2)/tileSize);
+
+        //COLLISIONS
+
+        if(this.tilePosY > 0) {
+            if((map[this.tilePosY - 1][this.tilePosX] === wallType)){
+                if((this.tilePosY - 1)*tileSize + yOffset + tileSize + this.height/2 > this.y){
+                    this.y = (this.tilePosY - 1)*tileSize + yOffset + tileSize + this.height/2;
+                    this.movingUp = false;
                 }
             }
+        }else{
+            this.y = (this.tilePosY)*tileSize + yOffset + tileSize + this.height/2;
+        }
+
+        if(this.tilePosY < map.length) {
+            if((map[this.tilePosY + 1][this.tilePosX] === wallType)){
+                if((this.tilePosY + 1)*tileSize < this.y - this.height/2){
+                    this.y = (this.tilePosY + 1)*tileSize + this.height/2;
+                    this.movingDown = false;
+                }
+            }
+        }else{
+            this.y = (this.tilePosY)*tileSize + this.height/2;
         }
 
         if(this.tilePosX > 0) {
-            if((map[this.tilePosY][this.tilePosX - 1] === 1) ||
-                ((map[this.tilePosY - 1][this.tilePosX - 1] === 1) && this.tilePosYRem < this.width/3) ||
-                ((map[this.tilePosY + 1][this.tilePosX - 1] === 1) && this.tilePosYRem > tileSize - this.width/3)){
-                if(this.tilePosXRem < this.width/2){
+            if((map[this.tilePosY][this.tilePosX - 1] === wallType)){
+                if((this.tilePosX - 1)*tileSize + xOffset + tileSize + this.width/2 > this.x){
+                    this.x = (this.tilePosX - 1)*tileSize + xOffset + tileSize + this.width/2;
                     this.movingLeft = false;
                 }
             }
+        }else{
+            this.x = (this.tilePosX)*tileSize + xOffset + tileSize + this.width/2;
         }
 
         if(this.tilePosX < map[0].length) {
-            if(map[this.tilePosY][this.tilePosX + 1] === 1 ||
-                ((map[this.tilePosY - 1][this.tilePosX + 1] === 1) && this.tilePosYRem < this.width/3) ||
-                ((map[this.tilePosY + 1][this.tilePosX + 1] === 1) && this.tilePosYRem > tileSize - this.width/3)){
-                if(this.tilePosXRem > tileSize - this.width/2){
+            if((map[this.tilePosY][this.tilePosX + 1] === wallType)){
+                if((this.tilePosX + 1)*tileSize + tileSize < this.x){
+                    this.x = (this.tilePosX + 1)*tileSize + tileSize;
                     this.movingRight = false;
                 }
             }
+        }else{
+            this.x = (this.tilePosX)*tileSize + this.height/2 + tileSize;
         }
 
         if(this.movingUp){
@@ -151,28 +224,11 @@ function Player(x, y, type){
             this.orientation = 9;
         }
 
-        if(this.movingUp){
-            this.y-= this.speed;
-        }
-        if(this.movingDown){
-            this.y+= this.speed;
-        }
-        if(this.movingRight){
-            this.x+= this.speed;
-        }
-        if(this.movingLeft){
-            this.x-= this.speed;
-        }
-
-        if(this.reload > 0){
-            this.reload--;
-        }
-
-    }
+    };
     this.draw = function() {
         ctx.fillStyle = 'red';
         ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-    }
+    };
     this.spawnBullet = function(){
         if(this.reload === 0) {
             bullets.push(new Bullet(this.x, this.y, this.orientation));
@@ -230,7 +286,7 @@ function Bullet(x, y, orientation){
         this.tilePosY = Math.floor((this.y - yOffset)/tileSize);
 
         //COLLISION CHECK
-        if(map[this.tilePosY][this.tilePosX] === 1){
+        if(map[this.tilePosY][this.tilePosX] === wallType){
             this.colliding = true;
         }
 
@@ -242,26 +298,26 @@ function Bullet(x, y, orientation){
 }
 
 //CREATE TILES
-for(var i = 0; i < map[0].length; i++){
-    for(var j = 0; j < map.length; j++){
-        if(map[j][i] === 0){
-            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, 0));
-        }else if(map[j][i] === 1) {
-            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, 1));
-        }
+for(var i = 0; i < map[0].length - 1; i++){
+    for(var j = 0; j < map.length - 1; j++){
+        tiles.push(new Tile(xOffset + tileSize*i + tileSize/2, yOffset + tileSize*j + tileSize/2, tileSize, tileSize, 99));
     }
 }
 
-players.push(new Player(WIDTH/2, HEIGHT/2, 0))
+for(var i = 0; i < map[0].length; i++){
+    for(var j = 0; j < map.length; j++){
+        tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, map[j][i]));
+    }
+}
+
+players.push(new Player(WIDTH/2, HEIGHT/2, 0));
 
 function game(){
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type !== 1){
-            tiles[i].update();
-            tiles[i].draw();
-        }
+        tiles[i].update();
+        tiles[i].draw();
     }
     for(var i = 0; i < players.length; i++) {
         players[i].update();
@@ -298,12 +354,6 @@ function game(){
         bullets[i].draw();
         if(bullets[i].colliding || bullets[i].x < 0 || bullets[i].y < 0 || bullets[i].x > WIDTH || bullets[i].y > HEIGHT){
             bullets.splice(i, 1);
-        }
-    }
-    for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type === 1){
-            tiles[i].update();
-            tiles[i].draw();
         }
     }
 }
