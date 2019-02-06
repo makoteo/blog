@@ -56,14 +56,10 @@ function Tile(x, y, width, height, type){
     this.height = height;
     this.type = type;
 
-    this.wallIntersect = false;
+    this.wallOrientation = 0;
 
     if(this.type === wallType || this.type === 27){
-        if((this.y - yOffset)/tileSize + 1 !== map.length){
-            if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === wallType){
-                this.wallIntersect = true;
-            }
-        }
+
     }
 
     this.update = function(){
@@ -74,10 +70,24 @@ function Tile(x, y, width, height, type){
             //ctx.fillStyle = 'black';
             //ctx.fillRect(this.x, this.y, this.width, this.height);
 
-            if(this.wallIntersect === false){
+            if(this.wallOrientation === 1){
                 ctx.drawImage(tileMap, 0, 64, 64, 64, this.x, this.y, this.width, this.height);
-            }else{
+            }else if(this.wallOrientation === 2){
                 ctx.drawImage(tileMap, 64, 64, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 3){
+                ctx.drawImage(tileMap, 0, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 4){
+                ctx.drawImage(tileMap, 64, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 5){
+                ctx.drawImage(tileMap, 128, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 6){
+                ctx.drawImage(tileMap, 192, 128, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 7){
+                ctx.drawImage(tileMap, 64, 192, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 8){
+                ctx.drawImage(tileMap, 128, 192, 64, 64, this.x, this.y, this.width, this.height);
+            }else if(this.wallOrientation === 9){
+                ctx.drawImage(tileMap, 192, 192, 64, 64, this.x, this.y, this.width, this.height);
             }
         }else if(this.type === 26){ //Door
             //ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -87,11 +97,7 @@ function Tile(x, y, width, height, type){
         }else if(this.type === 12){ //Tile Floor 1
             ctx.drawImage(tileMap, 64, 0, 64, 64, this.x, this.y, this.width, this.height);
         }else if(this.type === 27){ //Window 1
-            if(this.wallIntersect === false){
-                ctx.drawImage(tileMap, 0, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }else{
-                ctx.drawImage(tileMap, 64, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }
+
         }else if(this.type === 99){ //Tile Floor 1
             if((this.y - yOffset - tileSize/2)/tileSize === 0){
                 ctx.drawImage(tileMap, 0, 32, 64, 32, this.x, this.y, this.width, this.height/2);
