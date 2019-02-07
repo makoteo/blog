@@ -5,15 +5,34 @@ var HEIGHT = 675;
 
 var map = [
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-    [10, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10],
-    [10, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 12, 12, 12, 12, 12, 12, 10, 10, 10, 10, 10, 10, 10, 10],
-    [10, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 10],
-    [10, 12, 12, 12, 12, 12, 12, 10, 11, 11, 11, 11, 11, 11, 10],
+    [10, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 10, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 10, 88, 10],
+    [10, 88, 10, 10, 10, 10, 10, 10, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 10, 10, 10, 10, 10, 10, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 ];
+
+var groundMap = [
+    [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12],
+    [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 71, 12, 12],
+    [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 71, 12, 12],
+    [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 71, 12, 12],
+    [11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11],
+    [12, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11],
+    [12, 12, 12, 12, 12, 12, 12, 72, 11, 11, 11, 11, 11, 11, 11],
+    [12, 12, 12, 12, 12, 12, 12, 72, 11, 11, 11, 11, 11, 11, 11],
+    [12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11]
+];
+
+var lightMap = [
+    
+];
+
+//FIX RIGHT COLLISION ------------------------------------------------------------------------------ FIX RIGHT COLLISION ------------------------------------
+
 
 /*
 GUIDE TO TILE TYPES:
@@ -21,6 +40,11 @@ GUIDE TO TILE TYPES:
 10 -> Wall (rewrite wallTexture to get different wall textures)
 
 11-25 -> Dedicated to Floor Tiles
+
+71-87 -> Transition Flooring
+
+71 - Wood-Tiles (Horizontal)
+72 - Tiles-Wood (Horizontal)
 
 26 -> Door
 
@@ -62,6 +86,11 @@ function Tile(x, y, width, height, type){
     this.textureY = 0;
     this.textureWidth = 0;
     this.textureHeight = 0;
+
+    this.textureX2 = 0;
+    this.textureY2 = 0;
+    this.textureWidth2 = 0;
+    this.textureHeight2 = 0;
 
 
     if(this.type === wallType || this.type === 27){
@@ -128,85 +157,140 @@ function Tile(x, y, width, height, type){
         }
     }
 
-    if(this.type === wallType){ //Wall
-        //ctx.fillStyle = 'black';
-        //ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.initTextures = function(){
+        if(this.type === wallType){ //Wall
+            //ctx.fillStyle = 'black';
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        if(this.wallOrientation === 1){
+            if(this.wallOrientation === 1){
+                this.textureX = 0;
+                this.textureY = 64;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 2){
+                this.textureX = 64;
+                this.textureY = 64;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 3){
+                this.textureX = 0;
+                this.textureY = 128;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 4){
+                this.textureX = 64;
+                this.textureY = 128;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 5){
+                this.textureX = 128;
+                this.textureY = 128;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 6){
+                this.textureX = 192;
+                this.textureY = 128;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 7){
+                this.textureX = 64;
+                this.textureY = 192;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 8){
+                this.textureX = 128;
+                this.textureY = 192;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }else if(this.wallOrientation === 9){
+                this.textureX = 192;
+                this.textureY = 192;
+                this.textureWidth = 64;
+                this.textureHeight = 64;
+            }
+        }else if(this.type === 26){ //Door
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        }else if(this.type === 11){ //Wooden Floor 1
             this.textureX = 0;
-            this.textureY = 64;
+            this.textureY = 0;
             this.textureWidth = 64;
             this.textureHeight = 64;
-        }else if(this.wallOrientation === 2){
+        }else if(this.type === 12){ //Tile Floor 1
             this.textureX = 64;
-            this.textureY = 64;
+            this.textureY = 0;
             this.textureWidth = 64;
             this.textureHeight = 64;
-        }else if(this.wallOrientation === 3){
+        }else if(this.type === 27){ //Window 1
+
+        }else if(this.type === 71){ //Tile Floor 1
             this.textureX = 0;
-            this.textureY = 128;
+            this.textureY = 0;
             this.textureWidth = 64;
             this.textureHeight = 64;
-        }else if(this.wallOrientation === 4){
+
+            this.textureX2 = 64;
+            this.textureY2 = 0;
+            this.textureWidth2 = 64;
+            this.textureHeight2 = 64;
+        }else if(this.type === 72){ //Tile Floor 1
             this.textureX = 64;
-            this.textureY = 128;
+            this.textureY = 0;
             this.textureWidth = 64;
             this.textureHeight = 64;
-        }else if(this.wallOrientation === 5){
-            this.textureX = 128;
-            this.textureY = 128;
+
+            this.textureX2 = 0;
+            this.textureY2 = 0;
+            this.textureWidth2 = 64;
+            this.textureHeight2 = 64;
+        }else if(this.type === 99){ //Tile Floor 1
+
+            this.textureX = 0;
+            this.textureY = 0;
             this.textureWidth = 64;
             this.textureHeight = 64;
-        }else if(this.wallOrientation === 6){
-            this.textureX = 192;
-            this.textureY = 128;
-            this.textureWidth = 64;
-            this.textureHeight = 64;
-        }else if(this.wallOrientation === 7){
-            this.textureX = 64;
-            this.textureY = 192;
-            this.textureWidth = 64;
-            this.textureHeight = 64;
-        }else if(this.wallOrientation === 8){
-            this.textureX = 128;
-            this.textureY = 192;
-            this.textureWidth = 64;
-            this.textureHeight = 64;
-        }else if(this.wallOrientation === 9){
-            this.textureX = 192;
-            this.textureY = 192;
-            this.textureWidth = 64;
-            this.textureHeight = 64;
+
         }
-    }else if(this.type === 26){ //Door
-        //ctx.fillRect(this.x, this.y, this.width, this.height);
+    };
 
-    }else if(this.type === 11){ //Wooden Floor 1
-        this.textureX = 0;
-        this.textureY = 0;
-        this.textureWidth = 64;
-        this.textureHeight = 64;
-    }else if(this.type === 12){ //Tile Floor 1
-        this.textureX = 64;
-        this.textureY = 0;
-        this.textureWidth = 64;
-        this.textureHeight = 64;
-    }else if(this.type === 27){ //Window 1
+    this.initTextures();
 
-    }else if(this.type === 99){ //Tile Floor 1
+    this.checkLight = function(){
 
-        this.textureX = 0;
-        this.textureY = 0;
-        this.textureWidth = 64;
-        this.textureHeight = 64;
+        if((this.y - yOffset)/tileSize - 1 === 0){
+            if(map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 27){
+                this.lightLevel = 0;
+            }
+        }else if((this.x - xOffset)/tileSize - 1 === 0 && map[(this.y - yOffset)/tileSize > 0]){
+            if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 27){
+                this.lightLevel = 0;
+            }
+        }else if((this.y - yOffset)/tileSize + 1 === map.length && map[(this.y - yOffset)/tileSize > 0]){
+            if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 27){
+                this.lightLevel = 0;
+            }
+        }else if((this.x - xOffset)/tileSize + 1 === map[0].length && map[(this.y - yOffset)/tileSize > 0]){
+            if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 27){
+                this.lightLevel = 0;
+            }
+        }
 
+    };
+
+    if(this.type > 10 && this.type < 26) {
+        this.checkLight();
     }
 
     this.update = function(){
 
     };
     this.draw = function(){
-        ctx.drawImage(tileMap, this.textureX,  this.textureY,  this.textureWidth,  this.textureHeight, this.x, this.y, this.width, this.height);
+        if(this.type > 70 && this.type < 88){
+            ctx.drawImage(tileMap, this.textureX,  this.textureY,  this.textureWidth/2,  this.textureHeight, this.x, this.y, this.width/2, this.height);
+            ctx.drawImage(tileMap, this.textureX2,  this.textureY2,  this.textureWidth2/2,  this.textureHeight2, this.x + this.height/2, this.y, this.width/2, this.height);
+        }else{
+            ctx.drawImage(tileMap, this.textureX,  this.textureY,  this.textureWidth,  this.textureHeight, this.x, this.y, this.width, this.height);
+        }
     }
 }
 
@@ -398,26 +482,48 @@ function Bullet(x, y, orientation){
 }
 
 //CREATE TILES
-for(var i = 0; i < map[0].length; i++){
-    for(var j = 0; j < map.length; j++){
-        tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, 99));
+for(var i = 0; i < groundMap[0].length; i++){
+    for(var j = 0; j < groundMap.length; j++){
+        if(i === 0 && j === 0){
+            tiles.push(new Tile(xOffset + tileSize*i + tileSize/2, yOffset + tileSize*j + tileSize/2, tileSize/2, tileSize, groundMap[j][i]));
+        }if(i === groundMap[0].length - 1 && j === 0){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j + tileSize/2, tileSize/2, tileSize, groundMap[j][i]));
+        }else if(i === 0){
+            tiles.push(new Tile(xOffset + tileSize*i + tileSize/2, yOffset + tileSize*j, tileSize/2, tileSize, groundMap[j][i]));
+        }else if(j === 0){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j + tileSize/2, tileSize, tileSize/2, groundMap[j][i]));
+        }else if(i === groundMap[0].length - 1){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize/2, tileSize, groundMap[j][i]));
+        }else if(j === groundMap.length - 1){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize/2, tileSize, groundMap[j][i]));
+        }else{
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, groundMap[j][i]));
+        }
     }
 }
 
 for(var i = 0; i < map[0].length; i++){
     for(var j = 0; j < map.length; j++){
-        tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, map[j][i]));
+        if(map[j][i] !== 88){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, map[j][i]));
+        }
     }
 }
 
 players.push(new Player(WIDTH/2, HEIGHT/2, 0));
 
+var gameTicks = 0;
+
 function game(){
+
+    gameTicks++;
+
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < tiles.length; i++){
         tiles[i].update();
         tiles[i].draw();
+
     }
     for(var i = 0; i < players.length; i++) {
         players[i].update();
@@ -468,7 +574,7 @@ var keys;
 
 window.addEventListener('keydown', function (e) {
     keys = (keys || []);
-    keys[e.keyCode] = (e.type == "keydown");
+    keys[e.keyCode] = (e.type === "keydown");
 
     if([32, 37, 38, 39, 40, 114, 112].indexOf(e.keyCode) > -1) {
         e.preventDefault();
@@ -476,5 +582,5 @@ window.addEventListener('keydown', function (e) {
 
 }, false);
 window.addEventListener('keyup', function (e) {
-    keys[e.keyCode] = (e.type == "keydown");
+    keys[e.keyCode] = (e.type === "keydown");
 }, false);
