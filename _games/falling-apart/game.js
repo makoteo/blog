@@ -4,15 +4,15 @@ var WIDTH = 1200;
 var HEIGHT = 675;
 
 var map = [
-    [10, 10, 27, 10, 10, 10, 10, 10, 10, 10, 10, 27, 10, 10, 10],
-    [27, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 27],
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    [10, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 10],
     [10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10],
     [10, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 12, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 12, 12, 12, 12, 12, 12, 10, 10, 10, 10, 10, 10, 11, 10],
+    [10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 10],
+    [10, 12, 12, 12, 12, 12, 12, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 10],
     [10, 12, 12, 12, 12, 12, 12, 10, 11, 11, 11, 11, 11, 11, 10],
-    [10, 10, 10, 10, 27, 10, 10, 10, 10, 10, 10, 27, 10, 10, 10]
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 ];
 
 /*
@@ -58,7 +58,147 @@ function Tile(x, y, width, height, type){
 
     this.wallOrientation = 0;
 
+    this.textureX = 0;
+    this.textureY = 0;
+    this.textureWidth = 0;
+    this.textureHeight = 0;
+
+
     if(this.type === wallType || this.type === 27){
+        if((this.x - xOffset)/tileSize - 1 < 0 && (this.y - yOffset)/tileSize - 1 < 0){
+            this.wallOrientation = 8;
+        }else if((this.x - xOffset)/tileSize + 1 === map[0].length && (this.y - yOffset)/tileSize + 1 === map.length){
+            this.wallOrientation = 9;
+        }else if((this.x - xOffset)/tileSize - 1 < 0 && (this.y - yOffset)/tileSize + 1 === map.length){
+            this.wallOrientation = 6;
+        }else if((this.x - xOffset)/tileSize + 1 === map[0].length && (this.y - yOffset)/tileSize - 1 < 0){
+            this.wallOrientation = 5;
+        }else if((this.x - xOffset)/tileSize + 1 === map[0].length){
+            if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10 &&
+                map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 10){
+                this.wallOrientation = 5;
+            }else{
+                this.wallOrientation = 4;
+            }
+        }else if((this.x - xOffset)/tileSize - 1 < 0){
+            if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 &&
+                map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10){
+                this.wallOrientation = 8;
+            }else{
+                this.wallOrientation = 4;
+            }
+        }else if((this.y - yOffset)/tileSize + 1 === map.length){
+            this.wallOrientation = 1;
+        }else if((this.y - yOffset)/tileSize - 1 < 0){
+            if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 &&
+                map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10 &&
+                map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10){
+                this.wallOrientation = 3;
+            }else{
+                this.wallOrientation = 1;
+            }
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10 &&
+            map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 5;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 &&
+            map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 8;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10 &&
+            map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 9;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 &&
+            map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 6;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 &&
+            map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10 &&
+            map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10){
+            this.wallOrientation = 3;
+        }else if(map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 10 && map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 4;
+        }else if(map[(this.y - yOffset)/tileSize - 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 7;
+        }else if(map[(this.y - yOffset)/tileSize + 1][(this.x - xOffset)/tileSize] === 10){
+            this.wallOrientation = 2;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10){
+            this.wallOrientation = 1;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10){
+            this.wallOrientation = 1;
+        }else if(map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize + 1] === 10 && map[(this.y - yOffset)/tileSize][(this.x - xOffset)/tileSize - 1] === 10){
+            this.wallOrientation = 1;
+        }
+    }
+
+    if(this.type === wallType){ //Wall
+        //ctx.fillStyle = 'black';
+        //ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        if(this.wallOrientation === 1){
+            this.textureX = 0;
+            this.textureY = 64;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 2){
+            this.textureX = 64;
+            this.textureY = 64;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 3){
+            this.textureX = 0;
+            this.textureY = 128;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 4){
+            this.textureX = 64;
+            this.textureY = 128;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 5){
+            this.textureX = 128;
+            this.textureY = 128;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 6){
+            this.textureX = 192;
+            this.textureY = 128;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 7){
+            this.textureX = 64;
+            this.textureY = 192;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 8){
+            this.textureX = 128;
+            this.textureY = 192;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }else if(this.wallOrientation === 9){
+            this.textureX = 192;
+            this.textureY = 192;
+            this.textureWidth = 64;
+            this.textureHeight = 64;
+        }
+    }else if(this.type === 26){ //Door
+        //ctx.fillRect(this.x, this.y, this.width, this.height);
+
+    }else if(this.type === 11){ //Wooden Floor 1
+        this.textureX = 0;
+        this.textureY = 0;
+        this.textureWidth = 64;
+        this.textureHeight = 64;
+    }else if(this.type === 12){ //Tile Floor 1
+        this.textureX = 64;
+        this.textureY = 0;
+        this.textureWidth = 64;
+        this.textureHeight = 64;
+    }else if(this.type === 27){ //Window 1
+
+    }else if(this.type === 99){ //Tile Floor 1
+
+        this.textureX = 0;
+        this.textureY = 0;
+        this.textureWidth = 64;
+        this.textureHeight = 64;
 
     }
 
@@ -66,51 +206,7 @@ function Tile(x, y, width, height, type){
 
     };
     this.draw = function(){
-        if(this.type === wallType){ //Wall
-            //ctx.fillStyle = 'black';
-            //ctx.fillRect(this.x, this.y, this.width, this.height);
-
-            if(this.wallOrientation === 1){
-                ctx.drawImage(tileMap, 0, 64, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 2){
-                ctx.drawImage(tileMap, 64, 64, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 3){
-                ctx.drawImage(tileMap, 0, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 4){
-                ctx.drawImage(tileMap, 64, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 5){
-                ctx.drawImage(tileMap, 128, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 6){
-                ctx.drawImage(tileMap, 192, 128, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 7){
-                ctx.drawImage(tileMap, 64, 192, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 8){
-                ctx.drawImage(tileMap, 128, 192, 64, 64, this.x, this.y, this.width, this.height);
-            }else if(this.wallOrientation === 9){
-                ctx.drawImage(tileMap, 192, 192, 64, 64, this.x, this.y, this.width, this.height);
-            }
-        }else if(this.type === 26){ //Door
-            //ctx.fillRect(this.x, this.y, this.width, this.height);
-
-        }else if(this.type === 11){ //Wooden Floor 1
-            ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y, this.width, this.height);
-        }else if(this.type === 12){ //Tile Floor 1
-            ctx.drawImage(tileMap, 64, 0, 64, 64, this.x, this.y, this.width, this.height);
-        }else if(this.type === 27){ //Window 1
-
-        }else if(this.type === 99){ //Tile Floor 1
-            if((this.y - yOffset - tileSize/2)/tileSize === 0){
-                ctx.drawImage(tileMap, 0, 32, 64, 32, this.x, this.y, this.width, this.height/2);
-            }else if((this.x - xOffset - tileSize/2)/tileSize === 0){
-                ctx.drawImage(tileMap, 32, 0, 32, 64, this.x, this.y - this.height/2, this.width/2, this.height);
-            }else if((this.y - yOffset - tileSize/2)/tileSize === map.length - 2){
-                ctx.drawImage(tileMap, 0, 0, 64, 32, this.x, this.y+this.height/2, this.width, this.height/2);
-            }else if((this.x - xOffset - tileSize/2)/tileSize === map[0].length - 2){
-                ctx.drawImage(tileMap, 0, 0, 32, 64, this.x + this.width/2, this.y - this.height/2, this.width/2, this.height);
-            }else{
-                ctx.drawImage(tileMap, 0, 0, 64, 64, this.x, this.y - height/2, this.width, this.height);
-            }
-        }
+        ctx.drawImage(tileMap, this.textureX,  this.textureY,  this.textureWidth,  this.textureHeight, this.x, this.y, this.width, this.height);
     }
 }
 
@@ -302,9 +398,9 @@ function Bullet(x, y, orientation){
 }
 
 //CREATE TILES
-for(var i = 0; i < map[0].length - 1; i++){
-    for(var j = 0; j < map.length - 1; j++){
-        tiles.push(new Tile(xOffset + tileSize*i + tileSize/2, yOffset + tileSize*j + tileSize/2, tileSize, tileSize, 99));
+for(var i = 0; i < map[0].length; i++){
+    for(var j = 0; j < map.length; j++){
+        tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, 99));
     }
 }
 
