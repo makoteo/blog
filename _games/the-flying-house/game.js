@@ -14,7 +14,7 @@ var map = [
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
@@ -53,6 +53,7 @@ var wallType = 10;
 var tileSize;
 
 var tiles = [];
+var players = [];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
@@ -60,9 +61,11 @@ tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 var xOffset = Math.round(WIDTH/2 - (tileSize*map[0].length)/2);
 var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 
-var cameraX = 0;
-var cameraY = 0;
-var cameraZoom = 0.5;
+var cameraGlobalX = 0;
+var cameraGlobalY = 0;
+var cameraZoom = 1;
+
+var moveSpeed = tileSize/12;
 
 repeatOften(); //Starts Game
 
@@ -84,8 +87,44 @@ function Tile(x, y, width, height, type){
         this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
     };
     this.draw = function(){
-        ctx.fillRect(this.cameraX, this.cameraY, this.width*cameraZoom, this.height*cameraZoom);
-    }
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+    };
+}
+
+function Player(id){
+    this.x = WIDTH/2;
+    this.y = HEIGHT/2;
+    this.id = id;
+
+    this.width = tileSize/2;
+    this.height = tileSize;
+
+    this.cameraX = 0;
+    this.cameraY = 0;
+
+    this.screenHalfWidth = Math.round(WIDTH/2);
+    this.screenHalfHeight = Math.round(HEIGHT/2);
+
+    this.xVel = 0;
+    this.yVel = 0;
+
+    this.update = function(){
+
+        this.x += this.xVel;
+        this.y += this.yVel;
+
+        this.xVel = 0;
+        this.yVel = 0;
+
+        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+    };
+
+    this.draw = function(){
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+    };
 }
 
 //CREATE TILES
@@ -97,6 +136,8 @@ for(var i = 0; i < map[0].length; i++){
         }
     }
 }
+
+players.push(new Player(1));
 
 var gameTicks = 0;
 
@@ -110,6 +151,30 @@ function game(){
         tiles[i].update();
         tiles[i].draw();
     }
+
+    if((keys && keys[40])&&(keys && keys[38])){
+
+    }else if(keys && keys[38]){
+        players[0].yVel = -moveSpeed;
+    }
+    else if(keys && keys[40]){
+        players[0].yVel = moveSpeed;
+    }
+
+    if((keys && keys[37])&&(keys && keys[39])){
+
+    }else if(keys && keys[37]){
+        players[0].xVel = -moveSpeed;
+    }
+    else if(keys && keys[39]){
+        players[0].xVel = moveSpeed;
+    }
+
+    for(var i = 0; i < players.length; i++){
+        players[i].update();
+        players[i].draw();
+    }
+
 }
 
 function repeatOften() {
