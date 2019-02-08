@@ -94,7 +94,7 @@ function Tile(x, y, width, height, type){
 
 function Player(id){
     this.x = WIDTH/2;
-    this.y = HEIGHT/2;
+    this.y = HEIGHT/2 - 50;
     this.id = id;
 
     this.width = tileSize/2;
@@ -109,16 +109,44 @@ function Player(id){
     this.xVel = 0;
     this.yVel = 0;
 
+    this.actualXVel = 0;
+    this.actualYVel = 0;
+
+    this.tilePosX = 0;
+    this.tilePosY = 0;
+
     this.update = function(){
 
-        this.x += this.xVel;
-        this.y += this.yVel;
+        if(this.actualXVel === 0){
+            this.actualXVel = this.xVel;
+        }
+        if(this.actualYVel === 0){
+            this.actualYVel = this.yVel;
+        }
+
+        this.tilePosX = Math.round((this.x - xOffset) / tileSize);
+        this.tilePosY = Math.round((this.y - yOffset) / tileSize);
+
+        if(this.tilePosY < map.length){
+            if(map[this.tilePosY][this.tilePosX] === 10){
+                if(this.actualYVel > 0){
+                    this.actualYVel = 0;
+                }
+            }else{
+                this.actualYVel += 0.1;
+            }
+        }
+
+        this.x += this.actualXVel;
+        this.y += this.actualYVel;
+
+        this.actualXVel = 0;
 
         this.xVel = 0;
         this.yVel = 0;
 
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
-        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+        this.cameraY = Math.round((this.y - this.height/2 - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
     };
 
     this.draw = function(){
@@ -159,6 +187,8 @@ function game(){
     }
     else if(keys && keys[40]){
         players[0].yVel = moveSpeed;
+    }else{
+
     }
 
     if((keys && keys[37])&&(keys && keys[39])){
@@ -168,6 +198,8 @@ function game(){
     }
     else if(keys && keys[39]){
         players[0].xVel = moveSpeed;
+    }else{
+
     }
 
     for(var i = 0; i < players.length; i++){
