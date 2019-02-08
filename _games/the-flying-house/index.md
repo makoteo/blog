@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /games/the-flyig-house/index.html
+permalink: /games/the-flying-house/index.html
 title: Falling Apart
 ---
 
