@@ -12,8 +12,8 @@ var map = [
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10, 10, 88, 88, 10],
+    [10, 88, 10, 10, 10, 88, 88, 88, 10, 10, 10, 10, 10, 88, 10],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
@@ -112,7 +112,9 @@ function Player(id){
     this.actualXVel = 0;
     this.actualYVel = 0;
 
-    this.tilePosX = 0;
+    this.tilePosXLeft = 0;
+    this.tilePosXRight = 0;
+    this.tilePosXCenter = 0;
     this.tilePosY = 0;
 
     this.update = function(){
@@ -124,18 +126,33 @@ function Player(id){
             this.actualYVel = this.yVel;
         }
 
-        this.tilePosX = Math.round((this.x - xOffset) / tileSize);
-        this.tilePosY = Math.round((this.y - yOffset) / tileSize);
+        this.tilePosXLeft = Math.round((this.x - this.width - xOffset) / tileSize);
+        this.tilePosXRight = Math.round((this.x  - xOffset) / tileSize);
+        this.tilePosYBottom = Math.round((this.y - yOffset) / tileSize);
+        this.tilePosYBottomCenter = Math.round((this.y - this.height/5 - yOffset) / tileSize);
+        this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
 
-        if(this.tilePosY < map.length){
-            if(map[this.tilePosY][this.tilePosX] === 10){
+        if(this.tilePosYBottom < map.length){
+            if(map[this.tilePosYBottom][this.tilePosXLeft] === 10 || map[this.tilePosYBottom][this.tilePosXRight] === 10){
                 if(this.actualYVel > 0){
                     this.actualYVel = 0;
+                    this.y = this.tilePosYBottom * tileSize + yOffset - this.height/2;
                 }
             }else{
                 this.actualYVel += 0.1;
             }
         }
+
+        if(this.tilePosXRight + 1 < map[0].length){
+            if(map[this.tilePosYBottomCenter][this.tilePosXRight] === 10 || map[this.tilePosYTop][this.tilePosXRight] === 10){
+                this.actualXVel = 0;
+                this.x = this.tilePosXRight * tileSize + xOffset - this.width;
+            }
+        }
+
+        //DO THROUGH INTEGERS AND NOT TILEPOS
+
+        //console.log(this.actualYVel);
 
         this.x += this.actualXVel;
         this.y += this.actualYVel;
