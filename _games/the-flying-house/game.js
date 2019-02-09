@@ -99,7 +99,7 @@ function Tile(x, y, width, height, type){
 
     this.imageX = 0;
     this.imageY = 0;
-    this.imageWidth = 0;
+    this.imageWidth = 0; 
     this.imageHeight = 0;
 
     this.screenHalfWidth = Math.round(WIDTH/2);
