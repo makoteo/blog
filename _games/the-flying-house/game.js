@@ -9,7 +9,7 @@ var map = [
     [88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88],
     [88, 88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88],
-    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
     [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
@@ -212,7 +212,7 @@ function Player(id){
                     this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
                 }else{
                     if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                        if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 || map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                        if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
                             this.actualYVel = this.yVel;
                         }
                     }else{
@@ -221,7 +221,7 @@ function Player(id){
                 }
             }else{
                 if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                    if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 || map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                    if((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
                         this.actualYVel = this.yVel;
                     }
                 }else{
