@@ -10,18 +10,39 @@ var map = [
     [88, 88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 10, 10, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10],
-    [10, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10, 88, 10],
-    [10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
-    [10, 88, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10],
-    [10, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
+    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
+    [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
+    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
+    [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+];
+
+var backgroundMap = [
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88, 88],
+    [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
+    [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
+    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
 ];
 
 
@@ -30,18 +51,13 @@ GUIDE TO TILE TYPES:
 
 10 -> Wall (rewrite wallTexture to get different wall textures)
 
-11-25 -> Dedicated to Floor Tiles
+11 -> Ladder
 
-71-87 -> Transition Flooring
+12-24 -> Dedicated to Other Walls/Colliders
 
-71 - Wood-Tiles (Horizontal)
-72 - Tiles-Wood (Horizontal)
+25-40 -> Dedicated to Backgrounds
 
-26 -> Door
-
-27-40 -> Windows and Other Ways to Fall out
-
-40-70 -> Detailing
+88 -> Empty
 
  */
 
@@ -89,7 +105,13 @@ function Tile(x, y, width, height, type){
         this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
     };
     this.draw = function(){
-        ctx.fillStyle = 'black';
+        if(this.type === 10){
+            ctx.fillStyle = 'black';
+        }else if(this.type === 11){
+            ctx.fillStyle = 'blue';
+        }else if(this.type === 25){
+            ctx.fillStyle = 'gray';
+        }
         ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
     };
 }
@@ -189,10 +211,18 @@ function Player(id){
                 if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
                     this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
                 }else{
-                    this.actualYVel += this.gravity;
+                    if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
+                        this.actualYVel = this.yVel;
+                    }else{
+                        this.actualYVel += this.gravity;
+                    }
                 }
             }else{
-                this.actualYVel += this.gravity;
+                if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
+                    this.actualYVel = this.yVel;
+                }else{
+                    this.actualYVel += this.gravity;
+                }
             }
         }
 
@@ -267,6 +297,14 @@ function Player(id){
 
 //CREATE TILES
 
+for(var i = 0; i < backgroundMap[0].length; i++){
+    for(var j = 0; j < backgroundMap.length; j++){
+        if(backgroundMap[j][i] !== 88){
+            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, backgroundMap[j][i]));
+        }
+    }
+}
+
 for(var i = 0; i < map[0].length; i++){
     for(var j = 0; j < map.length; j++){
         if(map[j][i] !== 88){
@@ -285,6 +323,13 @@ function game(){
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
+    for(var i = 0; i < tiles.length; i++){
+        if(tiles[i].type !== 10){
+            tiles[i].update();
+            tiles[i].draw();
+        }
+    }
+
     for(var i = 0; i < bullets.length; i++){
         bullets[i].update();
         bullets[i].draw();
@@ -292,11 +337,10 @@ function game(){
         if(map[Math.round((bullets[i].y - tileSize/2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === 10){
             bullets.splice(i, 1);
         }
-    }
 
-    for(var i = 0; i < tiles.length; i++){
-        tiles[i].update();
-        tiles[i].draw();
+        if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
+            bullets.splice(i, 1);
+        }
     }
 
     if((keys && keys[40])&&(keys && keys[38])){
@@ -328,6 +372,13 @@ function game(){
     for(var i = 0; i < players.length; i++){
         players[i].update();
         players[i].draw();
+    }
+
+    for(var i = 0; i < tiles.length; i++){
+        if(tiles[i].type === 10){
+            tiles[i].update();
+            tiles[i].draw();
+        }
     }
 
 }
