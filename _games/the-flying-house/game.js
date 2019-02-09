@@ -212,14 +212,18 @@ function Player(id){
                     this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
                 }else{
                     if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                        this.actualYVel = this.yVel;
+                        if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 || map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                            this.actualYVel = this.yVel;
+                        }
                     }else{
                         this.actualYVel += this.gravity;
                     }
                 }
             }else{
                 if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                    this.actualYVel = this.yVel;
+                    if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 || map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                        this.actualYVel = this.yVel;
+                    }
                 }else{
                     this.actualYVel += this.gravity;
                 }
@@ -336,10 +340,12 @@ function game(){
 
         if(map[Math.round((bullets[i].y - tileSize/2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === 10){
             bullets.splice(i, 1);
+            break;
         }
 
         if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
             bullets.splice(i, 1);
+            break;
         }
     }
 
