@@ -283,7 +283,12 @@ function Player(id){
     };
 
     this.draw = function(){
-        ctx.fillStyle = 'red';
+        if(this.id === 1){
+            ctx.fillStyle = 'red';
+        }else if(this.id === 2){
+            ctx.fillStyle = 'lightblue';
+        }
+
         ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
     };
 
@@ -318,6 +323,7 @@ for(var i = 0; i < map[0].length; i++){
 }
 
 players.push(new Player(1));
+players.push(new Player(2));
 
 var gameTicks = 0;
 
@@ -351,6 +357,8 @@ function game(){
         }
     }
 
+    //CONTROLS
+    //PLAYER 1
     if((keys && keys[40])&&(keys && keys[38])){
 
     }else if(keys && keys[38]){
@@ -375,6 +383,34 @@ function game(){
 
     if(keys && keys[77]){
         players[0].spawnBullet();
+    }
+
+    //PLAYER 2
+
+    if((keys && keys[87])&&(keys && keys[83])){
+
+    }else if(keys && keys[87]){
+        players[1].yVel = -moveSpeed;
+    }
+    else if(keys && keys[83]){
+        players[1].yVel = moveSpeed;
+    }else{
+
+    }
+
+    if((keys && keys[65])&&(keys && keys[68])){
+
+    }else if(keys && keys[65]){
+        players[1].xVel = -moveSpeed;
+    }
+    else if(keys && keys[68]){
+        players[1].xVel = moveSpeed;
+    }else{
+
+    }
+
+    if(keys && keys[81]){
+        players[1].spawnBullet();
     }
 
     for(var i = 0; i < players.length; i++){
