@@ -75,6 +75,7 @@ var tileSize;
 var tiles = [];
 var players = [];
 var bullets = [];
+var balloons = [];
 
 var collidableBlocks = [10, 12, 13, 14, 15];
 
@@ -216,6 +217,47 @@ function Bullet(x, y, xVel, yVel, type){
         ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
     };
 
+}
+
+function Balloon(x, y, tiltedX){
+
+    this.x = x;
+    this.y = y;
+
+    this.tiltedX = tiltedX;
+
+    this.cameraX = 0;
+    this.cameraY = 0;
+
+    this.yFloat = 100;
+
+    this.screenHalfWidth = WIDTH/2;
+    this.screenHalfHeight = HEIGHT/2;
+
+    this.draw = function(){
+        ctx.beginPath();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.moveTo(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY);
+        ctx.lineTo(this.cameraX + cameraGlobalX + this.tiltedX, this.cameraY - this.yFloat + cameraGlobalY/2);
+        ctx.stroke();
+
+        ctx.drawImage(tileMap, 192, 0, 192, 256, this.cameraX - tileSize*3, this.cameraY - tileSize * 8 - this.yFloat/2, tileSize*6, tileSize*8);
+    };
+    this.update = function(){
+        if(gameTicks % 10 === 0){
+            this.yFloat += Math.round(Math.random()*3 - 1.5);
+
+            if(this.yFloat > 220){
+                this.yFloat = 220;
+            }else if(this.yFloat < 180){
+                this.yFloat = 180;
+            }
+        }
+
+        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+    };
 }
 
 function Player(id){
@@ -417,6 +459,18 @@ for(var i = 0; i < map[0].length; i++){
 players.push(new Player(1));
 players.push(new Player(2));
 
+for(var i = 0; i < 7; i++){
+    balloons.push(new Balloon(WIDTH/2, yOffset, -60 + i*20));
+}
+
+for(var i = 0; i < 5; i++){
+    balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, -60 + i*30));
+}
+
+for(var i = 0; i < 5; i++){
+    balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, -60 + i*30));
+}
+
 var gameTicks = 0;
 
 function game(){
@@ -517,9 +571,14 @@ function game(){
         players[1].spawnBullet();
     }
 
-    for(var i = 0; i < players.length; i++){
+    for(var i = 0; i < players.length; i++) {
         players[i].update();
         players[i].draw();
+    }
+
+    for(var i = 0; i < balloons.length; i++){
+        balloons[i].update();
+        balloons[i].draw();
     }
 
     for(var i = 0; i < tiles.length; i++){
@@ -527,6 +586,10 @@ function game(){
             tiles[i].update();
             tiles[i].draw();
         }
+    }
+
+    if(gameTicks % 5 === 0){
+        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3);
     }
 
 }
