@@ -312,6 +312,11 @@ function Player(id){
         if(this.actualXVel === 0){
             this.actualXVel = this.xVel;
         }
+
+        if(this.knockBackXVel > bulletSpeed*2){
+            this.knockBackXVel = bulletSpeed*2;
+        }
+
         this.actualXVel += this.knockBackXVel;
         if(this.actualYVel === 0){
             this.actualYVel = this.yVel;
@@ -583,26 +588,23 @@ function game(){
 
     //PLAYER 2
 
-    if((keys && keys[87])&&(keys && keys[83])){
+    if((keys && keys[69])&&(keys && keys[68])){
 
-    }else if(keys && keys[87]){
+    }else if(keys && keys[69]){
         players[1].yVel = -moveSpeed;
-    }
-    else if(keys && keys[83]){
-        players[1].yVel = moveSpeed;
-    }else{
-
-    }
-
-    if((keys && keys[65])&&(keys && keys[68])){
-
-    }else if(keys && keys[65]){
-        players[1].xVel = -moveSpeed;
+        console.log("Jump");
     }
     else if(keys && keys[68]){
-        players[1].xVel = moveSpeed;
-    }else{
+        players[1].yVel = moveSpeed;
+    }
 
+    if((keys && keys[83])&&(keys && keys[70])){
+
+    }else if(keys && keys[83]){
+        players[1].xVel = -moveSpeed;
+    }
+    else if(keys && keys[70]){
+        players[1].xVel = moveSpeed;
     }
 
     if(keys && keys[81]){
