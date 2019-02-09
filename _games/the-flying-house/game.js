@@ -576,7 +576,9 @@ function game(){
     }
 
     if(keys && keys[77]){
-        players[0].spawnBullet();
+        if(players[0].y + players[0].height < HEIGHT){
+            players[0].spawnBullet();
+        }
     }
 
     //PLAYER 2
@@ -604,7 +606,9 @@ function game(){
     }
 
     if(keys && keys[81]){
-        players[1].spawnBullet();
+        if(players[1].y + players[1].height < HEIGHT){
+            players[1].spawnBullet();
+        }
     }
 
     for(var i = 0; i < players.length; i++) {
