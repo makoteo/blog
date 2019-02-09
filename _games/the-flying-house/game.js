@@ -12,8 +12,8 @@ var map = [
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 10, 10, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 10, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
+    [10, 88, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10],
@@ -54,6 +54,7 @@ var tileSize;
 
 var tiles = [];
 var players = [];
+var bullets = [];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
@@ -66,6 +67,7 @@ var cameraGlobalY = 0;
 var cameraZoom = 1;
 
 var moveSpeed = tileSize/12;
+var bulletSpeed = tileSize/6;
 
 repeatOften(); //Starts Game
 
@@ -92,10 +94,42 @@ function Tile(x, y, width, height, type){
     };
 }
 
+function Bullet(x, y, xVel, yVel, type){
+    this.velY = yVel;
+    this.velX = xVel;
+    this.type = type;
+
+    this.x = x;
+    this.y = y;
+
+    this.width = tileSize/10;
+    this.height = tileSize/10;
+
+    this.screenHalfWidth = Math.round(WIDTH/2);
+    this.screenHalfHeight = Math.round(HEIGHT/2);
+
+    this.update = function(){
+        this.x += this.velX;
+        this.y += this.velY;
+
+        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = Math.round((this.y - this.height/2 - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+    };
+
+    this.draw = function(){
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+    };
+
+}
+
 function Player(id){
     this.x = WIDTH/2;
     this.y = HEIGHT/2 - 50;
     this.id = id;
+
+    this.reloadSpeed = 5;
+    this.reloadTimer = 0;
 
     this.width = tileSize/2;
     this.height = tileSize;
@@ -114,10 +148,11 @@ function Player(id){
 
     this.tilePosXLeft = 0;
     this.tilePosXRight = 0;
-    this.tilePosXCenter = 0;
     this.tilePosY = 0;
 
     this.gravity = 0.10;
+
+    this.facing = 1;
 
     this.update = function(){
 
@@ -133,6 +168,22 @@ function Player(id){
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
 
+        if(this.tilePosYTop > 0){
+            if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
+                if(this.actualYVel < 0){
+                    if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
+                        this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
+                    }else{
+
+                    }
+                }else{
+
+                }
+            }else{
+
+            }
+        }
+
         if(this.tilePosYBottom < map.length - 1){
             if(map[this.tilePosYBottom + 1][this.tilePosXLeft] === 10 || map[this.tilePosYBottom + 1][this.tilePosXRight] === 10){
                 if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
@@ -142,20 +193,6 @@ function Player(id){
                 }
             }else{
                 this.actualYVel += this.gravity;
-            }
-        }
-
-        if(this.tilePosYTop > 0){
-            if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
-                if(this.actualYVel < 0){
-                    if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
-                        this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
-                    }else{
-
-                    }
-                }
-            }else{
-
             }
         }
 
@@ -189,6 +226,12 @@ function Player(id){
 
         //console.log(this.actualYVel);
 
+        if(this.actualXVel > moveSpeed - 1){
+            this.facing = 1;
+        }else if(this.actualXVel < -moveSpeed + 1){
+            this.facing = -1;
+        }
+
         this.x += this.actualXVel;
         this.y += this.actualYVel;
 
@@ -196,6 +239,10 @@ function Player(id){
 
         this.xVel = 0;
         this.yVel = 0;
+
+        if(this.reloadTimer > 0){
+            this.reloadTimer--;
+        }
 
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.height/2 - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
@@ -205,6 +252,17 @@ function Player(id){
         ctx.fillStyle = 'red';
         ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
     };
+
+    this.spawnBullet = function(){
+        if(this.reloadTimer === 0){
+            if(this.facing === 1){
+                bullets.push(new Bullet(this.x + this.width, this.y, bulletSpeed, 0, 0));
+            }else{
+                bullets.push(new Bullet(this.x, this.y, -bulletSpeed, 0, 0));
+            }
+            this.reloadTimer = this.reloadSpeed;
+        }
+    }
 }
 
 //CREATE TILES
@@ -226,6 +284,15 @@ function game(){
     gameTicks++;
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    for(var i = 0; i < bullets.length; i++){
+        bullets[i].update();
+        bullets[i].draw();
+
+        if(map[Math.round((bullets[i].y - tileSize/2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === 10){
+            bullets.splice(i, 1);
+        }
+    }
 
     for(var i = 0; i < tiles.length; i++){
         tiles[i].update();
@@ -252,6 +319,10 @@ function game(){
         players[0].xVel = moveSpeed;
     }else{
 
+    }
+
+    if(keys && keys[77]){
+        players[0].spawnBullet();
     }
 
     for(var i = 0; i < players.length; i++){
