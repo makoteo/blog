@@ -63,8 +63,8 @@ GUIDE TO TILE TYPES:
 
 var wallType = 10;
 
-//var tileMap = new Image();
-//tileMap.src = "FallingApart.png";
+var tileMap = new Image();
+tileMap.src = "Flying-House.png";
 
 var tileSize;
 
@@ -97,22 +97,34 @@ function Tile(x, y, width, height, type){
     this.cameraX = 0;
     this.cameraY = 0;
 
+    this.imageX = 0;
+    this.imageY = 0;
+    this.imageWidth = 0;
+    this.imageHeight = 0;
+
     this.screenHalfWidth = Math.round(WIDTH/2);
     this.screenHalfHeight = Math.round(HEIGHT/2);
+
+    if(this.type === 10){
+        this.imageX = 0;
+        this.imageY = 0;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 11){
+
+    }else if(this.type === 25){
+        this.imageX = 64;
+        this.imageY = 0;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }
 
     this.update = function(){
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
     };
     this.draw = function(){
-        if(this.type === 10){
-            ctx.fillStyle = 'black';
-        }else if(this.type === 11){
-            ctx.fillStyle = 'blue';
-        }else if(this.type === 25){
-            ctx.fillStyle = 'gray';
-        }
-        ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
     };
 }
 
@@ -190,7 +202,7 @@ function Player(id){
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
 
-        if((this.x + this.width > xOffset) && (this.x - this.width < WIDTH - xOffset) && (this.y > 0) && (this.y < HEIGHT - yOffset)){
+        if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y < HEIGHT - yOffset)){
             if(this.tilePosYTop > 0 && this.tilePosYBottom < map.length - 1){
                 if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
                     if(this.actualYVel < 0){
