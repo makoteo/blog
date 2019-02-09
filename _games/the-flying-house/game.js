@@ -190,72 +190,76 @@ function Player(id){
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
 
-        if(this.tilePosYTop > 0){
-            if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
-                if(this.actualYVel < 0){
-                    if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
-                        this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
+        if((this.x > xOffset) && (this.x + this.width < WIDTH - xOffset) && (this.y > 0) && (this.y < HEIGHT - yOffset)){
+            if(this.tilePosYTop > 0 && this.tilePosYBottom < map.length - 1){
+                if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
+                    if(this.actualYVel < 0){
+                        if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
+                            this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
+                        }else{
+
+                        }
                     }else{
 
                     }
                 }else{
 
                 }
-            }else{
-
             }
-        }
 
-        if(this.tilePosYBottom < map.length - 1){
-            if(map[this.tilePosYBottom + 1][this.tilePosXLeft] === 10 || map[this.tilePosYBottom + 1][this.tilePosXRight] === 10){
-                if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
-                    this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
+            if(this.tilePosYBottom < map.length - 1){
+                if(map[this.tilePosYBottom + 1][this.tilePosXLeft] === 10 || map[this.tilePosYBottom + 1][this.tilePosXRight] === 10){
+                    if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
+                        this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
+                    }else{
+                        if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
+                            if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                                this.actualYVel = this.yVel;
+                            }
+                        }else{
+                            this.actualYVel += this.gravity;
+                        }
+                    }
                 }else{
                     if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                        if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
+                        if((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
                             this.actualYVel = this.yVel;
                         }
                     }else{
                         this.actualYVel += this.gravity;
                     }
                 }
-            }else{
-                if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                    if((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
-                        this.actualYVel = this.yVel;
+            }
+
+            if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length - 1){
+                if(map[this.tilePosYBottom][this.tilePosXLeft - 1] === 10 || map[this.tilePosYTop][this.tilePosXLeft - 1] === 10){
+                    if(this.actualXVel < 0){
+                        if(this.x + this.actualXVel <= (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset){
+                            this.actualXVel = ((this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1.15);
+                        }else{
+
+                        }
                     }
                 }else{
-                    this.actualYVel += this.gravity;
+
                 }
             }
-        }
 
-        if(this.tilePosXLeft > 0){
-            if(map[this.tilePosYBottom][this.tilePosXLeft - 1] === 10 || map[this.tilePosYTop][this.tilePosXLeft - 1] === 10){
-                if(this.actualXVel < 0){
-                    if(this.x + this.actualXVel <= (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset){
-                        this.actualXVel = ((this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1.15);
-                    }else{
+            if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length - 1){
+                if(map[this.tilePosYBottom][this.tilePosXRight + 1] === 10 || map[this.tilePosYTop][this.tilePosXRight + 1] === 10){
+                    if(this.actualXVel > 0){
+                        if(this.x + this.width + this.actualXVel >= (this.tilePosXRight + 1) * tileSize + xOffset){
+                            this.actualXVel = ((this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1.15);
+                        }else{
 
+                        }
                     }
+                }else{
+
                 }
-            }else{
-
             }
-        }
-
-        if(this.tilePosXRight < map[0].length - 1){
-            if(map[this.tilePosYBottom][this.tilePosXRight + 1] === 10 || map[this.tilePosYTop][this.tilePosXRight + 1] === 10){
-                if(this.actualXVel > 0){
-                    if(this.x + this.width + this.actualXVel >= (this.tilePosXRight + 1) * tileSize + xOffset){
-                        this.actualXVel = ((this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1.15);
-                    }else{
-
-                    }
-                }
-            }else{
-
-            }
+        }else{
+            this.actualYVel += this.gravity;
         }
 
         //console.log(this.actualYVel);
