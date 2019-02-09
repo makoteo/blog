@@ -4,45 +4,45 @@ var WIDTH = 1200;
 var HEIGHT = 675;
 
 var map = [
-    [88, 88, 88, 88, 88, 10, 10, 10, 10, 10, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88],
-    [88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88],
-    [88, 88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88],
-    [88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88],
-    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
-    [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
-    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
-    [10, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
-    [88, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [88, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10],
-    [10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10],
-    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88],
-    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    [88, 88, 88, 88, 88, 88, 12, 10, 10, 10, 13, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 12, 14, 88, 88, 88, 15, 13, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 12, 14, 88, 88, 88, 88, 88, 15, 13, 88, 88, 88, 88],
+    [88, 88, 88, 12, 14, 88, 88, 88, 88, 88, 88, 88, 15, 13, 88, 88, 88],
+    [88, 88, 12, 14, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 13, 88, 88],
+    [88, 12, 14, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 15, 13, 88],
+    [12, 14, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 15, 13],
+    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
+    [88, 10, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
+    [88, 88, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 11, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
 var backgroundMap = [
-    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88, 88],
-    [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
-    [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
-    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25],
-    [25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25]
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88, 88],
+    [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
+    [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
 
@@ -53,15 +53,16 @@ GUIDE TO TILE TYPES:
 
 11 -> Ladder
 
-12-24 -> Dedicated to Other Walls/Colliders
+12 - Left Roof
+13 - Right Roof
+14 - Left Corner Roof
+15 - Right Corner Roof
 
 25-40 -> Dedicated to Backgrounds
 
 88 -> Empty
 
  */
-
-var wallType = 10;
 
 var tileMap = new Image();
 tileMap.src = "Flying-House.png";
@@ -71,6 +72,8 @@ var tileSize;
 var tiles = [];
 var players = [];
 var bullets = [];
+
+var collidableBlocks = [10, 12, 13, 14, 15];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
@@ -102,15 +105,17 @@ function Tile(x, y, width, height, type){
     this.imageWidth = 0;
     this.imageHeight = 0;
 
-    if(this.type !== 11 && this.type !== 10){
+    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15){
         this.lightLevel = 0.8;
-    }else if(this.type === 10){
-        this.lightLevel = Math.random()/6;
+    }else if(this.type === 10 || this.type === 14 || this.type === 15){
+        this.lightLevel = Math.random()/4;
+    }else if(this.type === 12 || this.type === 13){
+        this.lightLevel = 0;
     }else{
         this.lightLevel = 0.5;
     }
 
-    if(this.type !== 10){
+    if(this.type !== 10 && this.type !== 12){
         if(Math.round((this.x-xOffset)/tileSize) === 0){
             this.lightLevel = 0;
         }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 1){
@@ -131,6 +136,26 @@ function Tile(x, y, width, height, type){
         this.imageY = 0;
         this.imageWidth = 64;
         this.imageHeight = 64;
+    }else if(this.type === 12){
+        this.imageX = 0;
+        this.imageY = 64;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 13){
+        this.imageX = 64;
+        this.imageY = 64;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 14){
+        this.imageX = 0;
+        this.imageY = 128;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 15){
+        this.imageX = 64;
+        this.imageY = 128;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
     }else if(this.type === 25){
         this.imageX = 64;
         this.imageY = 0;
@@ -144,7 +169,7 @@ function Tile(x, y, width, height, type){
     };
     this.draw = function(){
         ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
-        ctx.globalAlpha = this.lightLevel;
+        ctx.globalAlpha = this.lightLevel/4*3;
         ctx.fillStyle = 'black';
         ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
         ctx.globalAlpha = 1;
@@ -227,70 +252,85 @@ function Player(id){
 
         if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y < HEIGHT - yOffset)){
             if(this.tilePosYTop > 0 && this.tilePosYBottom < map.length - 1){
-                if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
-                    if(this.actualYVel < 0){
-                        if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
-                            this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
-                        }else{
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYTop - 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYTop - 1][this.tilePosXRight] === collidableBlocks[i]) {
+                        if (this.actualYVel < 0) {
+                            if (this.y - this.height / 2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset) {
+                                this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height / 2);
+                                break;
+                            } else {
+
+                            }
+                        } else {
 
                         }
-                    }else{
+                    } else {
 
                     }
-                }else{
-
                 }
             }
 
             if(this.tilePosYBottom < map.length - 1){
-                if(map[this.tilePosYBottom + 1][this.tilePosXLeft] === 10 || map[this.tilePosYBottom + 1][this.tilePosXRight] === 10){
-                    if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
-                        this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
-                    }else{
-                        if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                            if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11){
-                                this.actualYVel = this.yVel;
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYBottom + 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYBottom + 1][this.tilePosXRight] === collidableBlocks[i]) {
+                        if (this.y + this.height / 2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset) {
+                            this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height / 2);
+                            break;
+                        } else {
+                            if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
+                                if (map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11) {
+                                    this.actualYVel = this.yVel;
+                                }
+                            } else {
+                                this.actualYVel += this.gravity;
+                                break;
                             }
-                        }else{
+                        }
+                    } else {
+                        if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
+                            if ((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
+                                this.actualYVel = this.yVel;
+                                break;
+                            }
+                        } else {
                             this.actualYVel += this.gravity;
+                            break;
                         }
-                    }
-                }else{
-                    if(map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11){
-                        if((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
-                            this.actualYVel = this.yVel;
-                        }
-                    }else{
-                        this.actualYVel += this.gravity;
                     }
                 }
             }
 
             if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length - 1){
-                if(map[this.tilePosYBottom][this.tilePosXLeft - 1] === 10 || map[this.tilePosYTop][this.tilePosXLeft - 1] === 10){
-                    if(this.actualXVel < 0){
-                        if(this.x + this.actualXVel <= (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset){
-                            this.actualXVel = ((this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1.15);
-                        }else{
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYBottom][this.tilePosXLeft - 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXLeft - 1] === collidableBlocks[i]) {
+                        if (this.actualXVel < 0) {
+                            if (this.x + this.actualXVel <= (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset) {
+                                this.actualXVel = ((this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1.15);
+                                break;
+                            } else {
 
+                            }
                         }
-                    }
-                }else{
+                    } else {
 
+                    }
                 }
             }
 
             if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length - 1){
-                if(map[this.tilePosYBottom][this.tilePosXRight + 1] === 10 || map[this.tilePosYTop][this.tilePosXRight + 1] === 10){
-                    if(this.actualXVel > 0){
-                        if(this.x + this.width + this.actualXVel >= (this.tilePosXRight + 1) * tileSize + xOffset){
-                            this.actualXVel = ((this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1.15);
-                        }else{
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYBottom][this.tilePosXRight + 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXRight + 1] === collidableBlocks[i]) {
+                        if (this.actualXVel > 0) {
+                            if (this.x + this.width + this.actualXVel >= (this.tilePosXRight + 1) * tileSize + xOffset) {
+                                this.actualXVel = ((this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1.15);
+                                break;
+                            } else {
 
+                            }
                         }
-                    }
-                }else{
+                    } else {
 
+                    }
                 }
             }
         }else{
@@ -377,12 +417,7 @@ function game(){
             tiles[i].update();
             tiles[i].draw();
             if(gameTicks < 200){
-                if(i > map[0].length){
-                    if(tiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i-map[0].length].lightLevel + 0.1;
-                    }
-                }
-                if(i < tiles.length){
+                if(i < tiles.length - map.length){
                     if(tiles[i+map.length].lightLevel < tiles[i].lightLevel){
                         tiles[i].lightLevel = tiles[i+map.length].lightLevel + 0.1;
                     }
