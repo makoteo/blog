@@ -99,8 +99,24 @@ function Tile(x, y, width, height, type){
 
     this.imageX = 0;
     this.imageY = 0;
-    this.imageWidth = 0; 
+    this.imageWidth = 0;
     this.imageHeight = 0;
+
+    if(this.type !== 11 && this.type !== 10){
+        this.lightLevel = 0.5;
+    }else if(this.type === 10){
+        this.lightLevel = 0.15;
+    }else{
+        this.lightLevel = 0;
+    }
+
+    if(this.type !== 10){
+        if(Math.round((this.x-xOffset)/tileSize) === 0){
+            this.lightLevel = 0;
+        }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 1){
+            this.lightLevel = 0;
+        }
+    }
 
     this.screenHalfWidth = Math.round(WIDTH/2);
     this.screenHalfHeight = Math.round(HEIGHT/2);
@@ -125,6 +141,10 @@ function Tile(x, y, width, height, type){
     };
     this.draw = function(){
         ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        ctx.globalAlpha = this.lightLevel;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        ctx.globalAlpha = 1;
     };
 }
 
@@ -353,6 +373,16 @@ function game(){
         if(tiles[i].type !== 10){
             tiles[i].update();
             tiles[i].draw();
+            if(i > map.length){
+                if(tiles[i-map.length].lightLevel < tiles[i].lightLevel){
+                    tiles[i].lightLevel = tiles[i-map.length].lightLevel + 0.1;
+                }
+            }
+            if(i < tiles.length){
+                if(tiles[i+map[0].length].lightLevel < tiles[i].lightLevel){
+                    tiles[i].lightLevel = tiles[i+map[0].length].lightLevel + 0.1;
+                }
+            }
         }
     }
 
