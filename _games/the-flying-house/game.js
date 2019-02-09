@@ -523,9 +523,15 @@ function game(){
         for(var j = 0; j < players.length; j++){
             if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX > players[j].x){
                 if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
-                    players[j].knockBackXVel += bullets[i].velX;
+                    players[j].knockBackXVel += bullets[i].velX*1.5;
                     destroy = true;
                 }
+            }
+        }
+
+        if(bullets.length > 0 && i !== bullets.length){
+            if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
+                bullets.splice(i, 1);
             }
         }
 
@@ -538,12 +544,6 @@ function game(){
             }
         }else{
 
-        }
-
-        if(bullets.length > 0 && i !== bullets.length){
-            if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
-                destroy = true;
-            }
         }
 
         if(destroy === true){
