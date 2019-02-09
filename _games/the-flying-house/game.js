@@ -11,16 +11,16 @@ var map = [
     [88, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
     [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10, 10, 88, 88, 10],
-    [10, 88, 10, 10, 10, 88, 88, 88, 10, 10, 10, 10, 10, 88, 10],
-    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
-    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 10, 10, 88, 88, 88, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 10, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
+    [10, 88, 88, 88, 88, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10],
+    [10, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10, 88, 10],
+    [10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 10, 88, 88, 88, 10],
+    [10, 88, 88, 10, 88, 88, 88, 10, 88, 88, 88, 88, 88, 88, 10],
+    [10, 10, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 10],
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 ];
 
@@ -63,7 +63,7 @@ var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 
 var cameraGlobalX = 0;
 var cameraGlobalY = 0;
-var cameraZoom = 2;
+var cameraZoom = 1;
 
 var moveSpeed = tileSize/12;
 
@@ -112,12 +112,12 @@ function Player(id){
     this.actualXVel = 0;
     this.actualYVel = 0;
 
-    this.goingUp = true;
-
     this.tilePosXLeft = 0;
     this.tilePosXRight = 0;
     this.tilePosXCenter = 0;
     this.tilePosY = 0;
+
+    this.gravity = 0.10;
 
     this.update = function(){
 
@@ -132,19 +132,16 @@ function Player(id){
         this.tilePosXRight = Math.round((this.x - this.width/10 - xOffset) / tileSize);
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
-        this.tilePosYBottomCenter = Math.round((this.y - this.height/5 - yOffset) / tileSize);
 
-        if(this.tilePosYBottom < map.length){
+        if(this.tilePosYBottom < map.length - 1){
             if(map[this.tilePosYBottom + 1][this.tilePosXLeft] === 10 || map[this.tilePosYBottom + 1][this.tilePosXRight] === 10){
-                if(this.actualYVel > 0){
-                    if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
-                        this.actualYVel = (this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2;
-                    }else{
-                        this.actualYVel += 0.15;
-                    }
+                if(this.y + this.height/2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset){
+                    this.actualYVel = ((this.tilePosYBottom + 1) * tileSize + yOffset - this.y - this.height/2);
+                }else{
+                    this.actualYVel += this.gravity;
                 }
             }else{
-                this.actualYVel += 0.15;
+                this.actualYVel += this.gravity;
             }
         }
 
@@ -152,7 +149,7 @@ function Player(id){
             if(map[this.tilePosYTop - 1][this.tilePosXLeft] === 10 || map[this.tilePosYTop - 1][this.tilePosXRight] === 10){
                 if(this.actualYVel < 0){
                     if(this.y - this.height/2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset){
-                        this.actualYVel = (this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2 + 1;
+                        this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height/2);
                     }else{
 
                     }
@@ -166,7 +163,7 @@ function Player(id){
             if(map[this.tilePosYBottom][this.tilePosXLeft - 1] === 10 || map[this.tilePosYTop][this.tilePosXLeft - 1] === 10){
                 if(this.actualXVel < 0){
                     if(this.x + this.actualXVel <= (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset){
-                        this.actualXVel = (this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1;
+                        this.actualXVel = ((this.tilePosXLeft - 1) * tileSize + tileSize + xOffset - this.x + 1.15);
                     }else{
 
                     }
@@ -176,11 +173,11 @@ function Player(id){
             }
         }
 
-        if(this.tilePosXRight < map[0].length){
+        if(this.tilePosXRight < map[0].length - 1){
             if(map[this.tilePosYBottom][this.tilePosXRight + 1] === 10 || map[this.tilePosYTop][this.tilePosXRight + 1] === 10){
                 if(this.actualXVel > 0){
                     if(this.x + this.width + this.actualXVel >= (this.tilePosXRight + 1) * tileSize + xOffset){
-                        this.actualXVel = (this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1;
+                        this.actualXVel = ((this.tilePosXRight + 1) * tileSize + xOffset - this.x - this.width - 1.15);
                     }else{
 
                     }
@@ -190,7 +187,7 @@ function Player(id){
             }
         }
 
-        console.log(this.tilePosXLeft);
+        //console.log(this.actualYVel);
 
         this.x += this.actualXVel;
         this.y += this.actualYVel;
