@@ -338,13 +338,13 @@ function game(){
         bullets[i].update();
         bullets[i].draw();
 
-        if(bullets.length > 0) {
+        if(bullets.length > 0 && i !== bullets.length) {
             if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === 10) {
                 bullets.splice(i, 1);
             }
         }
 
-        if(bullets.length > 0){
+        if(bullets.length > 0 && i !== bullets.length){
             if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
                 bullets.splice(i, 1);
             }
