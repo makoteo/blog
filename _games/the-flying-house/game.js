@@ -223,7 +223,7 @@ function Player(id){
     this.y = HEIGHT/2 - 50;
     this.id = id;
 
-    this.reloadSpeed = 5;
+    this.reloadSpeed = 10;
     this.reloadTimer = 0;
 
     this.width = tileSize/2;
@@ -426,7 +426,7 @@ function game(){
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type !== 10){
+        if(tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15){
             tiles[i].update();
             tiles[i].draw();
             if(gameTicks < 200){
@@ -444,9 +444,14 @@ function game(){
         bullets[i].draw();
 
         if(bullets.length > 0 && i !== bullets.length) {
-            if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === 10) {
-                bullets.splice(i, 1);
+            for(var j = 0; j < collidableBlocks.length; j++){
+                if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
+                    bullets.splice(i, 1);
+                    break;
+                }
             }
+        }else{
+
         }
 
         if(bullets.length > 0 && i !== bullets.length){
@@ -518,7 +523,7 @@ function game(){
     }
 
     for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type === 10){
+        if(tiles[i].type === 10 || tiles[i].type === 12 || tiles[i].type === 13 || tiles[i].type === 14 || tiles[i].type === 15){
             tiles[i].update();
             tiles[i].draw();
         }
