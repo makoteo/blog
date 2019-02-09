@@ -234,15 +234,26 @@ function Balloon(x, y, tiltedX){
     this.screenHalfWidth = WIDTH/2;
     this.screenHalfHeight = HEIGHT/2;
 
+    this.ballooncameraX = 0;
+    this.ballooncameraY = 0;
+
     this.draw = function(){
-        ctx.beginPath();
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 2;
-        ctx.moveTo(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY);
-        ctx.lineTo(this.cameraX + cameraGlobalX + this.tiltedX, this.cameraY - this.yFloat + cameraGlobalY/2);
-        ctx.stroke();
+        for(var i = 0 ; i < 3; i++){
+            ctx.beginPath();
+            ctx.moveTo(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY);
+            ctx.lineTo(this.cameraX + cameraGlobalX - 30*cameraZoom + i*30*cameraZoom, this.cameraY + cameraGlobalY/2 - this.yFloat*cameraZoom);
+            ctx.stroke();
+        }
 
-        ctx.drawImage(tileMap, 192, 0, 192, 256, this.cameraX - tileSize*3, this.cameraY - tileSize * 8 - this.yFloat/2, tileSize*6, tileSize*8);
+        if(this.x > WIDTH/2 - tileSize && this.x < WIDTH/2 + tileSize){
+            for(var i = 0; i < 3; i++){
+                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
+            }
+        }else{
+            ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX, this.ballooncameraY, tileSize*6*cameraZoom, tileSize*8*cameraZoom);
+        }
     };
     this.update = function(){
         if(gameTicks % 10 === 0){
@@ -257,6 +268,9 @@ function Balloon(x, y, tiltedX){
 
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+
+        this.ballooncameraX = Math.round((this.x - this.screenHalfWidth - tileSize*3) * cameraZoom + this.screenHalfWidth);
+        this.ballooncameraY = Math.round((this.y - this.screenHalfHeight - this.yFloat*2) * cameraZoom + this.screenHalfHeight);
     };
 }
 
@@ -291,11 +305,14 @@ function Player(id){
 
     this.facing = 1;
 
+    this.knockBackXVel = 0;
+
     this.update = function(){
 
         if(this.actualXVel === 0){
             this.actualXVel = this.xVel;
         }
+        this.actualXVel += this.knockBackXVel;
         if(this.actualYVel === 0){
             this.actualYVel = this.yVel;
         }
@@ -305,7 +322,7 @@ function Player(id){
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
 
-        if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y < HEIGHT - yOffset)){
+        if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y + this.height < HEIGHT - yOffset)){
             if(this.tilePosYTop > 0 && this.tilePosYBottom < map.length - 1){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYTop - 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYTop - 1][this.tilePosXRight] === collidableBlocks[i]) {
@@ -323,6 +340,8 @@ function Player(id){
 
                     }
                 }
+            }else{
+                this.actualYVel += this.gravity;
             }
 
             if(this.tilePosYBottom < map.length - 1){
@@ -353,9 +372,11 @@ function Player(id){
                         }
                     }
                 }
+            }else{
+                this.actualYVel += this.gravity;
             }
 
-            if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length - 1){
+            if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXLeft - 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXLeft - 1] === collidableBlocks[i]) {
                         if (this.actualXVel < 0) {
@@ -372,7 +393,7 @@ function Player(id){
                 }
             }
 
-            if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length - 1){
+            if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight + 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXRight + 1] === collidableBlocks[i]) {
                         if (this.actualXVel > 0) {
@@ -398,6 +419,14 @@ function Player(id){
             this.facing = 1;
         }else if(this.actualXVel < -moveSpeed + 1){
             this.facing = -1;
+        }
+
+        if(this.knockBackXVel > 2){
+            this.knockBackXVel--;
+        }else if(this.knockBackXVel < -2){
+            this.knockBackXVel++;
+        }else{
+            this.knockBackXVel = 0;
         }
 
         this.x += this.actualXVel;
@@ -459,17 +488,9 @@ for(var i = 0; i < map[0].length; i++){
 players.push(new Player(1));
 players.push(new Player(2));
 
-for(var i = 0; i < 7; i++){
-    balloons.push(new Balloon(WIDTH/2, yOffset, -60 + i*20));
-}
-
-for(var i = 0; i < 5; i++){
-    balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, -60 + i*30));
-}
-
-for(var i = 0; i < 5; i++){
-    balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, -60 + i*30));
-}
+balloons.push(new Balloon(WIDTH/2, yOffset, 0));
+balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
+balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
 
 var gameTicks = 0;
 
@@ -497,10 +518,21 @@ function game(){
         bullets[i].update();
         bullets[i].draw();
 
+        var destroy = false;
+
+        for(var j = 0; j < players.length; j++){
+            if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX > players[j].x){
+                if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
+                    players[j].knockBackXVel += bullets[i].velX;
+                    destroy = true;
+                }
+            }
+        }
+
         if(bullets.length > 0 && i !== bullets.length) {
             for(var j = 0; j < collidableBlocks.length; j++){
                 if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
-                    bullets.splice(i, 1);
+                    destroy = true;
                     break;
                 }
             }
@@ -510,8 +542,12 @@ function game(){
 
         if(bullets.length > 0 && i !== bullets.length){
             if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
-                bullets.splice(i, 1);
+                destroy = true;
             }
+        }
+
+        if(destroy === true){
+            bullets.splice(i, 1);
         }
     }
 
