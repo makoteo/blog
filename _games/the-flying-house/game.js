@@ -103,9 +103,9 @@ function Tile(x, y, width, height, type){
     this.imageHeight = 0;
 
     if(this.type !== 11 && this.type !== 10){
-        this.lightLevel = 0.5;
+        this.lightLevel = 0.8;
     }else if(this.type === 10){
-        this.lightLevel = 0.15;
+        this.lightLevel = Math.random()/6;
     }else{
         this.lightLevel = 0;
     }
@@ -373,14 +373,16 @@ function game(){
         if(tiles[i].type !== 10){
             tiles[i].update();
             tiles[i].draw();
-            if(i > map.length){
-                if(tiles[i-map.length].lightLevel < tiles[i].lightLevel){
-                    tiles[i].lightLevel = tiles[i-map.length].lightLevel + 0.1;
+            if(gameTicks < 200){
+                if(i > map[0].length){
+                    if(tiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i-map[0].length].lightLevel + 0.1;
+                    }
                 }
-            }
-            if(i < tiles.length){
-                if(tiles[i+map[0].length].lightLevel < tiles[i].lightLevel){
-                    tiles[i].lightLevel = tiles[i+map[0].length].lightLevel + 0.1;
+                if(i < tiles.length){
+                    if(tiles[i+map.length].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i+map.length].lightLevel + 0.1;
+                    }
                 }
             }
         }
