@@ -36,7 +36,7 @@ var backgroundMap = [
     [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
     [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 29, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
@@ -72,6 +72,8 @@ GUIDE TO TILE TYPES:
 
 27 - Shelf Top
 28 - Shelf Bottom
+
+29 - Picture
 
 77 -> Spawner of Weapons
 88 -> Empty
@@ -214,6 +216,11 @@ function Tile(x, y, width, height, type){
     }else if(this.type === 28){
         this.imageX = 128;
         this.imageY = 256;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 29){
+        this.imageX = 0;
+        this.imageY = 320;
         this.imageWidth = 64;
         this.imageHeight = 64;
     }else if(this.type === 77){
@@ -404,6 +411,9 @@ function Player(id){
     this.cameraX = 0;
     this.cameraY = 0;
 
+    this.visible = true;
+    this.opacity = 1;
+
     this.screenHalfWidth = Math.round(WIDTH/2);
     this.screenHalfHeight = Math.round(HEIGHT/2);
 
@@ -572,6 +582,12 @@ function Player(id){
         this.x += this.actualXVel;
         this.y += this.actualYVel;
 
+        if(this.visible === false){
+            if(this.actualXVel !== 0 || this.actualYVel !== 0){
+                this.visible = true;
+            }
+        }
+
         this.actualXVel = 0;
 
         if(this.reloadTimer > 0){
@@ -588,14 +604,28 @@ function Player(id){
         }else if(this.xVel === 0){
             this.walkFrame = 0;
         }
+
+
+
     };
 
     this.draw = function(){
 
         //ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        if(this.visible === true){
+            if(this.opacity < 0.95){
+                this.opacity+=0.05;
+            }
+        }else{
+            if(this.opacity > 0.05){
+                this.opacity-=0.05;
+            }
+        }
+        ctx.globalAlpha = this.opacity;
         ctx.drawImage(tileMap, 32*this.id, 256, 32, 50, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.78*cameraZoom);
         ctx.drawImage(tileMap, 32*this.walkFrame, 306, 32, 14, this.cameraX + cameraGlobalX, this.cameraY + this.height*0.78*cameraZoom + cameraGlobalY, this.width*cameraZoom, this.height*0.22*cameraZoom);
         ctx.drawImage(tileMap, 64, 256, 32, 25, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
+        ctx.globalAlpha = 1;
 
         this.xVel = 0;
         this.yVel = 0;
@@ -633,6 +663,15 @@ function Player(id){
             this.active = false;
         }
     };
+
+    this.hide = function(){
+        if (map[this.tilePosYBottom][this.tilePosXRight] === 28 && map[this.tilePosYBottom][this.tilePosXLeft] === 28) {
+            this.visible = false;
+            console.log("Works");
+        } else {
+            console.log("Nope");
+        }
+    }
 }
 
 function playerStat(id){
@@ -951,6 +990,7 @@ function game(){
         }
         else if(keys && keys[40]){
             players[0].yVel = moveSpeed;
+            players[0].hide();
         }else{
 
         }
@@ -982,6 +1022,7 @@ function game(){
         }
         else if(keys && keys[68]){
             players[1].yVel = moveSpeed;
+            players[1].hide();
         }
 
         if((keys && keys[83])&&(keys && keys[70])){
