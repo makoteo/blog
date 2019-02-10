@@ -240,19 +240,32 @@ function Bullet(x, y, type){
         this.velY = 0;
         this.velX = bulletSpeed;
         this.knockBack = bulletSpeed*2;
+        this.width = tileSize/4;
+        this.height = tileSize/4;
     }else if(this.type === 1){
         this.velY = 0;
         this.velX = -bulletSpeed;
         this.knockBack = -bulletSpeed*2;
+        this.width = tileSize/4;
+        this.height = tileSize/4;
+    }else if(this.type === 2){
+        this.velY = 0;
+        this.velX = bulletSpeed*1.5;
+        this.knockBack = bulletSpeed*3;
+        this.width = tileSize/2;
+        this.height = tileSize/2/3*2;
+    }else if(this.type === 3){
+        this.velY = 0;
+        this.velX = -bulletSpeed*1.5;
+        this.knockBack = -bulletSpeed*3;
+        this.width = tileSize/2;
+        this.height = tileSize/2/3*2;
     }
 
     this.x = x;
     this.y = y;
 
     this.frame = 0;
-
-    this.width = tileSize/4;
-    this.height = tileSize/4;
 
     this.screenHalfWidth = Math.round(WIDTH/2);
     this.screenHalfHeight = Math.round(HEIGHT/2);
@@ -274,7 +287,14 @@ function Bullet(x, y, type){
     this.draw = function(){
         ctx.fillStyle = 'black';
         //ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
-        ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        if(this.type === 0 || this.type === 1){
+            ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        }else if(this.type === 2){
+            ctx.drawImage(tileMap, 152, 152, 24, 16, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        }else if(this.type === 3){
+            ctx.drawImage(tileMap, 128, 152, 24, 16, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        }
+
     };
 
 }
@@ -385,6 +405,9 @@ function Player(id){
     this.knockBackXVel = 0;
 
     this.walkFrame = 0;
+
+    this.weapon = "Crumpled Paper";
+    this.bulletCount = 0;
 
     this.update = function(){
 
@@ -513,6 +536,10 @@ function Player(id){
             this.knockBackXVel = 0;
         }
 
+        if(this.bulletCount === 0){
+            this.weapon = "Crumpled Paper";
+        }
+
         this.x += this.actualXVel;
         this.y += this.actualYVel;
 
@@ -547,12 +574,22 @@ function Player(id){
 
     this.spawnBullet = function(){
         if(this.reloadTimer === 0){
-            if(this.facing === 1){
-                bullets.push(new Bullet(this.x + this.width, this.y, 0));
-            }else{
-                bullets.push(new Bullet(this.x, this.y, 1));
+            if(this.weapon === "Crumpled Paper"){
+                if(this.facing === 1){
+                    bullets.push(new Bullet(this.x + this.width, this.y, 0));
+                }else{
+                    bullets.push(new Bullet(this.x, this.y, 1));
+                }
+                this.reloadTimer = this.reloadSpeed;
+            }else if(this.weapon === "Darts"){
+                if(this.facing === 1){
+                    bullets.push(new Bullet(this.x + this.width, this.y, 2));
+                }else{
+                    bullets.push(new Bullet(this.x, this.y, 3));
+                }
+                this.reloadTimer = this.reloadSpeed;
+                this.bulletCount--;
             }
-            this.reloadTimer = this.reloadSpeed;
         }
     };
 
@@ -585,6 +622,7 @@ function playerStat(id){
 
     this.name = "Player " + this.idPlusOne;
     this.weapon = "Crumpled Paper";
+    this.bulletCount = 0;
     this.lives = 10;
 
     if(this.id === 0){
@@ -628,7 +666,11 @@ function playerStat(id){
 
         ctx.fillStyle = 'black';
         ctx.font = '10px Arial';
-        ctx.fillText("Weapon: " + this.weapon, this.weaponX, this.weaponY);
+        if(this.bulletCount > 0){
+            ctx.fillText("Weapon: " + this.weapon + " (" + this.bulletCount + ")", this.weaponX, this.weaponY);
+        }else{
+            ctx.fillText("Weapon: " + this.weapon + " \u221e", this.weaponX, this.weaponY);
+        }
 
         ctx.font = '30px Arial';
         ctx.fillText(parseInt(this.lives), this.lifeNumX, this.lifeNumY);
@@ -637,7 +679,9 @@ function playerStat(id){
     this.update = function(){
         if(gameTicks % 60 === 0){
             this.lives = players[this.id].lives;
+            this.weapon = players[this.id].weapon;
         }
+        this.bulletCount = players[this.id].bulletCount;
     };
 }
 
@@ -697,6 +741,8 @@ function game(){
                         if(players[j].y + players[j].height/2 > tiles[i].y && players[j].y < tiles[i].y + tiles[i].height){
                             tiles[i].powerUpActive = false;
                             tiles[i].spawnTimer = 0;
+                            players[j].weapon = "Darts";
+                            players[j].bulletCount = 10;
                             powerUpSpawned = false;
                         }
                     }
