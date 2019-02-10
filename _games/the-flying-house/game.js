@@ -896,7 +896,6 @@ function game(){
 
     if(fallingTiles.length > 0){
         fallVelocity+=0.1;
-        targetCameraY-=0.1;
     }
 
     if(fallVelocity > 10){
