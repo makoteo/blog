@@ -110,7 +110,7 @@ var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 var cameraGlobalX = 0;
 var cameraGlobalY = 0;
 var cameraZoom = 1;
-var targetCameraZoom = 1;
+var targetCameraY = 1;
 
 var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
@@ -323,11 +323,11 @@ function Bullet(x, y, type){
         ctx.fillStyle = 'black';
         //ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
         if(this.type === 0 || this.type === 1){
-            ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+            ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 2){
-            ctx.drawImage(tileMap, 152, 152, 24, 16, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+            ctx.drawImage(tileMap, 152, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 3){
-            ctx.drawImage(tileMap, 128, 152, 24, 16, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+            ctx.drawImage(tileMap, 128, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }
 
     };
@@ -896,6 +896,7 @@ function game(){
 
     if(fallingTiles.length > 0){
         fallVelocity+=0.1;
+        targetCameraY-=0.1;
     }
 
     if(fallVelocity > 10){
@@ -1078,7 +1079,7 @@ function game(){
         playerStatBoxes[i].draw();
     }
     if(gameTicks % 5 === 0){
-        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3);
+        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3) - targetCameraY;
     }
 
 }
