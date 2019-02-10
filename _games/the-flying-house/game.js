@@ -130,9 +130,10 @@ function Tile(x, y, width, height, type){
     this.imageWidth = 0;
     this.imageHeight = 0;
 
-    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 && this.type !== 77 && this.type !== 99){
+    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 &&
+        this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99){
         this.lightLevel = 0.8;
-    }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 77){
+    }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 16 || this.type === 17 || this.type === 77){
         this.lightLevel = Math.random()/4;
     }else if(this.type === 12 || this.type === 13 || this.type === 99){
         this.lightLevel = 0;
@@ -734,6 +735,7 @@ var gameTicks = 0;
 
 var fallingApartLine = 0;
 var wallTilesToDelete = 0;
+var totalTiles = 0;
 
 function game(){
 
@@ -775,8 +777,21 @@ function game(){
                 }
             }
         }
-        console.log(wallTilesToDelete);
-        //tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
+        for(var n = 0; n < map.length; n++){
+            for(var t = 0; t < map[0].length; t++){
+                if(map[n][t] !== 88){
+                    totalTiles++;
+                }else{
+
+                }
+            }
+        }
+        var bgTilesToDelete = breakingApartBg.length * breakingApartBg[0].length;
+
+        console.log(totalTiles);
+
+        tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
+        tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
     }
 
 
@@ -788,12 +803,22 @@ function game(){
             if(gameTicks < 200){
                 if(i > 0){
                     if(tiles[i-1].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i-1].lightLevel + 0.1;
+                        tiles[i].lightLevel = tiles[i-1].lightLevel + 0.2;
                     }
                 }
                 if(i < tiles.length){
                     if(tiles[i+1].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i+1].lightLevel + 0.1;
+                        tiles[i].lightLevel = tiles[i+1].lightLevel + 0.2;
+                    }
+                }
+                if(i > map[0].length && i < tiles.length/2){
+                    if(tiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i-map[0].length].lightLevel + 0.2;
+                    }
+                }
+                if(i < tiles.length/2 - map[0].length){
+                    if(tiles[i+map[0].length].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i+map[0].length].lightLevel + 0.2;
                     }
                 }
             }
@@ -938,7 +963,6 @@ function game(){
         playerStatBoxes[i].update();
         playerStatBoxes[i].draw();
     }
-
     if(gameTicks % 5 === 0){
         cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3);
     }
