@@ -1,5 +1,5 @@
 //
-// Copyright Martin Feranec 2019
+// Copyright (c) Martin Feranec 2019
 //
 
 var canvas = document.getElementById("myCanvas");
@@ -15,8 +15,8 @@ var map = [
     [88, 88, 12, 14, 16, 88, 88, 88, 88, 88, 88, 88, 17, 15, 13, 88, 88],
     [88, 12, 14, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 15, 13, 88],
     [12, 14, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 13],
-    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 27, 88, 27, 27, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 28, 88, 28, 28, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
@@ -36,7 +36,7 @@ var backgroundMap = [
     [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
     [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
@@ -67,10 +67,11 @@ GUIDE TO TILE TYPES:
 16 - Upside Down Triangle Left
 17 - Upside Down Triangle Right
 
-25-40 -> Dedicated to Backgrounds
-
 25 - Wood
 26 - Window 1
+
+27 - Shelf Top
+28 - Shelf Bottom
 
 77 -> Spawner of Weapons
 88 -> Empty
@@ -132,12 +133,14 @@ function Tile(x, y, width, height, type){
     this.imageHeight = 0;
 
     if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 &&
-        this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99){
+        this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28){
         this.lightLevel = 0.8;
     }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 16 || this.type === 17 || this.type === 77){
         this.lightLevel = Math.random()/4;
     }else if(this.type === 12 || this.type === 13 || this.type === 99){
         this.lightLevel = 0;
+    }else if(this.type === 27 || this.type === 28){
+        this.lightLevel = 0.2;
     }else{
         this.lightLevel = 0.5;
     }
@@ -201,6 +204,16 @@ function Tile(x, y, width, height, type){
     }else if(this.type === 26){
         this.imageX = 128;
         this.imageY = 64;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 27){
+        this.imageX = 128;
+        this.imageY = 208;
+        this.imageWidth = 64;
+        this.imageHeight = 48;
+    }else if(this.type === 28){
+        this.imageX = 128;
+        this.imageY = 256;
         this.imageWidth = 64;
         this.imageHeight = 64;
     }else if(this.type === 77){
@@ -838,6 +851,7 @@ function game(){
     }
 
     if(fallVelocity > 10){
+        powerUpSpawned = false;
         breakingApartBg = [];
         breakingApartFg = [];
         fallingTiles = [];
