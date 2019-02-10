@@ -1,3 +1,7 @@
+//
+// Copyright Martin Feranec 2019
+//
+
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var WIDTH = 1200;
