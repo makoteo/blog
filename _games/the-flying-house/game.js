@@ -36,7 +36,7 @@ var backgroundMap = [
     [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
     [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [99, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [88, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
@@ -88,16 +88,16 @@ var players = [];
 var bullets = [];
 var balloons = [];
 var playerStatBoxes = [];
+var fallingTiles = [];
 
 var powerUpSpawned = false;
 
-var fallApartTime = 10;
+var fallApartTime = 200;
 var fallApartTimer = 0;
 
 var collidableBlocks = [10, 12, 13, 14, 15];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
-
 
 var xOffset = Math.round(WIDTH/2 - (tileSize*map[0].length)/2);
 var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
@@ -105,6 +105,7 @@ var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 var cameraGlobalX = 0;
 var cameraGlobalY = 0;
 var cameraZoom = 1;
+var targetCameraZoom = 1;
 
 var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
@@ -736,6 +737,11 @@ var gameTicks = 0;
 var fallingApartLine = 0;
 var wallTilesToDelete = 0;
 var totalTiles = 0;
+var bgTilesToDelete = 0;
+
+var fallingApartSize = 0;
+
+var fallVelocity = 0;
 
 function game(){
 
@@ -745,16 +751,19 @@ function game(){
 
     if(fallApartTimer < fallApartTime){
         fallApartTimer++;
+    }else{
+        fallApartTimer=0;
     }
 
-    if(fallApartTimer === fallApartTime - 1){
-        for(var i = 0; i < backgroundMap.length; i++){
-            for(var j = 0; j < backgroundMap[0].length; j++){
-                if(backgroundMap[i][j] === 99){
-                    fallingApartLine = i;
-                }
+    for(var i = 0; i < backgroundMap.length; i++){
+        for(var j = 0; j < backgroundMap[0].length; j++){
+            if(backgroundMap[i][j] === 99){
+                fallingApartLine = i;
             }
         }
+    }
+
+    if(fallApartTimer === fallApartTime - 1 && fallingApartLine !== 0){
         for(var m = fallingApartLine - 1; m < backgroundMap.length; m++){
             breakingApartBg.push(backgroundMap[m]);
         }
@@ -786,18 +795,54 @@ function game(){
                 }
             }
         }
-        var bgTilesToDelete = breakingApartBg.length * breakingApartBg[0].length;
-
-        console.log(totalTiles);
+        
+        bgTilesToDelete = breakingApartBg.length * breakingApartBg[0].length;
 
         tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
         tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
 
         map.splice(fallingApartLine - 1, map.length - fallingApartLine + 1);
         backgroundMap.splice(fallingApartLine - 1, backgroundMap.length - fallingApartLine + 1);
+
+        bgTilesToDelete = 0;
+        wallTilesToDelete = 0;
+        totalTiles = 0;
+
+        for(var i = 0; i < breakingApartBg.length; i++){
+            for(var j = 0; j < breakingApartBg[0].length; j++){
+                if(breakingApartBg[i][j] !== 88){
+                    fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartBg[i][j]));
+                }
+            }
+        }
+        for(var i = 0; i < breakingApartFg.length; i++){
+            for(var j = 0; j < breakingApartFg[0].length; j++){
+                if(breakingApartFg[i][j] !== 88){
+                    fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartFg[i][j]));
+                }
+            }
+        }
+
+        fallingApartLine = 0;
+
     }
 
+    for(var i = 0; i < fallingTiles.length; i++){
+        fallingTiles[i].update();
+        fallingTiles[i].draw();
+        fallingTiles[i].y += fallVelocity;
+    }
 
+    if(fallingTiles.length > 0){
+        fallVelocity+=0.1;
+    }
+
+    if(fallVelocity > 10){
+        breakingApartBg = [];
+        breakingApartFg = [];
+        fallingTiles = [];
+        fallVelocity = 0;
+    }
 
     for(var i = 0; i < tiles.length; i++){
         if(tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15){
@@ -860,7 +905,7 @@ function game(){
 
         if(bullets.length > 0 && i !== bullets.length){
             if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
-                bullets.splice(i, 1);
+                destroy = true;
             }
         }
 
