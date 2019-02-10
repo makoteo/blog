@@ -36,19 +36,21 @@ var backgroundMap = [
     [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
     [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [99, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [99, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
+    [99, 25, 25, 26, 26, 26, 25, 25, 25, 25, 25, 26, 26, 26, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
+var breakingApartFg = [];
+var breakingApartBg = [];
 
 /*
 GUIDE TO TILE TYPES:
@@ -72,6 +74,7 @@ GUIDE TO TILE TYPES:
 
 77 -> Spawner of Weapons
 88 -> Empty
+99 -> Break Point
 
  */
 
@@ -87,6 +90,9 @@ var balloons = [];
 var playerStatBoxes = [];
 
 var powerUpSpawned = false;
+
+var fallApartTime = 10;
+var fallApartTimer = 0;
 
 var collidableBlocks = [10, 12, 13, 14, 15];
 
@@ -124,21 +130,21 @@ function Tile(x, y, width, height, type){
     this.imageWidth = 0;
     this.imageHeight = 0;
 
-    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 && this.type !== 77){
+    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 && this.type !== 77 && this.type !== 99){
         this.lightLevel = 0.8;
     }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 77){
         this.lightLevel = Math.random()/4;
-    }else if(this.type === 12 || this.type === 13){
+    }else if(this.type === 12 || this.type === 13 || this.type === 99){
         this.lightLevel = 0;
     }else{
         this.lightLevel = 0.5;
     }
 
-    if(this.type !== 10 && this.type !== 12){
-        if(Math.round((this.x-xOffset)/tileSize) === 0){
+    if(this.type !== 10 && this.type !== 12 && this.type !== 88){
+        if(Math.round((this.x-xOffset)/tileSize) === 2){
             this.lightLevel = 0;
-        }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 1){
-            this.lightLevel = 0;
+        }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 2){
+
         }
     }
 
@@ -428,7 +434,7 @@ function Player(id){
         this.tilePosYTop = Math.round((this.y - this.height - yOffset) / tileSize);
         this.tilePosYBottom = Math.round((this.y - this.actualYVel - 2 - yOffset) / tileSize);
 
-        if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y + this.height < HEIGHT - yOffset)){
+        if((this.x + this.width*2 > xOffset) && (this.x - this.width*2 < WIDTH - xOffset) && (this.y > yOffset) && (this.y - this.height < HEIGHT - yOffset)){
             if(this.tilePosYTop > 0 && this.tilePosYBottom < map.length - 1){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYTop - 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYTop - 1][this.tilePosXRight] === collidableBlocks[i]) {
@@ -515,6 +521,15 @@ function Player(id){
                     }
                 }
             }
+            if(this.tilePosYBottom < map.length){
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
+                        this.y--;
+                    } else {
+
+                    }
+                }
+            }
         }else{
             this.actualYVel += this.gravity;
         }
@@ -586,7 +601,7 @@ function Player(id){
                 }else{
                     bullets.push(new Bullet(this.x, this.y, 3));
                 }
-                this.reloadTimer = this.reloadSpeed*3;
+                this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
             }
         }
@@ -598,6 +613,7 @@ function Player(id){
             this.x = this.spawnX;
             this.y = this.spawnY;
             this.knockBackXVel = 0;
+            this.bulletCount = 0;
         }else{
             this.active = false;
         }
@@ -688,18 +704,18 @@ function playerStat(id){
 
 //CREATE TILES
 
-for(var i = 0; i < backgroundMap[0].length; i++){
-    for(var j = 0; j < backgroundMap.length; j++){
-        if(backgroundMap[j][i] !== 88){
-            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, backgroundMap[j][i]));
+for(var i = 0; i < backgroundMap.length; i++){
+    for(var j = 0; j < backgroundMap[0].length; j++){
+        if(backgroundMap[i][j] !== 88){
+            tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
         }
     }
 }
 
-for(var i = 0; i < map[0].length; i++){
-    for(var j = 0; j < map.length; j++){
-        if(map[j][i] !== 88){
-            tiles.push(new Tile(xOffset + tileSize*i, yOffset + tileSize*j, tileSize, tileSize, map[j][i]));
+for(var i = 0; i < map.length; i++){
+    for(var j = 0; j < map[0].length; j++){
+        if(map[i][j] !== 88){
+            tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
         }
     }
 }
@@ -716,20 +732,68 @@ balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
 
 var gameTicks = 0;
 
+var fallingApartLine = 0;
+var wallTilesToDelete = 0;
+
 function game(){
 
     gameTicks++;
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
+    if(fallApartTimer < fallApartTime){
+        fallApartTimer++;
+    }
+
+    if(fallApartTimer === fallApartTime - 1){
+        for(var i = 0; i < backgroundMap.length; i++){
+            for(var j = 0; j < backgroundMap[0].length; j++){
+                if(backgroundMap[i][j] === 99){
+                    fallingApartLine = i;
+                }
+            }
+        }
+        for(var m = fallingApartLine - 1; m < backgroundMap.length; m++){
+            breakingApartBg.push(backgroundMap[m]);
+        }
+        for(var a = 0; a < map.length; a++){
+            for(var b = 0; b < map[0].length; b++){
+                if(map[a][b] === 99){
+                    fallingApartLine = i;
+                }
+            }
+        }
+        for(var m = fallingApartLine - 1; m < map.length; m++){
+            breakingApartFg.push(map[m]);
+        }
+        for(var n = 0; n < breakingApartFg.length; n++){
+            for(var t = 0; t < breakingApartFg[0].length; t++){
+                if(breakingApartFg[n][t] !== 88){
+                    wallTilesToDelete++;
+                }else{
+
+                }
+            }
+        }
+        console.log(wallTilesToDelete);
+        //tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
+    }
+
+
+
     for(var i = 0; i < tiles.length; i++){
         if(tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15){
             tiles[i].update();
             tiles[i].draw();
             if(gameTicks < 200){
-                if(i < tiles.length - map.length){
-                    if(tiles[i+map.length].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i+map.length].lightLevel + 0.1;
+                if(i > 0){
+                    if(tiles[i-1].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i-1].lightLevel + 0.1;
+                    }
+                }
+                if(i < tiles.length){
+                    if(tiles[i+1].lightLevel < tiles[i].lightLevel){
+                        tiles[i].lightLevel = tiles[i+1].lightLevel + 0.1;
                     }
                 }
             }
@@ -760,7 +824,7 @@ function game(){
         for(var j = 0; j < players.length; j++){
             if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX > players[j].x){
                 if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
-                    players[j].knockBackXVel += bullets[i].knockBack;
+                    players[j].knockBackXVel = bullets[i].knockBack;
                     destroy = true;
                 }
             }
