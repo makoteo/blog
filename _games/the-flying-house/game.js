@@ -415,10 +415,6 @@ function Player(id){
             this.actualXVel = this.xVel;
         }
 
-        if(this.knockBackXVel > bulletSpeed*2){
-            this.knockBackXVel = bulletSpeed*2;
-        }
-
         this.actualXVel += this.knockBackXVel;
         if(this.actualYVel === 0){
             this.actualYVel = this.yVel;
