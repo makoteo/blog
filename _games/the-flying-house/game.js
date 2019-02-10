@@ -792,6 +792,9 @@ function game(){
 
         tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
         tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
+
+        map.splice(fallingApartLine - 1, map.length - fallingApartLine + 1);
+        backgroundMap.splice(fallingApartLine - 1, backgroundMap.length - fallingApartLine + 1);
     }
 
 
