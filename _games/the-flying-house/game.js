@@ -207,12 +207,12 @@ function Bullet(x, y, type){
 
     if(this.type === 0){
         this.velY = 0;
-        this.velX = bulletSpeed/4*3;
-        this.knockBack = bulletSpeed*1.5;
+        this.velX = bulletSpeed;
+        this.knockBack = bulletSpeed*2;
     }else if(this.type === 1){
         this.velY = 0;
-        this.velX = -bulletSpeed/4*3;
-        this.knockBack = -bulletSpeed*1.5;
+        this.velX = -bulletSpeed;
+        this.knockBack = -bulletSpeed*2;
     }
 
     this.x = x;
@@ -763,7 +763,7 @@ function game(){
             players[i].update();
             players[i].draw();
 
-            if(players[i].x < -100 || players[i].x > WIDTH + 100 || players[i].y < -100 || players[i].y > HEIGHT + 100){
+            if(players[i].x < -200 || players[i].x > WIDTH + 200 || players[i].y < -200 || players[i].y > HEIGHT + 200){
                 players[i].die();
             }
         }
