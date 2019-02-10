@@ -79,6 +79,7 @@ var tiles = [];
 var players = [];
 var bullets = [];
 var balloons = [];
+var playerStatBoxes = [];
 
 var collidableBlocks = [10, 12, 13, 14, 15];
 
@@ -198,16 +199,29 @@ function Tile(x, y, width, height, type){
     };
 }
 
-function Bullet(x, y, xVel, yVel, type){
-    this.velY = yVel;
-    this.velX = xVel;
+function Bullet(x, y, type){
+    this.velY = 0;
+    this.velX = 0;
     this.type = type;
+    this.knockBack = 0;
+
+    if(this.type === 0){
+        this.velY = 0;
+        this.velX = bulletSpeed/4*3;
+        this.knockBack = bulletSpeed*1.5;
+    }else if(this.type === 1){
+        this.velY = 0;
+        this.velX = -bulletSpeed/4*3;
+        this.knockBack = -bulletSpeed*1.5;
+    }
 
     this.x = x;
     this.y = y;
 
-    this.width = tileSize/10;
-    this.height = tileSize/10;
+    this.frame = 0;
+
+    this.width = tileSize/4;
+    this.height = tileSize/4;
 
     this.screenHalfWidth = Math.round(WIDTH/2);
     this.screenHalfHeight = Math.round(HEIGHT/2);
@@ -218,11 +232,18 @@ function Bullet(x, y, xVel, yVel, type){
 
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.height/2 - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+
+        if(this.frame < 2 && gameTicks % 10 === 0){
+            this.frame++;
+        }else if(this.frame === 2){
+            this.frame = 0;
+        }
     };
 
     this.draw = function(){
         ctx.fillStyle = 'black';
-        ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        //ctx.fillRect(this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
+        ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX, this.cameraY, this.width * cameraZoom, this.height * cameraZoom);
     };
 
 }
@@ -283,9 +304,24 @@ function Balloon(x, y, tiltedX){
 }
 
 function Player(id){
-    this.x = WIDTH/2;
-    this.y = HEIGHT/2 - 50;
+
     this.id = id;
+
+    if(this.id === 0){
+        this.x = WIDTH/2 - WIDTH/8;
+        this.y = HEIGHT/2 - 50;
+    }else if(this.id === 1){
+        this.x = WIDTH/2 + WIDTH/8;
+        this.y = HEIGHT/2 - 50;
+    }else{
+        this.x = WIDTH/2;
+        this.y = HEIGHT/2;
+    }
+
+    this.lives = 5;
+
+    this.spawnX = this.x;
+    this.spawnY = this.y;
 
     this.reloadSpeed = 20;
     this.reloadTimer = 0;
@@ -312,6 +348,8 @@ function Player(id){
     this.gravity = 0.10;
 
     this.facing = 1;
+
+    this.active = true;
 
     this.knockBackXVel = 0;
 
@@ -479,14 +517,99 @@ function Player(id){
     this.spawnBullet = function(){
         if(this.reloadTimer === 0){
             if(this.facing === 1){
-                bullets.push(new Bullet(this.x + this.width, this.y, bulletSpeed, 0, 0));
+                bullets.push(new Bullet(this.x + this.width, this.y, 0));
             }else{
-                bullets.push(new Bullet(this.x, this.y, -bulletSpeed, 0, 0));
+                bullets.push(new Bullet(this.x, this.y, 1));
             }
             this.reloadTimer = this.reloadSpeed;
         }
-    }
+    };
+
+    this.die = function(){
+        this.lives--;
+        if(this.lives > 0){
+            this.x = this.spawnX;
+            this.y = this.spawnY;
+        }else{
+            this.active = false;
+        }
+    };
 }
+
+function playerStat(id){
+    this.x = 0;
+    this.y = 0;
+    this.id = id;
+
+    this.idPlusOne = this.id+1;
+
+    this.width = WIDTH/8;
+    this.height = HEIGHT/6;
+
+    this.titleX = 0;
+    this.titleY = 0;
+
+    this.profileWidth = WIDTH/20;
+    this.profileHeight = WIDTH/20;
+
+    this.name = "Player " + this.idPlusOne;
+    this.weapon = "Crumpled Paper";
+    this.lives = 10;
+
+    if(this.id === 0){
+        this.x = this.width/10;
+        this.y = HEIGHT - 2*this.height - 2*this.height/10;
+    }else if(this.id === 1){
+        this.x = this.width/10;
+        this.y = HEIGHT - this.height - this.height/10;
+    }
+
+    this.titleX = this.x + WIDTH/100;
+    this.titleY = this.y + HEIGHT/30;
+
+    this.weaponX = this.x + WIDTH/100;
+    this.weaponY = this.y + HEIGHT/7;
+
+    this.profileX = this.x + WIDTH/100;
+    this.profileY = this.y + HEIGHT/20;
+
+    this.lifeNumX = this.x + WIDTH/13;
+    this.lifeNumY = this.y + HEIGHT/11;
+
+    this.draw = function(){
+        ctx.fillStyle = 'gray';
+        ctx.globalAlpha = 0.4;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'black';
+        ctx.font = '20px Calibri';
+        ctx.fillText(this.name, this.titleX, this.titleY);
+
+        ctx.drawImage(tileMap, 32*this.id, 256, 32, 32, this.profileX, this.profileY, this.profileWidth, this.profileHeight*0.7);
+        ctx.drawImage(tileMap, 64, 256, 32, 25, this.profileX + 5, this.profileY, this.profileWidth, this.profileHeight*0.7);
+
+        ctx.globalAlpha = 0.4;
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(this.profileX, this.profileY, this.profileWidth, this.profileHeight*0.7);
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = 'black';
+        ctx.font = '10px Arial';
+        ctx.fillText("Weapon: " + this.weapon, this.weaponX, this.weaponY);
+
+        ctx.font = '30px Arial';
+        ctx.fillText(parseInt(this.lives), this.lifeNumX, this.lifeNumY);
+    };
+
+    this.update = function(){
+        if(gameTicks % 60 === 0){
+            this.lives = players[this.id].lives;
+        }
+    };
+}
+
 
 //CREATE TILES
 
@@ -508,6 +631,9 @@ for(var i = 0; i < map[0].length; i++){
 
 players.push(new Player(0));
 players.push(new Player(1));
+
+playerStatBoxes.push(new playerStat(0));
+playerStatBoxes.push(new playerStat(1));
 
 balloons.push(new Balloon(WIDTH/2, yOffset, 0));
 balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
@@ -544,7 +670,7 @@ function game(){
         for(var j = 0; j < players.length; j++){
             if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX > players[j].x){
                 if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
-                    players[j].knockBackXVel += bullets[i].velX*1.5;
+                    players[j].knockBackXVel += bullets[i].knockBack;
                     destroy = true;
                 }
             }
@@ -633,8 +759,14 @@ function game(){
     }
 
     for(var i = 0; i < players.length; i++) {
-        players[i].update();
-        players[i].draw();
+        if(players[i].active === true){
+            players[i].update();
+            players[i].draw();
+
+            if(players[i].x < -100 || players[i].x > WIDTH + 100 || players[i].y < -100 || players[i].y > HEIGHT + 100){
+                players[i].die();
+            }
+        }
     }
 
     for(var i = 0; i < balloons.length; i++){
@@ -647,6 +779,11 @@ function game(){
             tiles[i].update();
             tiles[i].draw();
         }
+    }
+
+    for(var i = 0; i < playerStatBoxes.length; i++){
+        playerStatBoxes[i].update();
+        playerStatBoxes[i].draw();
     }
 
     if(gameTicks % 5 === 0){
