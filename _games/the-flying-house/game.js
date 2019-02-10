@@ -92,7 +92,7 @@ var fallingTiles = [];
 
 var powerUpSpawned = false;
 
-var fallApartTime = 200;
+var fallApartTime = 1800;
 var fallApartTimer = 0;
 
 var collidableBlocks = [10, 12, 13, 14, 15];
@@ -795,7 +795,7 @@ function game(){
                 }
             }
         }
-        
+
         bgTilesToDelete = breakingApartBg.length * breakingApartBg[0].length;
 
         tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
