@@ -415,7 +415,10 @@ function Player(id){
             this.actualXVel = this.xVel;
         }
 
-        this.actualXVel += this.knockBackXVel;
+        if(Math.abs(this.knockBackXVel) < bulletSpeed*5){
+            this.actualXVel += this.knockBackXVel;
+        }
+
         if(this.actualYVel === 0){
             this.actualYVel = this.yVel;
         }
@@ -583,7 +586,7 @@ function Player(id){
                 }else{
                     bullets.push(new Bullet(this.x, this.y, 3));
                 }
-                this.reloadTimer = this.reloadSpeed;
+                this.reloadTimer = this.reloadSpeed*3;
                 this.bulletCount--;
             }
         }
@@ -594,6 +597,7 @@ function Player(id){
         if(this.lives > 0){
             this.x = this.spawnX;
             this.y = this.spawnY;
+            this.knockBackXVel = 0;
         }else{
             this.active = false;
         }
