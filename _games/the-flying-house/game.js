@@ -20,11 +20,11 @@ var map = [
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 77, 88, 88, 88, 88, 11, 88, 88, 88, 88, 77, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 77, 88, 88, 88, 88, 11, 88, 88, 88, 88, 77, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
@@ -70,6 +70,7 @@ GUIDE TO TILE TYPES:
 25 - Wood
 26 - Window 1
 
+77 -> Spawner of Weapons
 88 -> Empty
 
  */
@@ -84,6 +85,8 @@ var players = [];
 var bullets = [];
 var balloons = [];
 var playerStatBoxes = [];
+
+var powerUpSpawned = false;
 
 var collidableBlocks = [10, 12, 13, 14, 15];
 
@@ -109,6 +112,10 @@ function Tile(x, y, width, height, type){
     this.height = height;
     this.type = type;
 
+    this.powerUpActive = false;
+    this.spawnPeriod = 900 + (Math.random()*500 - 250);
+    this.spawnTimer = 0;
+
     this.cameraX = 0;
     this.cameraY = 0;
 
@@ -117,9 +124,9 @@ function Tile(x, y, width, height, type){
     this.imageWidth = 0;
     this.imageHeight = 0;
 
-    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15){
+    if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 && this.type !== 77){
         this.lightLevel = 0.8;
-    }else if(this.type === 10 || this.type === 14 || this.type === 15){
+    }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 77){
         this.lightLevel = Math.random()/4;
     }else if(this.type === 12 || this.type === 13){
         this.lightLevel = 0;
@@ -188,14 +195,34 @@ function Tile(x, y, width, height, type){
         this.imageY = 64;
         this.imageWidth = 64;
         this.imageHeight = 64;
+    }else if(this.type === 77){
+        this.imageX = 128;
+        this.imageY = 168;
+        this.imageWidth = 40;
+        this.imageHeight = 40;
     }
 
     this.update = function(){
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+
+        if(this.type === 77 && this.powerUpActive === false && powerUpSpawned === false){
+            if(this.spawnTimer < this.spawnPeriod){
+                this.spawnTimer++;
+            }else{
+                this.powerUpActive = true;
+                powerUpSpawned = true;
+            }
+        }
     };
     this.draw = function(){
-        ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        if(this.type !== 77){
+            ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        }else{
+            if(this.powerUpActive === true){
+                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + this.width/16*6 + cameraGlobalX, this.cameraY + cameraGlobalY + this.height/16*5, this.width/8*6*cameraZoom, this.height/8*6*cameraZoom);
+            }
+        }
         ctx.globalAlpha = this.lightLevel/4*3;
         ctx.fillStyle = 'black';
         ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
@@ -663,6 +690,19 @@ function game(){
                 }
             }
         }
+        if(tiles[i].type === 77){
+            if(tiles[i].powerUpActive === true){
+                for(var j = 0; j < players.length; j++){
+                    if(players[j].x + players[j].width > tiles[i].x && players[j].x < tiles[i].x + tiles[i].width){
+                        if(players[j].y + players[j].height/2 > tiles[i].y && players[j].y < tiles[i].y + tiles[i].height){
+                            tiles[i].powerUpActive = false;
+                            tiles[i].spawnTimer = 0;
+                            powerUpSpawned = false;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     for(var i = 0; i < bullets.length; i++){
@@ -740,7 +780,6 @@ function game(){
 
         }else if(keys && keys[69]){
             players[1].yVel = -moveSpeed;
-            console.log("Jump");
         }
         else if(keys && keys[68]){
             players[1].yVel = moveSpeed;
