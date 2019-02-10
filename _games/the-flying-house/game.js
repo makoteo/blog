@@ -665,11 +665,13 @@ function Player(id){
     };
 
     this.hide = function(){
-        if (map[this.tilePosYBottom][this.tilePosXRight] === 28 && map[this.tilePosYBottom][this.tilePosXLeft] === 28) {
-            this.visible = false;
-            console.log("Works");
-        } else {
-            console.log("Nope");
+        if(this.tilePosYBottom < map.length){
+            if (map[this.tilePosYBottom][this.tilePosXRight] === 28 && map[this.tilePosYBottom][this.tilePosXLeft] === 28) {
+                this.visible = false;
+                console.log("Works");
+            } else {
+                console.log("Nope");
+            }
         }
     }
 }
