@@ -315,6 +315,8 @@ function Player(id){
 
     this.knockBackXVel = 0;
 
+    this.walkFrame = 0;
+
     this.update = function(){
 
         if(this.actualXVel === 0){
@@ -447,25 +449,31 @@ function Player(id){
 
         this.actualXVel = 0;
 
-        this.xVel = 0;
-        this.yVel = 0;
-
         if(this.reloadTimer > 0){
             this.reloadTimer--;
         }
 
         this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = Math.round((this.y - this.height/2 - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+
+        if(this.walkFrame < 3 && gameTicks % 10 === 0 && this.xVel !== 0){
+            this.walkFrame++;
+        }else if(this.walkFrame === 3){
+            this.walkFrame = 0;
+        }else if(this.xVel === 0){
+            this.walkFrame = 0;
+        }
     };
 
     this.draw = function(){
-        if(this.id === 1){
-            ctx.fillStyle = 'red';
-        }else if(this.id === 2){
-            ctx.fillStyle = 'lightblue';
-        }
 
-        ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        //ctx.fillRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+        ctx.drawImage(tileMap, 32*this.id, 256, 32, 50, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.78*cameraZoom);
+        ctx.drawImage(tileMap, 32*this.walkFrame, 306, 32, 14, this.cameraX + cameraGlobalX, this.cameraY + this.height*0.78*cameraZoom + cameraGlobalY, this.width*cameraZoom, this.height*0.22*cameraZoom);
+        ctx.drawImage(tileMap, 64, 256, 32, 25, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
+
+        this.xVel = 0;
+        this.yVel = 0;
     };
 
     this.spawnBullet = function(){
@@ -498,8 +506,8 @@ for(var i = 0; i < map[0].length; i++){
     }
 }
 
+players.push(new Player(0));
 players.push(new Player(1));
-players.push(new Player(2));
 
 balloons.push(new Balloon(WIDTH/2, yOffset, 0));
 balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
@@ -566,58 +574,61 @@ function game(){
 
     //CONTROLS
     //PLAYER 1
-    if((keys && keys[40])&&(keys && keys[38])){
+    if(players.length > 0){
+        if((keys && keys[40])&&(keys && keys[38])){
 
-    }else if(keys && keys[38]){
-        players[0].yVel = -moveSpeed;
-    }
-    else if(keys && keys[40]){
-        players[0].yVel = moveSpeed;
-    }else{
+        }else if(keys && keys[38]){
+            players[0].yVel = -moveSpeed;
+        }
+        else if(keys && keys[40]){
+            players[0].yVel = moveSpeed;
+        }else{
 
-    }
+        }
 
-    if((keys && keys[37])&&(keys && keys[39])){
+        if((keys && keys[37])&&(keys && keys[39])){
 
-    }else if(keys && keys[37]){
-        players[0].xVel = -moveSpeed;
-    }
-    else if(keys && keys[39]){
-        players[0].xVel = moveSpeed;
-    }else{
+        }else if(keys && keys[37]){
+            players[0].xVel = -moveSpeed;
+        }
+        else if(keys && keys[39]){
+            players[0].xVel = moveSpeed;
+        }else{
 
-    }
+        }
 
-    if(keys && keys[77]){
-        if(players[0].y + players[0].height < HEIGHT){
-            players[0].spawnBullet();
+        if(keys && keys[77]){
+            if(players[0].y + players[0].height < HEIGHT){
+                players[0].spawnBullet();
+            }
         }
     }
 
     //PLAYER 2
+    if(players.length > 1){
+        if((keys && keys[69])&&(keys && keys[68])){
 
-    if((keys && keys[69])&&(keys && keys[68])){
+        }else if(keys && keys[69]){
+            players[1].yVel = -moveSpeed;
+            console.log("Jump");
+        }
+        else if(keys && keys[68]){
+            players[1].yVel = moveSpeed;
+        }
 
-    }else if(keys && keys[69]){
-        players[1].yVel = -moveSpeed;
-        console.log("Jump");
-    }
-    else if(keys && keys[68]){
-        players[1].yVel = moveSpeed;
-    }
+        if((keys && keys[83])&&(keys && keys[70])){
 
-    if((keys && keys[83])&&(keys && keys[70])){
+        }else if(keys && keys[83]){
+            players[1].xVel = -moveSpeed;
+        }
+        else if(keys && keys[70]){
+            players[1].xVel = moveSpeed;
+        }
 
-    }else if(keys && keys[83]){
-        players[1].xVel = -moveSpeed;
-    }
-    else if(keys && keys[70]){
-        players[1].xVel = moveSpeed;
-    }
-
-    if(keys && keys[81]){
-        if(players[1].y + players[1].height < HEIGHT){
-            players[1].spawnBullet();
+        if(keys && keys[81]){
+            if(players[1].y + players[1].height < HEIGHT){
+                players[1].spawnBullet();
+            }
         }
     }
 
