@@ -14,9 +14,9 @@ var map = [
     [88, 88, 88, 12, 14, 16, 88, 88, 88, 88, 88, 17, 15, 13, 88, 88, 88],
     [88, 88, 12, 14, 16, 88, 88, 88, 88, 88, 88, 88, 17, 15, 13, 88, 88],
     [88, 12, 14, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 15, 13, 88],
-    [12, 14, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 15, 13],
-    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
+    [12, 14, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 13],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
@@ -911,9 +911,11 @@ function game(){
 
         if(bullets.length > 0 && i !== bullets.length) {
             for(var j = 0; j < collidableBlocks.length; j++){
-                if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
-                    destroy = true;
-                    break;
+                if(Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize) < map.length){
+                    if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
+                        destroy = true;
+                        break;
+                    }
                 }
             }
         }else{
