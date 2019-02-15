@@ -561,7 +561,10 @@ function Player(id){
                         } else {
                             if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                                 if (map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11) {
-                                    this.actualYVel = this.yVel;
+                                    if(Math.abs(this.actualYVel) < moveSpeed){
+                                        this.actualYVel = this.yVel;
+                                    }
+
                                 }
                             } else {
                                 this.actualYVel += this.gravity;
@@ -571,7 +574,9 @@ function Player(id){
                     } else {
                         if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                             if ((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
-                                this.actualYVel = this.yVel;
+                                if(Math.abs(this.actualYVel) < moveSpeed){
+                                    this.actualYVel = this.yVel;
+                                }
                                 break;
                             }
                         } else {
@@ -1062,7 +1067,7 @@ function game(){
                             var random = Math.random();
                             if(random > 0.8){
                                 players[j].weapon = "Potato Launcher";
-                                players[j].bulletCount = 10;
+                                players[j].bulletCount = 3;
                             }else{
                                 players[j].weapon = "Darts";
                                 players[j].bulletCount = 20;
