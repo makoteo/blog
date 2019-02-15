@@ -20,7 +20,7 @@ var map = [
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 27, 27, 88, 88, 88, 88, 88],
-    [88, 88, 88, 77, 88, 88, 88, 88, 11, 88, 28, 28, 88, 77, 88, 88, 88],
+    [88, 88, 88, 77, 31, 32, 33, 88, 11, 88, 28, 28, 88, 77, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 27, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
@@ -76,6 +76,10 @@ GUIDE TO TILE TYPES:
 29 - Picture
 
 30 - Small Table
+
+31 -> Left Couch
+32 -> Middle Couch
+33 -> Right Couch
 
 77 -> Spawner of Weapons
 88 -> Empty
@@ -139,7 +143,8 @@ function Tile(x, y, width, height, type){
     this.imageHeight = 0;
 
     if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 &&
-        this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28){
+        this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28
+        && this.type !== 31 && this.type !== 32){
         this.lightLevel = 0.8;
     }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 16 || this.type === 17 || this.type === 77){
         this.lightLevel = Math.random()/4;
@@ -147,6 +152,8 @@ function Tile(x, y, width, height, type){
         this.lightLevel = 0;
     }else if(this.type === 27 || this.type === 28){
         this.lightLevel = 0.2;
+    }else if(this.type === 31|| this.type === 32){
+        this.lightLevel = 0.1;
     }else{
         this.lightLevel = 0.5;
     }
@@ -229,6 +236,21 @@ function Tile(x, y, width, height, type){
         this.imageHeight = 64;
     }else if(this.type === 30){
         this.imageX = 64;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 31){
+        this.imageX = 128;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 32){
+        this.imageX = 192;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 33){
+        this.imageX = 256;
         this.imageY = 320;
         this.imageWidth = 64;
         this.imageHeight = 64;
@@ -787,6 +809,7 @@ for(var i = 0; i < map.length; i++){
 
 players.push(new Player(0));
 players.push(new Player(1));
+//MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
 
 playerStatBoxes.push(new playerStat(0));
 playerStatBoxes.push(new playerStat(1));
@@ -806,11 +829,19 @@ var fallVelocity = 0;
 
 var justFell = false;
 
+var grd = ctx.createLinearGradient(0, 0, 0, 500);
+grd.addColorStop(0, "rgb(89, 139, 219)");
+grd.addColorStop(1, "rgb(142, 183, 249)");
+
 function game(){
 
     gameTicks++;
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+// Fill with gradient
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     if(justFell === true){
         if(yOffset + cameraGlobalYOffset + tileSize*map.length < HEIGHT - yOffset - cameraGlobalYOffset){
