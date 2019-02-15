@@ -24,7 +24,7 @@ var map = [
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 27, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 77, 88, 28, 30, 88, 11, 88, 88, 88, 88, 77, 88, 88, 88],
+    [88, 88, 88, 77, 88, 28, 30, 88, 11, 88, 35, 36, 37, 77, 34, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
@@ -80,6 +80,12 @@ GUIDE TO TILE TYPES:
 31 -> Left Couch
 32 -> Middle Couch
 33 -> Right Couch
+
+34 -> Seat
+
+35 -> Left Table
+36 -> Middle Table
+37 -> Right Table
 
 77 -> Spawner of Weapons
 88 -> Empty
@@ -144,7 +150,7 @@ function Tile(x, y, width, height, type){
 
     if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 &&
         this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28
-        && this.type !== 31 && this.type !== 32){
+        && this.type !== 31 && this.type !== 32 && this.type !== 33 && this.type !== 35 && this.type !== 36 && this.type !== 37){
         this.lightLevel = 0.8;
     }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 16 || this.type === 17 || this.type === 77){
         this.lightLevel = Math.random()/4;
@@ -254,6 +260,26 @@ function Tile(x, y, width, height, type){
         this.imageY = 320;
         this.imageWidth = 64;
         this.imageHeight = 64;
+    }else if(this.type === 34){
+        this.imageX = 512;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 35){
+        this.imageX = 320;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 36){
+        this.imageX = 384;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 37){
+        this.imageX = 448;
+        this.imageY = 320;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
     }else if(this.type === 77){
         this.imageX = 128;
         this.imageY = 168;
@@ -319,6 +345,18 @@ function Bullet(x, y, type){
         this.knockBack = -bulletSpeed*3;
         this.width = tileSize/2;
         this.height = tileSize/2/3*2;
+    }else if(this.type === 4){
+        this.velY = 0;
+        this.velX = bulletSpeed*2;
+        this.knockBack = bulletSpeed*5;
+        this.width = tileSize/2.5;
+        this.height = tileSize/2.5;
+    }else if(this.type === 5){
+        this.velY = 0;
+        this.velX = -bulletSpeed*2;
+        this.knockBack = -bulletSpeed*5;
+        this.width = tileSize/2.5;
+        this.height = tileSize/2.5;
     }
 
     this.x = x;
@@ -352,6 +390,8 @@ function Bullet(x, y, type){
             ctx.drawImage(tileMap, 152, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 3){
             ctx.drawImage(tileMap, 128, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
+        }else if(this.type === 5 || this.type === 4){
+            ctx.drawImage(tileMap, 168, 168, 24, 18, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }
 
     };
@@ -679,6 +719,14 @@ function Player(id){
                 }
                 this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
+            }else if(this.weapon === "Potato Launcher"){
+                if(this.facing === 1){
+                    bullets.push(new Bullet(this.x + this.width, this.y, 4));
+                }else{
+                    bullets.push(new Bullet(this.x, this.y, 5));
+                }
+                this.reloadTimer = this.reloadSpeed*3;
+                this.bulletCount--;
             }
         }
     };
@@ -699,9 +747,9 @@ function Player(id){
         if(this.tilePosYBottom < map.length){
             if (map[this.tilePosYBottom][this.tilePosXRight] === 28 && map[this.tilePosYBottom][this.tilePosXLeft] === 28) {
                 this.visible = false;
-                console.log("Works");
+                //console.log("Works");
             } else {
-                console.log("Nope");
+                //console.log("Nope");
             }
         }
     }
@@ -830,8 +878,8 @@ var fallVelocity = 0;
 var justFell = false;
 
 var grd = ctx.createLinearGradient(0, 0, 0, 500);
-grd.addColorStop(0, "rgb(89, 139, 219)");
-grd.addColorStop(1, "rgb(142, 183, 249)");
+grd.addColorStop(0, "rgb(86, 136, 216)");
+grd.addColorStop(1, "rgb(100, 183, 249)");
 
 function game(){
 
@@ -1011,8 +1059,14 @@ function game(){
                         if(players[j].y + players[j].height/2 > tiles[i].y && players[j].y < tiles[i].y + tiles[i].height){
                             tiles[i].powerUpActive = false;
                             tiles[i].spawnTimer = 0;
-                            players[j].weapon = "Darts";
-                            players[j].bulletCount = 10;
+                            var random = Math.random();
+                            if(random > 0.8){
+                                players[j].weapon = "Potato Launcher";
+                                players[j].bulletCount = 10;
+                            }else{
+                                players[j].weapon = "Darts";
+                                players[j].bulletCount = 20;
+                            }
                             powerUpSpawned = false;
                         }
                     }
