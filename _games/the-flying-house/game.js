@@ -800,8 +800,6 @@ var wallTilesToDelete = 0;
 var totalTiles = 0;
 var bgTilesToDelete = 0;
 
-var fallingApartSize = 0;
-
 var fallVelocity = 0;
 
 function game(){
@@ -857,17 +855,21 @@ function game(){
             }
         }
 
-        bgTilesToDelete = breakingApartBg.length * breakingApartBg[0].length;
+        for(var n = fallingApartLine - 1; n < backgroundMap.length; n++){
+            for(var t = 0; t < backgroundMap[0].length; t++){
+                if(backgroundMap[n][t] !== 88){
+                    bgTilesToDelete++;
+                }else{
+
+                }
+            }
+        }
 
         tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
         tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
 
         map.splice(fallingApartLine - 1, map.length - fallingApartLine + 1);
         backgroundMap.splice(fallingApartLine - 1, backgroundMap.length - fallingApartLine + 1);
-
-        bgTilesToDelete = 0;
-        wallTilesToDelete = 0;
-        totalTiles = 0;
 
         for(var i = 0; i < breakingApartBg.length; i++){
             for(var j = 0; j < breakingApartBg[0].length; j++){
@@ -885,6 +887,9 @@ function game(){
         }
 
         fallingApartLine = 0;
+        bgTilesToDelete = 0;
+        wallTilesToDelete = 0;
+        totalTiles = 0;
 
     }
 
@@ -892,6 +897,28 @@ function game(){
         fallingTiles[i].update();
         fallingTiles[i].draw();
         fallingTiles[i].y += fallVelocity;
+        if(fallingTiles[i].type !== 10 && fallingTiles[i].type !== 12 && fallingTiles[i].type !== 13 && fallingTiles[i].type !== 14 && fallingTiles[i].type !== 15){
+            if(i > 0){
+                if(fallingTiles[i-1].lightLevel < fallingTiles[i].lightLevel){
+                    fallingTiles[i].lightLevel = fallingTiles[i-1].lightLevel + 0.2;
+                }
+            }
+            if(i < fallingTiles.length){
+                if(fallingTiles[i+1].lightLevel < fallingTiles[i].lightLevel){
+                    fallingTiles[i].lightLevel = fallingTiles[i+1].lightLevel + 0.2;
+                }
+            }
+            if(i > map[0].length && i < fallingTiles.length/2){
+                if(fallingTiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
+                    fallingTiles[i].lightLevel = fallingTiles[i-map[0].length].lightLevel + 0.2;
+                }
+            }
+            if(i < fallingTiles.length/2 - map[0].length){
+                if(fallingTiles[i+map[0].length].lightLevel < fallingTiles[i].lightLevel){
+                    fallingTiles[i].lightLevel = fallingTiles[i+map[0].length].lightLevel + 0.2;
+                }
+            }
+        }
     }
 
     if(fallingTiles.length > 0){
