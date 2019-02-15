@@ -561,7 +561,10 @@ function Player(id){
                         } else {
                             if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                                 if (map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11) {
-                                    if(Math.abs(this.actualYVel) < moveSpeed/2){
+                                    if(Math.abs(this.actualYVel) === 0){
+                                        this.actualYVel = this.yVel;
+                                    }
+                                    if(Math.abs(this.yVel) > Math.abs(this.actualYVel)){
                                         this.actualYVel = this.yVel;
                                     }
 
@@ -574,7 +577,10 @@ function Player(id){
                     } else {
                         if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                             if ((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
-                                if(Math.abs(this.actualYVel) < moveSpeed/2){
+                                if(Math.abs(this.actualYVel) === 0){
+                                    this.actualYVel = this.yVel;
+                                }
+                                if(Math.abs(this.yVel) > Math.abs(this.actualYVel)){
                                     this.actualYVel = this.yVel;
                                 }
                                 break;
