@@ -97,7 +97,7 @@ var fallingTiles = [];
 
 var powerUpSpawned = false;
 
-var fallApartTime = 1800;
+var fallApartTime = 1800; //1800
 var fallApartTimer = 0;
 
 var collidableBlocks = [10, 12, 13, 14, 15];
@@ -109,6 +109,8 @@ var yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 
 var cameraGlobalX = 0;
 var cameraGlobalY = 0;
+
+var cameraGlobalYOffset = 0;
 var cameraZoom = 1;
 var targetCameraY = 1;
 
@@ -238,8 +240,8 @@ function Tile(x, y, width, height, type){
     }
 
     this.update = function(){
-        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
-        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+        this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
 
         if(this.type === 77 && this.powerUpActive === false && powerUpSpawned === false){
             if(this.spawnTimer < this.spawnPeriod){
@@ -358,16 +360,16 @@ function Balloon(x, y, tiltedX){
         for(var i = 0 ; i < 3; i++){
             ctx.beginPath();
             ctx.moveTo(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY);
-            ctx.lineTo(this.cameraX + cameraGlobalX - 30*cameraZoom + i*30*cameraZoom, this.cameraY + cameraGlobalY/2 - this.yFloat*cameraZoom);
+            ctx.lineTo(this.cameraX + cameraGlobalX - 30*cameraZoom + i*30*cameraZoom, this.cameraY + cameraGlobalY - this.yFloat*cameraZoom);
             ctx.stroke();
         }
 
         if(this.x > WIDTH/2 - tileSize && this.x < WIDTH/2 + tileSize){
             for(var i = 0; i < 3; i++){
-                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
+                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY + cameraGlobalY - 100, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
             }
         }else{
-            ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX, this.ballooncameraY, tileSize*6*cameraZoom, tileSize*8*cameraZoom);
+            ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX, this.ballooncameraY + cameraGlobalY, tileSize*6*cameraZoom, tileSize*8*cameraZoom);
         }
     };
     this.update = function(){
@@ -802,16 +804,26 @@ var bgTilesToDelete = 0;
 
 var fallVelocity = 0;
 
+var justFell = false;
+
 function game(){
 
     gameTicks++;
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
+    if(justFell === true){
+        if(yOffset + cameraGlobalYOffset + tileSize*map.length < HEIGHT - yOffset - cameraGlobalYOffset){
+            cameraGlobalYOffset += 0.1;
+        }else{
+            justFell = false;
+        }
+    }
+
     if(fallApartTimer < fallApartTime){
         fallApartTimer++;
     }else{
-        fallApartTimer=0;
+        fallApartTimer = 0;
     }
 
     for(var i = 0; i < backgroundMap.length; i++){
@@ -931,6 +943,7 @@ function game(){
         breakingApartFg = [];
         fallingTiles = [];
         fallVelocity = 0;
+        justFell = true;
     }
 
     for(var i = 0; i < tiles.length; i++){
@@ -1105,7 +1118,7 @@ function game(){
         playerStatBoxes[i].draw();
     }
     if(gameTicks % 5 === 0){
-        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3) - targetCameraY;
+        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3 + cameraGlobalYOffset);
     }
 
 }
