@@ -561,7 +561,7 @@ function Player(id){
                         } else {
                             if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                                 if (map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11) {
-                                    if(Math.abs(this.actualYVel) < moveSpeed){
+                                    if(Math.abs(this.actualYVel) < moveSpeed/2){
                                         this.actualYVel = this.yVel;
                                     }
 
@@ -574,7 +574,7 @@ function Player(id){
                     } else {
                         if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
                             if ((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
-                                if(Math.abs(this.actualYVel) < moveSpeed){
+                                if(Math.abs(this.actualYVel) < moveSpeed/2){
                                     this.actualYVel = this.yVel;
                                 }
                                 break;
@@ -625,7 +625,7 @@ function Player(id){
             if(this.tilePosYBottom < map.length){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
-                        this.y--;
+                        this.y = this.tilePosYTop*tileSize + yOffset + tileSize - this.height/2;
                     } else {
 
                     }
