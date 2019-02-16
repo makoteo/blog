@@ -138,10 +138,13 @@ var lightDetailLevel = 10;
 var lightingPercision = 0.2;
 
 var maxRainParticles = 100;
+var weatherSwitchTime = 1200;
 
 var rainOpacity = 0;
 
 var updateSpeed = 2; //Must be bigger than 0, should be 5
+
+var rainCurrent = 0;
 
 repeatOften(); //Starts Game
 
@@ -1076,6 +1079,16 @@ function game(){
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
         ctx.fillStyle = 'white';
         ctx.globalAlpha = 1;
+
+        if(gameTicks % weatherSwitchTime === 0){
+            rainCurrent = Math.round(Math.random()*100)/100;
+        }
+
+        if(rainCurrent > rainOpacity){
+            rainOpacity+=0.01;
+        }else if(rainCurrent < rainOpacity){
+            rainOpacity-=0.01;
+        }
 
         if(rainOpacity > 0.5){
             if(gameTicks % updateSpeed === 0){
