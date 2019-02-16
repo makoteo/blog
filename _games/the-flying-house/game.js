@@ -967,20 +967,27 @@ function RainParticle() {
 
 function LightningBolt() {
     this.x = Math.round(Math.random()*WIDTH);
-    this.y = Math.round(Math.random()*HEIGHT/10);
-    this.length = Math.round((Math.random() + 1) * HEIGHT/100);
+    this.y = 0;
+    this.length = Math.round((Math.random()) * 20);
     this.segmentsDrawn = 0;
-    this.x1 = this.x + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
-    this.y1 = this.y + Math.round(Math.random()-0.1*HEIGHT/8);
-    this.x2 = this.x1 + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
-    this.y2 = this.y1 + Math.round(Math.random()-0.1*HEIGHT/8);
-    this.x3 = this.x2 + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
-    this.y3 = this.y2 + Math.round(Math.random()-0.1*HEIGHT/8);
+
+    this.xPoses = [];
+    this.yPoses = [];
+
+    this.xPoses.push(this.x);
+    this.yPoses.push(this.y);
 
     this.opacity = 1;
 
+    for(var i = 1; i < this.length; i++){
+        this.xPoses.push(this.xPoses[i-1] + (Math.random()*WIDTH/20) - WIDTH/40);
+        this.yPoses.push(this.yPoses[i-1] + (Math.random()*HEIGHT/10) - HEIGHT/100);
+    }
+
     this.update = function(){
-        this.segmentsDrawn+=0.2;
+        if(this.segmentsDrawn < this.length){
+            this.segmentsDrawn+=1;
+        }
         if(this.opacity > 0){
             this.opacity-=0.02;
         }
@@ -988,28 +995,12 @@ function LightningBolt() {
 
     this.draw = function(){
         ctx.globalAlpha = this.opacity;
-        if(this.segmentsDrawn >= 0){
+        for(var i = 0; i < this.segmentsDrawn - 1; i++){
             ctx.beginPath();
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.x1, this.y1);
-            ctx.stroke();
-        }
-        if(this.segmentsDrawn >= 1){
-            ctx.beginPath();
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.moveTo(this.x1, this.y1);
-            ctx.lineTo(this.x2, this.y2);
-            ctx.stroke();
-        }
-        if(this.segmentsDrawn >= 2){
-            ctx.beginPath();
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 2;
-            ctx.moveTo(this.x2, this.y2);
-            ctx.lineTo(this.x3, this.y3);
+            ctx.strokeStyle = 'rgb(200, 255, 225)';
+            ctx.lineWidth = 1;
+            ctx.moveTo(this.xPoses[i], this.yPoses[i]);
+            ctx.lineTo(this.xPoses[i + 1], this.yPoses[i + 1]);
             ctx.stroke();
         }
         ctx.globalAlpha = 1;
@@ -1085,9 +1076,9 @@ function game(){
         }
 
         if(rainCurrent > rainOpacity){
-            rainOpacity+=0.01;
+            rainOpacity+=0.005;
         }else if(rainCurrent < rainOpacity){
-            rainOpacity-=0.01;
+            rainOpacity-=0.005;
         }
 
         if(rainOpacity > 0.5){
@@ -1101,7 +1092,7 @@ function game(){
         }
 
         if(rainOpacity > 0.7){
-            if(gameTicks % 1200 - Math.round(rainOpacity*2*500) === 0){
+            if(gameTicks % 600 - Math.round(rainOpacity*500) === 0){
                 lightningBolts.push(new LightningBolt());
                 lightningBoltFlashOpacity = 1;
             }
