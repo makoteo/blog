@@ -104,6 +104,7 @@ var bullets = [];
 var balloons = [];
 var playerStatBoxes = [];
 var fallingTiles = [];
+var effects = [];
 
 var powerUpSpawned = false;
 
@@ -126,6 +127,12 @@ var targetCameraY = 1;
 
 var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
+
+var GAMESTATE = "GAME";
+var lightDetailLevel = 10;
+var lightingPercision = 0.2;
+
+var rainOpacity = 0;
 
 repeatOften(); //Starts Game
 
@@ -165,10 +172,12 @@ function Tile(x, y, width, height, type){
     }
 
     if(this.type !== 10 && this.type !== 12 && this.type !== 88){
-        if(Math.round((this.x-xOffset)/tileSize) === 2){
-            this.lightLevel = 0;
-        }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 2){
-
+        if(lightDetailLevel > 1){
+            if(Math.round((this.x-xOffset)/tileSize) === 1){
+                this.lightLevel = 0.3;
+            }else if(Math.round((this.x-xOffset)/tileSize) === map[0].length - 2){
+                this.lightLevel = 0;
+            }
         }
     }
 
@@ -297,6 +306,7 @@ function Tile(x, y, width, height, type){
             }else{
                 this.powerUpActive = true;
                 powerUpSpawned = true;
+                effects.push(new Explosion(this.x + tileSize/2, this.y + tileSize/1.5, 0));
             }
         }
     };
@@ -305,7 +315,7 @@ function Tile(x, y, width, height, type){
             ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
         }else{
             if(this.powerUpActive === true){
-                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + this.width/16*6 + cameraGlobalX, this.cameraY + cameraGlobalY + this.height/16*5, this.width/8*6*cameraZoom, this.height/8*6*cameraZoom);
+                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + this.width/8 + cameraGlobalX, this.cameraY + cameraGlobalY + this.height/16*5, this.width/8*6*cameraZoom, this.height/8*6*cameraZoom);
             }
         }
         ctx.globalAlpha = this.lightLevel/4*3;
@@ -749,6 +759,7 @@ function Player(id){
             this.y = this.spawnY;
             this.knockBackXVel = 0;
             this.bulletCount = 0;
+            this.weapon = "Crumpled Paper";
         }else{
             this.active = false;
         }
@@ -808,6 +819,7 @@ function playerStat(id){
     this.lifeNumY = this.y + HEIGHT/11;
 
     this.draw = function(){
+        ctx.textAlign = 'left';
         ctx.fillStyle = 'gray';
         ctx.globalAlpha = 0.4;
         ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -844,6 +856,78 @@ function playerStat(id){
             this.weapon = players[this.id].weapon;
         }
         this.bulletCount = players[this.id].bulletCount;
+    };
+}
+
+function Button(){
+    //Make Button
+}
+
+function TextBox(x, y, type, text){
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.yVel = -0.5;
+    this.lifeSpan = 100;
+    this.opacity = 1;
+    this.text = text;
+    this.screenHalfHeight = HEIGHT/2;
+    this.screenHalfWidth = WIDTH/2;
+
+    this.update = function(){
+        this.y += this.yVel;
+        if(this.opacity > 0.01){
+            this.opacity -= 0.01
+        }
+        this.lifeSpan--;
+
+        this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+    };
+
+    this.draw = function(){
+        ctx.font = "15px Arial";
+        ctx.strokeStyle = 'white';
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = this.opacity;
+        ctx.textAlign = 'center';
+        ctx.fillText(this.text, this.x, this.y + cameraGlobalY);
+        ctx.globalAlpha = 1;
+    };
+}
+
+function Explosion(x, y, type){
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.radius = 0.1;
+    this.opacity = 1;
+    this.expandSpeed = 0.2;
+    this.lifeSpan = 100;
+    this.screenHalfHeight = HEIGHT/2;
+    this.screenHalfWidth = WIDTH/2;
+
+    this.update = function(){
+        if(this.opacity > 0.01){
+            this.opacity -= 0.01
+        }
+        this.radius+=this.expandSpeed;
+        if(this.lifeSpan > 0){
+            this.lifeSpan--;
+        }
+        this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+    };
+
+    this.draw = function(){
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = this.opacity;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(this.cameraX, this.cameraY + cameraGlobalY, this.radius, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 1;
     };
 }
 
@@ -888,334 +972,369 @@ var fallVelocity = 0;
 
 var justFell = false;
 
-var grd = ctx.createLinearGradient(0, 0, 0, 500);
+var grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
 grd.addColorStop(0, "rgb(86, 136, 216)");
 grd.addColorStop(1, "rgb(100, 183, 249)");
 
+var stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, HEIGHT/2, WIDTH/2);
+
+stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
+stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
 function game(){
 
-    gameTicks++;
+    if(GAMESTATE === "GAME"){
+        gameTicks++;
 
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
 // Fill with gradient
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = grd;
+        ctx.globalAlpha = 1 - rainOpacity/2;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = 1;
 
-    if(justFell === true){
-        if(yOffset + cameraGlobalYOffset + tileSize*map.length < HEIGHT - yOffset - cameraGlobalYOffset){
-            cameraGlobalYOffset += 0.1;
-        }else{
-            justFell = false;
-        }
-    }
-
-    if(fallApartTimer < fallApartTime){
-        fallApartTimer++;
-    }else{
-        fallApartTimer = 0;
-    }
-
-    for(var i = 0; i < backgroundMap.length; i++){
-        for(var j = 0; j < backgroundMap[0].length; j++){
-            if(backgroundMap[i][j] === 99){
-                fallingApartLine = i;
+        if(justFell === true){
+            if(yOffset + cameraGlobalYOffset + tileSize*map.length < HEIGHT - yOffset - cameraGlobalYOffset){
+                cameraGlobalYOffset += 0.1;
+            }else{
+                justFell = false;
             }
         }
-    }
 
-    if(fallApartTimer === fallApartTime - 1 && fallingApartLine !== 0){
-        for(var m = fallingApartLine - 1; m < backgroundMap.length; m++){
-            breakingApartBg.push(backgroundMap[m]);
+        if(fallApartTimer < fallApartTime){
+            fallApartTimer++;
+        }else{
+            fallApartTimer = 0;
         }
-        for(var a = 0; a < map.length; a++){
-            for(var b = 0; b < map[0].length; b++){
-                if(map[a][b] === 99){
+
+        for(var i = 0; i < backgroundMap.length; i++){
+            for(var j = 0; j < backgroundMap[0].length; j++){
+                if(backgroundMap[i][j] === 99){
                     fallingApartLine = i;
                 }
             }
         }
-        for(var m = fallingApartLine - 1; m < map.length; m++){
-            breakingApartFg.push(map[m]);
+
+        if(fallApartTimer === fallApartTime - 1 && fallingApartLine !== 0){
+            for(var m = fallingApartLine - 1; m < backgroundMap.length; m++){
+                breakingApartBg.push(backgroundMap[m]);
+            }
+            for(var a = 0; a < map.length; a++){
+                for(var b = 0; b < map[0].length; b++){
+                    if(map[a][b] === 99){
+                        fallingApartLine = i;
+                    }
+                }
+            }
+            for(var m = fallingApartLine - 1; m < map.length; m++){
+                breakingApartFg.push(map[m]);
+            }
+            for(var n = 0; n < breakingApartFg.length; n++){
+                for(var t = 0; t < breakingApartFg[0].length; t++){
+                    if(breakingApartFg[n][t] !== 88){
+                        wallTilesToDelete++;
+                    }else{
+
+                    }
+                }
+            }
+            for(var n = 0; n < map.length; n++){
+                for(var t = 0; t < map[0].length; t++){
+                    if(map[n][t] !== 88){
+                        totalTiles++;
+                    }else{
+
+                    }
+                }
+            }
+
+            for(var n = fallingApartLine - 1; n < backgroundMap.length; n++){
+                for(var t = 0; t < backgroundMap[0].length; t++){
+                    if(backgroundMap[n][t] !== 88){
+                        bgTilesToDelete++;
+                    }else{
+
+                    }
+                }
+            }
+
+            tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
+            tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
+
+            map.splice(fallingApartLine - 1, map.length - fallingApartLine + 1);
+            backgroundMap.splice(fallingApartLine - 1, backgroundMap.length - fallingApartLine + 1);
+
+            for(var i = 0; i < breakingApartBg.length; i++){
+                for(var j = 0; j < breakingApartBg[0].length; j++){
+                    if(breakingApartBg[i][j] !== 88){
+                        fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartBg[i][j]));
+                    }
+                }
+            }
+            for(var i = 0; i < breakingApartFg.length; i++){
+                for(var j = 0; j < breakingApartFg[0].length; j++){
+                    if(breakingApartFg[i][j] !== 88){
+                        fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartFg[i][j]));
+                    }
+                }
+            }
+
+            fallingApartLine = 0;
+            bgTilesToDelete = 0;
+            wallTilesToDelete = 0;
+            totalTiles = 0;
+
         }
-        for(var n = 0; n < breakingApartFg.length; n++){
-            for(var t = 0; t < breakingApartFg[0].length; t++){
-                if(breakingApartFg[n][t] !== 88){
-                    wallTilesToDelete++;
-                }else{
 
-                }
-            }
-        }
-        for(var n = 0; n < map.length; n++){
-            for(var t = 0; t < map[0].length; t++){
-                if(map[n][t] !== 88){
-                    totalTiles++;
-                }else{
-
-                }
-            }
-        }
-
-        for(var n = fallingApartLine - 1; n < backgroundMap.length; n++){
-            for(var t = 0; t < backgroundMap[0].length; t++){
-                if(backgroundMap[n][t] !== 88){
-                    bgTilesToDelete++;
-                }else{
-
-                }
-            }
-        }
-
-        tiles.splice(tiles.length - totalTiles - bgTilesToDelete, bgTilesToDelete);
-        tiles.splice(tiles.length - wallTilesToDelete, wallTilesToDelete);
-
-        map.splice(fallingApartLine - 1, map.length - fallingApartLine + 1);
-        backgroundMap.splice(fallingApartLine - 1, backgroundMap.length - fallingApartLine + 1);
-
-        for(var i = 0; i < breakingApartBg.length; i++){
-            for(var j = 0; j < breakingApartBg[0].length; j++){
-                if(breakingApartBg[i][j] !== 88){
-                    fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartBg[i][j]));
-                }
-            }
-        }
-        for(var i = 0; i < breakingApartFg.length; i++){
-            for(var j = 0; j < breakingApartFg[0].length; j++){
-                if(breakingApartFg[i][j] !== 88){
-                    fallingTiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i + tileSize*(fallingApartLine - 1), tileSize, tileSize, breakingApartFg[i][j]));
-                }
-            }
-        }
-
-        fallingApartLine = 0;
-        bgTilesToDelete = 0;
-        wallTilesToDelete = 0;
-        totalTiles = 0;
-
-    }
-
-    for(var i = 0; i < fallingTiles.length; i++){
-        fallingTiles[i].update();
-        fallingTiles[i].draw();
-        fallingTiles[i].y += fallVelocity;
-        if(fallingTiles[i].type !== 10 && fallingTiles[i].type !== 12 && fallingTiles[i].type !== 13 && fallingTiles[i].type !== 14 && fallingTiles[i].type !== 15){
-            if(i > 0){
-                if(fallingTiles[i-1].lightLevel < fallingTiles[i].lightLevel){
-                    fallingTiles[i].lightLevel = fallingTiles[i-1].lightLevel + 0.2;
-                }
-            }
-            if(i < fallingTiles.length){
-                if(fallingTiles[i+1].lightLevel < fallingTiles[i].lightLevel){
-                    fallingTiles[i].lightLevel = fallingTiles[i+1].lightLevel + 0.2;
-                }
-            }
-            if(i > map[0].length && i < fallingTiles.length/2){
-                if(fallingTiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
-                    fallingTiles[i].lightLevel = fallingTiles[i-map[0].length].lightLevel + 0.2;
-                }
-            }
-            if(i < fallingTiles.length/2 - map[0].length){
-                if(fallingTiles[i+map[0].length].lightLevel < fallingTiles[i].lightLevel){
-                    fallingTiles[i].lightLevel = fallingTiles[i+map[0].length].lightLevel + 0.2;
-                }
-            }
-        }
-    }
-
-    if(fallingTiles.length > 0){
-        fallVelocity+=0.1;
-    }
-
-    if(fallVelocity > 10){
-        powerUpSpawned = false;
-        breakingApartBg = [];
-        breakingApartFg = [];
-        fallingTiles = [];
-        fallVelocity = 0;
-        justFell = true;
-    }
-
-    for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15){
-            tiles[i].update();
-            tiles[i].draw();
-            if(gameTicks < 200){
+        for(var i = 0; i < fallingTiles.length; i++){
+            fallingTiles[i].update();
+            fallingTiles[i].draw();
+            fallingTiles[i].y += fallVelocity;
+            if(fallingTiles[i].type !== 10 && fallingTiles[i].type !== 12 && fallingTiles[i].type !== 13 && fallingTiles[i].type !== 14 && fallingTiles[i].type !== 15){
                 if(i > 0){
-                    if(tiles[i-1].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i-1].lightLevel + 0.2;
+                    if(fallingTiles[i-1].lightLevel < fallingTiles[i].lightLevel){
+                        fallingTiles[i].lightLevel = fallingTiles[i-1].lightLevel + lightingPercision;
                     }
                 }
-                if(i < tiles.length){
-                    if(tiles[i+1].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i+1].lightLevel + 0.2;
+                if(i < fallingTiles.length){
+                    if(fallingTiles[i+1].lightLevel < fallingTiles[i].lightLevel){
+                        fallingTiles[i].lightLevel = fallingTiles[i+1].lightLevel + lightingPercision;
                     }
                 }
-                if(i > map[0].length && i < tiles.length/2){
-                    if(tiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i-map[0].length].lightLevel + 0.2;
+                if(i > map[0].length && i < fallingTiles.length/2){
+                    if(fallingTiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
+                        fallingTiles[i].lightLevel = fallingTiles[i-map[0].length].lightLevel + lightingPercision;
                     }
                 }
-                if(i < tiles.length/2 - map[0].length){
-                    if(tiles[i+map[0].length].lightLevel < tiles[i].lightLevel){
-                        tiles[i].lightLevel = tiles[i+map[0].length].lightLevel + 0.2;
+                if(i < fallingTiles.length/2 - map[0].length){
+                    if(fallingTiles[i+map[0].length].lightLevel < fallingTiles[i].lightLevel){
+                        fallingTiles[i].lightLevel = fallingTiles[i+map[0].length].lightLevel + lightingPercision;
                     }
                 }
             }
         }
-        if(tiles[i].type === 77){
-            if(tiles[i].powerUpActive === true){
-                for(var j = 0; j < players.length; j++){
-                    if(players[j].x + players[j].width > tiles[i].x && players[j].x < tiles[i].x + tiles[i].width){
-                        if(players[j].y + players[j].height/2 > tiles[i].y && players[j].y < tiles[i].y + tiles[i].height){
-                            tiles[i].powerUpActive = false;
-                            tiles[i].spawnTimer = 0;
-                            var random = Math.random();
-                            if(random > 0.8){
-                                players[j].weapon = "Potato Launcher";
-                                players[j].bulletCount = 3;
-                            }else{
-                                players[j].weapon = "Darts";
-                                players[j].bulletCount = 20;
+
+        if(fallingTiles.length > 0){
+            fallVelocity+=0.1;
+        }
+
+        if(fallVelocity > 10){
+            powerUpSpawned = false;
+            breakingApartBg = [];
+            breakingApartFg = [];
+            fallingTiles = [];
+            fallVelocity = 0;
+            justFell = true;
+        }
+
+        for(var i = 0; i < tiles.length; i++){
+            if(tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15){
+                tiles[i].update();
+                tiles[i].draw();
+                if(gameTicks < lightDetailLevel){
+                    if(i > 0){
+                        if(tiles[i-1].lightLevel < tiles[i].lightLevel){
+                            tiles[i].lightLevel = tiles[i-1].lightLevel + lightingPercision;
+                        }
+                    }
+                    if(i < tiles.length){
+                        if(tiles[i+1].lightLevel < tiles[i].lightLevel){
+                            tiles[i].lightLevel = tiles[i+1].lightLevel + lightingPercision;
+                        }
+                    }
+                    if(i > map[0].length && i < tiles.length/2){
+                        if(tiles[i-map[0].length].lightLevel < tiles[i].lightLevel){
+                            tiles[i].lightLevel = tiles[i-map[0].length].lightLevel + lightingPercision;
+                        }
+                    }
+                    if(i < tiles.length/2 - map[0].length){
+                        if(tiles[i+map[0].length].lightLevel < tiles[i].lightLevel){
+                            tiles[i].lightLevel = tiles[i+map[0].length].lightLevel + lightingPercision;
+                        }
+                    }
+                }
+            }
+            if(tiles[i].type === 77){
+                if(tiles[i].powerUpActive === true){
+                    for(var j = 0; j < players.length; j++){
+                        if(players[j].x + players[j].width > tiles[i].x && players[j].x < tiles[i].x + tiles[i].width){
+                            if(players[j].y + players[j].height/2 > tiles[i].y && players[j].y < tiles[i].y + tiles[i].height){
+                                tiles[i].powerUpActive = false;
+                                tiles[i].spawnTimer = 0;
+                                var random = Math.random();
+                                if(random > 0.8){
+                                    effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Potato Launcher!"));
+                                    players[j].weapon = "Potato Launcher";
+                                    players[j].bulletCount = 3;
+                                }else{
+                                    effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Darts!"));
+                                    players[j].weapon = "Darts";
+                                    players[j].bulletCount = 20;
+                                }
+                                powerUpSpawned = false;
                             }
-                            powerUpSpawned = false;
                         }
                     }
                 }
             }
         }
-    }
 
-    for(var i = 0; i < bullets.length; i++){
-        bullets[i].update();
-        bullets[i].draw();
+        for(var i = 0; i < bullets.length; i++){
+            bullets[i].update();
+            bullets[i].draw();
 
-        var destroy = false;
+            var destroy = false;
 
-        for(var j = 0; j < players.length; j++){
-            if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX + bullets[i].width > players[j].x){
-                if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
-                    players[j].knockBackXVel = bullets[i].knockBack;
-                    destroy = true;
-                }
-            }
-        }
-
-        if(bullets.length > 0 && i !== bullets.length){
-            if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
-                destroy = true;
-            }
-        }
-
-        if(bullets.length > 0 && i !== bullets.length) {
-            for(var j = 0; j < collidableBlocks.length; j++){
-                if(Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize) < map.length){
-                    if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
+            for(var j = 0; j < players.length; j++){
+                if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX + bullets[i].width > players[j].x){
+                    if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
+                        players[j].knockBackXVel = bullets[i].knockBack;
                         destroy = true;
-                        break;
                     }
                 }
             }
-        }else{
 
-        }
+            if(bullets.length > 0 && i !== bullets.length){
+                if(bullets[i].x < 10 || bullets[i].x > WIDTH + 10){
+                    destroy = true;
+                }
+            }
 
-        if(destroy === true){
-            bullets.splice(i, 1);
-        }
-    }
+            if(bullets.length > 0 && i !== bullets.length) {
+                for(var j = 0; j < collidableBlocks.length; j++){
+                    if(Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize) < map.length){
+                        if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
+                            destroy = true;
+                            break;
+                        }
+                    }
+                }
+            }else{
 
-    //CONTROLS
-    //PLAYER 1
-    if(players.length > 0){
-        if((keys && keys[40])&&(keys && keys[38])){
+            }
 
-        }else if(keys && keys[38]){
-            players[0].yVel = -moveSpeed;
-        }
-        else if(keys && keys[40]){
-            players[0].yVel = moveSpeed;
-            players[0].hide();
-        }else{
-
-        }
-
-        if((keys && keys[37])&&(keys && keys[39])){
-
-        }else if(keys && keys[37]){
-            players[0].xVel = -moveSpeed;
-        }
-        else if(keys && keys[39]){
-            players[0].xVel = moveSpeed;
-        }else{
-
-        }
-
-        if(keys && keys[77]){
-            if(players[0].y + players[0].height < HEIGHT){
-                players[0].spawnBullet();
+            if(destroy === true){
+                bullets.splice(i, 1);
             }
         }
-    }
 
-    //PLAYER 2
-    if(players.length > 1){
-        if((keys && keys[69])&&(keys && keys[68])){
+        //CONTROLS
+        //PLAYER 1
+        if(players.length > 0){
+            if((keys && keys[40])&&(keys && keys[38])){
 
-        }else if(keys && keys[69]){
-            players[1].yVel = -moveSpeed;
-        }
-        else if(keys && keys[68]){
-            players[1].yVel = moveSpeed;
-            players[1].hide();
-        }
+            }else if(keys && keys[38]){
+                players[0].yVel = -moveSpeed;
+            }
+            else if(keys && keys[40]){
+                players[0].yVel = moveSpeed;
+                players[0].hide();
+            }else{
 
-        if((keys && keys[83])&&(keys && keys[70])){
+            }
 
-        }else if(keys && keys[83]){
-            players[1].xVel = -moveSpeed;
-        }
-        else if(keys && keys[70]){
-            players[1].xVel = moveSpeed;
-        }
+            if((keys && keys[37])&&(keys && keys[39])){
 
-        if(keys && keys[81]){
-            if(players[1].y + players[1].height < HEIGHT){
-                players[1].spawnBullet();
+            }else if(keys && keys[37]){
+                players[0].xVel = -moveSpeed;
+            }
+            else if(keys && keys[39]){
+                players[0].xVel = moveSpeed;
+            }else{
+
+            }
+
+            if(keys && keys[77]){
+                if(players[0].y + players[0].height < HEIGHT){
+                    players[0].spawnBullet();
+                }
             }
         }
-    }
 
-    for(var i = 0; i < players.length; i++) {
-        if(players[i].active === true){
-            players[i].update();
-            players[i].draw();
+        //PLAYER 2
+        if(players.length > 1){
+            if((keys && keys[69])&&(keys && keys[68])){
 
-            if(players[i].x < -200 || players[i].x > WIDTH + 200 || players[i].y < -200 || players[i].y > HEIGHT + 200){
-                players[i].die();
+            }else if(keys && keys[69]){
+                players[1].yVel = -moveSpeed;
+            }
+            else if(keys && keys[68]){
+                players[1].yVel = moveSpeed;
+                players[1].hide();
+            }
+
+            if((keys && keys[83])&&(keys && keys[70])){
+
+            }else if(keys && keys[83]){
+                players[1].xVel = -moveSpeed;
+            }
+            else if(keys && keys[70]){
+                players[1].xVel = moveSpeed;
+            }
+
+            if(keys && keys[81]){
+                if(players[1].y + players[1].height < HEIGHT){
+                    players[1].spawnBullet();
+                }
             }
         }
-    }
 
-    for(var i = 0; i < balloons.length; i++){
-        balloons[i].update();
-        balloons[i].draw();
-    }
+        for(var i = 0; i < players.length; i++) {
+            if(players[i].active === true){
+                players[i].update();
+                players[i].draw();
 
-    for(var i = 0; i < tiles.length; i++){
-        if(tiles[i].type === 10 || tiles[i].type === 12 || tiles[i].type === 13 || tiles[i].type === 14 || tiles[i].type === 15){
-            tiles[i].update();
-            tiles[i].draw();
+                if(players[i].x < -200 || players[i].x > WIDTH + 200 || players[i].y < -200 || players[i].y > HEIGHT + 200){
+                    players[i].die();
+                }
+            }
         }
+
+        for(var i = 0; i < balloons.length; i++){
+            balloons[i].update();
+            balloons[i].draw();
+        }
+
+        for(var i = 0; i < tiles.length; i++){
+            if(tiles[i].type === 10 || tiles[i].type === 12 || tiles[i].type === 13 || tiles[i].type === 14 || tiles[i].type === 15){
+                tiles[i].update();
+                tiles[i].draw();
+            }
+        }
+
+        for(var i = 0; i < effects.length; i++){
+            effects[i].update();
+            effects[i].draw();
+            if(effects[i].lifeSpan === 0){
+                effects.splice(i, 1);
+            }
+        }
+
+        ctx.globalAlpha = rainOpacity;
+        ctx.fillStyle = stormgrd;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = 'white';
+        ctx.globalAlpha = 1;
+
+        for(var i = 0; i < playerStatBoxes.length; i++){
+            playerStatBoxes[i].update();
+            playerStatBoxes[i].draw();
+        }
+        if(gameTicks % 5 === 0){
+            cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3 + cameraGlobalYOffset);
+        }
+
+    }else if(GAMESTATE === "MAIN MENU"){
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+// Fill with gradient
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
     }
 
-    for(var i = 0; i < playerStatBoxes.length; i++){
-        playerStatBoxes[i].update();
-        playerStatBoxes[i].draw();
-    }
-    if(gameTicks % 5 === 0){
-        cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3 + cameraGlobalYOffset);
-    }
+
 
 }
 
