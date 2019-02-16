@@ -947,12 +947,12 @@ function RainParticle() {
     this.x = Math.round(Math.random()*WIDTH);
     this.y = 0;
     this.length = Math.round((Math.random() + 1) * HEIGHT/100);
-    this.velY = Math.round((Math.random() + 2)*5);
+    this.velY = Math.round((Math.random() + 2)*3);
     this.velX = Math.round((Math.random() - 0.5) * 3);
 
     this.update = function(){
-        this.x += this.velX;
-        this.y += this.velY;
+        this.x += this.velX * (updateSpeed + 1);
+        this.y += this.velY * (updateSpeed + 1);
     };
 
     this.draw = function(){
@@ -966,7 +966,7 @@ function RainParticle() {
 }
 
 function LightningBolt() {
-    this.x = Math.round(Math.random()*WIDTH);
+    this.x = Math.round(Math.random()*WIDTH - WIDTH/5) + WIDTH/10;
     this.y = 0;
     this.length = Math.round((Math.random()) * 20);
     this.segmentsDrawn = 0;
