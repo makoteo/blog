@@ -650,9 +650,9 @@ function Player(id){
         }
 
         if(this.knockBackXVel > 2){
-            this.knockBackXVel--;
+            this.knockBackXVel-=0.75;
         }else if(this.knockBackXVel < -2){
-            this.knockBackXVel++;
+            this.knockBackXVel+=0.75;
         }else{
             this.knockBackXVel = 0;
         }
@@ -719,14 +719,14 @@ function Player(id){
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 0));
                 }else{
-                    bullets.push(new Bullet(this.x, this.y, 1));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 1));
                 }
                 this.reloadTimer = this.reloadSpeed;
             }else if(this.weapon === "Darts"){
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 2));
                 }else{
-                    bullets.push(new Bullet(this.x, this.y, 3));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 3));
                 }
                 this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
@@ -734,7 +734,7 @@ function Player(id){
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 4));
                 }else{
-                    bullets.push(new Bullet(this.x, this.y, 5));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 5));
                 }
                 this.reloadTimer = this.reloadSpeed*3;
                 this.bulletCount--;
@@ -1093,7 +1093,7 @@ function game(){
         var destroy = false;
 
         for(var j = 0; j < players.length; j++){
-            if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX > players[j].x){
+            if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX + bullets[i].width > players[j].x){
                 if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
                     players[j].knockBackXVel = bullets[i].knockBack;
                     destroy = true;
