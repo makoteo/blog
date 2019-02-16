@@ -105,6 +105,10 @@ var balloons = [];
 var playerStatBoxes = [];
 var fallingTiles = [];
 var effects = [];
+var rainParticles = [];
+var lightningBolts = [];
+
+var lightningBoltFlashOpacity = 0;
 
 var powerUpSpawned = false;
 
@@ -123,7 +127,8 @@ var cameraGlobalY = 0;
 
 var cameraGlobalYOffset = 0;
 var cameraZoom = 1;
-var targetCameraY = 1;
+var cameraYWindOffset = 0;
+var cameraYWindOffsetVel = 0;
 
 var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
@@ -132,7 +137,11 @@ var GAMESTATE = "GAME";
 var lightDetailLevel = 10;
 var lightingPercision = 0.2;
 
+var maxRainParticles = 100;
+
 var rainOpacity = 0;
+
+var updateSpeed = 2; //Must be bigger than 0, should be 5
 
 repeatOften(); //Starts Game
 
@@ -931,6 +940,79 @@ function Explosion(x, y, type){
     };
 }
 
+function RainParticle() {
+    this.x = Math.round(Math.random()*WIDTH);
+    this.y = 0;
+    this.length = Math.round((Math.random() + 1) * HEIGHT/100);
+    this.velY = Math.round((Math.random() + 2)*5);
+    this.velX = Math.round((Math.random() - 0.5) * 3);
+
+    this.update = function(){
+        this.x += this.velX;
+        this.y += this.velY;
+    };
+
+    this.draw = function(){
+        ctx.beginPath();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.velX, this.y + this.length);
+        ctx.stroke();
+    };
+}
+
+function LightningBolt() {
+    this.x = Math.round(Math.random()*WIDTH);
+    this.y = Math.round(Math.random()*HEIGHT/10);
+    this.length = Math.round((Math.random() + 1) * HEIGHT/100);
+    this.segmentsDrawn = 0;
+    this.x1 = this.x + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
+    this.y1 = this.y + Math.round(Math.random()-0.1*HEIGHT/8);
+    this.x2 = this.x1 + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
+    this.y2 = this.y1 + Math.round(Math.random()-0.1*HEIGHT/8);
+    this.x3 = this.x2 + Math.round(Math.random()*WIDTH/10) - WIDTH/20;
+    this.y3 = this.y2 + Math.round(Math.random()-0.1*HEIGHT/8);
+
+    this.opacity = 1;
+
+    this.update = function(){
+        this.segmentsDrawn+=0.2;
+        if(this.opacity > 0){
+            this.opacity-=0.02;
+        }
+    };
+
+    this.draw = function(){
+        ctx.globalAlpha = this.opacity;
+        if(this.segmentsDrawn >= 0){
+            ctx.beginPath();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x1, this.y1);
+            ctx.stroke();
+        }
+        if(this.segmentsDrawn >= 1){
+            ctx.beginPath();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.moveTo(this.x1, this.y1);
+            ctx.lineTo(this.x2, this.y2);
+            ctx.stroke();
+        }
+        if(this.segmentsDrawn >= 2){
+            ctx.beginPath();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.moveTo(this.x2, this.y2);
+            ctx.lineTo(this.x3, this.y3);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+    };
+}
+
 
 //CREATE TILES
 
@@ -993,6 +1075,50 @@ function game(){
         ctx.globalAlpha = 1 - rainOpacity/2;
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
         ctx.fillStyle = 'white';
+        ctx.globalAlpha = 1;
+
+        if(rainOpacity > 0.5){
+            if(gameTicks % updateSpeed === 0){
+                if(rainParticles.length < maxRainParticles*rainOpacity){
+                    rainParticles.push(new RainParticle());
+                }
+            }
+        }else{
+            rainParticles = [];
+        }
+
+        if(rainOpacity > 0.7){
+            if(gameTicks % 1200 - Math.round(rainOpacity*2*500) === 0){
+                lightningBolts.push(new LightningBolt());
+                lightningBoltFlashOpacity = 1;
+            }
+        }
+
+        if(rainParticles.length > 0){
+            if(gameTicks % (updateSpeed + 1) === 0){
+                for(var r = 0; r < rainParticles.length; r++){
+                    rainParticles[r].update();
+                    if(rainParticles[r].y > HEIGHT){
+                        rainParticles.splice(r, 1);
+                    }
+                }
+            }
+        }
+
+        if(lightningBolts.length > 0){
+            for(var l = 0; l < lightningBolts.length; l++){
+                lightningBolts[l].update();
+                lightningBolts[l].draw();
+                if(lightningBolts[l].opacity < 0.2){
+                    lightningBolts.splice(l, 1);
+                }
+            }
+        }
+
+        ctx.globalAlpha = rainOpacity;
+        for(var r = 0; r < rainParticles.length; r++){
+            rainParticles[r].draw();
+        }
         ctx.globalAlpha = 1;
 
         if(justFell === true){
@@ -1318,12 +1444,32 @@ function game(){
         ctx.fillStyle = 'white';
         ctx.globalAlpha = 1;
 
+        if(lightningBoltFlashOpacity > 0){
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = lightningBoltFlashOpacity;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.globalAlpha = 1;
+            lightningBoltFlashOpacity -= 0.2;
+        }
+
         for(var i = 0; i < playerStatBoxes.length; i++){
             playerStatBoxes[i].update();
             playerStatBoxes[i].draw();
         }
-        if(gameTicks % 5 === 0){
-            cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3 + cameraGlobalYOffset);
+        if(gameTicks % updateSpeed === 0){
+            cameraYWindOffsetVel+=(Math.random()*rainOpacity/2 - rainOpacity/4);
+            cameraYWindOffset += cameraYWindOffsetVel;
+            if(cameraYWindOffset > HEIGHT/50){
+                cameraYWindOffset = HEIGHT/50;
+            }else if(cameraYWindOffset < -HEIGHT/50){
+                cameraYWindOffset = -HEIGHT/50;
+            }
+            if(cameraYWindOffsetVel > 2){
+                cameraYWindOffsetVel = 2;
+            }else if(cameraYWindOffsetVel < -2){
+                cameraYWindOffsetVel = -2;
+            }
+            cameraGlobalY = Math.round(Math.sin(gameTicks/50) * 3 + cameraGlobalYOffset + cameraYWindOffset);
         }
 
     }else if(GAMESTATE === "MAIN MENU"){
