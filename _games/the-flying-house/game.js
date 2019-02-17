@@ -490,6 +490,9 @@ function Player(id, ai){
     }else if(this.id === 1){
         this.x = WIDTH/2 + WIDTH/8;
         this.y = HEIGHT/2 - 50;
+    }else if(this.id === 2){
+        this.x = WIDTH/2 - WIDTH/10;
+        this.y = HEIGHT/2 - 50;
     }else{
         this.x = WIDTH/2;
         this.y = HEIGHT/2;
@@ -1057,17 +1060,113 @@ function Cloud(){
 function AiBot(player, difficulty){
     this.player = player;
     this.difficulty = difficulty;
+
+    this.savedXVel = 0;
+    this.savedYVel = 0;
+
+    this.powerUpPosY = 0;
+    this.powerUpPosX = 0;
+
     this.update = function(){
         if(gameTicks > 20){
-            if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11){
-                players[this.player].yVel = -moveSpeed;
-            }
-            for(var i = 0; i < players.length; i++){
-                if(i !== this.player){
 
+            if(gameTicks % updateSpeed === 0){
+                this.savedXVel = 0;
+                this.savedYVel = 0;
+                if(powerUpSpawned === true){
+                    if(this.powerUpPosX === 0){
+                        for(var b = 0; b < tiles.length; b++){
+                            if(tiles[b].type === 77 && tiles[b].powerUpActive === true){
+                                this.powerUpPosX = tiles[b].x + tileSize/2;
+                                this.powerUpPosY = tiles[b].y;
+                            }
+                        }
+                    }
+                    //console.log(this.savedXVel);
+                    if(players[this.player].y + players[this.player].height*2 > this.powerUpPosY && players[this.player].y - players[this.player].height < this.powerUpPosY){
+                        if (players[this.player].x + players[this.player].width < this.powerUpPosX) {
+                            this.savedXVel = moveSpeed;
+                        } else {
+                            this.savedXVel = -moveSpeed;
+                        }
+                    }else if(this.powerUpPosY < players[this.player].y - players[this.player].height){
+                        if(players[this.player].tilePosYBottom < map.length){
+                            for(var t = 0; t < map[players[this.player].tilePosYBottom].length; t++){
+                                if(map[players[this.player].tilePosYBottom][t] === 11) {
+                                    if(players[this.player].x > xOffset + t*tileSize && players[this.player].x < xOffset + t*tileSize + tileSize/2){
+                                        this.savedXVel = 0;
+                                        break;
+                                    }else if(players[this.player].x < xOffset + t*tileSize){
+                                        this.savedXVel = moveSpeed;
+                                    }else if(players[this.player].x  - players[this.player].height/4 > xOffset + t*tileSize){
+                                        this.savedXVel = -moveSpeed;
+                                    }
+                                }
+                            }
+                            if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11){
+                                this.savedYVel = -moveSpeed;
+                            }
+                        }
+                    }else if(this.powerUpPosY > players[this.player].y){
+                        if(players[this.player].tilePosYBottom < map.length){
+                            for(var t = 0; t < map[players[this.player].tilePosYBottom].length; t++){
+                                if(map[players[this.player].tilePosYBottom][t] === 11) {
+                                    if(players[this.player].x > xOffset + t*tileSize && players[this.player].x < xOffset + t*tileSize + tileSize/2){
+                                        this.savedXVel = 0;
+                                        break;
+                                    }else if(players[this.player].x < xOffset + t*tileSize){
+                                        this.savedXVel = moveSpeed;
+                                    }else if(players[this.player].x  - players[this.player].height/4 > xOffset + t*tileSize){
+                                        this.savedXVel = -moveSpeed;
+                                    }
+                                }
+                            }
+                            if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11){
+                                this.savedYVel = moveSpeed;
+                            }
+                        }
+                    }
+                    //console.log(this.savedXVel);
+                }else{
+                    if(players[this.player].tilePosYBottom < map.length){
+                        if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11 && map[players[this.player].tilePosYTop][players[this.player].tilePosXRight] === 11){
+                            this.savedYVel = -moveSpeed;
+                        }
+                    }
+                    this.powerUpPosX = 0;
+                    this.powerUpPosY = 0;
+
+                    for(var i = 0; i < players.length; i++){
+                        if(i !== this.player){
+                            if(players[this.player].tilePosYBottom === players[i].tilePosYBottom || players[this.player].tilePosYTop === players[i].tilePosYBottom){
+                                if(players[this.player].tilePosXRight < players[i].tilePosXLeft){
+                                    this.savedXVel = moveSpeed;
+                                    players[this.player].spawnBullet();
+                                }else if (players[this.player].tilePosXLeft > players[i].tilePosXRight){
+                                    this.savedXVel = -moveSpeed;
+                                    players[this.player].spawnBullet();
+                                }else{
+                                    players[this.player].spawnBullet();
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                //console.log(this.savedXVel);
+                if(players[this.player].tilePosXLeft > map[0].length - 3){
+                    this.savedXVel = -moveSpeed;
+                }else if(players[this.player].tilePosXRight < 3){
+                    this.savedXVel = moveSpeed;
                 }
             }
+
         }
+
+        //console.log(this.savedXVel + "...");
+        players[this.player].xVel = this.savedXVel;
+        players[this.player].yVel = this.savedYVel;
 
     }
 }
@@ -1554,6 +1653,14 @@ function game(){
                 players[i].draw();
 
                 if(players[i].x < -200 || players[i].x > WIDTH + 200 || players[i].y < -200 || players[i].y > HEIGHT + 200){
+                    if(players[i].lives - 1 === 0){
+                        for(var a = 0; a < aiBots.length; a++){
+                            if(aiBots[a].player === i){
+                                aiBots.splice(a, 1);
+                            }
+                        }
+                    }
+
                     players[i].die();
                 }
             }
