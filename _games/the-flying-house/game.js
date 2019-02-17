@@ -107,6 +107,7 @@ var fallingTiles = [];
 var effects = [];
 var rainParticles = [];
 var lightningBolts = [];
+var clouds = [];
 
 var lightningBoltFlashOpacity = 0;
 
@@ -137,8 +138,9 @@ var GAMESTATE = "GAME";
 var lightDetailLevel = 10;
 var lightingPercision = 0.2;
 
-var maxRainParticles = 100;
-var weatherSwitchTime = 1200;
+var maxRainParticles = 100; //100 is good
+var weatherSwitchTime = 1200; //1200
+var rainCoefficient = -0.5;
 
 var rainOpacity = 0;
 
@@ -1007,6 +1009,45 @@ function LightningBolt() {
     };
 }
 
+function Cloud(){
+    this.width = Math.round(Math.random()*(rainCurrent+0.5)*100);
+    this.segments = Math.round(Math.random()*6) + 3;
+
+    this.x = Math.round(WIDTH + (this.width * 4));
+    this.y = Math.round(Math.random()*HEIGHT);
+
+    this.xPoses = [];
+    this.yPoses = [];
+    this.widths = [];
+
+    this.xVel = Math.round(Math.random()*(3*rainCurrent)*-1) - 1;
+
+    this.xPoses.push(this.x);
+    this.yPoses.push(this.y);
+    this.widths.push(this.width);
+
+    for(var i = 1; i < this.segments; i++){
+        this.widths.push(Math.round(Math.random()*(rainCurrent+0.5)*100));
+        this.xPoses.push(this.xPoses[i - 1] + Math.round(Math.random()*this.widths[i]/2) + this.widths[i]/2);
+        this.yPoses.push(this.yPoses[i - 1] + Math.round(Math.random()*this.widths[i]) - this.widths[i]/2);
+    }
+
+    this.update = function(){
+        for(var i = 0; i < this.xPoses.length; i++){
+            this.xPoses[i] += this.xVel;
+        }
+    };
+    this.draw = function(){
+        ctx.fillStyle = 'rgb(170, 223, 242)';
+        for(var c = 0; c < this.xPoses.length; c++){
+            ctx.beginPath();
+            ctx.arc(this.xPoses[c], this.yPoses[c], this.widths[c], 0, Math.PI*2, false);
+            ctx.fill();
+
+        }
+    }
+}
+
 
 //CREATE TILES
 
@@ -1071,14 +1112,38 @@ function game(){
         ctx.fillStyle = 'white';
         ctx.globalAlpha = 1;
 
+        if(gameTicks % (600 - 500*rainCurrent) === 0){
+            clouds.push(new Cloud());
+        }
+
+        for(var c = 0; c < clouds.length; c++){
+            clouds[c].update();
+            clouds[c].draw();
+            if(clouds[c].x + 300 < 0){
+                clouds.splice(c, 1);
+            }
+        }
+
         if(gameTicks % weatherSwitchTime === 0){
-            rainCurrent = Math.round(Math.random()*100)/100;
+            rainCurrent = Math.round(Math.random()*100)/100 + rainCoefficient;
+        }
+
+        if(rainCurrent < 0){
+            rainCurrent = 0;
+        }else if(rainCurrent > 1){
+            rainCurrent = 1;
         }
 
         if(rainCurrent > rainOpacity){
             rainOpacity+=0.005;
         }else if(rainCurrent < rainOpacity){
             rainOpacity-=0.005;
+        }
+
+        if(rainOpacity < 0){
+            rainOpacity = 0;
+        }else if(rainOpacity > 1){
+            rainOpacity = 1;
         }
 
         if(rainOpacity > 0.5){
