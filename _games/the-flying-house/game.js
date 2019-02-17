@@ -140,7 +140,7 @@ var lightingPercision = 0.2;
 
 var maxRainParticles = 100; //100 is good
 var weatherSwitchTime = 1200; //1200
-var rainCoefficient = -0.5;
+var rainCoefficient = 0; // < 0
 
 var rainOpacity = 0;
 
@@ -1112,26 +1112,26 @@ function game(){
         ctx.fillStyle = 'white';
         ctx.globalAlpha = 1;
 
-        if(gameTicks % (600 - 500*rainCurrent) === 0){
+        if(gameTicks % Math.round(600 - 500*rainCurrent) === 0){
             clouds.push(new Cloud());
         }
 
         for(var c = 0; c < clouds.length; c++){
             clouds[c].update();
             clouds[c].draw();
-            if(clouds[c].x + 300 < 0){
+            if(clouds[c].xPoses[0] + 300 < 0){
                 clouds.splice(c, 1);
             }
         }
 
         if(gameTicks % weatherSwitchTime === 0){
-            rainCurrent = Math.round(Math.random()*100)/100 + rainCoefficient;
+            rainCurrent = rainOpacity + (Math.round(Math.random()*0.6) - 0.3);
         }
 
-        if(rainCurrent < 0){
-            rainCurrent = 0;
-        }else if(rainCurrent > 1){
-            rainCurrent = 1;
+        if(rainCoefficient >= 0 && rainCurrent < 0 + rainCoefficient){
+            rainCurrent = 0 + rainCoefficient;
+        }else if(rainCoefficient <= 0 && rainCurrent > 1 + rainCoefficient){
+            rainCurrent = 1 + rainCoefficient;
         }
 
         if(rainCurrent > rainOpacity){
