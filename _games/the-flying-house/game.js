@@ -108,6 +108,7 @@ var effects = [];
 var rainParticles = [];
 var lightningBolts = [];
 var clouds = [];
+var aiBots = [];
 
 var lightningBoltFlashOpacity = 0;
 
@@ -478,9 +479,10 @@ function Balloon(x, y, tiltedX){
     };
 }
 
-function Player(id){
+function Player(id, ai){
 
     this.id = id;
+    this.ai = ai;
 
     if(this.id === 0){
         this.x = WIDTH/2 - WIDTH/8;
@@ -731,7 +733,7 @@ function Player(id){
         ctx.globalAlpha = this.opacity;
         ctx.drawImage(tileMap, 32*this.id, 256, 32, 50, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.78*cameraZoom);
         ctx.drawImage(tileMap, 32*this.walkFrame, 306, 32, 14, this.cameraX + cameraGlobalX, this.cameraY + this.height*0.78*cameraZoom + cameraGlobalY, this.width*cameraZoom, this.height*0.22*cameraZoom);
-        ctx.drawImage(tileMap, 64, 256, 32, 25, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
+        ctx.drawImage(tileMap, 96, 306, 32, 14, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
         ctx.globalAlpha = 1;
 
         this.xVel = 0;
@@ -819,6 +821,9 @@ function playerStat(id){
     }else if(this.id === 1){
         this.x = this.width/10;
         this.y = HEIGHT - this.height - this.height/10;
+    }else if(this.id === 2){
+        this.x = WIDTH - this.width - this.width/10;
+        this.y = HEIGHT - 2*this.height - 2*this.height/10;
     }
 
     this.titleX = this.x + WIDTH/100;
@@ -846,7 +851,7 @@ function playerStat(id){
         ctx.fillText(this.name, this.titleX, this.titleY);
 
         ctx.drawImage(tileMap, 32*this.id, 256, 32, 32, this.profileX, this.profileY, this.profileWidth, this.profileHeight*0.7);
-        ctx.drawImage(tileMap, 64, 256, 32, 25, this.profileX + 5, this.profileY, this.profileWidth, this.profileHeight*0.7);
+        ctx.drawImage(tileMap, 96, 306, 30, 14, this.profileX + 5, this.profileY, this.profileWidth, this.profileHeight*0.7);
 
         ctx.globalAlpha = 0.4;
         ctx.strokeStyle = 'black';
@@ -1012,7 +1017,7 @@ function LightningBolt() {
 
 function Cloud(){
     this.width = Math.round(Math.random()*(rainCurrent+0.5)*100);
-    this.segments = Math.round(Math.random()*6) + 3;
+    this.segments = Math.round(Math.random()*6) + 4;
 
     this.x = Math.round(WIDTH + (this.width * 4));
     this.y = Math.round(Math.random()*HEIGHT);
@@ -1049,6 +1054,24 @@ function Cloud(){
     }
 }
 
+function AiBot(player, difficulty){
+    this.player = player;
+    this.difficulty = difficulty;
+    this.update = function(){
+        if(gameTicks > 20){
+            if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11){
+                players[this.player].yVel = -moveSpeed;
+            }
+            for(var i = 0; i < players.length; i++){
+                if(i !== this.player){
+
+                }
+            }
+        }
+
+    }
+}
+
 
 //CREATE TILES
 
@@ -1068,12 +1091,16 @@ for(var i = 0; i < map.length; i++){
     }
 }
 
-players.push(new Player(0));
-players.push(new Player(1));
+players.push(new Player(0, false));
+players.push(new Player(1, false));
+
+players.push(new Player(2, true));
+aiBots.push(new AiBot(2, 0));
 //MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
 
 playerStatBoxes.push(new playerStat(0));
 playerStatBoxes.push(new playerStat(1));
+playerStatBoxes.push(new playerStat(2));
 
 balloons.push(new Balloon(WIDTH/2, yOffset, 0));
 balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
@@ -1421,63 +1448,105 @@ function game(){
         //CONTROLS
         //PLAYER 1
         if(players.length > 0){
-            if((keys && keys[40])&&(keys && keys[38])){
+            if(players[0].ai === false) {
+                if ((keys && keys[40]) && (keys && keys[38])) {
 
-            }else if(keys && keys[38]){
-                players[0].yVel = -moveSpeed;
-            }
-            else if(keys && keys[40]){
-                players[0].yVel = moveSpeed;
-                players[0].hide();
-            }else{
+                } else if (keys && keys[38]) {
+                    players[0].yVel = -moveSpeed;
+                }
+                else if (keys && keys[40]) {
+                    players[0].yVel = moveSpeed;
+                    players[0].hide();
+                } else {
 
-            }
+                }
 
-            if((keys && keys[37])&&(keys && keys[39])){
+                if ((keys && keys[37]) && (keys && keys[39])) {
 
-            }else if(keys && keys[37]){
-                players[0].xVel = -moveSpeed;
-            }
-            else if(keys && keys[39]){
-                players[0].xVel = moveSpeed;
-            }else{
+                } else if (keys && keys[37]) {
+                    players[0].xVel = -moveSpeed;
+                }
+                else if (keys && keys[39]) {
+                    players[0].xVel = moveSpeed;
+                } else {
 
-            }
+                }
 
-            if(keys && keys[77]){
-                if(players[0].y + players[0].height < HEIGHT){
-                    players[0].spawnBullet();
+                if (keys && keys[77]) {
+                    if (players[0].y + players[0].height < HEIGHT) {
+                        players[0].spawnBullet();
+                    }
                 }
             }
         }
 
         //PLAYER 2
         if(players.length > 1){
-            if((keys && keys[69])&&(keys && keys[68])){
+            if(players[1].ai === false) {
+                if ((keys && keys[69]) && (keys && keys[68])) {
 
-            }else if(keys && keys[69]){
-                players[1].yVel = -moveSpeed;
-            }
-            else if(keys && keys[68]){
-                players[1].yVel = moveSpeed;
-                players[1].hide();
-            }
+                } else if (keys && keys[69]) {
+                    players[1].yVel = -moveSpeed;
+                }
+                else if (keys && keys[68]) {
+                    players[1].yVel = moveSpeed;
+                    players[1].hide();
+                }
 
-            if((keys && keys[83])&&(keys && keys[70])){
+                if ((keys && keys[83]) && (keys && keys[70])) {
 
-            }else if(keys && keys[83]){
-                players[1].xVel = -moveSpeed;
-            }
-            else if(keys && keys[70]){
-                players[1].xVel = moveSpeed;
-            }
+                } else if (keys && keys[83]) {
+                    players[1].xVel = -moveSpeed;
+                }
+                else if (keys && keys[70]) {
+                    players[1].xVel = moveSpeed;
+                }
 
-            if(keys && keys[81]){
-                if(players[1].y + players[1].height < HEIGHT){
-                    players[1].spawnBullet();
+                if (keys && keys[81]) {
+                    if (players[1].y + players[1].height < HEIGHT) {
+                        players[1].spawnBullet();
+                    }
                 }
             }
         }
+
+        //PLAYER 3
+        if(players.length > 2){
+            if(players[2].ai === false){
+                if((keys && keys[73])&&(keys && keys[75])){
+
+                }else if(keys && keys[73]){
+                    players[2].yVel = -moveSpeed;
+                }
+                else if(keys && keys[75]){
+                    players[2].yVel = moveSpeed;
+                    players[2].hide();
+                }
+
+                if((keys && keys[74])&&(keys && keys[76])){
+
+                }else if(keys && keys[74]){
+                    players[2].xVel = -moveSpeed;
+                }
+                else if(keys && keys[76]){
+                    players[2].xVel = moveSpeed;
+                }
+
+                if(keys && keys[89]){
+                    if(players[2].y + players[1].height < HEIGHT){
+                        players[2].spawnBullet();
+                    }
+                }
+            }
+
+        }
+
+        if(aiBots.length > 0){
+            for(var i = 0; i < aiBots.length; i++){
+                aiBots[i].update();
+            }
+        }
+
 
         for(var i = 0; i < players.length; i++) {
             if(players[i].active === true){
