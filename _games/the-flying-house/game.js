@@ -493,6 +493,9 @@ function Player(id, ai){
     }else if(this.id === 2){
         this.x = WIDTH/2 - WIDTH/10;
         this.y = HEIGHT/2 - 50;
+    }else if(this.id === 3){
+        this.x = WIDTH/2 + WIDTH/10;
+        this.y = HEIGHT/2 - 50;
     }else{
         this.x = WIDTH/2;
         this.y = HEIGHT/2;
@@ -1061,6 +1064,8 @@ function AiBot(player, difficulty){
     this.player = player;
     this.difficulty = difficulty;
 
+    //DIFFICULTY FROM 1-10
+
     this.savedXVel = 0;
     this.savedYVel = 0;
 
@@ -1069,14 +1074,18 @@ function AiBot(player, difficulty){
 
     this.state = "Hiding";
 
+    this.waitTime = Math.round((Math.random()*20));
+    this.timer = 0;
+
     this.update = function(){
         if(gameTicks > 20){
-
-            if(gameTicks % updateSpeed === 0){
+            this.timer++;
+            if(gameTicks % (updateSpeed + 10 - Math.round(this.difficulty)) === 0){
                 this.savedXVel = 0;
                 this.savedYVel = 0;
-                if(powerUpSpawned === true && fallApartTimer < fallApartTime - 200){
+                if(powerUpSpawned === true && fallApartTimer < fallApartTime - 200 && this.timer >= this.waitTime){
                     this.state = "Attacking";
+                    this.timer = 0;
                     if(this.powerUpPosX === 0){
                         for(var b = 0; b < tiles.length; b++){
                             if(tiles[b].type === 77 && tiles[b].powerUpActive === true){
@@ -1131,17 +1140,23 @@ function AiBot(player, difficulty){
                     }
                     //console.log(this.savedXVel);
                 }else{
-                    if(players[this.player].tilePosYBottom < map.length - 1){
-                        if(map[players[this.player].tilePosYBottom + 1][players[this.player].tilePosXRight] === 11 ||
-                            map[players[this.player].tilePosYBottom + 1][players[this.player].tilePosXLeft] === 11){
-                            this.savedYVel = -moveSpeed;
+                    if(this.difficulty > 5){
+                        if(players[this.player].tilePosYBottom < map.length - 1){
+                            if(map[players[this.player].tilePosYBottom + 1][players[this.player].tilePosXRight] === 11 ||
+                                map[players[this.player].tilePosYBottom + 1][players[this.player].tilePosXLeft] === 11){
+                                if(this.savedYVel === 0){
+                                    this.savedYVel = -moveSpeed;
+                                    this.savedXVel = moveSpeed;
+                                }
+                            }
                         }
                     }
+
 
                     this.powerUpPosX = 0;
                     this.powerUpPosY = 0;
 
-                    if(this.savedXVel === 0 && this.state !== "Hiding"){ // More Dynamic - Follow Player
+                    if(this.state !== "Hiding" && this.difficulty > 3){ // More Dynamic - Follow Player
                         for(var i = 0; i < players.length; i++){
                             if(i !== this.player){
                                 if(players[this.player].tilePosYBottom < map.length) {
@@ -1160,6 +1175,7 @@ function AiBot(player, difficulty){
                                         }
                                         if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
                                             this.savedYVel = -moveSpeed;
+                                            this.savedXVel = 0;
                                         }
                                     }else if (players[this.player].y < players[i].y) {
                                         for (var t = 0; t < map.length; t++) {
@@ -1177,6 +1193,7 @@ function AiBot(player, difficulty){
                                         if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
                                             if(!(this.savedYVel < 0)){
                                                 this.savedYVel = moveSpeed;
+                                                this.savedXVel = 0;
                                             }
                                         }
                                     }
@@ -1214,13 +1231,16 @@ function AiBot(player, difficulty){
 
                 }
 
-                if(this.state === "Hiding"){
-                    if(players[this.player].tilePosXLeft > map[0].length - 7){
-                        this.savedXVel = -moveSpeed;
-                    }else if(players[this.player].tilePosXRight < 7){
-                        this.savedXVel = moveSpeed;
+                if(this.difficulty > 7){
+                    if(this.state === "Hiding"){
+                        if(players[this.player].tilePosXLeft > map[0].length - 7){
+                            this.savedXVel = -moveSpeed;
+                        }else if(players[this.player].tilePosXRight < 7){
+                            this.savedXVel = moveSpeed;
+                        }
                     }
                 }
+
 
                 //console.log(this.savedXVel);
                 if(players[this.player].tilePosXLeft > map[0].length - 3){
@@ -1234,9 +1254,8 @@ function AiBot(player, difficulty){
                 }
             }
 
+            //console.log(this.savedXVel + "...");
         }
-
-        //console.log(this.savedXVel + "...");
         players[this.player].xVel = this.savedXVel;
         players[this.player].yVel = this.savedYVel;
 
@@ -1265,8 +1284,11 @@ for(var i = 0; i < map.length; i++){
 players.push(new Player(0, false));
 players.push(new Player(1, false));
 
-players.push(new Player(2, true));
-aiBots.push(new AiBot(2, 0));
+players.push(new Player(2, true)); //2
+aiBots.push(new AiBot(2, 10)); //2,10
+
+//players.push(new Player(3, true));
+//aiBots.push(new AiBot(3, 10));
 //MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
 
 playerStatBoxes.push(new playerStat(0));
