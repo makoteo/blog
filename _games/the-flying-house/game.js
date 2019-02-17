@@ -1091,7 +1091,7 @@ function AiBot(player, difficulty){
                         }
                     }else if(this.powerUpPosY < players[this.player].y - players[this.player].height){
                         if(players[this.player].tilePosYBottom < map.length){
-                            for(var t = 0; t < map[players[this.player].tilePosYBottom].length; t++){
+                            for(var t = 0; t < map.length; t++){
                                 if(map[players[this.player].tilePosYBottom][t] === 11) {
                                     if(players[this.player].x > xOffset + t*tileSize && players[this.player].x < xOffset + t*tileSize + tileSize/2){
                                         this.savedXVel = 0;
@@ -1109,7 +1109,7 @@ function AiBot(player, difficulty){
                         }
                     }else if(this.powerUpPosY > players[this.player].y){
                         if(players[this.player].tilePosYBottom < map.length){
-                            for(var t = 0; t < map[players[this.player].tilePosYBottom].length; t++){
+                            for(var t = 0; t < map.length; t++){
                                 if(map[players[this.player].tilePosYBottom][t] === 11) {
                                     if(players[this.player].x > xOffset + t*tileSize && players[this.player].x < xOffset + t*tileSize + tileSize/2){
                                         this.savedXVel = 0;
@@ -1128,11 +1128,6 @@ function AiBot(player, difficulty){
                     }
                     //console.log(this.savedXVel);
                 }else{
-                    if(players[this.player].tilePosYBottom < map.length){
-                        if(map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11 && map[players[this.player].tilePosYTop][players[this.player].tilePosXRight] === 11){
-                            this.savedYVel = -moveSpeed;
-                        }
-                    }
                     this.powerUpPosX = 0;
                     this.powerUpPosY = 0;
 
@@ -1146,12 +1141,35 @@ function AiBot(player, difficulty){
                                     this.savedXVel = -moveSpeed;
                                     players[this.player].spawnBullet();
                                 }else{
+                                    //this.savedXVel = -moveSpeed; //Bc the thing will stay in one spot and that doesn't work
                                     players[this.player].spawnBullet();
                                 }
                             }
 
                         }
                     }
+
+                    if(this.savedXVel === 0){ // More Dynamic
+                        if(players[this.player].tilePosYBottom < map.length) {
+                            for (var t = 0; t < map.length; t++) {
+                                if (map[players[this.player].tilePosYBottom][t] === 11) {
+                                    if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
+                                        this.savedXVel = 0;
+                                        break;
+                                    } else if (players[this.player].x < xOffset + t * tileSize) {
+                                        this.savedXVel = moveSpeed;
+                                    } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
+                                        this.savedXVel = -moveSpeed;
+                                    }
+                                }
+
+                            }
+                            if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
+                                this.savedYVel = -moveSpeed;
+                            }
+                        }
+                    }
+
                 }
 
                 //console.log(this.savedXVel);
