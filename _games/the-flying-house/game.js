@@ -1202,14 +1202,14 @@ function AiBot(player, difficulty){
                             if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)) {
-                                if (players[this.player].tilePosXRight < players[i].tilePosXLeft && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*2) {
+                                if (players[this.player].tilePosXRight < players[i].tilePosXLeft && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
                                     this.savedXVel = moveSpeed;
                                     if(this.difficulty > 3){
                                         this.savedYVel = -moveSpeed;
                                     }
                                     players[this.player].spawnBullet();
                                     this.state = "ShootFollow";
-                                } else if (players[this.player].tilePosXLeft > players[i].tilePosXRight && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*2) {
+                                } else if (players[this.player].tilePosXLeft > players[i].tilePosXRight && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
                                     this.savedXVel = -moveSpeed;
                                     if(this.difficulty > 3){
                                         this.savedYVel = -moveSpeed;
@@ -1261,7 +1261,7 @@ function AiBot(player, difficulty){
                         players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                         players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
                         if(players[this.player].tilePosXRight === players[i].tilePosXRight){
-                            this.shootTimer = 15;
+                            this.shootTimer = 10;
                         }
                     }
 
@@ -1283,21 +1283,16 @@ function AiBot(player, difficulty){
                 this.state = "Save Upstairs Going";
             }
 
-            if (players[this.player].tilePosXLeft > map[0].length - 1 && this.state !== "ShootFollow") {
+            if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
                 this.savedXVel = -moveSpeed;
                 this.savedYVel = -moveSpeed;
                 this.state = "Hiding";
                 this.currentAttackChance = 0;
-            } else if (players[this.player].tilePosXRight < 1) {
+            } else if (players[this.player].tilePosXRight < 2) {
                 this.savedXVel = moveSpeed;
                 this.savedYVel = -moveSpeed;
                 this.state = "Hiding";
                 this.currentAttackChance = 0;
-            }
-
-            if(this.shootTimer > 0 && this.state !== "Hiding"){
-                this.savedXVel = this.safeMoveSpeed;
-                console.log("Here");
             }
 
             if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
@@ -1308,6 +1303,11 @@ function AiBot(player, difficulty){
                     this.savedXVel = moveSpeed;
                     this.state = "Moving To Mid";
                 }
+            }
+
+            if(this.shootTimer > 0 && this.state !== "Hiding"){
+                this.savedXVel = this.safeMoveSpeed;
+                console.log("Here");
             }
 
         }
