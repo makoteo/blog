@@ -147,6 +147,8 @@ var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
 
 var GAMESTATE = "GAME";
+var PAUSED = true;
+
 var lightDetailLevel = 10;
 var lightingPercision = 0.2;
 
@@ -1259,7 +1261,7 @@ function AiBot(player, difficulty){
             }
 
             for(var i = 0; i < players.length; i++){
-                if(i !== this.player){
+                if(i !== this.player && players[i].team !== players[this.player].team){
                     if((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
                         players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                         players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
@@ -1276,11 +1278,9 @@ function AiBot(player, difficulty){
                 this.savedYVel = -moveSpeed;
                 if(this.savedXVel === 0){
                     if(this.safeMoveSpeed !== 0){
-                        if(this.safeMoveSpeed !== 0){
-                            this.savedXVel = this.safeMoveSpeed;
-                        }else{
-                            this.savedXVel = moveSpeed;
-                        }
+                        this.savedXVel = this.safeMoveSpeed;
+                    }else{
+                        this.savedXVel = moveSpeed;
                     }
                 }
                 this.state = "Save Upstairs Going";
@@ -1383,7 +1383,7 @@ stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
 
 function game(){
 
-    if(GAMESTATE === "GAME"){
+    if(GAMESTATE === "GAME" && PAUSED === false){
         gameTicks++;
 
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -1888,7 +1888,9 @@ function game(){
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
     }
 
-
+    if ((keys && keys[32])) {
+        PAUSED = !PAUSED;
+    }
 
 }
 
