@@ -352,10 +352,12 @@ function Tile(x, y, width, height, type){
     };
 }
 
-function Bullet(x, y, type){
+function Bullet(x, y, type, team){
     this.velY = 0;
     this.velX = 0;
     this.type = type;
+    this.team = team;
+
     this.knockBack = 0;
 
     if(this.type === 0){
@@ -490,10 +492,11 @@ function Balloon(x, y, tiltedX){
     };
 }
 
-function Player(id, ai){
+function Player(id, ai, team){
 
     this.id = id;
     this.ai = ai;
+    this.team = team;
 
     if(this.id === 0){
         this.x = WIDTH/2 - WIDTH/8;
@@ -761,24 +764,24 @@ function Player(id, ai){
         if(this.reloadTimer === 0){
             if(this.weapon === "Crumpled Paper"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 0));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 0, this.team));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 1));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 1, this.team));
                 }
                 this.reloadTimer = this.reloadSpeed;
             }else if(this.weapon === "Darts"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 2));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 2, this.team));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 3));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 3, this.team));
                 }
                 this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
             }else if(this.weapon === "Potato Launcher"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 4));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 4, this.team));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 5));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 5, this.team));
                 }
                 this.reloadTimer = this.reloadSpeed*3;
                 this.bulletCount--;
@@ -1198,7 +1201,7 @@ function AiBot(player, difficulty){
 
                 if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0) {
                     for (var i = 0; i < players.length; i++) {
-                        if (i !== this.player) {
+                        if (i !== this.player && players[i].team !== players[this.player].team) {
                             if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)) {
@@ -1335,15 +1338,14 @@ for(var i = 0; i < map.length; i++){
     }
 }
 
-players.push(new Player(0, false));
+players.push(new Player(0, false, 0));
 
-players.push(new Player(1, true));
-aiBots.push(new AiBot(1, 5));
+players.push(new Player(1, false, 1));
 
-players.push(new Player(2, true)); //2
+players.push(new Player(2, true, 0)); //2
 aiBots.push(new AiBot(2, 5)); //2,5
 
-players.push(new Player(3, true)); //2
+players.push(new Player(3, true, 1)); //2
 aiBots.push(new AiBot(3, 5)); //2,5
 
 //players.push(new Player(3, true));
@@ -1669,8 +1671,11 @@ function game(){
             for(var j = 0; j < players.length; j++){
                 if(bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX + bullets[i].width > players[j].x){
                     if(bullets[i].y > players[j].y - players[j].height/2 && bullets[i].y < players[j].y + players[j].height/2){
-                        players[j].knockBackXVel = bullets[i].knockBack;
-                        destroy = true;
+                        if(players[j].team !== bullets[i].team){
+                            players[j].knockBackXVel = bullets[i].knockBack;
+                            destroy = true;
+                        }
+
                     }
                 }
             }
