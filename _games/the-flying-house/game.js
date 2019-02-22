@@ -1284,17 +1284,6 @@ function AiBot(player, difficulty){
                 this.state = "Save Upstairs Going";
             }
 
-            if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
-                this.savedXVel = -moveSpeed;
-                this.savedYVel = -moveSpeed;
-                this.state = "Hiding";
-                this.currentAttackChance = 0;
-            } else if (players[this.player].tilePosXRight < 2) {
-                this.savedXVel = moveSpeed;
-                this.savedYVel = -moveSpeed;
-                this.state = "Hiding";
-                this.currentAttackChance = 0;
-            }
 
             if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
                 if (players[this.player].tilePosXLeft > map[0].length - 3 - Math.round(this.intelligence/20)) {
@@ -1308,9 +1297,19 @@ function AiBot(player, difficulty){
 
             if(this.shootTimer > 0 && this.state !== "Hiding"){
                 this.savedXVel = this.safeMoveSpeed;
-                console.log("Here");
             }
 
+            if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
+                this.savedXVel = -moveSpeed;
+                this.savedYVel = -moveSpeed;
+                this.state = "Hiding";
+                this.currentAttackChance = 0;
+            } else if (players[this.player].tilePosXRight < 2) {
+                this.savedXVel = moveSpeed;
+                this.savedYVel = -moveSpeed;
+                this.state = "Hiding";
+                this.currentAttackChance = 0;
+            }
         }
         players[this.player].xVel = this.savedXVel;
         players[this.player].yVel = this.savedYVel;
