@@ -1273,15 +1273,13 @@ function AiBot(player, difficulty){
                 }
             }
 
-            if(this.state === "None" && players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
+            if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
                 || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11)){
                 this.savedYVel = -moveSpeed;
-                if(this.savedXVel === 0){
-                    if(this.safeMoveSpeed !== 0){
-                        this.savedXVel = this.safeMoveSpeed;
-                    }else{
-                        this.savedXVel = moveSpeed;
-                    }
+                if(this.safeMoveSpeed !== 0){
+                    this.savedXVel = this.safeMoveSpeed;
+                }else{
+                    this.savedXVel = moveSpeed;
                 }
                 this.state = "Save Upstairs Going";
             }
