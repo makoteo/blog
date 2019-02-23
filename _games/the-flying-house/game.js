@@ -25,7 +25,7 @@ var map = [
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 27, 88, 88, 11, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 77, 88, 28, 30, 88, 11, 88, 35, 36, 37, 77, 34, 88, 88],
+    [88, 88, 88, 77, 88, 28, 30, 88, 11, 88, 35, 36, 37, 77, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
@@ -149,7 +149,7 @@ var moveSpeed = tileSize/12;
 var bulletSpeed = tileSize/6;
 
 var GAMESTATE = "GAME";
-var PAUSED = true;
+var PAUSED = false;
 
 var lightDetailLevel = 10;
 var lightingPercision = 0.2;
@@ -159,11 +159,17 @@ var weatherSwitchTime = 1200; //1200
 var upperrainCoefficient = 0.8; // 0.8
 var lowerrainCoefficient = 0; // 0
 
+var GlobalLives = 5;
+
 var rainOpacity = 0;
 
 var updateSpeed = 2; //Must be bigger than 0, should be 5
 
 var rainCurrent = 0;
+
+var livesCanSpawn = true;
+var potatoLauncherChance = 0.2;
+var heartChance = 0.2;
 
 repeatOften(); //Starts Game
 
@@ -540,6 +546,8 @@ function Player(id, ai, team){
     this.ai = ai;
     this.team = team;
 
+    this.name = "Player " + this.id;
+
     if(this.id === 0){
         this.x = WIDTH/2 - WIDTH/8;
         this.y = HEIGHT/2 - 50;
@@ -557,7 +565,7 @@ function Player(id, ai, team){
         this.y = HEIGHT/2;
     }
 
-    this.lives = 5;
+    this.lives = GlobalLives;
 
     this.spawnX = this.x;
     this.spawnY = this.y;
@@ -796,6 +804,16 @@ function Player(id, ai, team){
         ctx.drawImage(tileMap, 32*this.id, 256, 32, 50, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.78*cameraZoom);
         ctx.drawImage(tileMap, 32*this.walkFrame, 306, 32, 14, this.cameraX + cameraGlobalX, this.cameraY + this.height*0.78*cameraZoom + cameraGlobalY, this.width*cameraZoom, this.height*0.22*cameraZoom);
         ctx.drawImage(tileMap, 96, 306, 32, 14, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
+        ctx.textAlign = 'center';
+        if(this.opacity - 0.5 > 0){
+            ctx.globalAlpha = this.opacity - 0.5;
+        }else{
+            ctx.globalAlpha = 0;
+        }
+        ctx.fillStyle = 'white';
+        ctx.font = "10px Arial";
+        ctx.fillText(this.name, this.x+this.width/2, this.y - this.height + cameraGlobalY);
+        ctx.textAlign = 'left';
         ctx.globalAlpha = 1;
 
         this.xVel = 0;
@@ -872,10 +890,10 @@ function playerStat(id){
     this.profileWidth = WIDTH/20;
     this.profileHeight = WIDTH/20;
 
-    this.name = "Player " + this.idPlusOne;
+    this.name = players[this.id].name;
     this.weapon = "Crumpled Paper";
     this.bulletCount = 0;
-    this.lives = 10;
+    this.lives = GlobalLives;
 
     if(this.id === 0){
         this.x = this.width/10;
@@ -904,6 +922,7 @@ function playerStat(id){
     this.lifeNumY = this.y + HEIGHT/11;
 
     this.draw = function(){
+        ctx.lineWidth = 2;
         ctx.textAlign = 'left';
         ctx.fillStyle = 'gray';
         ctx.globalAlpha = 0.4;
@@ -939,6 +958,7 @@ function playerStat(id){
         if(gameTicks % 60 === 0){
             this.lives = players[this.id].lives;
             this.weapon = players[this.id].weapon;
+            this.name = players[this.id].name;
         }
         this.bulletCount = players[this.id].bulletCount;
     };
@@ -960,18 +980,29 @@ function TextBox(x, y, type, text){
     this.screenHalfWidth = WIDTH/2;
 
     this.update = function(){
-        this.y += this.yVel;
-        if(this.opacity > 0.01){
-            this.opacity -= 0.01
+        if(this.type !== 3){
+            this.y += this.yVel;
+            if(this.opacity > 0.01){
+                this.opacity -= 0.01
+            }
+            this.lifeSpan--;
+        }else{
+            if(this.opacity > 0.01){
+                this.opacity -= 0.01
+            }
+            this.lifeSpan--;
         }
-        this.lifeSpan--;
 
         this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
     };
 
     this.draw = function(){
-        ctx.font = "15px Arial";
+        if(this.type !== 3){
+            ctx.font = "15px Arial";
+        }else{
+            ctx.font = "150px Arial";
+        }
         ctx.strokeStyle = 'white';
         ctx.fillStyle = 'white';
         ctx.globalAlpha = this.opacity;
@@ -1322,7 +1353,7 @@ function AiBot(player, difficulty){
                         players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                         players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
                         if(players[this.player].tilePosXRight === players[i].tilePosXRight){
-                            this.shootTimer = 10;
+                            this.shootTimer = 20;
                         }
                     }
 
@@ -1340,6 +1371,10 @@ function AiBot(player, difficulty){
                 }
             }
 
+            if(this.shootTimer > 0){
+                this.savedXVel = this.safeMoveSpeed;
+            }
+
             if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
                 this.savedXVel = -moveSpeed;
                 this.savedYVel = -moveSpeed;
@@ -1352,9 +1387,6 @@ function AiBot(player, difficulty){
                 this.currentAttackChance = 0;
             }
 
-            if(this.shootTimer > 0){
-                this.savedXVel = this.safeMoveSpeed;
-            }
         }
         players[this.player].xVel = this.savedXVel;
         players[this.player].yVel = this.savedYVel;
@@ -1363,45 +1395,6 @@ function AiBot(player, difficulty){
 
 
 //CREATE TILES
-
-for(var i = 0; i < backgroundMap.length; i++){
-    for(var j = 0; j < backgroundMap[0].length; j++){
-        if(backgroundMap[i][j] !== 88){
-            tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
-        }
-    }
-}
-
-for(var i = 0; i < map.length; i++){
-    for(var j = 0; j < map[0].length; j++){
-        if(map[i][j] !== 88){
-            tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
-        }
-    }
-}
-
-players.push(new Player(0, false, 0));
-
-players.push(new Player(1, false, 1));
-
-players.push(new Player(2, true, 0)); //2
-aiBots.push(new AiBot(2, 5)); //2,5
-
-players.push(new Player(3, true, 1)); //2
-aiBots.push(new AiBot(3, 5)); //2,5
-
-//players.push(new Player(3, true));
-//aiBots.push(new AiBot(3, 10));
-//MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
-
-playerStatBoxes.push(new playerStat(0));
-playerStatBoxes.push(new playerStat(1));
-playerStatBoxes.push(new playerStat(2));
-playerStatBoxes.push(new playerStat(3));
-
-balloons.push(new Balloon(WIDTH/2, yOffset, 0));
-balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
-balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
 
 var gameTicks = 0;
 
@@ -1414,6 +1407,87 @@ var fallVelocity = 0;
 
 var justFell = false;
 
+function Setup(){
+
+    gameTicks = 0;
+
+    fallingApartLine = 0;
+    wallTilesToDelete = 0;
+    totalTiles = 0;
+    bgTilesToDelete = 0;
+
+    fallVelocity = 0;
+
+    justFell = false;
+
+    tiles = [];
+    players = [];
+    bullets = [];
+    balloons = [];
+    playerStatBoxes = [];
+    fallingTiles = [];
+    effects = [];
+    rainParticles = [];
+    lightningBolts = [];
+    clouds = [];
+    aiBots = [];
+
+
+    cameraGlobalX = 0;
+    cameraGlobalY = 0;
+
+    cameraGlobalYOffset = 0;
+    cameraZoom = 1;
+    cameraYWindOffset = 0;
+    cameraYWindOffsetVel = 0;
+    rainOpacity = 0;
+
+    rainCurrent = 0;
+
+    for(var i = 0; i < backgroundMap.length; i++){
+        for(var j = 0; j < backgroundMap[0].length; j++){
+            if(backgroundMap[i][j] !== 88){
+                tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
+            }
+        }
+    }
+
+    //REMEMBER THAT PART OF THE MAP IS NOW GONE LOL
+
+    for(var i = 0; i < map.length; i++){
+        for(var j = 0; j < map[0].length; j++){
+            if(map[i][j] !== 88){
+                tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
+            }
+        }
+    }
+
+    players.push(new Player(0, false, 0));
+
+    players.push(new Player(1, false, 1));
+
+    players.push(new Player(2, true, 0)); //2
+    aiBots.push(new AiBot(2, 5)); //2,5
+
+    players.push(new Player(3, true, 1)); //2
+    aiBots.push(new AiBot(3, 5)); //3,5
+
+//players.push(new Player(3, true));
+//aiBots.push(new AiBot(3, 10));
+//MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
+
+    playerStatBoxes.push(new playerStat(0));
+    playerStatBoxes.push(new playerStat(1));
+    playerStatBoxes.push(new playerStat(2));
+    playerStatBoxes.push(new playerStat(3));
+
+    balloons.push(new Balloon(WIDTH/2, yOffset, 0));
+    balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
+    balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
+}
+
+Setup();
+
 var grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
 grd.addColorStop(0, "rgb(86, 136, 216)");
 grd.addColorStop(1, "rgb(100, 183, 249)");
@@ -1422,6 +1496,10 @@ var stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, 
 
 stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
 stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
+var countDownStartTime = 50;
+var countDownEndTime = 350;
+var startDelay = 50;
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius, fill, stroke) {
     var cornerRadius = { upperLeft: 0, upperRight: 0, lowerLeft: 0, lowerRight: 0 };
@@ -1457,6 +1535,16 @@ function game(){
 
     if(GAMESTATE === "GAME" && PAUSED === false){
         gameTicks++;
+
+        if(gameTicks === countDownStartTime){
+            effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "3"));
+        }else if(gameTicks === countDownStartTime + (countDownEndTime - countDownStartTime)/3){
+            effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "2"));
+        }else if(gameTicks === countDownStartTime + (countDownEndTime - countDownStartTime)/3*2){
+            effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "1"));
+        }else if(gameTicks === countDownStartTime + countDownEndTime){
+            effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "Start!"));
+        }
 
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
@@ -1717,14 +1805,26 @@ function game(){
                                 tiles[i].powerUpActive = false;
                                 tiles[i].spawnTimer = 0;
                                 var random = Math.random();
-                                if(random > 0.8){
-                                    effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Potato Launcher!"));
+                                if(random > 1 - potatoLauncherChance){
+                                    effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Potato Launcher!!"));
                                     players[j].weapon = "Potato Launcher";
                                     players[j].bulletCount = 3;
                                 }else{
-                                    effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Darts!"));
-                                    players[j].weapon = "Darts";
-                                    players[j].bulletCount = 20;
+                                    if(livesCanSpawn === false){
+                                        effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Darts!"));
+                                        players[j].weapon = "Darts";
+                                        players[j].bulletCount = 20;
+                                    }else{
+                                        if(random > 1 - potatoLauncherChance - heartChance){
+                                            effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "+1 Life!!"));
+                                            players[j].lives ++;
+                                        }else{
+                                            effects.push(new TextBox(tiles[i].x + tiles[i].width/2, tiles[i].y - tiles[i].height/2, 0, "Darts!"));
+                                            players[j].weapon = "Darts";
+                                            players[j].bulletCount = 20;
+                                        }
+
+                                    }
                                 }
                                 powerUpSpawned = false;
                             }
@@ -1778,105 +1878,108 @@ function game(){
 
         //CONTROLS
         //PLAYER 1
-        if(players.length > 0){
-            if(players[0].ai === false) {
-                if ((keys && keys[40]) && (keys && keys[38])) {
+        if(gameTicks > countDownEndTime + startDelay){
+            if(players.length > 0){
+                if(players[0].ai === false) {
+                    if ((keys && keys[40]) && (keys && keys[38])) {
 
-                } else if (keys && keys[38]) {
-                    players[0].yVel = -moveSpeed;
-                }
-                else if (keys && keys[40]) {
-                    players[0].yVel = moveSpeed;
-                    players[0].hide();
-                } else {
-
-                }
-
-                if ((keys && keys[37]) && (keys && keys[39])) {
-
-                } else if (keys && keys[37]) {
-                    players[0].xVel = -moveSpeed;
-                }
-                else if (keys && keys[39]) {
-                    players[0].xVel = moveSpeed;
-                } else {
-
-                }
-
-                if (keys && keys[77]) {
-                    if (players[0].y + players[0].height < HEIGHT) {
-                        players[0].spawnBullet();
+                    } else if (keys && keys[38]) {
+                        players[0].yVel = -moveSpeed;
                     }
-                }
-            }
-        }
+                    else if (keys && keys[40]) {
+                        players[0].yVel = moveSpeed;
+                        players[0].hide();
+                    } else {
 
-        //PLAYER 2
-        if(players.length > 1){
-            if(players[1].ai === false) {
-                if ((keys && keys[69]) && (keys && keys[68])) {
-
-                } else if (keys && keys[69]) {
-                    players[1].yVel = -moveSpeed;
-                }
-                else if (keys && keys[68]) {
-                    players[1].yVel = moveSpeed;
-                    players[1].hide();
-                }
-
-                if ((keys && keys[83]) && (keys && keys[70])) {
-
-                } else if (keys && keys[83]) {
-                    players[1].xVel = -moveSpeed;
-                }
-                else if (keys && keys[70]) {
-                    players[1].xVel = moveSpeed;
-                }
-
-                if (keys && keys[81]) {
-                    if (players[1].y + players[1].height < HEIGHT) {
-                        players[1].spawnBullet();
                     }
-                }
-            }
-        }
 
-        //PLAYER 3
-        if(players.length > 2){
-            if(players[2].ai === false){
-                if((keys && keys[73])&&(keys && keys[75])){
+                    if ((keys && keys[37]) && (keys && keys[39])) {
 
-                }else if(keys && keys[73]){
-                    players[2].yVel = -moveSpeed;
-                }
-                else if(keys && keys[75]){
-                    players[2].yVel = moveSpeed;
-                    players[2].hide();
-                }
+                    } else if (keys && keys[37]) {
+                        players[0].xVel = -moveSpeed;
+                    }
+                    else if (keys && keys[39]) {
+                        players[0].xVel = moveSpeed;
+                    } else {
 
-                if((keys && keys[74])&&(keys && keys[76])){
+                    }
 
-                }else if(keys && keys[74]){
-                    players[2].xVel = -moveSpeed;
-                }
-                else if(keys && keys[76]){
-                    players[2].xVel = moveSpeed;
-                }
-
-                if(keys && keys[89]){
-                    if(players[2].y + players[1].height < HEIGHT){
-                        players[2].spawnBullet();
+                    if (keys && keys[77]) {
+                        if (players[0].y + players[0].height < HEIGHT) {
+                            players[0].spawnBullet();
+                        }
                     }
                 }
             }
 
-        }
+            //PLAYER 2
+            if(players.length > 1){
+                if(players[1].ai === false) {
+                    if ((keys && keys[69]) && (keys && keys[68])) {
 
-        if(aiBots.length > 0){
-            for(var i = 0; i < aiBots.length; i++){
-                aiBots[i].update();
+                    } else if (keys && keys[69]) {
+                        players[1].yVel = -moveSpeed;
+                    }
+                    else if (keys && keys[68]) {
+                        players[1].yVel = moveSpeed;
+                        players[1].hide();
+                    }
+
+                    if ((keys && keys[83]) && (keys && keys[70])) {
+
+                    } else if (keys && keys[83]) {
+                        players[1].xVel = -moveSpeed;
+                    }
+                    else if (keys && keys[70]) {
+                        players[1].xVel = moveSpeed;
+                    }
+
+                    if (keys && keys[81]) {
+                        if (players[1].y + players[1].height < HEIGHT) {
+                            players[1].spawnBullet();
+                        }
+                    }
+                }
+            }
+
+            //PLAYER 3
+            if(players.length > 2){
+                if(players[2].ai === false){
+                    if((keys && keys[73])&&(keys && keys[75])){
+
+                    }else if(keys && keys[73]){
+                        players[2].yVel = -moveSpeed;
+                    }
+                    else if(keys && keys[75]){
+                        players[2].yVel = moveSpeed;
+                        players[2].hide();
+                    }
+
+                    if((keys && keys[74])&&(keys && keys[76])){
+
+                    }else if(keys && keys[74]){
+                        players[2].xVel = -moveSpeed;
+                    }
+                    else if(keys && keys[76]){
+                        players[2].xVel = moveSpeed;
+                    }
+
+                    if(keys && keys[89]){
+                        if(players[2].y + players[1].height < HEIGHT){
+                            players[2].spawnBullet();
+                        }
+                    }
+                }
+
+            }
+
+            if(aiBots.length > 0){
+                for(var i = 0; i < aiBots.length; i++){
+                    aiBots[i].update();
+                }
             }
         }
+
 
 
         for(var i = 0; i < players.length; i++) {
