@@ -325,6 +325,35 @@ function Tile(x, y, width, height, type){
         this.imageHeight = 40;
     }
 
+    this.upperRightCurve = 0;
+    this.bottomRightCurve = 0;
+    this.upperLeftCurve = 0;
+    this.bottomLeftCurve = 0;
+
+    this.tilePosX = Math.round(this.x-xOffset)/tileSize;
+    this.tilePosY = Math.round(this.y-yOffset)/tileSize;
+
+    /*
+    //if(this.falling ){
+        if(this.tilePosX > 0){
+            if(map[this.tilePosY][this.tilePosX - 1] !== 10){
+                if(this.tilePosY > 0){
+                    if(map[this.tilePosY - 1][this.tilePosX] !== 10) {
+                        this.upperLeftCurve = 5;
+                    }
+                }
+                if(this.tilePosY < map.length - 1){
+                    if(map[this.tilePosY + 1][this.tilePosX] !== 10) {
+                        this.bottomLeftCurve = 5;
+                    }
+                }else{
+                    this.bottomLeftCurve = 5;
+                }
+            }
+        }
+    //}
+    */
+
     this.update = function(){
         this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
         this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
@@ -341,7 +370,16 @@ function Tile(x, y, width, height, type){
     };
     this.draw = function(){
         if(this.type !== 77){
-            ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+            if(this.type !== 10){
+                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+            }else{
+                /*ctx.save();
+                ctx.roundRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom, {upperLeft:this.upperLeftCurve,upperRight:this.upperRightCurve,lowerLeft:this.bottomLeftCurve,lowerRight:this.upperRightCurve}, true, false);
+                ctx.clip();
+                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+                ctx.restore();*/
+                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+            }
         }else{
             if(this.powerUpActive === true){
                 ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + this.width/8 + cameraGlobalX, this.cameraY + cameraGlobalY + this.height/16*5, this.width/8*6*cameraZoom, this.height/8*6*cameraZoom);
@@ -1112,6 +1150,8 @@ function AiBot(player, difficulty){
 
     this.state = "None";
 
+    this.shootDelay = 0;
+
     this.update = function(){
 
         //State 1: ShootFollow
@@ -1156,7 +1196,7 @@ function AiBot(player, difficulty){
                             this.savedXVel = -moveSpeed;
                         }
                         if(this.intelligence > 2){
-                            this.yVel = -moveSpeed;
+                            this.savedYVel = -moveSpeed;
                         }
                     } else if (this.powerUpPosY < players[this.player].y - players[this.player].height) {
                         if (players[this.player].tilePosYBottom < map.length) {
@@ -1237,6 +1277,20 @@ function AiBot(player, difficulty){
                 }
             }
 
+            if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
+                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11)){
+                this.savedYVel = -moveSpeed;
+                if(amountOfBreaks === breakPoints - 1){
+                    if(this.safeMoveSpeed !== 0){
+                        this.savedXVel = this.safeMoveSpeed;
+                    }else{
+                        this.savedXVel = moveSpeed;
+                    }
+                }
+
+                this.state = "Save Upstairs Going";
+            }
+
             if (fallApartTimer >= fallApartTime - 200 && this.intelligence > 1) {
                 if (players[this.player].tilePosYBottom === map.length - 2 || players[this.player].tilePosYBottom === map.length - 1) {
                     for (var t = 0; t < map.length; t++) {
@@ -1250,7 +1304,7 @@ function AiBot(player, difficulty){
                                 this.savedXVel = -moveSpeed;
                             }
                         }else{
-                            //this.savedXVel = this.safeMoveSpeed;
+
                         }
                     }
                     if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
@@ -1273,17 +1327,6 @@ function AiBot(player, difficulty){
                 }
             }
 
-            if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
-                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11)){
-                this.savedYVel = -moveSpeed;
-                if(this.safeMoveSpeed !== 0){
-                    this.savedXVel = this.safeMoveSpeed;
-                }else{
-                    this.savedXVel = moveSpeed;
-                }
-                this.state = "Save Upstairs Going";
-            }
-
 
             if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
                 if (players[this.player].tilePosXLeft > map[0].length - 3 - Math.round(this.intelligence/20)) {
@@ -1293,10 +1336,6 @@ function AiBot(player, difficulty){
                     this.savedXVel = moveSpeed;
                     this.state = "Moving To Mid";
                 }
-            }
-
-            if(this.shootTimer > 0 && this.state !== "Hiding"){
-                this.savedXVel = this.safeMoveSpeed;
             }
 
             if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
@@ -1309,6 +1348,10 @@ function AiBot(player, difficulty){
                 this.savedYVel = -moveSpeed;
                 this.state = "Hiding";
                 this.currentAttackChance = 0;
+            }
+
+            if(this.shootTimer > 0){
+                this.savedXVel = this.safeMoveSpeed;
             }
         }
         players[this.player].xVel = this.savedXVel;
@@ -1377,6 +1420,36 @@ var stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, 
 
 stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
 stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius, fill, stroke) {
+    var cornerRadius = { upperLeft: 0, upperRight: 0, lowerLeft: 0, lowerRight: 0 };
+    if (typeof stroke == "undefined") {
+        stroke = true;
+    }
+    if (typeof radius === "object") {
+        for (var side in radius) {
+            cornerRadius[side] = radius[side];
+        }
+    }
+
+    this.beginPath();
+    this.moveTo(x + cornerRadius.upperLeft, y);
+    this.lineTo(x + width - cornerRadius.upperRight, y);
+    this.quadraticCurveTo(x + width, y, x + width, y + cornerRadius.upperRight);
+    this.lineTo(x + width, y + height - cornerRadius.lowerRight);
+    this.quadraticCurveTo(x + width, y + height, x + width - cornerRadius.lowerRight, y + height);
+    this.lineTo(x + cornerRadius.lowerLeft, y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - cornerRadius.lowerLeft);
+    this.lineTo(x, y + cornerRadius.upperLeft);
+    this.quadraticCurveTo(x, y, x + cornerRadius.upperLeft, y);
+    this.closePath();
+    if (stroke) {
+        this.stroke();
+    }
+    if (fill) {
+        this.fill();
+    }
+}
 
 function game(){
 
