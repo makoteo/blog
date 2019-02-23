@@ -1484,6 +1484,9 @@ function Setup(){
 
     fallApartTimer = 0;
 
+    amountOfBreaks = 0;
+    breakPoints = 0;
+
     tiles = [];
     players = [];
     bullets = [];
@@ -1496,6 +1499,9 @@ function Setup(){
     clouds = [];
     aiBots = [];
 
+    breakingApartBg = [];
+    breakingApartFg = [];
+
     cameraGlobalX = 0;
     cameraGlobalY = 0;
 
@@ -1507,8 +1513,18 @@ function Setup(){
 
     rainCurrent = 0;
 
+    powerUpSpawned = false;
+
     map = Lvl2Fg.slice();
     backgroundMap = Lvl2Bg.slice();
+
+    for(var i = 0; i < backgroundMap.length; i++){
+        for(var j = 0; j < backgroundMap[0].length; j++){
+            if(backgroundMap[i][j] === 99){
+                breakPoints++;
+            }
+        }
+    }
 
     for(var i = 0; i < backgroundMap.length; i++){
         for(var j = 0; j < backgroundMap[0].length; j++){
