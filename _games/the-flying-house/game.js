@@ -8,14 +8,15 @@ var WIDTH = 1200;
 var HEIGHT = 675;
 
 var map = [
-    [88, 88, 88, 88, 88, 88, 12, 10, 10, 10, 13, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 12, 14, 16, 88, 17, 15, 13, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 12, 14, 16, 88, 88, 88, 17, 15, 13, 88, 88, 88, 88],
-    [88, 88, 88, 12, 14, 16, 88, 88, 88, 88, 88, 17, 15, 13, 88, 88, 88],
-    [88, 88, 12, 14, 16, 88, 88, 88, 88, 88, 88, 88, 17, 15, 13, 88, 88],
-    [88, 12, 14, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 15, 13, 88],
-    [12, 14, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 13],
-    [88, 88, 88, 88, 88, 27, 27, 88, 77, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 12, 14, 14, 14, 13, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 12, 14, 14, 14, 14, 14, 13, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 12, 14, 14, 16, 88, 17, 14, 14, 13, 88, 88, 88, 88],
+    [88, 88, 88, 12, 14, 14, 16, 88, 88, 88, 17, 14, 14, 13, 88, 88, 88],
+    [88, 88, 12, 14, 14, 16, 88, 88, 88, 88, 88, 17, 14, 14, 13, 88, 88],
+    [88, 12, 14, 14, 16, 88, 88, 88, 88, 88, 88, 88, 17, 14, 14, 13, 88],
+    [12, 14, 14, 14, 10, 10, 10, 10, 10, 10, 10, 10, 10, 14, 14, 14, 13],
+    [15, 15, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 15],
+    [88, 88, 88, 88, 88, 27, 27, 88, 77, 88, 88, 88, 29, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 28, 28, 88, 11, 88, 88, 88, 30, 88, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
@@ -30,13 +31,14 @@ var map = [
 
 var backgroundMap = [
     [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 25, 25, 25, 26, 25, 25, 25, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88, 88],
     [88, 88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88, 88],
     [88, 88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 29, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
@@ -72,8 +74,8 @@ GUIDE TO TILE TYPES:
 
 12 - Left Roof
 13 - Right Roof
-14 - Left Corner Roof
-15 - Right Corner Roof
+14 - Full Block Roof
+15 - Bottom Roof
 
 16 - Upside Down Triangle Left
 17 - Upside Down Triangle Right
@@ -188,9 +190,9 @@ function Tile(x, y, width, height, type){
         this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28
         && this.type !== 31 && this.type !== 32 && this.type !== 33 && this.type !== 35 && this.type !== 36 && this.type !== 37){
         this.lightLevel = 0.8;
-    }else if(this.type === 10 || this.type === 14 || this.type === 15 || this.type === 16 || this.type === 17 || this.type === 77){
+    }else if(this.type === 10 || this.type === 14 || this.type === 16 || this.type === 17 || this.type === 77){
         this.lightLevel = Math.random()/4;
-    }else if(this.type === 12 || this.type === 13 || this.type === 99){
+    }else if(this.type === 12 || this.type === 13 || this.type === 99 || this.type === 15){
         this.lightLevel = 0;
     }else if(this.type === 27 || this.type === 28){
         this.lightLevel = 0.2;
@@ -1247,14 +1249,14 @@ function AiBot(player, difficulty){
                             if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
                                 players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)) {
-                                if (players[this.player].tilePosXRight < players[i].tilePosXLeft && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
+                                if (players[this.player].x + players[this.player].width < players[i].x && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
                                     this.savedXVel = moveSpeed;
                                     if(this.difficulty > 3){
                                         this.savedYVel = -moveSpeed;
                                     }
                                     players[this.player].spawnBullet();
                                     this.state = "ShootFollow";
-                                } else if (players[this.player].tilePosXLeft > players[i].tilePosXRight && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
+                                } else if (players[this.player].x > players[i].x + players[i].height && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
                                     this.savedXVel = -moveSpeed;
                                     if(this.difficulty > 3){
                                         this.savedYVel = -moveSpeed;
@@ -1280,7 +1282,7 @@ function AiBot(player, difficulty){
             if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
                 || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11)){
                 this.savedYVel = -moveSpeed;
-                if(amountOfBreaks === breakPoints - 1){
+                if(amountOfBreaks === breakPoints){
                     if(this.safeMoveSpeed !== 0){
                         this.savedXVel = this.safeMoveSpeed;
                     }else{
