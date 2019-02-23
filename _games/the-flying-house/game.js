@@ -7,7 +7,7 @@ var ctx = canvas.getContext("2d");
 var WIDTH = 1200;
 var HEIGHT = 675;
 
-var map = [
+var Lvl1Fg = [
     [88, 88, 88, 88, 88, 88, 12, 14, 14, 14, 13, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 12, 14, 14, 14, 14, 14, 13, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 12, 14, 14, 16, 88, 17, 14, 14, 13, 88, 88, 88, 88],
@@ -17,7 +17,7 @@ var map = [
     [12, 14, 14, 14, 10, 10, 10, 10, 10, 10, 10, 10, 10, 14, 14, 14, 13],
     [15, 15, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 15, 15],
     [88, 88, 88, 88, 88, 27, 27, 88, 77, 88, 88, 88, 29, 88, 88, 88, 88],
-    [88, 88, 88, 88, 88, 28, 28, 88, 11, 88, 88, 88, 30, 88, 88, 88, 88],
+    [88, 88, 66, 88, 66, 28, 28, 88, 11, 88, 88, 66, 30, 66, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 11, 10, 10, 10, 10, 10, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88, 88, 88, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 11, 88, 27, 27, 88, 88, 88, 88, 88],
@@ -29,7 +29,7 @@ var map = [
     [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
-var backgroundMap = [
+var Lvl1Bg = [
     [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 25, 25, 25, 25, 25, 88, 88, 88, 88, 88, 88],
@@ -50,6 +50,65 @@ var backgroundMap = [
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
+
+var Lvl2Fg = [
+    [88, 88, 88, 88, 12, 14, 13, 88, 88, 88, 88],
+    [88, 88, 88, 12, 14, 14, 14, 13, 88, 88, 88],
+    [88, 88, 12, 14, 14, 88, 14, 14, 13, 88, 88],
+    [88, 88, 14, 14, 14, 88, 14, 14, 14, 88, 88],
+    [88, 12, 14, 14, 14, 88, 14, 14, 14, 13, 88],
+    [88, 15, 15, 15, 15, 15, 15, 15, 15, 15, 88],
+    [88, 88, 27, 88, 88, 11, 88, 88, 27, 88, 88],
+    [88, 88, 28, 66, 88, 11, 66, 88, 28, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 27, 88, 88, 11, 88, 88, 88],
+    [88, 88, 77, 66, 28, 88, 66, 11, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
+    [88, 88, 31, 32, 33, 77, 88, 11, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 27, 88, 88],
+    [88, 77, 88, 36, 34, 88, 88, 11, 28, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
+    [88, 88, 35, 36, 37, 88, 77, 11, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
+];
+
+var Lvl2Bg = [
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 26, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 26, 26, 26, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 26, 88, 88, 88, 88, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
+];
+
+var map = Lvl2Fg;
+var backgroundMap = Lvl2Bg;
 
 var breakPoints = 0;
 for(var i = 0; i < backgroundMap.length; i++){
@@ -100,6 +159,7 @@ GUIDE TO TILE TYPES:
 36 -> Middle Table
 37 -> Right Table
 
+66 -> SpawnPoint
 77 -> Spawner of Weapons
 88 -> Empty
 99 -> Break Point
@@ -159,13 +219,15 @@ var weatherSwitchTime = 1200; //1200
 var upperrainCoefficient = 0.8; // 0.8
 var lowerrainCoefficient = 0; // 0
 
-var GlobalLives = 5;
+var GlobalLives = 1;
 
 var rainOpacity = 0;
 
 var updateSpeed = 2; //Must be bigger than 0, should be 5
 
 var rainCurrent = 0;
+
+var teamPoints = [0, 0, 0, 0];
 
 var livesCanSpawn = true;
 var potatoLauncherChance = 0.2;
@@ -333,11 +395,6 @@ function Tile(x, y, width, height, type){
         this.imageHeight = 40;
     }
 
-    this.upperRightCurve = 0;
-    this.bottomRightCurve = 0;
-    this.upperLeftCurve = 0;
-    this.bottomLeftCurve = 0;
-
     this.tilePosX = Math.round(this.x-xOffset)/tileSize;
     this.tilePosY = Math.round(this.y-yOffset)/tileSize;
 
@@ -495,7 +552,7 @@ function Balloon(x, y, tiltedX){
     this.cameraX = 0;
     this.cameraY = 0;
 
-    this.yFloat = 100;
+    this.yFloat = tileSize*6;
 
     this.screenHalfWidth = WIDTH/2;
     this.screenHalfHeight = HEIGHT/2;
@@ -525,10 +582,10 @@ function Balloon(x, y, tiltedX){
         if(gameTicks % 10 === 0){
             this.yFloat += Math.round(Math.random()*3 - 1.5);
 
-            if(this.yFloat > 220){
-                this.yFloat = 220;
-            }else if(this.yFloat < 180){
-                this.yFloat = 180;
+            if(this.yFloat > tileSize*7){
+                this.yFloat =  tileSize*7;
+            }else if(this.yFloat < tileSize*5){
+                this.yFloat =  tileSize*5;
             }
         }
 
@@ -547,22 +604,21 @@ function Player(id, ai, team){
     this.team = team;
 
     this.name = "Player " + this.id;
+    this.spawnPlacesFound = 0;
 
-    if(this.id === 0){
-        this.x = WIDTH/2 - WIDTH/8;
-        this.y = HEIGHT/2 - 50;
-    }else if(this.id === 1){
-        this.x = WIDTH/2 + WIDTH/8;
-        this.y = HEIGHT/2 - 50;
-    }else if(this.id === 2){
-        this.x = WIDTH/2 - WIDTH/10;
-        this.y = HEIGHT/2 - 50;
-    }else if(this.id === 3){
-        this.x = WIDTH/2 + WIDTH/10;
-        this.y = HEIGHT/2 - 50;
-    }else{
-        this.x = WIDTH/2;
-        this.y = HEIGHT/2;
+    this.width = tileSize/2;
+    this.height = tileSize;
+
+    for(var i = 0; i < map.length; i++){
+        for(var j = 0; j < map[0].length; j++){
+            if(map[i][j] === 66){
+                this.spawnPlacesFound++;
+                if(this.spawnPlacesFound === this.id + 1){
+                    this.x = j*tileSize + xOffset + this.width;
+                    this.y = i*tileSize + yOffset;
+                }
+            }
+        }
     }
 
     this.lives = GlobalLives;
@@ -572,9 +628,6 @@ function Player(id, ai, team){
 
     this.reloadSpeed = 20;
     this.reloadTimer = 0;
-
-    this.width = tileSize/2;
-    this.height = tileSize;
 
     this.cameraX = 0;
     this.cameraY = 0;
@@ -982,15 +1035,19 @@ function TextBox(x, y, type, text){
     this.update = function(){
         if(this.type !== 3){
             this.y += this.yVel;
-            if(this.opacity > 0.01){
+            if(this.opacity > 0){
                 this.opacity -= 0.01
             }
             this.lifeSpan--;
         }else{
-            if(this.opacity > 0.01){
-                this.opacity -= 0.01
+            if(this.opacity > 0){
+                this.opacity -= 0.02
             }
             this.lifeSpan--;
+        }
+
+        if(this.opacity <= 0){
+            this.lifeSpan = 0;
         }
 
         this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
@@ -998,17 +1055,19 @@ function TextBox(x, y, type, text){
     };
 
     this.draw = function(){
-        if(this.type !== 3){
-            ctx.font = "15px Arial";
-        }else{
-            ctx.font = "150px Arial";
+        if(this.opacity > 0) {
+            if (this.type !== 3) {
+                ctx.font = "15px Arial";
+            } else {
+                ctx.font = "150px Arial";
+            }
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = this.opacity;
+            ctx.textAlign = 'center';
+            ctx.fillText(this.text, this.x, this.y + cameraGlobalY);
+            ctx.globalAlpha = 1;
         }
-        ctx.strokeStyle = 'white';
-        ctx.fillStyle = 'white';
-        ctx.globalAlpha = this.opacity;
-        ctx.textAlign = 'center';
-        ctx.fillText(this.text, this.x, this.y + cameraGlobalY);
-        ctx.globalAlpha = 1;
     };
 }
 
@@ -1050,7 +1109,7 @@ function Explosion(x, y, type){
 function RainParticle() {
     this.x = Math.round(Math.random()*WIDTH);
     this.y = 0;
-    this.length = Math.round((Math.random() + 1) * HEIGHT/100);
+    this.length = Math.round((Math.random() + 1) * HEIGHT/100 * tileSize/32);
     this.velY = Math.round((Math.random() + 2)*3);
     this.velX = Math.round((Math.random() - 0.5) * 3);
 
@@ -1311,7 +1370,7 @@ function AiBot(player, difficulty){
             }
 
             if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
-                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11)){
+                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) && amountOfBreaks > 0){
                 this.savedYVel = -moveSpeed;
                 if(amountOfBreaks === breakPoints){
                     if(this.safeMoveSpeed !== 0){
@@ -1347,18 +1406,21 @@ function AiBot(player, difficulty){
                 this.state = "Going Upstairs";
             }
 
-            for(var i = 0; i < players.length; i++){
-                if(i !== this.player && players[i].team !== players[this.player].team){
-                    if((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
-                        players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
-                        players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
-                        if(players[this.player].tilePosXRight === players[i].tilePosXRight){
-                            this.shootTimer = 20;
+            if(this.shootTimer === 0){
+                for(var i = 0; i < players.length; i++){
+                    if(i !== this.player && players[i].team !== players[this.player].team){
+                        if((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
+                            players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
+                            players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
+                            if(players[this.player].tilePosXRight === players[i].tilePosXRight){
+                                this.shootTimer = 20;
+                            }
                         }
-                    }
 
+                    }
                 }
             }
+
 
 
             if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
@@ -1420,6 +1482,8 @@ function Setup(){
 
     justFell = false;
 
+    fallApartTimer = 0;
+
     tiles = [];
     players = [];
     bullets = [];
@@ -1443,6 +1507,9 @@ function Setup(){
     rainOpacity = 0;
 
     rainCurrent = 0;
+
+    map = Lvl2Fg;
+    backgroundMap = Lvl2Bg;
 
     for(var i = 0; i < backgroundMap.length; i++){
         for(var j = 0; j < backgroundMap[0].length; j++){
@@ -1498,7 +1565,7 @@ stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
 stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
 
 var countDownStartTime = 50;
-var countDownEndTime = 350;
+var countDownEndTime = 250;
 var startDelay = 50;
 
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius, fill, stroke) {
@@ -1531,6 +1598,10 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, ra
     }
 }
 
+var teams = [];
+var firstTeam = 0;
+var moreTeams = false;
+
 function game(){
 
     if(GAMESTATE === "GAME" && PAUSED === false){
@@ -1538,13 +1609,43 @@ function game(){
 
         if(gameTicks === countDownStartTime){
             effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "3"));
-        }else if(gameTicks === countDownStartTime + (countDownEndTime - countDownStartTime)/3){
+        }else if(gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime)/3)){
             effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "2"));
-        }else if(gameTicks === countDownStartTime + (countDownEndTime - countDownStartTime)/3*2){
+        }else if(gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime)/3*2)){
             effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "1"));
         }else if(gameTicks === countDownStartTime + countDownEndTime){
             effects.push(new TextBox(WIDTH/2, HEIGHT/2, 3, "Start!"));
         }
+
+        if(gameTicks % 50 === 0){
+            for(var p = 0; p < players.length; p++){
+                if(players[p].lives > 0){
+                    teams.push(players[p].team);
+                }
+            }
+            console.log(teams);
+
+            if(teams.length > 0){
+                firstTeam = teams[0];
+            }
+
+            for(var t = 0; t < teams.length; t++){
+                if(firstTeam !== teams[t]){
+                    moreTeams = true;
+                    break;
+                }
+            }
+
+            if(moreTeams === false){
+                Setup();
+                teamPoints[firstTeam] += 1;
+            }
+
+            moreTeams = false;
+            firstTeam = 0;
+            teams = [];
+        }
+
 
         ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
