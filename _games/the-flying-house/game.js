@@ -107,8 +107,8 @@ var Lvl2Bg = [
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
-var map = Lvl2Fg;
-var backgroundMap = Lvl2Bg;
+var map = Lvl2Fg.slice();
+var backgroundMap = Lvl2Bg.slice();
 
 var breakPoints = 0;
 for(var i = 0; i < backgroundMap.length; i++){
@@ -572,7 +572,7 @@ function Balloon(x, y, tiltedX){
 
         if(this.x > WIDTH/2 - tileSize && this.x < WIDTH/2 + tileSize){
             for(var i = 0; i < 3; i++){
-                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY + cameraGlobalY - 100, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
+                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY + cameraGlobalY - tileSize*3, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
             }
         }else{
             ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX, this.ballooncameraY + cameraGlobalY, tileSize*6*cameraZoom, tileSize*8*cameraZoom);
@@ -1496,7 +1496,6 @@ function Setup(){
     clouds = [];
     aiBots = [];
 
-
     cameraGlobalX = 0;
     cameraGlobalY = 0;
 
@@ -1508,8 +1507,8 @@ function Setup(){
 
     rainCurrent = 0;
 
-    map = Lvl2Fg;
-    backgroundMap = Lvl2Bg;
+    map = Lvl2Fg.slice();
+    backgroundMap = Lvl2Bg.slice();
 
     for(var i = 0; i < backgroundMap.length; i++){
         for(var j = 0; j < backgroundMap[0].length; j++){
@@ -1619,11 +1618,10 @@ function game(){
 
         if(gameTicks % 50 === 0){
             for(var p = 0; p < players.length; p++){
-                if(players[p].lives > 0){
+                if(players[p].active === true){
                     teams.push(players[p].team);
                 }
             }
-            console.log(teams);
 
             if(teams.length > 0){
                 firstTeam = teams[0];
@@ -1639,6 +1637,7 @@ function game(){
             if(moreTeams === false){
                 Setup();
                 teamPoints[firstTeam] += 1;
+                console.log(teamPoints);
             }
 
             moreTeams = false;
