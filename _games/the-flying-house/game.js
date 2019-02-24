@@ -58,24 +58,24 @@ var Lvl2Fg = [
     [88, 88, 14, 14, 14, 88, 14, 14, 14, 88, 88],
     [88, 12, 14, 14, 14, 88, 14, 14, 14, 13, 88],
     [88, 15, 15, 15, 15, 15, 15, 15, 15, 15, 88],
-    [88, 88, 27, 88, 88, 88, 88, 88, 27, 88, 88],
-    [88, 88, 28, 66, 88, 88, 66, 88, 28, 88, 88],
-    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
-    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
-    [88, 88, 88, 88, 27, 88, 88, 11, 88, 88, 88],
-    [88, 88, 77, 66, 28, 88, 66, 11, 88, 88, 88],
-    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
-    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
-    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
-    [88, 88, 31, 32, 33, 77, 88, 11, 88, 88, 88],
-    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
-    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
-    [88, 88, 88, 88, 88, 88, 88, 11, 27, 88, 88],
-    [88, 77, 88, 36, 34, 88, 88, 11, 28, 88, 88],
+    [88, 88, 27, 27, 88, 88, 88, 88, 27, 88, 88],
+    [88, 88, 28, 28, 66, 88, 66, 88, 28, 88, 88],
+    [88, 43, 43, 43, 43, 43, 43, 11, 43, 43, 88],
+    [88, 43, 88, 88, 88, 88, 88, 11, 88, 43, 88],
+    [88, 88, 88, 27, 88, 88, 88, 11, 88, 88, 88],
+    [88, 88, 77, 28, 66, 88, 66, 11, 88, 88, 88],
     [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
     [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
     [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
-    [88, 88, 35, 36, 37, 88, 77, 11, 88, 88, 88],
+    [88, 88, 31, 32, 33, 77, 88, 11, 88, 41, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
+    [88, 77, 39, 40, 34, 88, 88, 11, 88, 88, 88],
+    [88, 10, 10, 10, 10, 10, 10, 11, 10, 10, 88],
+    [88, 10, 88, 88, 88, 88, 88, 11, 88, 10, 88],
+    [88, 88, 88, 88, 88, 88, 88, 11, 88, 88, 88],
+    [88, 88, 35, 36, 37, 88, 77, 11, 88, 41, 88],
     [88, 10, 10, 10, 10, 10, 10, 10, 10, 10, 88]
 ];
 
@@ -86,7 +86,7 @@ var Lvl2Bg = [
     [88, 88, 88, 88, 26, 26, 26, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 26, 88, 88, 88, 88, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 44, 44, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
@@ -169,6 +169,9 @@ GUIDE TO TILE TYPES:
 
 42 -> Rotated Wooden BackGround
 
+43 -> Rock
+44 -> Rock Bg
+
 66 -> SpawnPoint
 77 -> Spawner of Weapons
 88 -> Empty
@@ -200,7 +203,7 @@ var powerUpSpawned = false;
 var fallApartTime = 1800; //1800
 var fallApartTimer = 0;
 
-var collidableBlocks = [10, 12, 13, 14, 15];
+var collidableBlocks = [10, 12, 13, 14, 43, 15];
 
 tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
@@ -267,9 +270,9 @@ function Tile(x, y, width, height, type){
     if(this.type !== 11 && this.type !== 10 && this.type !== 12 && this.type !== 13 && this.type !== 14 && this.type !== 15 &&
         this.type !== 16 && this.type !== 17 && this.type !== 77 && this.type !== 99 && this.type !== 27 && this.type !== 28
         && this.type !== 31 && this.type !== 32 && this.type !== 33 && this.type !== 35 && this.type !== 36 && this.type !== 37
-        && this.type !== 34 && this.type !== 38 && this.type !== 39 && this.type !== 40){
+        && this.type !== 34 && this.type !== 38 && this.type !== 39 && this.type !== 40 && this.type !== 43){
         this.lightLevel = 0.8;
-    }else if(this.type === 10 || this.type === 14 || this.type === 16 || this.type === 17 || this.type === 77){
+    }else if(this.type === 10 || this.type === 14 || this.type === 16 || this.type === 17 || this.type === 77 || this.type === 43){
         this.lightLevel = Math.random()/4;
     }else if(this.type === 12 || this.type === 13 || this.type === 99 || this.type === 15){
         this.lightLevel = 0;
@@ -422,6 +425,16 @@ function Tile(x, y, width, height, type){
     }else if(this.type === 42){
         this.imageX = 384;
         this.imageY = 256;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 43){
+        this.imageX = 384;
+        this.imageY = 192;
+        this.imageWidth = 64;
+        this.imageHeight = 64;
+    }else if(this.type === 44){
+        this.imageX = 448;
+        this.imageY = 192;
         this.imageWidth = 64;
         this.imageHeight = 64;
     }else if(this.type === 77){
@@ -690,14 +703,20 @@ function Player(id, ai, team){
 
     this.active = true;
 
+    this.canJump = false;
+
     this.knockBackXVel = 0;
 
     this.walkFrame = 0;
+
+    this.falling = false;
 
     this.weapon = "Crumpled Paper";
     this.bulletCount = 0;
 
     this.update = function(){
+
+        this.falling = false;
 
         if(this.actualXVel === 0){
             this.actualXVel = this.xVel;
@@ -707,9 +726,11 @@ function Player(id, ai, team){
             this.actualXVel += this.knockBackXVel;
         }
 
-        if(this.actualYVel === 0){
+        if(this.canJump === true){
             this.actualYVel = this.yVel;
         }
+
+        this.canJump = false;
 
         this.tilePosXLeft = Math.round((this.x - this.width + this.width/10 - xOffset) / tileSize);
         this.tilePosXRight = Math.round((this.x - this.width/10 - xOffset) / tileSize);
@@ -738,6 +759,15 @@ function Player(id, ai, team){
                 this.actualYVel += this.gravity;
             }
 
+            if(Math.round((this.y + 2 - yOffset) / tileSize) < map.length){
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[Math.round((this.y + 2 - yOffset) / tileSize)][this.tilePosXLeft] === collidableBlocks[i] || map[Math.round((this.y + 2 - yOffset) / tileSize)][this.tilePosXRight] === collidableBlocks[i]) {
+                        this.canJump = true;
+                    }
+                }
+            }
+
+
             if(this.tilePosYBottom < map.length - 1){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom + 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYBottom + 1][this.tilePosXRight] === collidableBlocks[i]) {
@@ -749,15 +779,18 @@ function Player(id, ai, team){
                                 if (map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11) {
                                     if(Math.abs(this.actualYVel) === 0){
                                         this.actualYVel = this.yVel;
+                                        //this.falling = true;
                                     }
                                     if(Math.abs(this.yVel) > Math.abs(this.actualYVel)){
                                         this.actualYVel = this.yVel;
+                                        //this.falling = true;
                                     }
 
                                 }
                             } else {
-                                this.actualYVel += this.gravity;
-                                break;
+                                //this.actualYVel += this.gravity;
+                                this.falling = true;
+                                //break;
                             }
                         }
                     } else {
@@ -769,15 +802,20 @@ function Player(id, ai, team){
                                 if(Math.abs(this.yVel) > Math.abs(this.actualYVel)){
                                     this.actualYVel = this.yVel;
                                 }
-                                break;
+                                //break;
                             }
                         } else {
-                            this.actualYVel += this.gravity;
-                            break;
+                            //this.actualYVel += this.gravity;
+                            this.falling = true;
+                            //break;
                         }
                     }
                 }
             }else{
+                this.actualYVel += this.gravity;
+            }
+
+            if(this.falling === true){
                 this.actualYVel += this.gravity;
             }
 
