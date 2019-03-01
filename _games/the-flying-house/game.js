@@ -89,21 +89,21 @@ var Lvl2Bg = [
     [88, 44, 44, 44, 44, 44, 44, 44, 44, 44, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
-    [88, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
-    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
+    [88, 42, 42, 26, 42, 26, 42, 42, 42, 42, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
-    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
-    [99, 25, 25, 26, 25, 26, 25, 25, 25, 25, 88],
-    [88, 42, 42, 42, 42, 42, 42, 42, 42, 42, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 42, 42, 26, 42, 26, 42, 42, 42, 42, 88],
+    [88, 25, 25, 26, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 42, 42, 26, 42, 26, 42, 42, 42, 42, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
+    [99, 42, 42, 26, 42, 26, 42, 42, 42, 42, 88],
+    [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88],
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
@@ -447,26 +447,56 @@ function Tile(x, y, width, height, type){
     this.tilePosX = Math.round(this.x-xOffset)/tileSize;
     this.tilePosY = Math.round(this.y-yOffset)/tileSize;
 
-    /*
-    //if(this.falling ){
-        if(this.tilePosX > 0){
-            if(map[this.tilePosY][this.tilePosX - 1] !== 10){
-                if(this.tilePosY > 0){
-                    if(map[this.tilePosY - 1][this.tilePosX] !== 10) {
-                        this.upperLeftCurve = 5;
+
+    this.upperRightCurve = 0;
+    this.bottomRightCurve = 0;
+    this.bottomLeftCurve = 0;
+    this.upperLeftCurve = 0;
+
+    this.curved = false;
+
+    if((this.type === 10 || this.type === 25) && gameTicks < 50){
+        //console.log("Here");
+        if(this.type === 10 || this.type === 43){
+            if(this.tilePosX > 0 && this.tilePosX < map[0].length){
+                if(map[this.tilePosY][this.tilePosX - 1] !== this.type){
+                    if(this.tilePosY > 0){
+                        if(map[this.tilePosY - 1][this.tilePosX] !== this.type) {
+                            this.upperLeftCurve = 2;
+                            this.curved = true;
+                        }
+                    }
+                    if(this.tilePosY < map.length - 1){
+                        if(map[this.tilePosY + 1][this.tilePosX] !== this.type) {
+                            this.bottomLeftCurve = 2;
+                            this.curved = true;
+                        }
+                    }else{
+                        this.bottomLeftCurve = 2;
+                        this.curved = true;
                     }
                 }
-                if(this.tilePosY < map.length - 1){
-                    if(map[this.tilePosY + 1][this.tilePosX] !== 10) {
-                        this.bottomLeftCurve = 5;
+                if(map[this.tilePosY][this.tilePosX + 1] !== this.type){
+                    if(this.tilePosY < map.length - 1){
+                        if(map[this.tilePosY - 1][this.tilePosX] !== this.type) {
+                            this.upperRightCurve = 2;
+                            this.curved = true;
+                        }
                     }
-                }else{
-                    this.bottomLeftCurve = 5;
+                    if(this.tilePosY < map.length - 1){
+                        if(map[this.tilePosY + 1][this.tilePosX] !== this.type) {
+                            this.bottomRightCurve = 2;
+                            this.curved = true;
+                        }
+                    }else{
+                        this.bottomRightCurve = 2;
+                        this.curved = true;
+                    }
                 }
             }
         }
-    //}
-    */
+
+    }
 
     this.update = function(){
         this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
@@ -484,15 +514,15 @@ function Tile(x, y, width, height, type){
     };
     this.draw = function(){
         if(this.type !== 77){
-            if(this.type !== 10){
+            if(this.curved === false){
                 ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
             }else{
-                /*ctx.save();
-                ctx.roundRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom, {upperLeft:this.upperLeftCurve,upperRight:this.upperRightCurve,lowerLeft:this.bottomLeftCurve,lowerRight:this.upperRightCurve}, true, false);
+                ctx.save();
+                ctx.roundRect(this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom, {upperLeft:this.upperLeftCurve,upperRight:this.upperRightCurve,lowerLeft:this.bottomLeftCurve,lowerRight:this.bottomRightCurve}, true, false);
                 ctx.clip();
                 ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
-                ctx.restore();*/
-                ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+                ctx.restore();
+                //ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
             }
         }else{
             if(this.powerUpActive === true){
