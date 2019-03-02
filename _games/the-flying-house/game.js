@@ -241,6 +241,8 @@ var updateSpeed = 2; //Must be bigger than 0, should be 5
 var rainCurrent = 0;
 
 var teamPoints = [0, 0, 0, 0];
+var playerPoints = [0, 0, 0, 0];
+var playerAccuracy = [0, 0, 0, 0];
 
 var livesCanSpawn = true;
 var potatoLauncherChance = 0.2;
@@ -611,9 +613,9 @@ function Bullet(x, y, type, team, shooter){
         if(this.type === 0 || this.type === 1){
             ctx.drawImage(tileMap, 128 + this.frame*24, 128, 24, 24, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 2){
-            ctx.drawImage(tileMap, 152, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
+            ctx.drawImage(tileMap, 152, 152, 24, 14, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 3){
-            ctx.drawImage(tileMap, 128, 152, 24, 16, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
+            ctx.drawImage(tileMap, 128, 152, 24, 14, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }else if(this.type === 5 || this.type === 4){
             ctx.drawImage(tileMap, 168, 168, 24, 18, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width * cameraZoom, this.height * cameraZoom);
         }
@@ -682,6 +684,9 @@ function Player(id, ai, team){
     this.id = id;
     this.ai = ai;
     this.team = team;
+
+    this.hitAmount = 0;
+    this.totalShots = 0;
 
     this.tempCauseOfDeath = "Slipped Off";
 
@@ -951,6 +956,10 @@ function Player(id, ai, team){
             this.tempCauseOfDeath = "Slipped Off";
         }
 
+        if((gameTicks % 400 === 0) && this.totalShots !== 0){
+            playerAccuracy[this.id] = this.hits/this.totalShots;
+        }
+
     };
 
     this.draw = function(){
@@ -987,6 +996,7 @@ function Player(id, ai, team){
 
     this.spawnBullet = function(){
         if(this.reloadTimer === 0){
+            this.totalShots++;
             if(this.weapon === "Crumpled Paper"){
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 0, this.team, this.id));
@@ -1792,6 +1802,7 @@ function game(){
                     Setup();
                     teamPoints[firstTeam] += 1;
                     console.log(teamPoints);
+                    console.log(playerAccuracy);
                 }
 
                 moreTeams = false;
@@ -2063,19 +2074,23 @@ function game(){
                                         effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Potato Launcher!!"));
                                         players[j].weapon = "Potato Launcher";
                                         players[j].bulletCount = 3;
+                                        playerPoints[j] += 90;
                                     } else {
                                         if (livesCanSpawn === false) {
                                             effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Darts!"));
                                             players[j].weapon = "Darts";
                                             players[j].bulletCount = 20;
+                                            playerPoints[j] += 50;
                                         } else {
                                             if (random > 1 - potatoLauncherChance - heartChance) {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "+1 Life!!"));
                                                 players[j].lives++;
+                                                playerPoints[j] += 70;
                                             } else {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Darts!"));
                                                 players[j].weapon = "Darts";
                                                 players[j].bulletCount = 20;
+                                                playerPoints[j] += 50;
                                             }
 
                                         }
@@ -2100,10 +2115,13 @@ function game(){
                         if (bullets[i].y > players[j].y - players[j].height / 2 && bullets[i].y < players[j].y + players[j].height / 2) {
                             if (players[j].team !== bullets[i].team) {
                                 players[j].knockBackXVel = bullets[i].knockBack;
+                                players[bullets[i].shooter].hitAmount++;
                                 if(bullets[i].type === 4 || bullets[i].type === 5){
                                     players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
+                                    playerPoints[bullets[i].shooter] += 200;
                                 }else{
                                     players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
+                                    playerPoints[bullets[i].shooter] += 100;
                                 }
 
                                 destroy = true;
