@@ -1340,6 +1340,7 @@ function AiBot(player, difficulty){
 
     this.savedXVel = 0;
     this.savedYVel = 0;
+    this.shooting = false;
 
     this.powerUpPosY = 0;
     this.powerUpPosX = 0;
@@ -1350,17 +1351,123 @@ function AiBot(player, difficulty){
 
     this.update = function(){
 
-        //State 1: ShootFollow
-
-        if (this.timer > 0) {
-            this.timer--;
-        } else {
-            this.timer = 0;
-        }
-
         if(gameTicks % updateSpeed*2 === 0 && gameTicks > this.reactionSpeed) {
 
-            if (this.shootTimer > 0) {
+            this.savedXVel = 0;
+            this.savedYVel = 0;
+            this.shooting = false;
+
+            if (this.currentAttackChance < 100) {
+                this.currentAttackChance++;
+            }
+
+            if (this.timer > 0) {
+                this.timer--;
+            } else {
+                this.timer = 0;
+            }
+
+            if(amountOfBreaks === breakPoints){ //ONLY LAST FLOOR REMAINS, OR ONLY TOP FLOORS ARE LEFT
+                if (players[this.player].tilePosXLeft > map[0].length - Math.round(map[0].length/10) - Math.round(this.intelligence/20)) {
+                    this.state = "Jumping Over To Left";
+                    this.timer = Math.round(Math.random()*10);
+                } else if (players[this.player].tilePosXRight < Math.round(map[0].length/10) + Math.round(this.intelligence/20)) {
+                    this.state = "Jumping Over To Right";
+                    this.timer = Math.round(Math.random()*10);
+                }
+
+                if (players[this.player].tilePosXLeft > map[0].length - Math.round(map[0].length/4) - Math.round(this.intelligence/20)) {
+                    this.state = "LastFloorRight";
+                } else if (players[this.player].tilePosXRight < Math.round(map[0].length/4) + Math.round(this.intelligence/20)) {
+                    this.state = "LastFloorLeft";
+                }else{
+                    if(this.timer === 0){
+                        this.state = "Idle";
+                    }
+                }
+            }else{
+                if (players[this.player].tilePosXLeft > map[0].length - Math.round(map[0].length/10) - Math.round(this.intelligence/20)) {
+                    this.state = "Jumping Over To Left";
+                    this.timer = Math.round(Math.random()*10);
+                } else if (players[this.player].tilePosXRight < Math.round(map[0].length/10) + Math.round(this.intelligence/20)) {
+                    this.state = "Jumping Over To Right";
+                    this.timer = Math.round(Math.random()*10);
+                }else{
+                    if(this.timer === 0){
+                        this.state = "Idle";
+                    }
+                }
+            }
+
+            if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0 && this.state === "Idle" && this.timer === 0) {
+                for (var i = 0; i < players.length; i++) {
+                    if (i !== this.player && players[i].team !== players[this.player].team) {
+                        if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
+                            players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom)) {
+                            if(players[this.player].x < players[i].x && players[i].x - players[this.player].x > tileSize){
+                                this.state = "Shooting Right";
+                            }else if(players[this.player].x < players[i].x && players[i].x - players[this.player].x <= tileSize*2 && players[i].x - players[this.player].x > 0){
+                                this.state = "Wandering Left";
+                                this.timer = Math.round(Math.random()*5)+5;
+                            }else if(players[this.player].x > players[i].x && players[this.player].x - players[i].x > tileSize){
+                                this.state = "Shooting Left"
+                            }else if(players[this.player].x > players[i].x && players[this.player].x - players[i].x <= tileSize*2 && players[i].x - players[this.player].x > 0){
+                                this.state = "Wandering Right";
+                                this.timer = Math.round(Math.random()*5)+5;
+                            }else{
+                                this.state = "Idle";
+                            }
+                        }else if(players[this.player].tilePosYBottom - 2 === players[i].tilePosYBottom){
+                            if(players[this.player].x < players[i].x && players[i].x - players[this.player].x > tileSize){
+                                this.state = "Shooting Right";
+                            }else if(players[this.player].x < players[i].x && players[i].x - players[this.player].x <= tileSize*2){
+                                this.state = "Wandering Left";
+                                this.timer = Math.round(Math.random()*5)+5;
+                            }else if(players[this.player].x > players[i].x && players[this.player].x - players[i].x > tileSize){
+                                this.state = "Shooting Left";
+                            }else if(players[this.player].x > players[i].x && players[this.player].x - players[i].x <= tileSize*2){
+                                this.state = "Wandering Right";
+                                this.timer = Math.round(Math.random()*5)+5;
+                            }else{
+                                this.state = "Idle";
+                            }
+                            this.savedYVel = -moveSpeed;
+                        }
+
+                    }
+                }
+            }
+
+            if(this.state === "LastFloorRight"){
+                this.savedXVel = -moveSpeed;
+                this.shooting = true;
+
+            }else if(this.state === "LastFloorLeft"){
+                this.savedXVel = moveSpeed;
+                this.shooting = true;
+            }else if(this.state === "Jumping Over To Right"){
+                this.savedXVel = moveSpeed;
+                this.savedYVel = -moveSpeed;
+
+            }else if(this.state === "Jumping Over To Left"){
+                this.savedXVel = -moveSpeed;
+                this.savedYVel = -moveSpeed;
+            }else if(this.state === "Shooting Right"){
+                this.savedXVel = moveSpeed;
+                this.shooting = true;
+            }else if(this.state === "Shooting Left"){
+                this.savedXVel = -moveSpeed;
+                this.shooting = true;
+            }else if(this.state === "Shooting"){
+                this.shooting = true;
+            }else if(this.state === "Wandering Right"){
+                this.savedXVel = moveSpeed;
+            }else if(this.state === "Wandering Left"){
+                this.savedXVel = -moveSpeed;
+            }
+
+
+            /*if (this.shootTimer > 0) {
                 this.shootTimer--;
             } else {
                 this.shootTimer = 0;
@@ -1530,10 +1637,10 @@ function AiBot(player, difficulty){
             if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
                 if (players[this.player].tilePosXLeft > map[0].length - 3 - Math.round(this.intelligence/20)) {
                     this.savedXVel = -moveSpeed;
-                    this.state = "Moving To Mid";
+                    //this.state = "Moving To Mid";
                 } else if (players[this.player].tilePosXRight < 3 + Math.round(this.intelligence/20)) {
                     this.savedXVel = moveSpeed;
-                    this.state = "Moving To Mid";
+                    //this.state = "Moving To Mid";
                 }
             }
 
@@ -1551,11 +1658,17 @@ function AiBot(player, difficulty){
                 this.savedYVel = -moveSpeed;
                 this.state = "Hiding";
                 this.currentAttackChance = 0;
-            }
+            }*/
 
         }
         players[this.player].xVel = this.savedXVel;
         players[this.player].yVel = this.savedYVel;
+
+        if(this.shooting){
+            players[this.player].spawnBullet();
+        }
+
+        console.log(this.player + " - " + this.state);
     }
 }
 
