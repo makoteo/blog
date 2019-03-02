@@ -825,6 +825,9 @@ function Player(id, ai, team){
                         }
                     } else {
                         if (map[this.tilePosYBottom][this.tilePosXLeft] === 11 || map[this.tilePosYBottom][this.tilePosXRight] === 11) {
+                            if(Math.abs(this.actualYVel) < moveSpeed){
+                                this.canJump = true;
+                            }
                             if ((map[this.tilePosYTop - 1][this.tilePosXLeft] === 11 && map[this.tilePosYTop - 1][this.tilePosXRight] === 11)) {
                                 if(Math.abs(this.actualYVel) === 0){
                                     this.actualYVel = this.yVel;
@@ -1326,16 +1329,6 @@ function AiBot(player, difficulty){
 
     this.currentAttackChance = this.minAttackChance;
 
-    if(this.player % 2 === 0){
-        this.safeMoveSpeed = moveSpeed;
-    }else if(this.player === 1){
-        // If player is 0, he doesn't move has to be added
-        this.safeMoveSpeed = -moveSpeed;
-    }else{
-        // If player is 0, he doesn't move has to be added
-        this.safeMoveSpeed = 0;
-    }
-
     //DIFFICULTY FROM 1-10
 
     this.savedXVel = 0;
@@ -1399,6 +1392,68 @@ function AiBot(player, difficulty){
                 }
             }
 
+            if (powerUpSpawned === true && ((fallApartTimer < fallApartTime - 200 && this.intelligence > 1) || this.intelligence === 1) && players[this.player].weapon !== "Potato Launcher") {
+                if (this.powerUpPosX === 0) {
+                    for (var b = 0; b < tiles.length; b++) {
+                        if (tiles[b].type === 77 && tiles[b].powerUpActive === true) {
+                            this.powerUpPosX = tiles[b].x + tileSize / 2;
+                            this.powerUpPosY = tiles[b].y;
+                        }
+                    }
+                    this.timer = this.reactionSpeed;
+                }else{
+                    if (players[this.player].y + players[this.player].height > this.powerUpPosY && players[this.player].y - players[this.player].height < this.powerUpPosY) {
+                        if (players[this.player].x + players[this.player].width < this.powerUpPosX) {
+                            this.state = "Wandering Right";
+                        } else {
+                            this.state = "Wandering Left";
+                        }
+                        if (this.intelligence > 2) {
+                            this.savedYVel = -moveSpeed;
+                        }
+                    } else if (this.powerUpPosY < players[this.player].y - players[this.player].height) {
+                        if (players[this.player].tilePosYBottom < map.length) {
+                            for (var t = 0; t < map.length; t++) {
+                                if (map[players[this.player].tilePosYBottom][t] === 11) {
+                                    if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
+                                        this.savedXVel = 0;
+                                        break;
+                                    } else if (players[this.player].x < xOffset + t * tileSize) {
+                                        this.state = "Wandering Right";
+                                    } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
+                                        this.state = "Wandering Left";
+                                    }
+                                }
+                            }
+                            if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
+                                this.state = "Up Ladder";
+                            }
+                        }
+                    } else if (this.powerUpPosY > players[this.player].y) {
+                        if (players[this.player].tilePosYBottom < map.length) {
+                            for (var t = 0; t < map.length; t++) {
+                                if (map[players[this.player].tilePosYBottom][t] === 11) {
+                                    if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
+                                        this.savedXVel = 0;
+                                        break;
+                                    } else if (players[this.player].x < xOffset + t * tileSize) {
+                                        this.state = "Wandering Right";
+                                    } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
+                                        this.state = "Wandering Left";
+                                    }
+                                }
+                            }
+                            if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
+                                this.state = "Down Ladder";
+                            }
+                        }
+                    }
+                }
+            }else if(powerUpSpawned === false){
+                this.powerUpPosY = 0;
+                this.powerUpPosX = 0;
+            }
+
             if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0 && this.state === "Idle" && this.timer === 0) {
                 for (var i = 0; i < players.length; i++) {
                     if (i !== this.player && players[i].team !== players[this.player].team) {
@@ -1438,17 +1493,44 @@ function AiBot(player, difficulty){
                 }
             }
 
+            if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
+                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) && amountOfBreaks > 0){
+                this.state = "Up Ladder";
+            }
+
+            if (fallApartTimer >= fallApartTime - 200 && this.intelligence > 1) {
+                if (players[this.player].tilePosYBottom === map.length - 2 || players[this.player].tilePosYBottom === map.length - 1) {
+                    for (var t = 0; t < map.length; t++) {
+                        if (map[players[this.player].tilePosYBottom][t] === 11) {
+                            if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
+                                this.savedXVel = 0;
+                                break;
+                            } else if (players[this.player].x < xOffset + t * tileSize) {
+                                this.state = "Wandering Right"
+                            } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
+                                this.state = "Wandering Left"
+                            }
+                        }else{
+
+                        }
+                    }
+                    if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
+                        this.state = "Up Ladder";
+                    }
+                }
+            }
+
+
+
             if(this.state === "LastFloorRight"){
                 this.savedXVel = -moveSpeed;
                 this.shooting = true;
-
             }else if(this.state === "LastFloorLeft"){
                 this.savedXVel = moveSpeed;
                 this.shooting = true;
             }else if(this.state === "Jumping Over To Right"){
                 this.savedXVel = moveSpeed;
                 this.savedYVel = -moveSpeed;
-
             }else if(this.state === "Jumping Over To Left"){
                 this.savedXVel = -moveSpeed;
                 this.savedYVel = -moveSpeed;
@@ -1466,199 +1548,11 @@ function AiBot(player, difficulty){
                 this.savedXVel = -moveSpeed;
             }
 
-
-            /*if (this.shootTimer > 0) {
-                this.shootTimer--;
-            } else {
-                this.shootTimer = 0;
-            }
-
-            this.state = "None";
-
-            this.savedXVel = 0;
-            this.savedYVel = 0;
-
-            if (this.currentAttackChance < 100) {
-                this.currentAttackChance++;
-            }
-
-            if (powerUpSpawned === true && ((fallApartTimer < fallApartTime - 200 && this.intelligence > 1) || this.intelligence === 1) && (this.intelligence > 4 && players[this.player].weapon !== "Potato Launcher")) {
-                if (this.powerUpPosX === 0) {
-                    for (var b = 0; b < tiles.length; b++) {
-                        if (tiles[b].type === 77 && tiles[b].powerUpActive === true) {
-                            this.powerUpPosX = tiles[b].x + tileSize / 2;
-                            this.powerUpPosY = tiles[b].y;
-                        }
-                    }
-                    this.timer = this.reactionSpeed;
-                } else if(this.timer === 0){
-                    if (players[this.player].y + players[this.player].height * 2 > this.powerUpPosY && players[this.player].y - players[this.player].height < this.powerUpPosY) {
-                        if (players[this.player].x + players[this.player].width < this.powerUpPosX) {
-                            this.savedXVel = moveSpeed;
-                        } else {
-                            this.savedXVel = -moveSpeed;
-                        }
-                        if(this.intelligence > 2){
-                            this.savedYVel = -moveSpeed;
-                        }
-                    } else if (this.powerUpPosY < players[this.player].y - players[this.player].height) {
-                        if (players[this.player].tilePosYBottom < map.length) {
-                            for (var t = 0; t < map.length; t++) {
-                                if (map[players[this.player].tilePosYBottom][t] === 11) {
-                                    if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
-                                        this.savedXVel = 0;
-                                        break;
-                                    } else if (players[this.player].x < xOffset + t * tileSize) {
-                                        this.savedXVel = moveSpeed;
-                                    } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
-                                        this.savedXVel = -moveSpeed;
-                                    }
-                                }
-                            }
-                            if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
-                                this.savedYVel = -moveSpeed;
-                            }
-                        }
-                    } else if (this.powerUpPosY > players[this.player].y) {
-                        if (players[this.player].tilePosYBottom < map.length) {
-                            for (var t = 0; t < map.length; t++) {
-                                if (map[players[this.player].tilePosYBottom][t] === 11) {
-                                    if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
-                                        this.savedXVel = 0;
-                                        break;
-                                    } else if (players[this.player].x < xOffset + t * tileSize) {
-                                        this.savedXVel = moveSpeed;
-                                    } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
-                                        this.savedXVel = -moveSpeed;
-                                    }
-                                }
-                            }
-                            if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
-                                this.savedYVel = moveSpeed;
-                            }
-                        }
-                    }
-                    this.state = "Moving For PowerUp";
-                }
-            } else {
-                this.powerUpPosX = 0;
-                this.powerUpPosY = 0;
-
-                if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0) {
-                    for (var i = 0; i < players.length; i++) {
-                        if (i !== this.player && players[i].team !== players[this.player].team) {
-                            if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
-                                players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
-                                players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)) {
-                                if (players[this.player].x + players[this.player].width < players[i].x && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
-                                    this.savedXVel = moveSpeed;
-                                    if(this.difficulty > 3){
-                                        this.savedYVel = -moveSpeed;
-                                    }
-                                    players[this.player].spawnBullet();
-                                    this.state = "ShootFollow";
-                                } else if (players[this.player].x > players[i].x + players[i].height && Math.abs(players[i].x - players[this.player].x) > players[this.player].width*3) {
-                                    this.savedXVel = -moveSpeed;
-                                    if(this.difficulty > 3){
-                                        this.savedYVel = -moveSpeed;
-                                    }
-                                    players[this.player].spawnBullet();
-                                    this.state = "ShootFollow";
-                                } else {
-                                    if(players[this.player].x < players[i].x && players[this.player].facing !== 1){
-                                        players[this.player].facing = 1;
-                                    }else if(players[this.player].x > players[i].x && players[this.player].facing !== -1){
-                                        players[this.player].facing = -1;
-                                    }
-                                    players[this.player].spawnBullet();
-                                    this.state = "Shoot";
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
-                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) && amountOfBreaks > 0){
+            if(this.state === "Up Ladder"){
                 this.savedYVel = -moveSpeed;
-                if(amountOfBreaks === breakPoints){
-                    if(this.safeMoveSpeed !== 0){
-                        this.savedXVel = this.safeMoveSpeed;
-                    }else{
-                        this.savedXVel = moveSpeed;
-                    }
-                }
-
-                this.state = "Save Upstairs Going";
+            }else if(this.state === "Down Ladder"){
+                this.savedYVel = moveSpeed;
             }
-
-            if (fallApartTimer >= fallApartTime - 200 && this.intelligence > 1) {
-                if (players[this.player].tilePosYBottom === map.length - 2 || players[this.player].tilePosYBottom === map.length - 1) {
-                    for (var t = 0; t < map.length; t++) {
-                        if (map[players[this.player].tilePosYBottom][t] === 11) {
-                            if (players[this.player].x > xOffset + t * tileSize && players[this.player].x < xOffset + t * tileSize + tileSize / 2) {
-                                this.savedXVel = 0;
-                                break;
-                            } else if (players[this.player].x < xOffset + t * tileSize) {
-                                this.savedXVel = moveSpeed;
-                            } else if (players[this.player].x - players[this.player].height / 4 > xOffset + t * tileSize) {
-                                this.savedXVel = -moveSpeed;
-                            }
-                        }else{
-
-                        }
-                    }
-                    if (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11 && map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) {
-                        this.savedYVel = -moveSpeed;
-                    }
-                }
-                this.state = "Going Upstairs";
-            }
-
-            if(this.shootTimer === 0){
-                for(var i = 0; i < players.length; i++){
-                    if(i !== this.player && players[i].team !== players[this.player].team){
-                        if((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
-                            players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom ||
-                            players[this.player].tilePosYBottom + 1 === players[i].tilePosYBottom)){
-                            if(players[this.player].tilePosXRight === players[i].tilePosXRight){
-                                this.shootTimer = 20;
-                            }
-                        }
-
-                    }
-                }
-            }
-
-
-
-            if ((this.state === "Hiding" || this.state === "Moving To Mid" || this.currentAttackChance < this.minAttackChance) && this.difficulty > 1) {
-                if (players[this.player].tilePosXLeft > map[0].length - 3 - Math.round(this.intelligence/20)) {
-                    this.savedXVel = -moveSpeed;
-                    //this.state = "Moving To Mid";
-                } else if (players[this.player].tilePosXRight < 3 + Math.round(this.intelligence/20)) {
-                    this.savedXVel = moveSpeed;
-                    //this.state = "Moving To Mid";
-                }
-            }
-
-            if(this.shootTimer > 0){
-                this.savedXVel = this.safeMoveSpeed;
-            }
-
-            if (players[this.player].tilePosXLeft > map[0].length - 2 && this.state !== "ShootFollow") {
-                this.savedXVel = -moveSpeed;
-                this.savedYVel = -moveSpeed;
-                this.state = "Hiding";
-                this.currentAttackChance = 0;
-            } else if (players[this.player].tilePosXRight < 2) {
-                this.savedXVel = moveSpeed;
-                this.savedYVel = -moveSpeed;
-                this.state = "Hiding";
-                this.currentAttackChance = 0;
-            }*/
 
         }
         players[this.player].xVel = this.savedXVel;
