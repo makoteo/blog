@@ -536,11 +536,12 @@ function Tile(x, y, width, height, type){
     };
 }
 
-function Bullet(x, y, type, team){
+function Bullet(x, y, type, team, shooter){
     this.velY = 0;
     this.velX = 0;
     this.type = type;
     this.team = team;
+    this.shooter = shooter;
 
     this.knockBack = 0;
 
@@ -681,6 +682,8 @@ function Player(id, ai, team){
     this.id = id;
     this.ai = ai;
     this.team = team;
+
+    this.tempCauseOfDeath = "Slipped Off";
 
     this.name = "Player " + this.id;
     this.spawnPlacesFound = 0;
@@ -944,7 +947,9 @@ function Player(id, ai, team){
             this.walkFrame = 0;
         }
 
-
+        if(this.canJump === true && this.knockBackXVel === 0){
+            this.tempCauseOfDeath = "Slipped Off";
+        }
 
     };
 
@@ -984,24 +989,24 @@ function Player(id, ai, team){
         if(this.reloadTimer === 0){
             if(this.weapon === "Crumpled Paper"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 0, this.team));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 0, this.team, this.id));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 1, this.team));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 1, this.team, this.id));
                 }
                 this.reloadTimer = this.reloadSpeed;
             }else if(this.weapon === "Darts"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 2, this.team));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 2, this.team, this.id));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 3, this.team));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 3, this.team, this.id));
                 }
                 this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
             }else if(this.weapon === "Potato Launcher"){
                 if(this.facing === 1){
-                    bullets.push(new Bullet(this.x + this.width, this.y, 4, this.team));
+                    bullets.push(new Bullet(this.x + this.width, this.y, 4, this.team, this.id));
                 }else{
-                    bullets.push(new Bullet(this.x - this.width, this.y, 5, this.team));
+                    bullets.push(new Bullet(this.x - this.width, this.y, 5, this.team, this.id));
                 }
                 this.reloadTimer = this.reloadSpeed*3;
                 this.bulletCount--;
@@ -1011,6 +1016,7 @@ function Player(id, ai, team){
 
     this.die = function(){
         this.lives--;
+        console.log(this.name + " " + this.tempCauseOfDeath);
         if(this.lives > 0){
             this.x = this.spawnX;
             this.y = this.spawnY;
@@ -1494,7 +1500,7 @@ function AiBot(player, difficulty){
             }
 
             if(players[this.player].tilePosYBottom === map.length - 2 && (map[players[this.player].tilePosYBottom][players[this.player].tilePosXRight] === 11
-                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) && amountOfBreaks > 0){
+                || map[players[this.player].tilePosYBottom][players[this.player].tilePosXLeft] === 11) && amountOfBreaks > 0 && this.powerUpPosX === 0){
                 this.state = "Up Ladder";
             }
 
@@ -1562,7 +1568,7 @@ function AiBot(player, difficulty){
             players[this.player].spawnBullet();
         }
 
-        console.log(this.player + " - " + this.state);
+        //console.log(this.player + " - " + this.state);
     }
 }
 
@@ -2089,6 +2095,7 @@ function game(){
                         if (bullets[i].y > players[j].y - players[j].height / 2 && bullets[i].y < players[j].y + players[j].height / 2) {
                             if (players[j].team !== bullets[i].team) {
                                 players[j].knockBackXVel = bullets[i].knockBack;
+                                players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
                                 destroy = true;
                             }
 
