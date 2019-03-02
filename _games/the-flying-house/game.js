@@ -957,7 +957,7 @@ function Player(id, ai, team){
         }
 
         if((gameTicks % 400 === 0) && this.totalShots !== 0){
-            playerAccuracy[this.id] = this.hitAmount/this.totalShots;
+            playerAccuracy[this.id] = Math.round(this.hitAmount/this.totalShots*100);
         }
 
     };
@@ -1802,6 +1802,7 @@ function game(){
                     Setup();
                     teamPoints[firstTeam] += 1;
                     console.log(teamPoints);
+                    console.log(playerPoints);
                     console.log(playerAccuracy);
                 }
 
