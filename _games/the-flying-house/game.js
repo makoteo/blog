@@ -1686,6 +1686,11 @@ function Setup(){
     players.push(new Player(3, true, 1)); //2
     aiBots.push(new AiBot(3, 5)); //3,5
 
+    players[0].name = "Martin";
+    players[1].name = "NellyCorn";
+    players[2].name = "Oof";
+    players[3].name = "NeSrdce";
+
 //players.push(new Player(3, true));
 //aiBots.push(new AiBot(3, 10));
 //MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
@@ -2095,7 +2100,12 @@ function game(){
                         if (bullets[i].y > players[j].y - players[j].height / 2 && bullets[i].y < players[j].y + players[j].height / 2) {
                             if (players[j].team !== bullets[i].team) {
                                 players[j].knockBackXVel = bullets[i].knockBack;
-                                players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
+                                if(bullets[i].type === 4 || bullets[i].type === 5){
+                                    players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
+                                }else{
+                                    players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
+                                }
+
                                 destroy = true;
                             }
 
