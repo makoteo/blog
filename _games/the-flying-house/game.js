@@ -1479,7 +1479,7 @@ function AiBot(player, difficulty){
                             players[this.player].tilePosYBottom - 1 === players[i].tilePosYBottom)) {
                             if(players[this.player].x < players[i].x && players[i].x - players[this.player].x > tileSize){
                                 this.state = "Shooting Right";
-                            }else if(players[this.player].x < players[i].x && players[i].x - players[this.player].x <= tileSize*2 && players[i].x - players[this.player].x > 0){
+                            }else if(players[this.player].x <= players[i].x && players[i].x - players[this.player].x <= tileSize*2 && players[i].x - players[this.player].x >= 0){
                                 this.state = "Wandering Left";
                                 this.timer = Math.round(Math.random()*5)+5;
                             }else if(players[this.player].x > players[i].x && players[this.player].x - players[i].x > tileSize){
