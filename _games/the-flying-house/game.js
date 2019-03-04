@@ -11,6 +11,11 @@ var mousePosX = 0;
 var mousePosY = 0;
 var clickTimer = 0;
 
+var stateToTransitionTo = "";
+var transitionOpacity = 0;
+
+var pauseOpacity = 0;
+
 var Lvl1Fg = [
     [88, 88, 88, 88, 88, 88, 12, 14, 14, 14, 13, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 12, 14, 14, 14, 14, 14, 13, 88, 88, 88, 88, 88],
@@ -661,7 +666,7 @@ function Balloon(x, y, tiltedX){
 
         if(this.x > WIDTH/2 - tileSize && this.x < WIDTH/2 + tileSize){
             for(var i = 0; i < 3; i++){
-                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY + cameraGlobalY - tileSize*3, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
+                ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX - tileSize*cameraZoom + tileSize*cameraZoom*i, this.ballooncameraY + cameraGlobalY - tileSize, tileSize*7*cameraZoom, tileSize*10*cameraZoom);
             }
         }else{
             ctx.drawImage(tileMap, 192, 0, 192, 256, this.ballooncameraX, this.ballooncameraY + cameraGlobalY, tileSize*6*cameraZoom, tileSize*8*cameraZoom);
@@ -671,10 +676,10 @@ function Balloon(x, y, tiltedX){
         if(tempTicks % 10 === 0){
             this.yFloat += Math.round(Math.random()*3 - 1.5);
 
-            if(this.yFloat > tileSize*7){
-                this.yFloat =  tileSize*7;
-            }else if(this.yFloat < tileSize*5){
-                this.yFloat =  tileSize*5;
+            if(this.yFloat > tileSize*6.5){
+                this.yFloat =  tileSize*6.5;
+            }else if(this.yFloat < tileSize*5.5){
+                this.yFloat =  tileSize*5.5;
             }
         }
 
@@ -1154,17 +1159,29 @@ function Button(text, x, y, width, height){
     this.width = width;
     this.height = height;
 
+    this.growthX = 0;
+
     this.radius = HEIGHT/120;
 
     this.update = function(){
         if(mousePosY > this.y && mousePosY < this.y + this.height){
-            if(mousePosX > this.x && mousePosX < this.x + this.width){
+            if(mousePosX > this.x - this.growthX && mousePosX < this.x + this.width + this.growthX*2){
+                if(this.growthX < 10){
+                    this.growthX++;
+                }
                 if(clickTimer === 10){
                     //THIS MUST UPDATE BEFORE CLICKTIMER IS SUBTRACTED
                     console.log("Click");
-                    GAMESTATE = "GAME";
-                    Setup(true);
+                    stateToTransitionTo = "GAME";
                 }
+            }else{
+                if(this.growthX > 0){
+                    this.growthX--;
+                }
+            }
+        }else{
+            if(this.growthX > 0){
+                this.growthX--;
             }
         }
 
@@ -1174,10 +1191,10 @@ function Button(text, x, y, width, height){
         ctx.fillStyle = 'white';
         ctx.globalAlpha = 0.2;
         //ctx.fillRect(this.x, this.y, this.width, this.height);
-        ctx.roundRect(this.x, this.y, this.width, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+        ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
         ctx.globalAlpha = 0.7;
         ctx.textAlign = 'center';
-        ctx.font = '30px Arial';
+        ctx.font = '20px Arial';
         ctx.fillText(text, this.x + this.width/2, this.y + this.height - this.height/4);
         ctx.textAlign = 'left';
         ctx.globalAlpha = 1;
@@ -1639,14 +1656,19 @@ var fallVelocity = 0;
 var justFell = false;
 
 function checkGameState(){
+    buttons = [];
     if(GAMESTATE === "MENU"){
-        buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
+        cameraZoom = 0.5;
+        buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*5, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+    }else if(GAMESTATE = "GAME"){
+        Setup(true, false);
     }
 }
 
-checkGameState();
-
-function Setup(game){
+function Setup(game, newHouse){
 
     gameTicks = 0;
 
@@ -1664,7 +1686,9 @@ function Setup(game){
     amountOfBreaks = 0;
     breakPoints = 0;
 
-    tiles = [];
+    if(newHouse === true){
+        tiles = [];
+    }
     players = [];
     bullets = [];
     balloons = [];
@@ -1692,49 +1716,55 @@ function Setup(game){
 
     powerUpSpawned = false;
 
-    var mapRandom = Math.random();
+    if(newHouse === true){
+        var mapRandom = Math.random();
 
-    if(mapRandom < 0.5){
-        map = Lvl2Fg.slice();
-        backgroundMap = Lvl2Bg.slice();
-    }else{
-        map = Lvl1Fg.slice();
-        backgroundMap = Lvl1Bg.slice();
-    }
+        if(mapRandom < 0.5){
+            map = Lvl2Fg.slice();
+            backgroundMap = Lvl2Bg.slice();
+        }else{
+            map = Lvl1Fg.slice();
+            backgroundMap = Lvl1Bg.slice();
+        }
 
-    for(var i = 0; i < backgroundMap.length; i++){
-        for(var j = 0; j < backgroundMap[0].length; j++){
-            if(backgroundMap[i][j] === 99){
-                breakPoints++;
+        for(var i = 0; i < backgroundMap.length; i++){
+            for(var j = 0; j < backgroundMap[0].length; j++){
+                if(backgroundMap[i][j] === 99){
+                    breakPoints++;
+                }
+            }
+        }
+
+        tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
+
+        xOffset = Math.round(WIDTH/2 - (tileSize*map[0].length)/2);
+        yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
+
+        moveSpeed = tileSize/12;
+        bulletSpeed = tileSize/6;
+
+        for(var i = 0; i < backgroundMap.length; i++){
+            for(var j = 0; j < backgroundMap[0].length; j++){
+                if(backgroundMap[i][j] !== 88){
+                    tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
+                }
+            }
+        }
+
+        //REMEMBER THAT PART OF THE MAP IS NOW GONE LOL
+
+        for(var i = 0; i < map.length; i++){
+            for(var j = 0; j < map[0].length; j++){
+                if(map[i][j] !== 88){
+                    tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
+                }
             }
         }
     }
 
-    tileSize = Math.round((HEIGHT - HEIGHT/10) / map.length);
 
-    xOffset = Math.round(WIDTH/2 - (tileSize*map[0].length)/2);
-    yOffset = Math.round(HEIGHT/2 - (tileSize*map.length)/2);
 
-    moveSpeed = tileSize/12;
-    bulletSpeed = tileSize/6;
 
-    for(var i = 0; i < backgroundMap.length; i++){
-        for(var j = 0; j < backgroundMap[0].length; j++){
-            if(backgroundMap[i][j] !== 88){
-                tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
-            }
-        }
-    }
-
-    //REMEMBER THAT PART OF THE MAP IS NOW GONE LOL
-
-    for(var i = 0; i < map.length; i++){
-        for(var j = 0; j < map[0].length; j++){
-            if(map[i][j] !== 88){
-                tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
-            }
-        }
-    }
 
     if(game === true){
         players.push(new Player(0, false, 0));
@@ -1769,7 +1799,8 @@ function Setup(game){
     balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
 }
 
-Setup(false);
+Setup(false, true);
+checkGameState();
 
 var grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
 grd.addColorStop(0, "rgb(86, 136, 216)");
@@ -1855,7 +1886,7 @@ function game(){
                     }
 
                     if (moreTeams === false) {
-                        Setup(true);
+                        Setup(true, true);
                         teamPoints[firstTeam] += 1;
                         console.log(teamPoints);
                         console.log(playerPoints);
@@ -2453,16 +2484,29 @@ function game(){
         }
 
         if(PAUSED === true){
-            ctx.globalAlpha = 0.8;
+            if(pauseOpacity < 0.8){
+                pauseOpacity += 0.1;
+            }
+        }else{
+            if(pauseOpacity > 0.1){
+                pauseOpacity -= 0.1;
+            }else{
+                pauseOpacity = 0;
+            }
+        }
+
+        if(pauseOpacity > 0.1){
+            ctx.globalAlpha = pauseOpacity
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
-            ctx.globalAlpha = 1;
 
             ctx.textAlign = 'center';
             ctx.fillStyle = 'white';
             ctx.font = '50px Arial';
             ctx.fillText("Paused", WIDTH/2, HEIGHT/3);
+            ctx.globalAlpha = 1;
         }
+
 
     }
 
@@ -2474,12 +2518,35 @@ function game(){
         }
     }
 
-    if ((keys && keys[32])) {
+
+
+    if ((keys && keys[32]) && GAMESTATE === "GAME") {
         if(pauseTimer === 0){
             PAUSED = !PAUSED;
         }
         pauseTimer = 10;
     }
+
+    if(stateToTransitionTo !== ""){
+        if(transitionOpacity < 1){
+            transitionOpacity += 0.05;
+        }else{
+            GAMESTATE = stateToTransitionTo;
+            checkGameState();
+            stateToTransitionTo = "";
+        }
+    }else{
+        if(transitionOpacity > 0.05){
+            transitionOpacity -= 0.05;
+        }else{
+            transitionOpacity = 0;
+        }
+    }
+
+    ctx.globalAlpha = transitionOpacity;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    ctx.globalAlpha = 1;
 
     if(pauseTimer > 0){
         pauseTimer--;
