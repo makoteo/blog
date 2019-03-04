@@ -269,6 +269,8 @@ function Tile(x, y, width, height, type){
     this.height = height;
     this.type = type;
 
+    this.spawnPointId = 0;
+
     this.powerUpActive = false;
     this.spawnPeriod = 900 + (Math.random()*500 - 250);
     this.spawnTimer = 0;
@@ -467,6 +469,8 @@ function Tile(x, y, width, height, type){
     this.bottomLeftCurve = 0;
     this.upperLeftCurve = 0;
 
+    this.mouseHover = false;
+
     this.curved = false;
 
     if((this.type === 10 || this.type === 25) && gameTicks < 50){
@@ -517,12 +521,28 @@ function Tile(x, y, width, height, type){
         this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
 
         if(this.type === 77 && this.powerUpActive === false && powerUpSpawned === false){
-            if(this.spawnTimer < this.spawnPeriod){
+            if(this.spawnTimer < this.spawnPeriod && GAMESTATE === "GAME"){
                 this.spawnTimer++;
-            }else{
+            }else if(GAMESTATE === "GAME"){
                 this.powerUpActive = true;
                 powerUpSpawned = true;
                 effects.push(new Explosion(this.x + tileSize/2, this.y + tileSize/1.5, 0));
+            }
+        }
+
+        if(GAMESTATE === "GAME SETUP" && (players.length === this.spawnPointId - 1)){
+            if(mousePosY > this.cameraY + cameraGlobalY && mousePosY < this.cameraY + cameraGlobalY + this.height){
+                if(mousePosX > this.cameraX + cameraGlobalX && mousePosX < this.cameraX + this.width + cameraGlobalX){
+                    this.mouseHover = true;
+                    if(clickTimer === 0){
+                        players.push(new Player(players.length, false, players.length));
+                        clickTimer = 1;
+                    }
+                }else{
+                    this.mouseHover = false;
+                }
+            }else{
+                this.mouseHover = false;
             }
         }
     };
@@ -537,6 +557,23 @@ function Tile(x, y, width, height, type){
                 ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
                 ctx.restore();
                 //ctx.drawImage(tileMap, this.imageX, this.imageY, this.imageWidth, this.imageHeight, this.cameraX + cameraGlobalX, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*cameraZoom);
+            }
+            if(this.type === 66 && GAMESTATE === "GAME SETUP"){
+                if((players.length === this.spawnPointId - 1)){
+                    ctx.globalAlpha = 0.5;
+                    if(this.mouseHover === false){
+                        ctx.fillStyle = 'rgb(72, 196, 41)';
+                    }else{
+                        ctx.fillStyle = 'rgb(109, 237, 78)';
+                    }
+                    ctx.fillRect(this.cameraX + tileSize/6 + cameraGlobalX, this.cameraY + tileSize/6 + cameraGlobalY, this.width - tileSize/3, this.height - tileSize/3);
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = 'rgb(24, 86, 9)';
+                    ctx.textAlign = 'center';
+                    ctx.font = parseInt(tileSize) + "px Arial";
+                    ctx.fillText("+", this.cameraX + this.width/2 + cameraGlobalX, this.cameraY + this.height - tileSize/8 + cameraGlobalY);
+                }
+
             }
         }else{
             if(this.powerUpActive === true){
@@ -713,7 +750,7 @@ function Player(id, ai, team){
             if(map[i][j] === 66){
                 this.spawnPlacesFound++;
                 if(this.spawnPlacesFound === this.id + 1){
-                    this.x = j*tileSize + xOffset + this.width;
+                    this.x = j*tileSize + xOffset + this.width/2;
                     this.y = i*tileSize + yOffset;
                 }
             }
@@ -1169,10 +1206,15 @@ function Button(text, x, y, width, height){
                 if(this.growthX < 10){
                     this.growthX++;
                 }
-                if(clickTimer === 10){
+                if(clickTimer === 0){
                     //THIS MUST UPDATE BEFORE CLICKTIMER IS SUBTRACTED
                     console.log("Click");
-                    stateToTransitionTo = "GAME";
+                    if(this.text === "Play"){
+                        stateToTransitionTo = "GAME SETUP";
+                    }else if(this.text === "Begin"){
+                        stateToTransitionTo = "GAME";
+                    }
+
                 }
             }else{
                 if(this.growthX > 0){
@@ -1663,8 +1705,11 @@ function checkGameState(){
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
-    }else if(GAMESTATE = "GAME"){
+    }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
+        buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+    }else if(GAMESTATE === "GAME"){
+
     }
 }
 
@@ -1743,11 +1788,14 @@ function Setup(game, newHouse){
         moveSpeed = tileSize/12;
         bulletSpeed = tileSize/6;
 
+        var tileSpawnPointNum = 1;
+
         for(var i = 0; i < backgroundMap.length; i++){
             for(var j = 0; j < backgroundMap[0].length; j++){
                 if(backgroundMap[i][j] !== 88){
                     tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, backgroundMap[i][j]));
                 }
+
             }
         }
 
@@ -1757,6 +1805,10 @@ function Setup(game, newHouse){
             for(var j = 0; j < map[0].length; j++){
                 if(map[i][j] !== 88){
                     tiles.push(new Tile(xOffset + tileSize*j, yOffset + tileSize*i, tileSize, tileSize, map[i][j]));
+                }
+                if(map[i][j] === 66){
+                    tiles[tiles.length - 1].spawnPointId = tileSpawnPointNum;
+                    tileSpawnPointNum++;
                 }
             }
         }
@@ -1769,27 +1821,27 @@ function Setup(game, newHouse){
     if(game === true){
         players.push(new Player(0, false, 0));
 
-        players.push(new Player(1, false, 1));
+        /*players.push(new Player(1, false, 1));
 
         players.push(new Player(2, true, 0)); //2
         aiBots.push(new AiBot(2, 5)); //2,5
 
         players.push(new Player(3, true, 1)); //2
-        aiBots.push(new AiBot(3, 5)); //3,5
+        aiBots.push(new AiBot(3, 5)); //3,5*/
 
-        players[0].name = "Martin";
-        players[1].name = "NellyCorn";
+        //players[0].name = "Martin";
+        /*players[1].name = "NellyCorn";
         players[2].name = "Oof";
-        players[3].name = "NeSrdce";
+        players[3].name = "NeSrdce";*/
 
 //players.push(new Player(3, true));
 //aiBots.push(new AiBot(3, 10));
 //MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
 
-        playerStatBoxes.push(new playerStat(0));
-        playerStatBoxes.push(new playerStat(1));
+        //playerStatBoxes.push(new playerStat(0));
+        /*playerStatBoxes.push(new playerStat(1));
         playerStatBoxes.push(new playerStat(2));
-        playerStatBoxes.push(new playerStat(3));
+        playerStatBoxes.push(new playerStat(3));*/
 
     }
 
@@ -1853,9 +1905,9 @@ var tempTicks = 0;
 
 function game(){
 
-    if(GAMESTATE === "GAME" || GAMESTATE === "MENU"){
+    if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP"){
         for(var ticks = 0; ticks < updateTimesPerTick; ticks++) {
-            if(PAUSED === false && GAMESTATE !== "MENU") {
+            if(PAUSED === false && GAMESTATE === "GAME") {
                 gameTicks++;
                 tempTicks = gameTicks;
                 if (gameTicks === countDownStartTime) {
@@ -1897,7 +1949,7 @@ function game(){
                     firstTeam = 0;
                     teams = [];
                 }
-            }else if(GAMESTATE === "MENU"){
+            }else{
                 tempTicks++;
             }
 
@@ -2006,7 +2058,7 @@ function game(){
                 }
             }
 
-            if(PAUSED === false && GAMESTATE !== "MENU") {
+            if(PAUSED === false && GAMESTATE  === "GAME") {
                 if (fallApartTimer < fallApartTime && amountOfBreaks < breakPoints) {
                     fallApartTimer++;
                 } else {
@@ -2510,7 +2562,7 @@ function game(){
 
     }
 
-    if(GAMESTATE === "MENU"){
+    if(GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP"){
         window.onmousemove = logMouseMove;
         for(var b = 0; b < buttons.length; b++){
             buttons[b].update();
@@ -2528,11 +2580,17 @@ function game(){
     }
 
     if(stateToTransitionTo !== ""){
-        if(transitionOpacity < 1){
-            transitionOpacity += 0.05;
+        if(stateToTransitionTo !== "GAME"){
+            if(transitionOpacity < 1){
+                transitionOpacity += 0.05;
+            }else{
+                GAMESTATE = stateToTransitionTo;
+                checkGameState();
+                stateToTransitionTo = "";
+            }
         }else{
             GAMESTATE = stateToTransitionTo;
-            checkGameState();
+            buttons = [];
             stateToTransitionTo = "";
         }
     }else{
@@ -2552,8 +2610,8 @@ function game(){
         pauseTimer--;
     }
 
-    if(clickTimer > 0){
-        clickTimer--;
+    if(clickTimer < 1){
+        clickTimer++;
     }
 
 }
@@ -2577,8 +2635,8 @@ function logMouseMove(e) {
 document.addEventListener("mouseup", clickedNow);
 
 function clickedNow(){
-    if(clickTimer === 0){
-        clickTimer = 10;
+    if(clickTimer === 1){
+        clickTimer = 0;
     }
 }
 
