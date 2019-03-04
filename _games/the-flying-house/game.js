@@ -1705,11 +1705,11 @@ function checkGameState(){
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+    }else if(GAMESTATE === "GAME"){
+        console.log("HERE");
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
-    }else if(GAMESTATE === "GAME"){
-
     }
 }
 
@@ -1813,10 +1813,6 @@ function Setup(game, newHouse){
             }
         }
     }
-
-
-
-
 
     if(game === true){
         players.push(new Player(0, false, 0));
@@ -2590,7 +2586,7 @@ function game(){
             }
         }else{
             GAMESTATE = stateToTransitionTo;
-            buttons = [];
+            checkGameState();
             stateToTransitionTo = "";
         }
     }else{
