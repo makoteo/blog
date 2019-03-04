@@ -2400,7 +2400,7 @@ function game(){
 
             //CONTROLS
             //PLAYER 1
-            if (gameTicks > countDownEndTime + startDelay && PAUSED === false) {
+            if (gameTicks > countDownEndTime + startDelay && PAUSED === false && GAMESTATE !== "GAME OVER") {
                 if (players.length > 0) {
                     if (players[0].ai === false) {
                         if ((keys && keys[40]) && (keys && keys[38])) {
@@ -2703,6 +2703,10 @@ function game(){
 
     if(clickTimer < 1){
         clickTimer++;
+    }
+
+    if(GAMESTATE === "GAME OVER"){
+
     }
 
 }
