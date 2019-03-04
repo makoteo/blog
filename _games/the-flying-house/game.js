@@ -116,6 +116,8 @@ var Lvl2Bg = [
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
+var playerInfos = [];
+
 var map = Lvl2Fg.slice();
 var backgroundMap = Lvl2Bg.slice();
 
@@ -473,6 +475,8 @@ function Tile(x, y, width, height, type){
 
     this.curved = false;
 
+    this.aiPicked = false;
+
     if((this.type === 10 || this.type === 25) && gameTicks < 50){
         //console.log("Here");
         if(this.type === 10 || this.type === 43){
@@ -529,13 +533,25 @@ function Tile(x, y, width, height, type){
                 effects.push(new Explosion(this.x + tileSize/2, this.y + tileSize/1.5, 0));
             }
         }
-
+        if(GAMESTATE === "GAME SETUP" && this.type === 66){
+            if(mousePosY > this.cameraY - tileSize + tileSize/6 + cameraGlobalY && mousePosY <  this.cameraY - tileSize + tileSize/6 + cameraGlobalY + this.height){
+                if(mousePosX > this.cameraX + cameraGlobalX && mousePosX < this.cameraX + this.width + cameraGlobalX){
+                    if(clickTimer === 0){
+                        this.aiPicked = !this.aiPicked;
+                        console.log(this.spawnPointId);
+                        playerInfos[this.spawnPointId - 2][1] = this.aiPicked;
+                        //clickTimer = 1;
+                    }
+                }
+            }
+        }
         if(GAMESTATE === "GAME SETUP" && (players.length === this.spawnPointId - 1)){
             if(mousePosY > this.cameraY + cameraGlobalY && mousePosY < this.cameraY + cameraGlobalY + this.height){
                 if(mousePosX > this.cameraX + cameraGlobalX && mousePosX < this.cameraX + this.width + cameraGlobalX){
                     this.mouseHover = true;
                     if(clickTimer === 0){
-                        players.push(new Player(players.length, false, players.length));
+                        players.push(new Player(players.length, this.aiPicked, players.length));
+                        playerInfos.push([players.length - 1, this.aiPicked, players.length - 1]);
                         clickTimer = 1;
                     }
                 }else{
@@ -572,6 +588,25 @@ function Tile(x, y, width, height, type){
                     ctx.textAlign = 'center';
                     ctx.font = parseInt(tileSize) + "px Arial";
                     ctx.fillText("+", this.cameraX + this.width/2 + cameraGlobalX, this.cameraY + this.height - tileSize/8 + cameraGlobalY);
+                }
+
+                if((players.length >= this.spawnPointId) && this.spawnPointId !== 1){
+                    ctx.globalAlpha = 0.5;
+                    if(this.aiPicked === false){
+                        ctx.fillStyle = 'rgb(237, 109, 78)';
+                    }else{
+                        ctx.fillStyle = 'rgb(72, 196, 41)';
+                    }
+                    ctx.fillRect(this.cameraX + tileSize/6 + cameraGlobalX, this.cameraY - tileSize + tileSize/6 + cameraGlobalY, this.width - tileSize/3, this.height - tileSize/3);
+                    ctx.globalAlpha = 1;
+                    if(this.aiPicked === false){
+                        ctx.fillStyle = 'rgb(196, 109, 78)';
+                    }else{
+                        ctx.fillStyle = 'rgb(72, 196, 41)';
+                    }
+                    ctx.textAlign = 'center';
+                    ctx.font = parseInt(tileSize/2) + "px Arial";
+                    ctx.fillText("AI", this.cameraX + this.width/2 + cameraGlobalX, this.cameraY - tileSize*1.2 + this.height - tileSize/8 + cameraGlobalY);
                 }
 
             }
@@ -1028,7 +1063,8 @@ function Player(id, ai, team){
         ctx.drawImage(tileMap, 32*this.walkFrame, 306, 32, 14, this.cameraX + cameraGlobalX, this.cameraY + this.height*0.78*cameraZoom + cameraGlobalY, this.width*cameraZoom, this.height*0.22*cameraZoom);
         ctx.drawImage(tileMap, 96, 306, 32, 14, this.cameraX + cameraGlobalX + this.facing*2*cameraZoom, this.cameraY + cameraGlobalY, this.width*cameraZoom, this.height*0.39*cameraZoom);
         ctx.textAlign = 'center';
-        if(this.opacity - 0.5 > 0){
+
+        /*if(this.opacity - 0.5 > 0){
             ctx.globalAlpha = this.opacity - 0.5;
         }else{
             ctx.globalAlpha = 0;
@@ -1037,7 +1073,7 @@ function Player(id, ai, team){
         ctx.font = "10px Arial";
         ctx.fillText(this.name, this.x+this.width/2, this.y - this.height + cameraGlobalY);
         ctx.textAlign = 'left';
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 1;*/
 
         this.xVel = 0;
         this.yVel = 0;
@@ -1115,7 +1151,7 @@ function playerStat(id){
     this.profileWidth = WIDTH/20;
     this.profileHeight = WIDTH/20;
 
-    this.name = players[this.id].name;
+    this.name = "Player " + this.idPlusOne;
     this.weapon = "Crumpled Paper";
     this.bulletCount = 0;
     this.lives = GlobalLives;
@@ -1183,7 +1219,7 @@ function playerStat(id){
         if(gameTicks % 60 === 0){
             this.lives = players[this.id].lives;
             this.weapon = players[this.id].weapon;
-            this.name = players[this.id].name;
+            //this.name = players[this.id].name;
         }
         this.bulletCount = players[this.id].bulletCount;
     };
@@ -1211,7 +1247,7 @@ function Button(text, x, y, width, height){
                     console.log("Click");
                     if(this.text === "Play"){
                         stateToTransitionTo = "GAME SETUP";
-                    }else if(this.text === "Begin"){
+                    }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
                     }
 
@@ -1236,6 +1272,13 @@ function Button(text, x, y, width, height){
         ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
         ctx.globalAlpha = 0.7;
         ctx.textAlign = 'center';
+        if(this.text === "Begin" && players.length <= 1){
+            ctx.fillStyle = 'black';
+            ctx.globalAlpha = 0.3;
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+        }
+        ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
         ctx.fillText(text, this.x + this.width/2, this.y + this.height - this.height/4);
         ctx.textAlign = 'left';
@@ -1706,7 +1749,10 @@ function checkGameState(){
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
     }else if(GAMESTATE === "GAME"){
-        console.log("HERE");
+        Setup(true, false);
+        for(var i = 0; i < players.length; i++){
+            playerStatBoxes.push(new playerStat(i));
+        }
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
@@ -1728,12 +1774,12 @@ function Setup(game, newHouse){
 
     fallApartTimer = 0;
 
-    amountOfBreaks = 0;
-    breakPoints = 0;
-
     if(newHouse === true){
         tiles = [];
+        amountOfBreaks = 0;
+        breakPoints = 0;
     }
+
     players = [];
     bullets = [];
     balloons = [];
@@ -1760,6 +1806,7 @@ function Setup(game, newHouse){
     rainCurrent = 0;
 
     powerUpSpawned = false;
+
 
     if(newHouse === true){
         var mapRandom = Math.random();
@@ -1815,29 +1862,16 @@ function Setup(game, newHouse){
     }
 
     if(game === true){
+        players = [];
         players.push(new Player(0, false, 0));
 
-        /*players.push(new Player(1, false, 1));
-
-        players.push(new Player(2, true, 0)); //2
-        aiBots.push(new AiBot(2, 5)); //2,5
-
-        players.push(new Player(3, true, 1)); //2
-        aiBots.push(new AiBot(3, 5)); //3,5*/
-
-        //players[0].name = "Martin";
-        /*players[1].name = "NellyCorn";
-        players[2].name = "Oof";
-        players[3].name = "NeSrdce";*/
-
-//players.push(new Player(3, true));
-//aiBots.push(new AiBot(3, 10));
-//MAKE SURE TO CHECK IF PLAYER ISN'T BOT IN KEY BINDINGS
-
-        //playerStatBoxes.push(new playerStat(0));
-        /*playerStatBoxes.push(new playerStat(1));
-        playerStatBoxes.push(new playerStat(2));
-        playerStatBoxes.push(new playerStat(3));*/
+        for(var i = 0; i < playerInfos.length; i++){
+            players.push(new Player(playerInfos[i][0], playerInfos[i][1], playerInfos[i][2]));
+            if(playerInfos[i][1] === true){
+                aiBots.push(new AiBot(playerInfos[i][0], 10));
+            }
+            playerStatBoxes.push(new playerStat(playerInfos[i][0]));
+        }
 
     }
 
