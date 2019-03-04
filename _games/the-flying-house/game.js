@@ -808,7 +808,7 @@ function Player(id, ai, team){
             }
 
 
-            if(this.tilePosYBottom < map.length - 1){
+            if(this.tilePosYBottom < map.length - 1 && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom + 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYBottom + 1][this.tilePosXRight] === collidableBlocks[i]) {
                         if (this.y + this.height / 2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset) {
@@ -862,7 +862,7 @@ function Player(id, ai, team){
                 this.actualYVel += this.gravity;
             }
 
-            if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length){
+            if(this.tilePosXLeft > 0 && this.tilePosYBottom < map.length && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXLeft - 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXLeft - 1] === collidableBlocks[i]) {
                         if (this.actualXVel < 0) {
@@ -879,7 +879,7 @@ function Player(id, ai, team){
                 }
             }
 
-            if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length){
+            if(this.tilePosXRight < map[0].length - 1 && this.tilePosYBottom < map.length && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight + 1] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXRight + 1] === collidableBlocks[i]) {
                         if (this.actualXVel > 0) {
@@ -895,7 +895,7 @@ function Player(id, ai, team){
                     }
                 }
             }
-            if(this.tilePosYBottom < map.length){
+            if(this.tilePosYBottom < map.length && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
                         this.y = this.tilePosYTop*tileSize + yOffset + tileSize - this.height/2;
@@ -1472,7 +1472,7 @@ function AiBot(player, difficulty){
                 this.powerUpPosX = 0;
             }
 
-            if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0 && this.state === "Idle" && this.timer === 0) {
+            if (this.currentAttackChance > this.minAttackChance && this.shootTimer === 0 && (this.state === "Idle" || this.state === "LastFloorRight" || this.state === "LastFloorLeft") && this.timer === 0) {
                 for (var i = 0; i < players.length; i++) {
                     if (i !== this.player && players[i].team !== players[this.player].team) {
                         if ((players[this.player].tilePosYBottom === players[i].tilePosYBottom ||
@@ -1562,8 +1562,10 @@ function AiBot(player, difficulty){
                 this.shooting = true;
             }else if(this.state === "Wandering Right"){
                 this.savedXVel = moveSpeed;
+                this.shooting = true;
             }else if(this.state === "Wandering Left"){
                 this.savedXVel = -moveSpeed;
+                this.shooting = true;
             }
 
             if(this.state === "Up Ladder"){
@@ -1695,8 +1697,8 @@ function Setup(){
     players.push(new Player(2, true, 0)); //2
     aiBots.push(new AiBot(2, 5)); //2,5
 
-    players.push(new Player(3, true, 1)); //2
-    aiBots.push(new AiBot(3, 5)); //3,5
+    players.push(new Player(3, false, 1)); //2
+    //aiBots.push(new AiBot(3, 5)); //3,5
 
     players[0].name = "Martin";
     players[1].name = "NellyCorn";
@@ -2204,7 +2206,7 @@ function game(){
                         }
 
                         if (keys && keys[77]) {
-                            if (players[0].y + players[0].height < HEIGHT) {
+                            if (players[0].y + players[0].height < HEIGHT && players[0].y > 0) {
                                 players[0].spawnBullet();
                             }
                         }
@@ -2234,7 +2236,7 @@ function game(){
                         }
 
                         if (keys && keys[81]) {
-                            if (players[1].y + players[1].height < HEIGHT) {
+                            if (players[1].y + players[1].height < HEIGHT && players[1].y > 0) {
                                 players[1].spawnBullet();
                             }
                         }
@@ -2264,8 +2266,38 @@ function game(){
                         }
 
                         if (keys && keys[89]) {
-                            if (players[2].y + players[1].height < HEIGHT) {
+                            if (players[2].y + players[2].height < HEIGHT && players[2].y > 0) {
                                 players[2].spawnBullet();
+                            }
+                        }
+                    }
+
+                }
+
+                if (players.length > 3) {
+                    if (players[3].ai === false) {
+                        if ((keys && keys[104]) && (keys && keys[101])) {
+
+                        } else if (keys && keys[104]) {
+                            players[3].yVel = -moveSpeed;
+                        }
+                        else if (keys && keys[101]) {
+                            players[3].yVel = moveSpeed;
+                            players[3].hide();
+                        }
+
+                        if ((keys && keys[100]) && (keys && keys[102])) {
+
+                        } else if (keys && keys[100]) {
+                            players[3].xVel = -moveSpeed;
+                        }
+                        else if (keys && keys[102]) {
+                            players[3].xVel = moveSpeed;
+                        }
+
+                        if (keys && keys[109]) {
+                            if (players[3].y + players[3].height < HEIGHT && players[3].y > 0) {
+                                players[3].spawnBullet();
                             }
                         }
                     }
