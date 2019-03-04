@@ -1864,6 +1864,7 @@ function Setup(game, newHouse){
     if(game === true){
         players = [];
         players.push(new Player(0, false, 0));
+        playerStatBoxes.push(new playerStat(0));
 
         for(var i = 0; i < playerInfos.length; i++){
             players.push(new Player(playerInfos[i][0], playerInfos[i][1], playerInfos[i][2]));
