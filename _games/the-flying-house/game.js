@@ -137,6 +137,8 @@ var amountOfBreaks = 0;
 
 var updateTimesPerTick = 1;
 
+var playedRounds = 0;
+
 /*
 GUIDE TO TILE TYPES:
 
@@ -533,9 +535,9 @@ function Tile(x, y, width, height, type){
                 effects.push(new Explosion(this.x + tileSize/2, this.y + tileSize/1.5, 0));
             }
         }
-        if(GAMESTATE === "GAME SETUP" && this.type === 66){
-            if(mousePosY > this.cameraY - tileSize + tileSize/6 + cameraGlobalY && mousePosY <  this.cameraY - tileSize + tileSize/6 + cameraGlobalY + this.height){
-                if(mousePosX > this.cameraX + cameraGlobalX && mousePosX < this.cameraX + this.width + cameraGlobalX){
+        if(GAMESTATE === "GAME SETUP" && this.type === 66 && (players.length >= this.spawnPointId)){
+            if(mousePosY > this.cameraY - tileSize + tileSize/6 + cameraGlobalY && mousePosY <  this.cameraY - tileSize - tileSize/6 + cameraGlobalY + this.height){
+                if(mousePosX > this.cameraX + cameraGlobalX + tileSize/6 && mousePosX < this.cameraX + this.width + cameraGlobalX - tileSize/6){
                     if(clickTimer === 0){
                         this.aiPicked = !this.aiPicked;
                         console.log(this.spawnPointId);
@@ -546,8 +548,8 @@ function Tile(x, y, width, height, type){
             }
         }
         if(GAMESTATE === "GAME SETUP" && (players.length === this.spawnPointId - 1)){
-            if(mousePosY > this.cameraY + cameraGlobalY && mousePosY < this.cameraY + cameraGlobalY + this.height){
-                if(mousePosX > this.cameraX + cameraGlobalX && mousePosX < this.cameraX + this.width + cameraGlobalX){
+            if(mousePosY > this.cameraY + cameraGlobalY + tileSize/6 && mousePosY < this.cameraY + cameraGlobalY + this.height - tileSize/6){
+                if(mousePosX > this.cameraX + cameraGlobalX + tileSize/6 && mousePosX < this.cameraX + this.width + cameraGlobalX - tileSize/6){
                     this.mouseHover = true;
                     if(clickTimer === 0){
                         players.push(new Player(players.length, this.aiPicked, players.length));
@@ -1249,6 +1251,12 @@ function Button(text, x, y, width, height){
                         stateToTransitionTo = "GAME SETUP";
                     }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
+                    }else if(this.text === "3 Rounds"){
+                        RoundAmount = 3;
+                    }else if(this.text === "5 Rounds"){
+                        RoundAmount = 5;
+                    }else if(this.text === "10 Rounds"){
+                        RoundAmount = 10;
                     }
 
                 }
@@ -1265,24 +1273,53 @@ function Button(text, x, y, width, height){
 
     };
     this.draw = function(){
-        //console.log("Here");
-        ctx.fillStyle = 'white';
-        ctx.globalAlpha = 0.2;
-        //ctx.fillRect(this.x, this.y, this.width, this.height);
-        ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
-        ctx.globalAlpha = 0.7;
-        ctx.textAlign = 'center';
-        if(this.text === "Begin" && players.length <= 1){
-            ctx.fillStyle = 'black';
-            ctx.globalAlpha = 0.3;
+        if(this.text.length < 20){
+            //console.log("Here");
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 0.2;
             //ctx.fillRect(this.x, this.y, this.width, this.height);
             ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+            ctx.globalAlpha = 0.7;
+            ctx.textAlign = 'center';
+            if(this.text === "Begin" && players.length <= 1){
+                ctx.fillStyle = 'black';
+                ctx.globalAlpha = 0.3;
+                //ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+            }
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText(this.text, this.x + this.width/2, this.y + this.height - this.height/4);
+            ctx.textAlign = 'left';
+            ctx.globalAlpha = 1;
+
+            if(this.text === "3 Rounds" && !(RoundAmount === 3)){
+                ctx.fillStyle = 'gray';
+                ctx.globalAlpha = 0.2;
+                //ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+                ctx.globalAlpha = 1;
+            }else if(this.text === "5 Rounds" && !(RoundAmount === 5)){
+                ctx.fillStyle = 'gray';
+                ctx.globalAlpha = 0.2;
+                //ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+                ctx.globalAlpha = 1;
+            }if(this.text === "10 Rounds" && !(RoundAmount === 10)){
+                ctx.fillStyle = 'gray';
+                ctx.globalAlpha = 0.2;
+                //ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
+                ctx.globalAlpha = 1;
+            }
+        }else{
+            ctx.fillStyle = 'white';
+            ctx.font = '15px Arial';
+            ctx.textAlign = 'end';
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.textAlign = 'left';
+            ctx.globalAlpha = 1;
         }
-        ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
-        ctx.fillText(text, this.x + this.width/2, this.y + this.height - this.height/4);
-        ctx.textAlign = 'left';
-        ctx.globalAlpha = 1;
     };
 }
 
@@ -1740,6 +1777,8 @@ var fallVelocity = 0;
 
 var justFell = false;
 
+var RoundAmount = 3;
+
 function checkGameState(){
     buttons = [];
     if(GAMESTATE === "MENU"){
@@ -1756,6 +1795,11 @@ function checkGameState(){
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Tap on the green icon with a plus to add a player.", WIDTH - WIDTH/20, HEIGHT/30));
+        buttons.push(new Button("Tap the AI icon on to make the player an AI.", WIDTH - WIDTH/20, HEIGHT/30 + HEIGHT/30));
+        buttons.push(new Button("3 Rounds", WIDTH/20, HEIGHT/2 - HEIGHT/10, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("5 Rounds", WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("10 Rounds", WIDTH/20, HEIGHT/2 + HEIGHT/10, WIDTH/5, HEIGHT/20));
     }
 }
 
@@ -1864,7 +1908,10 @@ function Setup(game, newHouse){
     if(game === true){
         players = [];
         players.push(new Player(0, false, 0));
-        playerStatBoxes.push(new playerStat(0));
+        if(GAMESTATE === "GAME"){
+            playerStatBoxes.push(new playerStat(0));
+        }
+
 
         for(var i = 0; i < playerInfos.length; i++){
             players.push(new Player(playerInfos[i][0], playerInfos[i][1], playerInfos[i][2]));
@@ -1936,7 +1983,7 @@ var tempTicks = 0;
 
 function game(){
 
-    if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP"){
+    if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP" || GAMESTATE === "GAME OVER"){
         for(var ticks = 0; ticks < updateTimesPerTick; ticks++) {
             if(PAUSED === false && GAMESTATE === "GAME") {
                 gameTicks++;
@@ -1969,11 +2016,16 @@ function game(){
                     }
 
                     if (moreTeams === false) {
-                        Setup(true, true);
                         teamPoints[firstTeam] += 1;
                         console.log(teamPoints);
                         console.log(playerPoints);
                         console.log(playerAccuracy);
+                        playedRounds++;
+                        if(playedRounds === RoundAmount){
+                            stateToTransitionTo = "GAME OVER";
+                        }else{
+                            Setup(true, true);
+                        }
                     }
 
                     moreTeams = false;
@@ -2611,7 +2663,7 @@ function game(){
     }
 
     if(stateToTransitionTo !== ""){
-        if(stateToTransitionTo !== "GAME"){
+        if(stateToTransitionTo !== "GAME" && stateToTransitionTo !== "GAME OVER"){
             if(transitionOpacity < 1){
                 transitionOpacity += 0.05;
             }else{
@@ -2619,12 +2671,20 @@ function game(){
                 checkGameState();
                 stateToTransitionTo = "";
             }
-        }else{
+        }else if(stateToTransitionTo === "GAME"){
             GAMESTATE = stateToTransitionTo;
             checkGameState();
             stateToTransitionTo = "";
+        }else if(stateToTransitionTo === "GAME OVER"){
+            if(transitionOpacity < 0.8){
+                transitionOpacity += 0.02;
+            }else{
+                GAMESTATE = stateToTransitionTo;
+                checkGameState();
+                stateToTransitionTo = "";
+            }
         }
-    }else{
+    }else if(GAMESTATE !== "GAME OVER"){
         if(transitionOpacity > 0.05){
             transitionOpacity -= 0.05;
         }else{
