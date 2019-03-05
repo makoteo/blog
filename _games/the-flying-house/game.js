@@ -984,7 +984,7 @@ function Player(id, ai, team){
             if(this.tilePosYBottom < map.length && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
-                        this.y = this.tilePosYTop*tileSize + yOffset + tileSize - this.height/2;
+                        this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
                     } else {
 
                     }
