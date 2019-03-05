@@ -1786,6 +1786,12 @@ function AiBot(player, difficulty){
 function sound(src) {
     this.sound = document.createElement("audio");
     this.sound.src = src;
+    //if(this.src = "Walking1.wav"){
+        this.sound.volume = 1;
+    //}else{
+        //this.sound.volume = 0.2;
+    //}
+
     //this.sound.setAttribute("preload", "auto");
     //this.sound.setAttribute("controls", "none");
     this.sound.style.display = "none";
@@ -1796,6 +1802,9 @@ function sound(src) {
     this.stop = function(){
         this.sound.pause();
     };
+    this.delete = function(){
+        this.sound.parentNode.removeChild(this.sound);
+    }
 }
 
 //CREATE TILES
@@ -1840,13 +1849,24 @@ function checkGameState(){
         for(var i = 0; i < players.length; i++){
             playerStatBoxes.push(new playerStat(i));
         }
+        for(var i = 0; i < walkSounds.length; i++){
+            walkSounds[i].delete();
+        }
         walkSounds = [];
         for(var i = 0; i < players.length; i++){
             walkSounds.push(new sound("Walking1.wav"));
         }
+
+        for(var i = 0; i < shotSounds1.length; i++){
+            shotSounds1[i].delete();
+        }
         shotSounds1 = [];
         for(var i = 0; i < players.length; i++){
             shotSounds1.push(new sound("ShotSound1.wav"));
+        }
+
+        for(var i = 0; i < shotSounds2.length; i++){
+            shotSounds2[i].delete();
         }
         shotSounds2 = [];
         for(var i = 0; i < players.length; i++){
