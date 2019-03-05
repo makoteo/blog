@@ -996,11 +996,20 @@ function Player(id, ai, team){
 
         //console.log(this.actualYVel);
 
-        if(this.actualXVel > moveSpeed - 1){
+        if(this.actualXVel >= moveSpeed){
             this.facing = 1;
-        }else if(this.actualXVel < -moveSpeed + 1){
+        }else if(this.actualXVel <= -moveSpeed){
             this.facing = -1;
         }
+
+        if(GAMESTATE === "GAME" && gameTicks > countDownEndTime){
+            if(this.actualXVel !== 0){
+                walkSounds[this.id].play();
+            }else{
+                //walkSounds[this.id].stop();
+            }
+        }
+
 
         if(this.knockBackXVel > 2){
             this.knockBackXVel-=0.75;
@@ -1085,9 +1094,9 @@ function Player(id, ai, team){
 
     this.spawnBullet = function(){
         if(this.reloadTimer === 0){
-            shotSound1.play();
             this.totalShots++;
             if(this.weapon === "Crumpled Paper"){
+                shotSounds1[this.id].play();
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 0, this.team, this.id));
                 }else{
@@ -1095,6 +1104,7 @@ function Player(id, ai, team){
                 }
                 this.reloadTimer = this.reloadSpeed;
             }else if(this.weapon === "Darts"){
+                shotSounds2[this.id].play();
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 2, this.team, this.id));
                 }else{
@@ -1798,8 +1808,13 @@ clickSound = new sound("ClickSound1.wav");
 var clickSound2;
 clickSound2 = new sound("ClickSound2.wav");
 
-var shotSound1;
-shotSound1 = new sound("ShotSound1.wav");
+var dingSound1;
+dingSound1 = new sound("Ding1.wav");
+
+var walkSounds = [];
+var shotSounds1 = [];
+var shotSounds2 = [];
+var shotSounds3 = [];
 
 var fallingApartLine = 0;
 var wallTilesToDelete = 0;
@@ -1824,6 +1839,18 @@ function checkGameState(){
         Setup(true, false);
         for(var i = 0; i < players.length; i++){
             playerStatBoxes.push(new playerStat(i));
+        }
+        walkSounds = [];
+        for(var i = 0; i < players.length; i++){
+            walkSounds.push(new sound("Walking1.wav"));
+        }
+        shotSounds1 = [];
+        for(var i = 0; i < players.length; i++){
+            shotSounds1.push(new sound("ShotSound1.wav"));
+        }
+        shotSounds2 = [];
+        for(var i = 0; i < players.length; i++){
+            shotSounds2.push(new sound("ShotSound2.wav"));
         }
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
@@ -2369,6 +2396,7 @@ function game(){
 
                                         }
                                     }
+                                    dingSound1.play();
                                     powerUpSpawned = false;
                                     break;
                                 }
