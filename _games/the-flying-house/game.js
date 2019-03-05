@@ -985,6 +985,7 @@ function Player(id, ai, team){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
                         this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
+                        console.log("Collide");
                     } else {
 
                     }
@@ -1003,7 +1004,7 @@ function Player(id, ai, team){
         }
 
         if(GAMESTATE === "GAME" && gameTicks > countDownEndTime){
-            if(this.actualXVel !== 0){
+            if(this.actualXVel !== 0 && this.actualYVel === 0){
                 walkSounds[this.id].play();
             }else{
                 //walkSounds[this.id].stop();
@@ -1113,6 +1114,7 @@ function Player(id, ai, team){
                 this.reloadTimer = this.reloadSpeed*2;
                 this.bulletCount--;
             }else if(this.weapon === "Potato Launcher"){
+                shotSounds3[this.id].play();
                 if(this.facing === 1){
                     bullets.push(new Bullet(this.x + this.width, this.y, 4, this.team, this.id));
                 }else{
@@ -1231,7 +1233,7 @@ function playerStat(id){
     };
 
     this.update = function(){
-        if(gameTicks % 60 === 0){
+        if(tempTicks % 60 === 0){
             this.lives = players[this.id].lives;
             this.weapon = players[this.id].weapon;
             //this.name = players[this.id].name;
@@ -1871,6 +1873,14 @@ function checkGameState(){
         shotSounds2 = [];
         for(var i = 0; i < players.length; i++){
             shotSounds2.push(new sound("ShotSound2.wav"));
+        }
+
+        for(var i = 0; i < shotSounds3.length; i++){
+            shotSounds3[i].delete();
+        }
+        shotSounds3 = [];
+        for(var i = 0; i < players.length; i++){
+            shotSounds3.push(new sound("ShotSound3.wav"));
         }
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
