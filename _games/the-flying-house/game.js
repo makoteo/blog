@@ -542,6 +542,7 @@ function Tile(x, y, width, height, type){
                         this.aiPicked = !this.aiPicked;
                         console.log(this.spawnPointId);
                         playerInfos[this.spawnPointId - 2][1] = this.aiPicked;
+                        clickSound.play();
                         //clickTimer = 1;
                     }
                 }
@@ -554,6 +555,7 @@ function Tile(x, y, width, height, type){
                     if(clickTimer === 0){
                         players.push(new Player(players.length, this.aiPicked, players.length));
                         playerInfos.push([players.length - 1, this.aiPicked, players.length - 1]);
+                        clickSound.play();
                         clickTimer = 1;
                     }
                 }else{
@@ -1083,6 +1085,7 @@ function Player(id, ai, team){
 
     this.spawnBullet = function(){
         if(this.reloadTimer === 0){
+            shotSound1.play();
             this.totalShots++;
             if(this.weapon === "Crumpled Paper"){
                 if(this.facing === 1){
@@ -1258,6 +1261,13 @@ function Button(text, x, y, width, height){
                     }else if(this.text === "10 Rounds"){
                         RoundAmount = 10;
                     }
+
+                    if(this.text === "Begin" && players.length <= 1){
+                        clickSound2.play();
+                    }else{
+                        clickSound.play();
+                    }
+
 
                 }
             }else{
@@ -1763,10 +1773,33 @@ function AiBot(player, difficulty){
     }
 }
 
+function sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    //this.sound.setAttribute("preload", "auto");
+    //this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    };
+    this.stop = function(){
+        this.sound.pause();
+    };
+}
 
 //CREATE TILES
 
 var gameTicks = 0;
+
+var clickSound;
+clickSound = new sound("ClickSound1.wav");
+
+var clickSound2;
+clickSound2 = new sound("ClickSound2.wav");
+
+var shotSound1;
+shotSound1 = new sound("ShotSound1.wav");
 
 var fallingApartLine = 0;
 var wallTilesToDelete = 0;
