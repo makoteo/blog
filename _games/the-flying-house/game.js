@@ -1794,8 +1794,8 @@ function sound(src) {
         //this.sound.volume = 0.2;
     //}
 
-    //this.sound.setAttribute("preload", "auto");
-    //this.sound.setAttribute("controls", "none");
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
     this.sound.style.display = "none";
     document.body.appendChild(this.sound);
     this.play = function(){
@@ -1822,6 +1822,15 @@ clickSound2 = new sound("ClickSound2.wav");
 var dingSound1;
 dingSound1 = new sound("Ding1.wav");
 
+var toneSound1;
+toneSound1 = new sound("EStartTone.wav");
+
+var toneSound2;
+toneSound2 = new sound("CStartTone.wav");
+
+var toneSound3;
+toneSound3 = new sound("EStartTone.wav");
+
 var walkSounds = [];
 var shotSounds1 = [];
 var shotSounds2 = [];
@@ -1847,6 +1856,7 @@ function checkGameState(){
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
     }else if(GAMESTATE === "GAME"){
+        console.log("CheckGame");
         Setup(true, false);
         for(var i = 0; i < players.length; i++){
             playerStatBoxes.push(new playerStat(i));
@@ -2080,12 +2090,16 @@ function game(){
                 tempTicks = gameTicks;
                 if (gameTicks === countDownStartTime) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "3"));
+                    toneSound1.play();
                 } else if (gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime) / 3)) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "2"));
+                    toneSound3.play();
                 } else if (gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime) / 3 * 2)) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "1"));
+                    toneSound1.play();
                 } else if (gameTicks === countDownStartTime + countDownEndTime) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "Start!"));
+                    toneSound2.play();
                 }
                 if (gameTicks % 50 === 0) {
                     for (var p = 0; p < players.length; p++) {
