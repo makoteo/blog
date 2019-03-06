@@ -1380,7 +1380,11 @@ function Button(text, x, y, width, height){
                     if(this.text === "Play"){
                         stateToTransitionTo = "GAME SETUP";
                     }else if(this.text === "Options"){
-                        optionsOpen = true;
+                        if(optionsOpen === false){
+                            optionsOpen = true;
+                        }else{
+                            optionsOpen = false;
+                        }
                     }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
                     }else if(this.text === "1 Round"){
@@ -2524,7 +2528,7 @@ function game(){
 
             }
 
-            for (var i = 0; i < fallingTiles.length; i++) {
+            for (var i = 0, len = fallingTiles.length; i < len; ++i) {
                 if (PAUSED === false) {
                     fallingTiles[i].update();
                 }
@@ -2569,7 +2573,7 @@ function game(){
                 justFell = true;
             }
 
-            for (var i = 0; i < tiles.length; i++) {
+            for (var i = 0, len = tiles.length; i < len; ++i) {
                 if (tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15) {
                     if (PAUSED === false) {
                         tiles[i].update();
@@ -2649,7 +2653,9 @@ function game(){
                 }
             }
 
-            for (var i = 0; i < bullets.length; i++) {
+            var i = bullets.length;
+
+            while(i--){
                 if (PAUSED === false) {
                     bullets[i].update();
                 }
@@ -2705,6 +2711,63 @@ function game(){
                     bullets.splice(i, 1);
                 }
             }
+
+            /*for (var i = 0; i < bullets.length; i++) {
+                if (PAUSED === false) {
+                    bullets[i].update();
+                }
+                bullets[i].draw();
+
+                var destroy = false;
+
+                for (var j = 0; j < players.length; j++) {
+                    if (bullets[i].x < players[j].x + players[j].width && bullets[i].x + bullets[i].velX + bullets[i].width > players[j].x) {
+                        if (bullets[i].y > players[j].y - players[j].height / 2 && bullets[i].y < players[j].y + players[j].height / 2) {
+                            if (players[j].team !== bullets[i].team) {
+                                players[j].knockBackXVel = bullets[i].knockBack;
+                                players[bullets[i].shooter].hitAmount++;
+                                if (bullets[i].type === 4 || bullets[i].type === 5) {
+                                    players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
+                                    if(GAMESTATE === "GAME") {
+                                        playerPoints[bullets[i].shooter] += 200;
+                                    }
+                                } else {
+                                    players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
+                                    if(GAMESTATE === "GAME") {
+                                        playerPoints[bullets[i].shooter] += 100;
+                                    }
+                                }
+
+                                destroy = true;
+                            }
+
+                        }
+                    }
+                }
+
+                if (bullets.length > 0 && i !== bullets.length) {
+                    if (bullets[i].x < 10 || bullets[i].x > WIDTH + 10) {
+                        destroy = true;
+                    }
+                }
+
+                if (bullets.length > 0 && i !== bullets.length) {
+                    for (var j = 0; j < collidableBlocks.length; j++) {
+                        if (Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize) < map.length) {
+                            if (map[Math.round((bullets[i].y - tileSize / 2 - yOffset) / tileSize)][Math.round((bullets[i].x - xOffset) / tileSize)] === collidableBlocks[j]) {
+                                destroy = true;
+                                break;
+                            }
+                        }
+                    }
+                } else {
+
+                }
+
+                if (destroy === true) {
+                    bullets.splice(i, 1);
+                }
+            }*/
 
             //CONTROLS
             //PLAYER 1
@@ -2840,8 +2903,9 @@ function game(){
                 }
             }
 
+            var i = players.length;
 
-            for (var i = 0; i < players.length; i++) {
+            while(i--){
                 if (players[i].active === true) {
                     if (PAUSED === false) {
                         players[i].update();
@@ -2861,6 +2925,27 @@ function game(){
                     }
                 }
             }
+
+            /*for (var i = 0; i < players.length; i++) {
+                if (players[i].active === true) {
+                    if (PAUSED === false) {
+                        players[i].update();
+                    }
+                    players[i].draw();
+
+                    if (players[i].x < -200 || players[i].x > WIDTH + 200 || players[i].y < -200 || players[i].y > HEIGHT + 200) {
+                        if (players[i].lives - 1 === 0) {
+                            for (var a = 0; a < aiBots.length; a++) {
+                                if (aiBots[a].player === i) {
+                                    aiBots.splice(a, 1);
+                                }
+                            }
+                        }
+
+                        players[i].die();
+                    }
+                }
+            }*/
 
             for (var i = 0; i < balloons.length; i++) {
                 if (PAUSED === false) {
