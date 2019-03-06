@@ -257,6 +257,7 @@ var rainCurrent = 0;
 var teamPoints = [0, 0, 0, 0];
 var playerPoints = [0, 0, 0, 0];
 var playerAccuracy = [0, 0, 0, 0];
+var playerKills = [0, 0, 0, 0];
 
 var livesCanSpawn = true;
 var potatoLauncherChance = 0.2;
@@ -773,8 +774,6 @@ function Player(id, ai, team){
     this.ai = ai;
     this.team = team;
 
-    this.kills = 0;
-
     if(this.id === 0){
         this.name = "Blue";
     }else if(this.id === 1){
@@ -996,7 +995,6 @@ function Player(id, ai, team){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
                         this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
-                        console.log("Collide");
                     } else {
 
                     }
@@ -1143,7 +1141,7 @@ function Player(id, ai, team){
         for(var i = 0; i < players.length; i++){
             if(i !== this.id){
                 if(this.tempCauseOfDeath === "Was Knocked Off By " + players[i].name || this.tempCauseOfDeath === "Was Sniped Off By " + players[i].name){
-                    players[i].kills++;
+                    playerKills[i]++;
                 }
             }
         }
@@ -1294,6 +1292,7 @@ function Button(text, x, y, width, height){
                     if(this.text === "Skip (No points are added)"){
                         console.log("Here");
                         playedRounds++;
+                        buttons = [];
                         if(playedRounds === RoundAmount){
                             stateToTransitionTo = "GAME OVER";
                         }else{
@@ -1934,6 +1933,7 @@ function checkGameState(){
         playerAccuracy = [0, 0, 0, 0];
         playerPoints = [0, 0, 0, 0];
         teamPoints = [0, 0, 0, 0];
+        playerKills = [0, 0, 0, 0];
 
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
@@ -2204,6 +2204,7 @@ function game(){
                     if (moreTeams === false) {
                         teamPoints[firstTeam] += 1;
                         playedRounds++;
+                        buttons = [];
                         if (playedRounds === RoundAmount) {
                             stateToTransitionTo = "GAME OVER";
                         } else {
@@ -2995,7 +2996,7 @@ function game(){
                     ctx.fillText(players[Order[i]].name, startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerPointsNoSort[Order[i]], startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerAccuracy[Order[i]] + "%", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
-                    ctx.fillText(parseInt(players[Order[i]].kills), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(parseInt(playerKills[i]), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                 }
             }
         }
