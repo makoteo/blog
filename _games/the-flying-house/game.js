@@ -2497,23 +2497,31 @@ function game(){
                                         effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Potato Launcher!!"));
                                         players[j].weapon = "Potato Launcher";
                                         players[j].bulletCount = 3;
-                                        playerPoints[j] += 90;
+                                        if(GAMESTATE === "GAME"){
+                                            playerPoints[j] += 90;
+                                        }
                                     } else {
                                         if (livesCanSpawn === false) {
                                             effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Darts!"));
                                             players[j].weapon = "Darts";
                                             players[j].bulletCount = 20;
-                                            playerPoints[j] += 50;
+                                            if(GAMESTATE === "GAME") {
+                                                playerPoints[j] += 50;
+                                            }
                                         } else {
                                             if (random > 1 - potatoLauncherChance - heartChance) {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "+1 Life!!"));
                                                 players[j].lives++;
-                                                playerPoints[j] += 70;
+                                                if(GAMESTATE === "GAME") {
+                                                    playerPoints[j] += 70;
+                                                }
                                             } else {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Darts!"));
                                                 players[j].weapon = "Darts";
                                                 players[j].bulletCount = 20;
-                                                playerPoints[j] += 50;
+                                                if(GAMESTATE === "GAME") {
+                                                    playerPoints[j] += 50;
+                                                }
                                             }
 
                                         }
@@ -2544,10 +2552,14 @@ function game(){
                                 players[bullets[i].shooter].hitAmount++;
                                 if (bullets[i].type === 4 || bullets[i].type === 5) {
                                     players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
-                                    playerPoints[bullets[i].shooter] += 200;
+                                    if(GAMESTATE === "GAME") {
+                                        playerPoints[bullets[i].shooter] += 200;
+                                    }
                                 } else {
                                     players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
-                                    playerPoints[bullets[i].shooter] += 100;
+                                    if(GAMESTATE === "GAME") {
+                                        playerPoints[bullets[i].shooter] += 100;
+                                    }
                                 }
 
                                 destroy = true;
