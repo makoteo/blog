@@ -146,6 +146,9 @@ var leftPanelOptionsX = -leftPanelOptionsWidth;
 var optionsOpen = false;
 
 var dragging = false;
+var draggingSlider = false;
+
+var globalVolume = 1;
 
 /*
 GUIDE TO TILE TYPES:
@@ -1266,15 +1269,18 @@ function playerStat(id){
     };
 }
 
-function Slider(x, y, width, segments){
+function Slider(x, y, width, type){
     this.x = x;
     this.y = y;
     this.width = width;
-    this.segments = segments;
+    this.type = type;
 
-    this.slideX = 0;
+    this.slideX = this.width;
 
-    this.dependancy = this.x - leftPanelOptionsX;
+    if(this.type === 0 || this.type === 1 || this.type === 2){
+        this.dependancy = this.x - leftPanelOptionsX;
+    }
+
 
     this.sliding = false;
 
@@ -1283,15 +1289,16 @@ function Slider(x, y, width, segments){
 
         if(mousePosY > this.y - HEIGHT/100 && mousePosY < this.y + HEIGHT/100 + HEIGHT/100) {
             if (mousePosX > this.x - this.width/2 - WIDTH/100 && mousePosX < this.x + this.width/2) {
-                if(dragging){
+                if(dragging && draggingSlider === false){
                     this.sliding = true;
+                    draggingSlider = true;
                 }
-                console.log(dragging);
             }
         }
 
         if(!dragging){
             this.sliding = false;
+            draggingSlider = false;
         }
 
         if(this.sliding === true){
@@ -1301,6 +1308,30 @@ function Slider(x, y, width, segments){
                 this.slideX = 0;
             }else{
                 this.slideX = mousePosX - this.x + this.width/2;
+            }
+
+            //PASS IN ALL SOUNDS HERE --------------------------------------------------------------------------------------------------------------
+
+            if(this.type === 0 && globalVolume !== this.slideX/this.width){
+                globalVolume = this.slideX/this.width;
+                for(var i = 0; i < walkSounds.length; i++){
+                    walkSounds[i].changeVolume();
+                }
+                for(var i = 0; i < shotSounds1.length; i++){
+                    shotSounds1[i].changeVolume();
+                }
+                for(var i = 0; i < shotSounds2.length; i++){
+                    shotSounds2[i].changeVolume();
+                }
+                for(var i = 0; i < shotSounds3.length; i++){
+                    shotSounds3[i].changeVolume();
+                }
+                clickSound.changeVolume();
+                clickSound2.changeVolume();
+                dingSound1.changeVolume();
+                toneSound1.changeVolume();
+                toneSound2.changeVolume();
+                toneSound3.changeVolume();
             }
 
         }
@@ -1876,11 +1907,9 @@ function AiBot(player, difficulty){
 function sound(src) {
     this.sound = document.createElement("audio");
     this.sound.src = src;
-    //if(this.src = "Walking1.wav"){
-        this.sound.volume = 1;
-    //}else{
-        //this.sound.volume = 0.2;
-    //}
+
+    this.sound.volume = globalVolume;
+
 
     this.sound.setAttribute("preload", "auto");
     this.sound.setAttribute("controls", "none");
@@ -1894,6 +1923,9 @@ function sound(src) {
     };
     this.delete = function(){
         this.sound.parentNode.removeChild(this.sound);
+    }
+    this.changeVolume = function(){
+        this.sound.volume = globalVolume;
     }
 }
 
@@ -1946,7 +1978,9 @@ function checkGameState(){
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
 
-        buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*2, leftPanelOptionsWidth*0.8, 100));
+        buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*3, leftPanelOptionsWidth*0.8, 0));
+        buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*5, leftPanelOptionsWidth*0.8, 1));
+        buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*7, leftPanelOptionsWidth*0.8, 2));
     }else if(GAMESTATE === "GAME"){
         playedRounds = 0;
         buttons = [];
@@ -3094,10 +3128,16 @@ function game(){
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = 'white';
         ctx.fillRect(leftPanelOptionsX, leftPanelOptionsY, leftPanelOptionsWidth, leftPanelOptionsHeight);
-        ctx.fontStyle = '30px Arial';
+        ctx.font = '30px Arial';
         ctx.globalAlpha = 0.8;
         ctx.textAlign = 'center';
         ctx.fillText("Options", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10);
+        ctx.font = '20px Arial';
+        ctx.fillText("Sounds", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*4);
+        ctx.fillText("Particles", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*6);
+        ctx.fillText("Update Speed", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*8);
+        ctx.font = '15px Arial';
+        ctx.fillText("(Lower is better on slower computers)", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*8.5);
     }
 
 }
