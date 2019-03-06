@@ -139,6 +139,14 @@ var updateTimesPerTick = 1;
 
 var playedRounds = 0;
 
+var leftPanelOptionsWidth = WIDTH/4;
+var leftPanelOptionsHeight = HEIGHT/2;
+var leftPanelOptionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+var leftPanelOptionsX = -leftPanelOptionsWidth;
+var optionsOpen = false;
+
+var dragging = false;
+
 /*
 GUIDE TO TILE TYPES:
 
@@ -1258,6 +1266,56 @@ function playerStat(id){
     };
 }
 
+function Slider(x, y, width, segments){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.segments = segments;
+
+    this.slideX = 0;
+
+    this.dependancy = this.x - leftPanelOptionsX;
+
+    this.sliding = false;
+
+    this.update = function(){
+        this.x = leftPanelOptionsX + this.dependancy;
+
+        if(mousePosY > this.y - HEIGHT/100 && mousePosY < this.y + HEIGHT/100 + HEIGHT/100) {
+            if (mousePosX > this.x - this.width/2 - WIDTH/100 && mousePosX < this.x + this.width/2) {
+                if(dragging){
+                    this.sliding = true;
+                }
+                console.log(dragging);
+            }
+        }
+
+        if(!dragging){
+            this.sliding = false;
+        }
+
+        if(this.sliding === true){
+            if(mousePosX > this.x + this.width/2){ //
+                this.slideX = this.width;
+            }else if(mousePosX < this.x - this.width/2){
+                this.slideX = 0;
+            }else{
+                this.slideX = mousePosX - this.x + this.width/2;
+            }
+
+        }
+
+    }
+    this.draw = function(){
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.x - this.width/2, this.y, this.width, HEIGHT/100);
+
+        ctx.fillStyle = 'white';
+        ctx.fillRect(this.x - this.width/2 + this.slideX, this.y - HEIGHT/60, WIDTH/200, HEIGHT/25)
+    }
+}
+
 function Button(text, x, y, width, height){
     this.text = text;
     this.x = x;
@@ -1279,6 +1337,8 @@ function Button(text, x, y, width, height){
                     //THIS MUST UPDATE BEFORE CLICKTIMER IS SUBTRACTED
                     if(this.text === "Play"){
                         stateToTransitionTo = "GAME SETUP";
+                    }else if(this.text === "Options"){
+                        optionsOpen = true;
                     }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
                     }else if(this.text === "1 Round"){
@@ -1885,6 +1945,8 @@ function checkGameState(){
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+
+        buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*2, leftPanelOptionsWidth*0.8, 100));
     }else if(GAMESTATE === "GAME"){
         playedRounds = 0;
         buttons = [];
@@ -3019,6 +3081,23 @@ function game(){
             }
         }
 
+    }else if(GAMESTATE === "MENU"){
+        if(optionsOpen === true){
+            if(leftPanelOptionsX < leftPanelOptionsWidth*0.1){
+                leftPanelOptionsX+=50;
+            }
+        }else{
+            if(leftPanelOptionsX > -leftPanelOptionsWidth){
+                leftPanelOptionsX-=50;
+            }
+        }
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(leftPanelOptionsX, leftPanelOptionsY, leftPanelOptionsWidth, leftPanelOptionsHeight);
+        ctx.fontStyle = '30px Arial';
+        ctx.globalAlpha = 0.8;
+        ctx.textAlign = 'center';
+        ctx.fillText("Options", leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10);
     }
 
 }
@@ -3039,11 +3118,17 @@ function logMouseMove(e) {
 }
 
 document.addEventListener("mouseup", clickedNow);
+document.addEventListener("mousedown", draggedNow);
 
 function clickedNow(){
     if(clickTimer === 1){
         clickTimer = 0;
+        dragging = false;
     }
+}
+
+function draggedNow(){
+    dragging = true;
 }
 
 var keys;
