@@ -1291,12 +1291,27 @@ function Button(text, x, y, width, height){
                         RoundAmount = 5;
                     }
 
+                    if(this.text === "Skip (No points are added)"){
+                        console.log("Here");
+                        playedRounds++;
+                        if(playedRounds === RoundAmount){
+                            stateToTransitionTo = "GAME OVER";
+                        }else{
+                            Setup(true, true);
+                        }
+                    }
+
                     if(this.text === "Begin" && players.length <= 1){
                         clickSound2.play();
                     }else{
                         clickSound.play();
                     }
 
+                    if(this.text === "Menu"){
+                        stateToTransitionTo = "MENU";
+                    }else if(this.text === "Play Again"){
+                        stateToTransitionTo = "GAME SETUP";
+                    }
 
                 }
             }else{
@@ -1312,7 +1327,7 @@ function Button(text, x, y, width, height){
 
     };
     this.draw = function(){
-        if(this.text.length < 20){
+        if(this.text.length < 27 && this.text !== "Skip (No Points are added)"){
             ctx.fillStyle = 'white';
             ctx.globalAlpha = 0.2;
             //ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -1864,12 +1879,15 @@ var RoundAmount = 1;
 function checkGameState(){
     buttons = [];
     if(GAMESTATE === "MENU"){
+        Setup(false, true);
         cameraZoom = 0.5;
         buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*5, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
     }else if(GAMESTATE === "GAME"){
+        playedRounds = 0;
+        buttons = [];
         Setup(true, false);
         for(var i = 0; i < players.length; i++){
             playerStatBoxes.push(new playerStat(i));
@@ -1905,6 +1923,17 @@ function checkGameState(){
         for(var i = 0; i < players.length; i++){
             shotSounds3.push(new sound("ShotSound3.wav"));
         }
+
+        playerPointsNoSort = [];
+        Order = [99, 99, 99, 99];
+        sorted = false;
+        EndGamePoints = [];
+        displayedTexts = 0;
+        displayedTextTimer = 0;
+        playerAccuracy = [0, 0, 0, 0];
+        playerPoints = [0, 0, 0, 0];
+        teamPoints = [0, 0, 0, 0];
+
     }else if(GAMESTATE === "GAME SETUP"){
         Setup(true, false);
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
@@ -1914,8 +1943,7 @@ function checkGameState(){
         buttons.push(new Button("3 Rounds", WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("5 Rounds", WIDTH/20, HEIGHT/2 + HEIGHT/10, WIDTH/5, HEIGHT/20));
     }else if(GAMESTATE === "GAME OVER"){
-        buttons.push(new Button("Play Again", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("Back To Menu", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+
     }
 }
 
@@ -2101,6 +2129,8 @@ var playerPointsNoSort = [];
 var Order = [99, 99, 99, 99];
 var sorted = false;
 var EndGamePoints = [];
+var displayedTexts = 0;
+var displayedTextTimer = 0;
 
 var columns = 4;
 var columnWidth = WIDTH/8
@@ -2111,11 +2141,32 @@ for(var i = 0; i < columns; i++){
     columnXs.push(startColumnX + i*columnWidth);
 }
 
+var noRealHumans = true;
+
 function game(){
 
-    if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP" || GAMESTATE === "GAME OVER"){
-        for(var ticks = 0; ticks < updateTimesPerTick; ticks++) {
-            if(PAUSED === false && GAMESTATE === "GAME") {
+    if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP" || GAMESTATE === "GAME OVER") {
+        for (var ticks = 0; ticks < updateTimesPerTick; ticks++) {
+
+            if (GAMESTATE === "GAME") {
+                noRealHumans = true;
+                for (var i = 0; i < players.length; i++) {
+                    if (players[i].active === true) {
+                        if (players[i].ai === true) {
+
+                        } else {
+                            noRealHumans = false;
+                            break;
+                        }
+                    }
+                }
+
+                if ((gameTicks % amountOfBreaks * fallApartTime + fallApartTime && buttons.length < 1) || ((noRealHumans === true) && buttons.length < 1)) {
+                    buttons.push(new Button("Skip (No points are added)", WIDTH - WIDTH / 3, HEIGHT / 25, WIDTH / 4, HEIGHT / 20));
+                }
+            }
+
+            if (PAUSED === false && GAMESTATE === "GAME") {
                 gameTicks++;
                 tempTicks = gameTicks;
                 if (gameTicks === countDownStartTime) {
@@ -2152,9 +2203,9 @@ function game(){
                     if (moreTeams === false) {
                         teamPoints[firstTeam] += 1;
                         playedRounds++;
-                        if(playedRounds === RoundAmount){
+                        if (playedRounds === RoundAmount) {
                             stateToTransitionTo = "GAME OVER";
-                        }else{
+                        } else {
                             Setup(true, true);
                         }
                     }
@@ -2163,7 +2214,7 @@ function game(){
                     firstTeam = 0;
                     teams = [];
                 }
-            }else{
+            } else {
                 tempTicks++;
             }
 
@@ -2176,14 +2227,14 @@ function game(){
             ctx.fillStyle = 'white';
             ctx.globalAlpha = 1;
 
-            if(PAUSED === false) {
+            if (PAUSED === false) {
                 if (tempTicks % Math.round(600 - 500 * rainCurrent) === 0) {
                     clouds.push(new Cloud());
                 }
             }
 
             for (var c = 0; c < clouds.length; c++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     clouds[c].update();
                 }
                 clouds[c].draw();
@@ -2198,7 +2249,7 @@ function game(){
 
             // NEGATIVE RAINCOEFFICIENT = MORE RAIN
 
-            if(PAUSED === false) {
+            if (PAUSED === false) {
                 if (rainCurrent > upperrainCoefficient) {
                     rainCurrent = upperrainCoefficient;
                 } else if (rainCurrent < lowerrainCoefficient) {
@@ -2248,7 +2299,7 @@ function game(){
 
             if (lightningBolts.length > 0) {
                 for (var l = 0; l < lightningBolts.length; l++) {
-                    if(PAUSED === false) {
+                    if (PAUSED === false) {
                         lightningBolts[l].update();
                     }
                     lightningBolts[l].draw();
@@ -2272,7 +2323,7 @@ function game(){
                 }
             }
 
-            if(PAUSED === false && GAMESTATE  === "GAME") {
+            if (PAUSED === false && GAMESTATE === "GAME") {
                 if (fallApartTimer < fallApartTime && amountOfBreaks < breakPoints) {
                     fallApartTimer++;
                 } else {
@@ -2361,11 +2412,11 @@ function game(){
             }
 
             for (var i = 0; i < fallingTiles.length; i++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     fallingTiles[i].update();
                 }
                 fallingTiles[i].draw();
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     fallingTiles[i].y += fallVelocity;
                 }
                 if (fallingTiles[i].type !== 10 && fallingTiles[i].type !== 12 && fallingTiles[i].type !== 13 && fallingTiles[i].type !== 14 && fallingTiles[i].type !== 15) {
@@ -2407,7 +2458,7 @@ function game(){
 
             for (var i = 0; i < tiles.length; i++) {
                 if (tiles[i].type !== 10 && tiles[i].type !== 12 && tiles[i].type !== 13 && tiles[i].type !== 14 && tiles[i].type !== 15) {
-                    if(PAUSED === false) {
+                    if (PAUSED === false) {
                         tiles[i].update();
                     }
                     tiles[i].draw();
@@ -2478,7 +2529,7 @@ function game(){
             }
 
             for (var i = 0; i < bullets.length; i++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     bullets[i].update();
                 }
                 bullets[i].draw();
@@ -2491,10 +2542,10 @@ function game(){
                             if (players[j].team !== bullets[i].team) {
                                 players[j].knockBackXVel = bullets[i].knockBack;
                                 players[bullets[i].shooter].hitAmount++;
-                                if(bullets[i].type === 4 || bullets[i].type === 5){
+                                if (bullets[i].type === 4 || bullets[i].type === 5) {
                                     players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
                                     playerPoints[bullets[i].shooter] += 200;
-                                }else{
+                                } else {
                                     players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
                                     playerPoints[bullets[i].shooter] += 100;
                                 }
@@ -2667,7 +2718,7 @@ function game(){
 
             for (var i = 0; i < players.length; i++) {
                 if (players[i].active === true) {
-                    if(PAUSED === false) {
+                    if (PAUSED === false) {
                         players[i].update();
                     }
                     players[i].draw();
@@ -2687,7 +2738,7 @@ function game(){
             }
 
             for (var i = 0; i < balloons.length; i++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     balloons[i].update();
                 }
                 balloons[i].draw();
@@ -2695,7 +2746,7 @@ function game(){
 
             for (var i = 0; i < tiles.length; i++) {
                 if (tiles[i].type === 10 || tiles[i].type === 12 || tiles[i].type === 13 || tiles[i].type === 14 || tiles[i].type === 15) {
-                    if(PAUSED === false) {
+                    if (PAUSED === false) {
                         tiles[i].update();
                     }
                     tiles[i].draw();
@@ -2703,7 +2754,7 @@ function game(){
             }
 
             for (var i = 0; i < effects.length; i++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     effects[i].update();
                 }
                 effects[i].draw();
@@ -2727,7 +2778,7 @@ function game(){
             }
 
             for (var i = 0; i < playerStatBoxes.length; i++) {
-                if(PAUSED === false) {
+                if (PAUSED === false) {
                     playerStatBoxes[i].update();
                 }
                 playerStatBoxes[i].draw();
@@ -2750,19 +2801,19 @@ function game(){
 
         }
 
-        if(PAUSED === true){
-            if(pauseOpacity < 0.8){
+        if (PAUSED === true) {
+            if (pauseOpacity < 0.8) {
                 pauseOpacity += 0.1;
             }
-        }else{
-            if(pauseOpacity > 0.1){
+        } else {
+            if (pauseOpacity > 0.1) {
                 pauseOpacity -= 0.1;
-            }else{
+            } else {
                 pauseOpacity = 0;
             }
         }
 
-        if(pauseOpacity > 0.1){
+        if (pauseOpacity > 0.1) {
             ctx.globalAlpha = pauseOpacity;
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -2770,22 +2821,12 @@ function game(){
             ctx.textAlign = 'center';
             ctx.fillStyle = 'white';
             ctx.font = '50px Arial';
-            ctx.fillText("Paused", WIDTH/2, HEIGHT/3);
+            ctx.fillText("Paused", WIDTH / 2, HEIGHT / 3);
             ctx.globalAlpha = 1;
         }
 
 
     }
-
-    if(GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP"){
-        window.onmousemove = logMouseMove;
-        for(var b = 0; b < buttons.length; b++){
-            buttons[b].update();
-            buttons[b].draw();
-        }
-    }
-
-
 
     if ((keys && keys[32]) && GAMESTATE === "GAME") {
         if(pauseTimer === 0){
@@ -2816,6 +2857,7 @@ function game(){
                 stateToTransitionTo = "";
             }
         }
+
     }else if(GAMESTATE !== "GAME OVER"){
         if(transitionOpacity > 0.05){
             transitionOpacity -= 0.05;
@@ -2828,6 +2870,14 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     ctx.globalAlpha = 1;
+
+    if(GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP" || GAMESTATE === "GAME" || GAMESTATE === "GAME OVER"){
+        window.onmousemove = logMouseMove;
+        for(var b = 0; b < buttons.length; b++){
+            buttons[b].update();
+            buttons[b].draw();
+        }
+    }
 
     if(pauseTimer > 0){
         pauseTimer--;
@@ -2908,17 +2958,30 @@ function game(){
             ctx.fillStyle = 'white';
             ctx.font = '25px Arial';
 
+            displayedTextTimer++;
+
+            if(displayedTextTimer % 5 === 0){
+                if(displayedTexts < players.length){
+                    displayedTexts++;
+                }else{
+                    if(buttons.length === 0){
+                        buttons.push(new Button("Menu", WIDTH/4, HEIGHT - HEIGHT/10, WIDTH/5, HEIGHT/20));
+                        buttons.push(new Button("Play Again", WIDTH/2 + WIDTH/4 - WIDTH/5, HEIGHT - HEIGHT/10, WIDTH/5, HEIGHT/20));
+                    }
+                }
+            }
+
             ctx.fillText("Player", startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20);
             ctx.fillText("Points", startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20);
             ctx.fillText("Accuracy", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20);
             ctx.fillText("Kills", startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20);
 
             ctx.font = '20px Arial';
-            for(var i = 0; i < players.length; i++){
+            for(var i = 0; i < displayedTexts; i++){
                 if(!(Order[i] > players.length - 1)){
                     ctx.fillText(players[Order[i]].name, startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerPointsNoSort[Order[i]], startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
-                    ctx.fillText(playerAccuracy[Order[i]], startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(playerAccuracy[Order[i]] + "%", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(parseInt(players[Order[i]].kills), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                 }
             }
