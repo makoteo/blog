@@ -1879,6 +1879,7 @@ var RoundAmount = 1;
 function checkGameState(){
     buttons = [];
     if(GAMESTATE === "MENU"){
+        playerInfos = [];
         Setup(false, true);
         cameraZoom = 0.5;
         buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*5, WIDTH/5, HEIGHT/20));
