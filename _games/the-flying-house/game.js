@@ -773,12 +773,23 @@ function Player(id, ai, team){
     this.ai = ai;
     this.team = team;
 
+    this.kills = 0;
+
+    if(this.id === 0){
+        this.name = "Blue";
+    }else if(this.id === 1){
+        this.name = "Red";
+    }else if(this.id === 2){
+        this.name = "Green";
+    }else if(this.id === 3){
+        this.name = "Yellow";
+    }
+
     this.hitAmount = 0;
     this.totalShots = 0;
 
     this.tempCauseOfDeath = "Slipped Off";
 
-    this.name = "Player " + this.id;
     this.spawnPlacesFound = 0;
 
     this.width = tileSize/2;
@@ -1129,6 +1140,14 @@ function Player(id, ai, team){
     this.die = function(){
         this.lives--;
         console.log(this.name + " " + this.tempCauseOfDeath);
+        for(var i = 0; i < players.length; i++){
+            if(i !== this.id){
+                if(this.tempCauseOfDeath === "Was Knocked Off By " + players[i].name || this.tempCauseOfDeath === "Was Sniped Off By " + players[i].name){
+                    players[i].kills++;
+                }
+            }
+        }
+
         if(this.lives > 0){
             this.x = this.spawnX;
             this.y = this.spawnY;
@@ -1138,15 +1157,14 @@ function Player(id, ai, team){
         }else{
             this.active = false;
         }
-    };
+    }
 
     this.hide = function(){
         if(this.tilePosYBottom < map.length){
             if (map[this.tilePosYBottom][this.tilePosXRight] === 28 && map[this.tilePosYBottom][this.tilePosXLeft] === 28) {
                 this.visible = false;
-                //console.log("Works");
             } else {
-                //console.log("Nope");
+
             }
         }
     }
@@ -1233,10 +1251,10 @@ function playerStat(id){
     };
 
     this.update = function(){
-        if(tempTicks % 60 === 0){
+        if(tempTicks % 60 === 1){
             this.lives = players[this.id].lives;
             this.weapon = players[this.id].weapon;
-            //this.name = players[this.id].name;
+            this.name = players[this.id].name;
         }
         this.bulletCount = players[this.id].bulletCount;
     };
@@ -1261,17 +1279,16 @@ function Button(text, x, y, width, height){
                 }
                 if(clickTimer === 0){
                     //THIS MUST UPDATE BEFORE CLICKTIMER IS SUBTRACTED
-                    console.log("Click");
                     if(this.text === "Play"){
                         stateToTransitionTo = "GAME SETUP";
                     }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
+                    }else if(this.text === "1 Round"){
+                        RoundAmount = 1;
                     }else if(this.text === "3 Rounds"){
                         RoundAmount = 3;
                     }else if(this.text === "5 Rounds"){
                         RoundAmount = 5;
-                    }else if(this.text === "10 Rounds"){
-                        RoundAmount = 10;
                     }
 
                     if(this.text === "Begin" && players.length <= 1){
@@ -1296,7 +1313,6 @@ function Button(text, x, y, width, height){
     };
     this.draw = function(){
         if(this.text.length < 20){
-            //console.log("Here");
             ctx.fillStyle = 'white';
             ctx.globalAlpha = 0.2;
             //ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -1315,19 +1331,19 @@ function Button(text, x, y, width, height){
             ctx.textAlign = 'left';
             ctx.globalAlpha = 1;
 
-            if(this.text === "3 Rounds" && !(RoundAmount === 3)){
+            if(this.text === "1 Round" && !(RoundAmount === 1)){
                 ctx.fillStyle = 'gray';
                 ctx.globalAlpha = 0.2;
                 //ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
                 ctx.globalAlpha = 1;
-            }else if(this.text === "5 Rounds" && !(RoundAmount === 5)){
+            }else if(this.text === "3 Rounds" && !(RoundAmount === 3)){
                 ctx.fillStyle = 'gray';
                 ctx.globalAlpha = 0.2;
                 //ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.roundRect(this.x - this.growthX, this.y, this.width + this.growthX*2, this.height, {upperLeft:this.radius,lowerLeft:this.radius,upperRight:this.radius,lowerRight:this.radius}, true, false);
                 ctx.globalAlpha = 1;
-            }if(this.text === "10 Rounds" && !(RoundAmount === 10)){
+            }if(this.text === "5 Rounds" && !(RoundAmount === 5)){
                 ctx.fillStyle = 'gray';
                 ctx.globalAlpha = 0.2;
                 //ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -1780,8 +1796,6 @@ function AiBot(player, difficulty){
         if(this.shooting){
             players[this.player].spawnBullet();
         }
-
-        //console.log(this.player + " - " + this.state);
     }
 }
 
@@ -1845,7 +1859,7 @@ var fallVelocity = 0;
 
 var justFell = false;
 
-var RoundAmount = 3;
+var RoundAmount = 1;
 
 function checkGameState(){
     buttons = [];
@@ -1856,7 +1870,6 @@ function checkGameState(){
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
     }else if(GAMESTATE === "GAME"){
-        console.log("CheckGame");
         Setup(true, false);
         for(var i = 0; i < players.length; i++){
             playerStatBoxes.push(new playerStat(i));
@@ -1897,9 +1910,12 @@ function checkGameState(){
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Tap on the green icon with a plus to add a player.", WIDTH - WIDTH/20, HEIGHT/30));
         buttons.push(new Button("Tap the AI icon on to make the player an AI.", WIDTH - WIDTH/20, HEIGHT/30 + HEIGHT/30));
-        buttons.push(new Button("3 Rounds", WIDTH/20, HEIGHT/2 - HEIGHT/10, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("5 Rounds", WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("10 Rounds", WIDTH/20, HEIGHT/2 + HEIGHT/10, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("1 Round", WIDTH/20, HEIGHT/2 - HEIGHT/10, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("3 Rounds", WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("5 Rounds", WIDTH/20, HEIGHT/2 + HEIGHT/10, WIDTH/5, HEIGHT/20));
+    }else if(GAMESTATE === "GAME OVER"){
+        buttons.push(new Button("Play Again", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Back To Menu", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
     }
 }
 
@@ -2081,6 +2097,20 @@ var moreTeams = false;
 
 var tempTicks = 0;
 
+var playerPointsNoSort = [];
+var Order = [99, 99, 99, 99];
+var sorted = false;
+var EndGamePoints = [];
+
+var columns = 4;
+var columnWidth = WIDTH/8
+var startColumnX = (WIDTH - WIDTH/8*columns)/2;
+var columnXs = [];
+
+for(var i = 0; i < columns; i++){
+    columnXs.push(startColumnX + i*columnWidth);
+}
+
 function game(){
 
     if(GAMESTATE === "GAME" || GAMESTATE === "MENU" || GAMESTATE === "GAME SETUP" || GAMESTATE === "GAME OVER"){
@@ -2097,7 +2127,7 @@ function game(){
                 } else if (gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime) / 3 * 2)) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "1"));
                     toneSound1.play();
-                } else if (gameTicks === countDownStartTime + countDownEndTime) {
+                } else if (gameTicks === countDownStartTime + Math.round((countDownEndTime - countDownStartTime) / 3 * 3)) {
                     effects.push(new TextBox(WIDTH / 2, HEIGHT / 2, 3, "Start!"));
                     toneSound2.play();
                 }
@@ -2121,9 +2151,6 @@ function game(){
 
                     if (moreTeams === false) {
                         teamPoints[firstTeam] += 1;
-                        console.log(teamPoints);
-                        console.log(playerPoints);
-                        console.log(playerAccuracy);
                         playedRounds++;
                         if(playedRounds === RoundAmount){
                             stateToTransitionTo = "GAME OVER";
@@ -2736,7 +2763,7 @@ function game(){
         }
 
         if(pauseOpacity > 0.1){
-            ctx.globalAlpha = pauseOpacity
+            ctx.globalAlpha = pauseOpacity;
             ctx.fillStyle = 'black';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -2812,6 +2839,91 @@ function game(){
 
     if(GAMESTATE === "GAME OVER"){
 
+        if(sorted === false){
+
+            for(var i = 0; i < players.length; i++){
+                if(players[i].lives > 0){
+                    playerPoints[i] += 1000;
+                    break;
+                }
+            }
+
+            for(var i = 0 ; i < playerPoints.length; i++){
+                playerPointsNoSort.push(playerPoints[i]);
+            }
+            playerPoints.sort(function(a, b){return b-a;});
+
+            for(var i = 0; i < playerPointsNoSort.length; i++){
+                if(playerPointsNoSort[i] === playerPoints[0]){
+                    Order[0] = i;
+                    break;
+                }
+            }
+
+            if(players.length > 1){
+                for(var i = 0; i < playerPointsNoSort.length; i++){
+                    if(playerPointsNoSort[i] === playerPoints[1]){
+                        Order[1] = i;
+                    }
+                }
+            }
+
+            if(players.length > 2) {
+                for (var i = 0; i < playerPointsNoSort.length; i++) {
+                    if (playerPointsNoSort[i] === playerPoints[2]) {
+                        Order[2] = i;
+                        break;
+                    }
+                }
+            }
+
+            if(players.length > 3) {
+                for (var i = 0; i < playerPointsNoSort.length; i++) {
+                    if (playerPointsNoSort[i] === playerPoints[3]) {
+                        Order[3] = i;
+                        break;
+                    }
+                }
+            }
+
+            sorted = true;
+        }else{
+            ctx.fillStyle = 'white';
+            ctx.font = '40px Arial'
+            ctx.textAlign = 'center';
+            ctx.fillText(players[Order[0]].name + " Wins!!", WIDTH/2, HEIGHT/5);
+
+            ctx.font = '30px Arial';
+            ctx.globalAlpha = 0.2;
+            for(var i = 0; i < columnXs.length; i++){
+                if(i % 2 === 0){
+                    ctx.fillStyle = 'white';
+                }else{
+                    ctx.fillStyle = 'gray';
+                }
+                ctx.fillRect(columnXs[i], HEIGHT/4, columnWidth, HEIGHT/2);
+            }
+            ctx.globalAlpha = 1;
+
+            ctx.fillStyle = 'white';
+            ctx.font = '25px Arial';
+
+            ctx.fillText("Player", startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20);
+            ctx.fillText("Points", startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20);
+            ctx.fillText("Accuracy", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20);
+            ctx.fillText("Kills", startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20);
+
+            ctx.font = '20px Arial';
+            for(var i = 0; i < players.length; i++){
+                if(!(Order[i] > players.length - 1)){
+                    ctx.fillText(players[Order[i]].name, startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(playerPointsNoSort[Order[i]], startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(playerAccuracy[Order[i]], startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(parseInt(players[Order[i]].kills), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                }
+            }
+        }
+
     }
 
 }
@@ -2829,7 +2941,6 @@ function logMouseMove(e) {
 
     mousePosX = e.clientX - rect.left;
     mousePosY = e.clientY - rect.top;
-    //console.log(mousePosX + ", " + mousePosY);
 }
 
 document.addEventListener("mouseup", clickedNow);
