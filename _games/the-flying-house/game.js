@@ -1936,6 +1936,7 @@ function checkGameState(){
         playerKills = [0, 0, 0, 0];
 
     }else if(GAMESTATE === "GAME SETUP"){
+        playerStatBoxes = [];
         Setup(true, false);
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Tap on the green icon with a plus to add a player.", WIDTH - WIDTH/20, HEIGHT/30));
@@ -2144,6 +2145,7 @@ for(var i = 0; i < columns; i++){
 }
 
 var noRealHumans = true;
+var alivePlayers = 0;
 
 function game(){
 
@@ -2151,19 +2153,20 @@ function game(){
         for (var ticks = 0; ticks < updateTimesPerTick; ticks++) {
 
             if (GAMESTATE === "GAME") {
+                alivePlayers = 0;
                 noRealHumans = true;
                 for (var i = 0; i < players.length; i++) {
                     if (players[i].active === true) {
+                        alivePlayers++;
                         if (players[i].ai === true) {
 
                         } else {
                             noRealHumans = false;
-                            break;
                         }
                     }
                 }
 
-                if ((gameTicks % (amountOfBreaks * fallApartTime + fallApartTime) === 0 && buttons.length < 1 && gameTicks !== 0) || ((noRealHumans === true) && buttons.length < 1)) {
+                if ((gameTicks % (amountOfBreaks * fallApartTime + fallApartTime) === 0 && buttons.length < 1 && gameTicks !== 0) || ((noRealHumans === true) && buttons.length < 1 && alivePlayers > 1)) {
                     buttons.push(new Button("Skip (No points are added)", WIDTH - WIDTH / 3, HEIGHT / 25, WIDTH / 4, HEIGHT / 20));
                 }
             }
@@ -2890,7 +2893,9 @@ function game(){
         window.onmousemove = logMouseMove;
         for(var b = 0; b < buttons.length; b++){
             buttons[b].update();
-            buttons[b].draw();
+            if(buttons.length > 0){
+                buttons[b].draw();
+            }
         }
     }
 
