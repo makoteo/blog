@@ -1140,7 +1140,7 @@ function Player(id, ai, team){
         console.log(this.name + " " + this.tempCauseOfDeath);
         for(var i = 0; i < players.length; i++){
             if(i !== this.id){
-                if(this.tempCauseOfDeath === "Was Knocked Off By " + players[i].name || this.tempCauseOfDeath === "Was Sniped Off By " + players[i].name){
+                if((this.tempCauseOfDeath === ("Was Knocked Off By " + players[i].name)) || (this.tempCauseOfDeath === ("Was Sniped Off By " + players[i].name))){
                     playerKills[i]++;
                 }
             }
@@ -1951,6 +1951,7 @@ function checkGameState(){
 function Setup(game, newHouse){
 
     gameTicks = 0;
+    tempTicks = 0;
 
     fallingApartLine = 0;
     wallTilesToDelete = 0;
@@ -3008,7 +3009,7 @@ function game(){
                     ctx.fillText(players[Order[i]].name, startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerPointsNoSort[Order[i]], startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerAccuracy[Order[i]] + "%", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
-                    ctx.fillText(parseInt(playerKills[i]), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
+                    ctx.fillText(parseInt(playerKills[Order[i]]), startColumnX + columnWidth/2 + columnWidth*3, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                 }
             }
         }
