@@ -2162,7 +2162,7 @@ function game(){
                     }
                 }
 
-                if ((gameTicks % amountOfBreaks * fallApartTime + fallApartTime && buttons.length < 1) || ((noRealHumans === true) && buttons.length < 1)) {
+                if ((gameTicks % (amountOfBreaks * fallApartTime + fallApartTime) === 0 && buttons.length < 1) || ((noRealHumans === true) && buttons.length < 1)) {
                     buttons.push(new Button("Skip (No points are added)", WIDTH - WIDTH / 3, HEIGHT / 25, WIDTH / 4, HEIGHT / 20));
                 }
             }
