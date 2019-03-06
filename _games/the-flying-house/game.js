@@ -2932,7 +2932,7 @@ function game(){
 
             if(players.length > 1){
                 for(var i = 0; i < playerPointsNoSort.length; i++){
-                    if(playerPointsNoSort[i] === playerPoints[1]){
+                    if(playerPointsNoSort[i] === playerPoints[1] && i !== Order[0]){
                         Order[1] = i;
                         break;
                     }
@@ -2941,7 +2941,7 @@ function game(){
 
             if(players.length > 2) {
                 for (var i = 0; i < playerPointsNoSort.length; i++) {
-                    if (playerPointsNoSort[i] === playerPoints[2]) {
+                    if (playerPointsNoSort[i] === playerPoints[2] && i !== Order[1]) {
                         Order[2] = i;
                         break;
                     }
@@ -2950,7 +2950,7 @@ function game(){
 
             if(players.length > 3) {
                 for (var i = 0; i < playerPointsNoSort.length; i++) {
-                    if (playerPointsNoSort[i] === playerPoints[3]) {
+                    if (playerPointsNoSort[i] === playerPoints[3] && i !== Order[2]) {
                         Order[3] = i;
                         break;
                     }
