@@ -2928,6 +2928,7 @@ function game(){
                 for(var i = 0; i < playerPointsNoSort.length; i++){
                     if(playerPointsNoSort[i] === playerPoints[1]){
                         Order[1] = i;
+                        break;
                     }
                 }
             }
@@ -2958,7 +2959,7 @@ function game(){
             ctx.fillText(players[Order[0]].name + " Wins!!", WIDTH/2, HEIGHT/5);
 
             ctx.font = '30px Arial';
-            ctx.globalAlpha = 0.2;
+            ctx.globalAlpha = 0.4;
             for(var i = 0; i < columnXs.length; i++){
                 if(i % 2 === 0){
                     ctx.fillStyle = 'white';
@@ -2966,6 +2967,16 @@ function game(){
                     ctx.fillStyle = 'gray';
                 }
                 ctx.fillRect(columnXs[i], HEIGHT/4, columnWidth, HEIGHT/2);
+            }
+
+            for(var i = 0; i < 5; i++){
+                ctx.globalAlpha = 0.1;
+                if(i % 2 === 0){
+                    ctx.fillStyle = 'black';
+                }else{
+                    ctx.fillStyle = 'gray';
+                }
+                ctx.fillRect(columnXs[0], HEIGHT/4 + i*HEIGHT/2/5, columnWidth*columns, HEIGHT/2/5);
             }
             ctx.globalAlpha = 1;
 
@@ -2993,6 +3004,7 @@ function game(){
             ctx.font = '20px Arial';
             for(var i = 0; i < displayedTexts; i++){
                 if(!(Order[i] > players.length - 1)){
+                    ctx.globalAlpha = 1;
                     ctx.fillText(players[Order[i]].name, startColumnX + columnWidth/2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerPointsNoSort[Order[i]], startColumnX + columnWidth/2 + columnWidth, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
                     ctx.fillText(playerAccuracy[Order[i]] + "%", startColumnX + columnWidth/2 + columnWidth*2, HEIGHT/4 + HEIGHT/20 + HEIGHT/10*(i+1));
