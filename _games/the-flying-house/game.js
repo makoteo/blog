@@ -761,7 +761,7 @@ function Balloon(x, y, tiltedX){
         }
     };
     this.update = function(){
-        if(tempTicks % 10 === 0){
+        if(tempTicks % (updateSpeed*10) === 0){
             this.yFloat += Math.round(Math.random()*3 - 1.5);
 
             if(this.yFloat > tileSize*6.5){
@@ -1332,6 +1332,14 @@ function Slider(x, y, width, type){
                 toneSound1.changeVolume();
                 toneSound2.changeVolume();
                 toneSound3.changeVolume();
+            }
+
+            if(this.type === 1 && maxRainParticles !== Math.round(this.slideX/this.width*75)+25){
+                maxRainParticles = Math.round(this.slideX/this.width*75)+25;
+            }
+
+            if(this.type === 2 && updateSpeed !== Math.round((this.width - this.slideX)/this.width*10 + 1)){
+                updateSpeed = Math.round((this.width - this.slideX)/this.width*4)
             }
 
         }
