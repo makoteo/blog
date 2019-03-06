@@ -1338,8 +1338,11 @@ function Slider(x, y, width, type){
                 maxRainParticles = Math.round(this.slideX/this.width*75)+25;
             }
 
-            if(this.type === 2 && updateSpeed !== Math.round((this.width - this.slideX)/this.width*10 + 1)){
-                updateSpeed = Math.round((this.width - this.slideX)/this.width*4)
+            if(this.type === 2 && updateSpeed !== Math.round(((this.x + this.width - this.slideX)/this.width)*10 + 1)){
+                updateSpeed = Math.round((this.width - this.slideX)/this.width*4);
+                if(updateSpeed <= 0){
+                    updateSpeed = 1;
+                }
             }
 
         }
