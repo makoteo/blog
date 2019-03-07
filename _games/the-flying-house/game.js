@@ -232,6 +232,7 @@ var buttons = [];
 var lightningBoltFlashOpacity = 0;
 
 var powerUpSpawned = false;
+var powerUpsSpawn = true;
 
 var fallApartTime = 1800; //1800
 var fallApartTimer = 0;
@@ -1287,7 +1288,14 @@ function Slider(x, y, width, type, text){
     this.value = 1;
 
     if(this.type === 10){
-        this.slideX = 0;
+        this.slideX = this.width/15*GlobalLives;
+        this.value = GlobalLives;
+    }else if(this.type === 11){
+        this.slideX = this.width/105*(fallApartTime/60-15);
+        this.value = fallApartTime/60;
+    }else if(this.type === 12){
+        this.slideX = this.width/15*RoundAmount;
+        this.value = RoundAmount;
     }else{
         this.slideX = this.width;
     }
@@ -1371,6 +1379,12 @@ function Slider(x, y, width, type, text){
             if(this.type === 10 && this.value !== Math.round((this.slideX/this.width*14)+1)){
                 this.value = Math.round((this.slideX/this.width*14)+1);
                 GlobalLives = this.value;
+            }else if(this.type === 11 && this.value !== Math.round((this.slideX/this.width*105)+15)){
+                this.value = Math.round((this.slideX/this.width*105)+15);
+                fallApartTime = this.value*60;
+            }else if(this.type === 12 && this.value !== Math.round((this.slideX/this.width*14)+1)){
+                this.value = Math.round((this.slideX/this.width*14)+1);
+                RoundAmount = this.value;
             }
 
         }
@@ -1385,7 +1399,7 @@ function Slider(x, y, width, type, text){
         ctx.fillRect(this.x - this.width/2 + this.slideX, this.y - HEIGHT/60, WIDTH/200, HEIGHT/25);
 
         ctx.textAlign = 'center';
-        if(this.type === 10){
+        if(this.type === 10 || this.type === 11 || this.type === 12){
             ctx.fillText(this.text + " (" + this.value + ")", this.x, this.y + WIDTH/40);
         }else{
             ctx.fillText(this.text, this.x, this.y + WIDTH/40);
@@ -2101,13 +2115,17 @@ function checkGameState(){
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Tap on the green icon with a plus to add a player.", WIDTH - WIDTH/20, HEIGHT/30));
         buttons.push(new Button("Tap the AI icon on to make the player an AI.", WIDTH - WIDTH/20, HEIGHT/30 + HEIGHT/30));
-        buttons.push(new Button("1 Round", WIDTH/20, HEIGHT/2 - HEIGHT/10, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("3 Rounds", WIDTH/20, HEIGHT/2, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("5 Rounds", WIDTH/20, HEIGHT/2 + HEIGHT/10, WIDTH/5, HEIGHT/20));
+        if(customGame === false) {
+            buttons.push(new Button("1 Round", WIDTH / 20, HEIGHT / 2 - HEIGHT / 10, WIDTH / 5, HEIGHT / 20));
+            buttons.push(new Button("3 Rounds", WIDTH / 20, HEIGHT / 2, WIDTH / 5, HEIGHT / 20));
+            buttons.push(new Button("5 Rounds", WIDTH / 20, HEIGHT / 2 + HEIGHT / 10, WIDTH / 5, HEIGHT / 20));
+        }
         buttons.push(new Button("Menu", WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
 
         if(customGame === true){
             buttons.push(new Slider(WIDTH-WIDTH/8, HEIGHT/10*3, WIDTH/5, 10, "Lives"));
+            buttons.push(new Slider(WIDTH-WIDTH/8, HEIGHT/10*4, WIDTH/5, 11, "Floor Fall Off Time"));
+            buttons.push(new Slider(WIDTH-WIDTH/8, HEIGHT/10*5, WIDTH/5, 12, "Rounds"));
         }
     }else if(GAMESTATE === "GAME OVER"){
         playerStatBoxes = [];
