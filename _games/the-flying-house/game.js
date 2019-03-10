@@ -1035,20 +1035,15 @@ function Player(id, ai, team){
 
         //console.log(this.actualYVel);
 
+        if(Math.abs(this.actualYVel) < moveSpeed/1000){
+            this.actualYVel = 0
+        }
+
         if(this.actualXVel >= moveSpeed){
             this.facing = 1;
         }else if(this.actualXVel <= -moveSpeed){
             this.facing = -1;
         }
-
-        if(GAMESTATE === "GAME" && gameTicks > countDownEndTime){
-            if(this.actualXVel !== 0 && this.actualYVel === 0){
-                walkSounds[this.id].play();
-            }else{
-                //walkSounds[this.id].stop();
-            }
-        }
-
 
         if(this.knockBackXVel > 2){
             this.knockBackXVel-=0.75;
@@ -1068,6 +1063,18 @@ function Player(id, ai, team){
         if(this.visible === false){
             if(this.actualXVel !== 0 || this.actualYVel !== 0){
                 this.visible = true;
+            }
+        }
+
+        if(this.id === 0){
+            console.log(this.actualYVel + " + " + this.actualYVel);
+        }
+
+        if(GAMESTATE === "GAME" && gameTicks > countDownEndTime){
+            if(this.actualXVel !== 0 && this.actualYVel === 0){
+                walkSounds[this.id].play();
+            }else{
+                //walkSounds[this.id].stop();
             }
         }
 
