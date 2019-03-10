@@ -596,8 +596,8 @@ function Tile(x, y, width, height, type){
     }
 
     this.update = function(){
-        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
-        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+        this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
 
         if(this.type === 77 && this.powerUpActive === false && powerUpSpawned === false){
             if(this.spawnTimer < this.spawnPeriod && GAMESTATE === "GAME"){
@@ -2120,7 +2120,7 @@ function checkGameState(){
     if(GAMESTATE === "MENU"){
         playerInfos = [];
         Setup(false, true);
-        cameraZoom = 0.5;
+        cameraZoom = 0.35;
         buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*5, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
@@ -2259,7 +2259,6 @@ function Setup(game, newHouse){
 
     if(newHouse === true){
         var mapRandom = Math.random();
-        mapRandom = 0.5;
         if(mapRandom < 0.3){
             map = Lvl2Fg.slice();
             backgroundMap = Lvl2Bg.slice();
