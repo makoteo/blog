@@ -11,8 +11,8 @@
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var WIDTH = 1200;
-var HEIGHT = 675;
+var WIDTH = 1152;
+var HEIGHT = 648;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -125,6 +125,47 @@ var Lvl2Bg = [
     [88, 25, 25, 25, 25, 25, 25, 25, 25, 25, 88]
 ];
 
+var Lvl3Fg = [
+    [88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 11, 88, 88, 88, 88],
+    [88, 43, 43, 43, 11, 43, 43, 43, 88],
+    [88, 43, 88, 88, 11, 88, 88, 43, 88],
+    [88, 88, 88, 88, 11, 88, 88, 88, 88],
+    [88, 88, 66, 66, 11, 66, 66, 88, 88],
+    [88, 43, 43, 43, 11, 43, 43, 43, 88],
+    [88, 43, 88, 88, 11, 88, 88, 43, 88],
+    [88, 88, 88, 88, 11, 88, 88, 88, 88],
+    [88, 88, 88, 88, 11, 88, 88, 41, 88],
+    [88, 43, 43, 43, 11, 43, 43, 43, 88],
+    [88, 43, 88, 88, 11, 88, 88, 43, 88],
+    [88, 88, 88, 88, 11, 88, 88, 88, 88],
+    [88, 77, 39, 40, 11, 88, 88, 88, 88],
+    [88, 43, 43, 43, 43, 43, 43, 43, 88]
+];
+
+var Lvl3Bg = [
+    [88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 88, 88, 88, 88, 88, 88, 88, 88],
+    [88, 44, 88, 44, 88, 44, 88, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [99, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [99, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88],
+    [88, 44, 44, 44, 44, 44, 44, 44, 88]
+];
+
+
 var playerInfos = [];
 
 var map = Lvl2Fg.slice();
@@ -224,6 +265,8 @@ var tileMap = new Image();
 tileMap.src = "Flying-House.png";
 
 var tileSize;
+
+var mapId = 2;
 
 var tiles = [];
 var players = [];
@@ -553,8 +596,8 @@ function Tile(x, y, width, height, type){
     }
 
     this.update = function(){
-        this.cameraX = ((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
-        this.cameraY = ((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
+        this.cameraX = Math.round((this.x - this.screenHalfWidth) * cameraZoom + this.screenHalfWidth);
+        this.cameraY = Math.round((this.y - this.screenHalfHeight) * cameraZoom + this.screenHalfHeight);
 
         if(this.type === 77 && this.powerUpActive === false && powerUpSpawned === false){
             if(this.spawnTimer < this.spawnPeriod && GAMESTATE === "GAME"){
@@ -934,7 +977,7 @@ function Player(id, ai, team){
             }
 
 
-            if(this.tilePosYBottom < map.length - 1 && this.tilePosYTop >= 0){
+            if(this.tilePosYBottom < map.length - 1 && this.tilePosYTop > 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom + 1][this.tilePosXLeft] === collidableBlocks[i] || map[this.tilePosYBottom + 1][this.tilePosXRight] === collidableBlocks[i]) {
                         if (this.y + this.height / 2 + this.actualYVel >= (this.tilePosYBottom + 1) * tileSize + yOffset) {
@@ -1490,7 +1533,6 @@ function Button(text, x, y, width, height){
                         buttons = [];
                         if(playedRounds === RoundAmount){
                             stateToTransitionTo = "GAME OVER";
-                            gamePlayed = true;
                         }else{
                             Setup(true, true);
                         }
@@ -2161,6 +2203,7 @@ function checkGameState(){
         }
     }else if(GAMESTATE === "GAME OVER"){
         playerStatBoxes = [];
+        gamePlayed = true;
     }
 }
 
@@ -2216,13 +2259,19 @@ function Setup(game, newHouse){
 
     if(newHouse === true){
         var mapRandom = Math.random();
-
-        if(mapRandom < 0.5){
+        mapRandom = 0.5;
+        if(mapRandom < 0.3){
             map = Lvl2Fg.slice();
             backgroundMap = Lvl2Bg.slice();
+            mapId = 2;
+        }else if(mapRandom < 0.6){
+            mapId = 3;
+            map = Lvl3Fg.slice();
+            backgroundMap = Lvl3Bg.slice();
         }else{
             map = Lvl1Fg.slice();
             backgroundMap = Lvl1Bg.slice();
+            mapId = 1;
         }
 
         for(var i = 0; i < backgroundMap.length; i++){
@@ -2289,9 +2338,14 @@ function Setup(game, newHouse){
     }
 
 
-    balloons.push(new Balloon(WIDTH/2, yOffset, 0));
-    balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
-    balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
+    if(mapId !== 3){
+        balloons.push(new Balloon(WIDTH/2, yOffset, 0));
+        balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*6, 0));
+        balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*6, 0));
+    }else{
+        balloons.push(new Balloon(xOffset + tileSize, yOffset + tileSize*2, 0));
+        balloons.push(new Balloon(WIDTH - xOffset - tileSize, yOffset + tileSize*2, 0));
+    }
 }
 
 Setup(false, true);
@@ -2649,7 +2703,7 @@ function game(){
                             fallingTiles[i].lightLevel = fallingTiles[i - 1].lightLevel + lightingPercision;
                         }
                     }
-                    if (i < fallingTiles.length) {
+                    if (i < fallingTiles.length - 1) {
                         if (fallingTiles[i + 1].lightLevel < fallingTiles[i].lightLevel) {
                             fallingTiles[i].lightLevel = fallingTiles[i + 1].lightLevel + lightingPercision;
                         }
@@ -2686,13 +2740,13 @@ function game(){
                         tiles[i].update();
                     }
                     tiles[i].draw();
-                    if (gameTicks < lightDetailLevel) {
+                    if (tempTicks < lightDetailLevel && tempTicks > 1) {
                         if (i > 0) {
                             if (tiles[i - 1].lightLevel < tiles[i].lightLevel) {
                                 tiles[i].lightLevel = tiles[i - 1].lightLevel + lightingPercision;
                             }
                         }
-                        if (i < tiles.length) {
+                        if (i < tiles.length - 1) {
                             if (tiles[i + 1].lightLevel < tiles[i].lightLevel) {
                                 tiles[i].lightLevel = tiles[i + 1].lightLevel + lightingPercision;
                             }
