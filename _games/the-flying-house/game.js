@@ -1,6 +1,13 @@
+//-----------------------------------------------------------------------------------------------------
+
 //
-// Copyright (c) Martin Feranec 2019
+// Copyright (c) Martin Feranec 2019 - All Rights Reserved
 //
+
+//-----------------------------------------------------------------------------------------------------
+
+
+//TODO - Add link to webpage once there is one: something like this: location.href = 'http://www.google.com';
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -563,7 +570,7 @@ function Tile(x, y, width, height, type){
                 if(mousePosX > this.cameraX + cameraGlobalX + tileSize/6 && mousePosX < this.cameraX + this.width + cameraGlobalX - tileSize/6){
                     if(clickTimer === 0){
                         this.aiPicked = !this.aiPicked;
-                        console.log(this.spawnPointId);
+                        //console.log(this.spawnPointId);
                         playerInfos[this.spawnPointId - 2][1] = this.aiPicked;
                         clickSound.play();
                         //clickTimer = 1;
@@ -1160,7 +1167,7 @@ function Player(id, ai, team){
 
     this.die = function(){
         this.lives--;
-        console.log(this.name + " " + this.tempCauseOfDeath);
+        //console.log(this.name + " " + this.tempCauseOfDeath);
         for(var i = 0; i < players.length; i++){
             if(i !== this.id){
                 if((this.tempCauseOfDeath === ("Was Knocked Off By " + players[i].name)) || (this.tempCauseOfDeath === ("Was Sniped Off By " + players[i].name))){
@@ -1495,6 +1502,7 @@ function Button(text, x, y, width, height){
 
                     if(this.text === "Menu"){
                         stateToTransitionTo = "MENU";
+                        PAUSED = false;
                     }else if(this.text === "Play Again"){
                         stateToTransitionTo = "GAME SETUP";
                     }
@@ -3142,6 +3150,7 @@ function game(){
                 buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*3, leftPanelOptionsWidth*0.8, 0, "Sound Volume"));
                 buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*5, leftPanelOptionsWidth*0.8, 1, "Particles"));
                 buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*7, leftPanelOptionsWidth*0.8, 2, "Update Speed"));
+                buttons.push(new Button("Menu", WIDTH/2 - WIDTH/10, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
             }else{
                 var i = buttons.length;
                 while(i--){
