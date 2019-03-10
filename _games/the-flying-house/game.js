@@ -16,6 +16,8 @@ var transitionOpacity = 0;
 
 var pauseOpacity = 0;
 
+var gamePlayed = false;
+
 var Lvl1Fg = [
     [88, 88, 88, 88, 88, 88, 12, 14, 14, 14, 13, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 12, 14, 14, 14, 14, 14, 13, 88, 88, 88, 88, 88],
@@ -1118,6 +1120,7 @@ function Player(id, ai, team){
         ctx.textAlign = 'left';
         ctx.globalAlpha = 1;*/
 
+        ctx.globalAlpha = 1;
         this.xVel = 0;
         this.yVel = 0;
     };
@@ -1300,6 +1303,14 @@ function Slider(x, y, width, type, text){
         this.slideX = this.width;
     }
 
+    if(this.type === 0){
+        this.slideX = this.width*globalVolume;
+    }else if(this.type === 1){
+        this.slideX = Math.round((maxRainParticles - 25)*this.width/75);
+    }else if(this.type === 2){
+        this.slideX = this.width - (updateSpeed - 1)*this.width/4;
+    }
+
 
     if(this.type === 0 || this.type === 1 || this.type === 2){
         this.dependancy = this.x - leftPanelOptionsX;
@@ -1392,13 +1403,14 @@ function Slider(x, y, width, type, text){
     }
     this.draw = function(){
         ctx.globalAlpha = 1;
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = 'rgb(63, 63, 63)';
         ctx.fillRect(this.x - this.width/2, this.y, this.width, HEIGHT/100);
 
         ctx.fillStyle = 'white';
         ctx.fillRect(this.x - this.width/2 + this.slideX, this.y - HEIGHT/60, WIDTH/200, HEIGHT/25);
 
         ctx.textAlign = 'center';
+        ctx.font = '20px Arial';
         if(this.type === 10 || this.type === 11 || this.type === 12){
             ctx.fillText(this.text + " (" + this.value + ")", this.x, this.y + WIDTH/40);
         }else{
@@ -1419,6 +1431,12 @@ function Button(text, x, y, width, height){
     this.growthX = 0;
 
     this.radius = HEIGHT/120;
+
+    this.type = 0;
+
+    if(this.text === "Skip (No points are added)"){
+        this.type = 99;
+    }
 
     this.update = function(){
         if(mousePosY > this.y && mousePosY < this.y + this.height){
@@ -1459,11 +1477,11 @@ function Button(text, x, y, width, height){
                     }
 
                     if(this.text === "Skip (No points are added)"){
-                        console.log("Here");
                         playedRounds++;
                         buttons = [];
                         if(playedRounds === RoundAmount){
                             stateToTransitionTo = "GAME OVER";
+                            gamePlayed = true;
                         }else{
                             Setup(true, true);
                         }
@@ -2111,7 +2129,11 @@ function checkGameState(){
 
     }else if(GAMESTATE === "GAME SETUP"){
         playerStatBoxes = [];
-        Setup(true, false);
+        if(gamePlayed === false){
+            Setup(true, false);
+        }else{
+            Setup(true, true);
+        }
         buttons.push(new Button("Begin", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Tap on the green icon with a plus to add a player.", WIDTH - WIDTH/20, HEIGHT/30));
         buttons.push(new Button("Tap the AI icon on to make the player an AI.", WIDTH - WIDTH/20, HEIGHT/30 + HEIGHT/30));
@@ -3116,6 +3138,18 @@ function game(){
     if ((keys && keys[32]) && GAMESTATE === "GAME") {
         if(pauseTimer === 0){
             PAUSED = !PAUSED;
+            if(PAUSED === true){
+                buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*3, leftPanelOptionsWidth*0.8, 0, "Sound Volume"));
+                buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*5, leftPanelOptionsWidth*0.8, 1, "Particles"));
+                buttons.push(new Slider(WIDTH/2, leftPanelOptionsY + leftPanelOptionsHeight/10*7, leftPanelOptionsWidth*0.8, 2, "Update Speed"));
+            }else{
+                var i = buttons.length;
+                while(i--){
+                    if (buttons[i].type !== 99) {
+                        buttons.splice(i, 1);
+                    }
+                }
+            }
         }
         pauseTimer = 10;
     }
