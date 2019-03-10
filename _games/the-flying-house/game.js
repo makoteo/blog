@@ -189,6 +189,11 @@ var updateTimesPerTick = 1;
 
 var playedRounds = 0;
 
+var FULLSCREEN = false;
+var fullScreenTimer = 0;
+var popUpTimer = 0;
+var popUpOpacity = 0;
+
 var leftPanelOptionsWidth = WIDTH/4;
 var leftPanelOptionsHeight = HEIGHT/2;
 var leftPanelOptionsY = (HEIGHT - leftPanelOptionsHeight)/2;
@@ -3431,6 +3436,81 @@ function game(){
         ctx.fillText("Martin Feranec", leftPanelCreditsX + leftPanelCreditsWidth/2, leftPanelCreditsY + leftPanelCreditsHeight/10*4);
     }
 
+    if (fullScreenTimer > 0) {
+        fullScreenTimer--;
+    }
+
+    if (popUpTimer > 0) {
+        popUpTimer--;
+        popUpOpacity = 1
+    }
+    if (popUpOpacity > 0.01) {
+        popUpOpacity -= 0.01;
+        ctx.globalAlpha = popUpOpacity;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        ctx.fillRect(0, HEIGHT / 2 - HEIGHT / 16, WIDTH, HEIGHT / 8);
+        ctx.textAlign = 'center';
+        ctx.font = '25pt Courier New';
+        ctx.fillStyle = 'white';
+        ctx.fillText("Press F11 to exit full screen mode.", WIDTH / 2, HEIGHT / 2);
+        ctx.globalAlpha = 1;
+    }
+
+    if(GAMESTATE === "MENU") {
+        var tempCanvas = document.getElementById("myCanvas");
+
+        var height = document.documentElement.clientHeight;
+
+        if (height === screen.height && FULLSCREEN === false) {
+            popUpTimer = 100;
+            unloadScrollBars();
+            tempCanvas.width = document.body.clientWidth;
+            tempCanvas.height = tempCanvas.width * 0.5625;
+            WIDTH = tempCanvas.width;
+            HEIGHT = tempCanvas.height;
+            document.getElementById("canvasHolder").style.position = "absolute";
+            document.getElementById("canvasHolder").style.left = '0px';
+            document.getElementById("canvasHolder").style.top = '0px';
+            document.getElementById("canvasHolder").style.border = '0px solid lightgray';
+            if (document.getElementById("foo-pop") !== null) {
+                document.getElementById("foo-pop").setAttribute('hidden', true);
+                document.getElementById("foo-boring").setAttribute('hidden', true);
+            }
+            FULLSCREEN = true;
+            stateToTransitionTo = GAMESTATE;
+            tileSize = Math.round((HEIGHT - HEIGHT / 10) / map.length);
+
+            xOffset = Math.round(WIDTH / 2 - (tileSize * map[0].length) / 2);
+            yOffset = Math.round(HEIGHT / 2 - (tileSize * map.length) / 2);
+
+            moveSpeed = tileSize / 12;
+            bulletSpeed = tileSize / 6;
+        }
+
+        if (height !== screen.height && FULLSCREEN === true) {
+            reloadScrollBars();
+            tempCanvas.width = 1200;
+            tempCanvas.height = 675;
+            WIDTH = tempCanvas.width;
+            HEIGHT = tempCanvas.height;
+            document.getElementById("canvasHolder").style.position = "relative";
+            document.getElementById("canvasHolder").style.border = '3px solid lightgray';
+            if (document.getElementById("foo-pop") !== null) {
+                document.getElementById("foo-pop").removeAttribute('hidden');
+                document.getElementById("foo-boring").removeAttribute('hidden');
+            }
+            FULLSCREEN = false;
+            stateToTransitionTo = GAMESTATE;
+            tileSize = Math.round((HEIGHT - HEIGHT / 10) / map.length);
+
+            xOffset = Math.round(WIDTH / 2 - (tileSize * map[0].length) / 2);
+            yOffset = Math.round(HEIGHT / 2 - (tileSize * map.length) / 2);
+
+            moveSpeed = tileSize / 12;
+            bulletSpeed = tileSize / 6;
+        }
+    }
+
 }
 
 function repeatOften() {
@@ -3476,3 +3556,13 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type === "keydown");
 }, false);
+
+function reloadScrollBars() {
+    document.documentElement.style.overflow = 'auto';  // firefox, chrome
+    document.body.scroll = "yes"; // ie only
+}
+
+function unloadScrollBars() {
+    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+    document.body.scroll = "no"; // ie only
+}
