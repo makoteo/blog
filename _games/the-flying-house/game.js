@@ -909,6 +909,7 @@ function Player(id, ai, team){
                         if (this.actualYVel < 0) {
                             if (this.y - this.height / 2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset) {
                                 this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height / 2);
+                                console.log(1);
                                 break;
                             } else {
 
@@ -950,7 +951,6 @@ function Player(id, ai, team){
                                         this.actualYVel = this.yVel;
                                         //this.falling = true;
                                     }
-
                                 }
                             } else {
                                 //this.actualYVel += this.gravity;
@@ -1020,10 +1020,11 @@ function Player(id, ai, team){
                     }
                 }
             }
-            if(this.tilePosYBottom < map.length && this.tilePosYTop >= 0){
+            if(this.tilePosYTop < map.length && this.tilePosYTop >= 0){
                 for(var i = 0; i < collidableBlocks.length; i++) {
-                    if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
-                        this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
+                    if (map[this.tilePosYTop][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXLeft] === collidableBlocks[i]) {
+                        this.y = this.tilePosYTop*tileSize + tileSize + yOffset + this.height/2;
+                        console.log(5);
                     } else {
 
                     }
@@ -1032,8 +1033,6 @@ function Player(id, ai, team){
         }else{
             this.actualYVel += this.gravity;
         }
-
-        //console.log(this.actualYVel);
 
         if(Math.abs(this.actualYVel) < moveSpeed/1000){
             this.actualYVel = 0
@@ -1064,10 +1063,6 @@ function Player(id, ai, team){
             if(this.actualXVel !== 0 || this.actualYVel !== 0){
                 this.visible = true;
             }
-        }
-
-        if(this.id === 0){
-            console.log(this.actualYVel + " + " + this.actualYVel);
         }
 
         if(GAMESTATE === "GAME" && gameTicks > countDownEndTime){
