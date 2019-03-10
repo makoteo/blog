@@ -1078,6 +1078,17 @@ function Player(id, ai, team){
                     }
                 }
             }
+
+            if(this.tilePosYBottom < map.length && this.tilePosYBottom > 0){
+                for(var i = 0; i < collidableBlocks.length; i++) {
+                    if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
+                        this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
+                        console.log(5);
+                    } else {
+
+                    }
+                }
+            }
         }else{
             this.actualYVel += this.gravity;
         }
@@ -2212,6 +2223,18 @@ function checkGameState(){
     }
 }
 
+var grd;
+var stormgrd;
+
+grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
+grd.addColorStop(0, "rgb(86, 136, 216)");
+grd.addColorStop(1, "rgb(100, 183, 249)");
+
+stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, HEIGHT/2, WIDTH/2);
+
+stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
+stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
 function Setup(game, newHouse){
 
     gameTicks = 0;
@@ -2260,7 +2283,6 @@ function Setup(game, newHouse){
     rainCurrent = 0;
 
     powerUpSpawned = false;
-
 
     if(newHouse === true){
         var mapRandom = Math.random();
@@ -2354,15 +2376,6 @@ function Setup(game, newHouse){
 
 Setup(false, true);
 checkGameState();
-
-var grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
-grd.addColorStop(0, "rgb(86, 136, 216)");
-grd.addColorStop(1, "rgb(100, 183, 249)");
-
-var stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, HEIGHT/2, WIDTH/2);
-
-stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
-stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
 
 var countDownStartTime = 50;
 var countDownEndTime = 250;
@@ -2504,7 +2517,7 @@ function game(){
 
 // Fill with gradient
             ctx.fillStyle = grd;
-            ctx.globalAlpha = 1 - rainOpacity / 2;
+            ctx.globalAlpha = 1;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = 'white';
             ctx.globalAlpha = 1;
@@ -3466,8 +3479,6 @@ function game(){
             unloadScrollBars();
             tempCanvas.width = document.body.clientWidth;
             tempCanvas.height = tempCanvas.width * 0.5625;
-            WIDTH = tempCanvas.width;
-            HEIGHT = tempCanvas.height;
             document.getElementById("canvasHolder").style.position = "absolute";
             document.getElementById("canvasHolder").style.left = '0px';
             document.getElementById("canvasHolder").style.top = '0px';
@@ -3485,14 +3496,24 @@ function game(){
 
             moveSpeed = tileSize / 12;
             bulletSpeed = tileSize / 6;
+
+            WIDTH = tempCanvas.width;
+            HEIGHT = tempCanvas.height;
+
+            grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
+            grd.addColorStop(0, "rgb(86, 136, 216)");
+            grd.addColorStop(1, "rgb(100, 183, 249)");
+
+            stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, HEIGHT/2, WIDTH/2);
+
+            stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
+            stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
         }
 
         if (height !== screen.height && FULLSCREEN === true) {
             reloadScrollBars();
-            tempCanvas.width = 1200;
-            tempCanvas.height = 675;
-            WIDTH = tempCanvas.width;
-            HEIGHT = tempCanvas.height;
+            tempCanvas.width = 1152;
+            tempCanvas.height = 648;
             document.getElementById("canvasHolder").style.position = "relative";
             document.getElementById("canvasHolder").style.border = '3px solid lightgray';
             if (document.getElementById("foo-pop") !== null) {
@@ -3508,6 +3529,18 @@ function game(){
 
             moveSpeed = tileSize / 12;
             bulletSpeed = tileSize / 6;
+
+            WIDTH = tempCanvas.width;
+            HEIGHT = tempCanvas.height;
+
+            grd = ctx.createLinearGradient(0, 0, 0, HEIGHT/1.2);
+            grd.addColorStop(0, "rgb(86, 136, 216)");
+            grd.addColorStop(1, "rgb(100, 183, 249)");
+
+            stormgrd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, HEIGHT/120, WIDTH/2, HEIGHT/2, WIDTH/2);
+
+            stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
+            stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
         }
     }
 
