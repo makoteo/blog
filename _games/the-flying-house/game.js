@@ -3508,6 +3508,22 @@ function game(){
 
             stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
             stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
+            leftPanelOptionsWidth = WIDTH/4;
+            leftPanelOptionsHeight = HEIGHT/2;
+            leftPanelOptionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelOptionsX = -leftPanelOptionsWidth;
+            optionsOpen = false;
+
+            leftPanelCreditsWidth = WIDTH/4;
+            leftPanelCreditsHeight = HEIGHT/2;
+            leftPanelCreditsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelCreditsX = -leftPanelOptionsWidth;
+            creditsOpen = false;
+
+            columnWidth = WIDTH/8
+            startColumnX = (WIDTH - WIDTH/8*columns)/2;
+            columnXs = [];
         }
 
         if (height !== screen.height && FULLSCREEN === true) {
@@ -3541,6 +3557,22 @@ function game(){
 
             stormgrd.addColorStop(0, "rgba(5, 5, 5, 0.4)");
             stormgrd.addColorStop(1, "rgba(33, 32, 33, 1)");
+
+            leftPanelOptionsWidth = WIDTH/4;
+            leftPanelOptionsHeight = HEIGHT/2;
+            leftPanelOptionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelOptionsX = -leftPanelOptionsWidth;
+            optionsOpen = false;
+
+            leftPanelCreditsWidth = WIDTH/4;
+            leftPanelCreditsHeight = HEIGHT/2;
+            leftPanelCreditsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelCreditsX = -leftPanelOptionsWidth;
+            creditsOpen = false;
+
+            columnWidth = WIDTH/8
+            startColumnX = (WIDTH - WIDTH/8*columns)/2;
+            columnXs = [];
         }
     }
 
