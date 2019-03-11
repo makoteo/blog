@@ -2425,7 +2425,7 @@ var displayedTexts = 0;
 var displayedTextTimer = 0;
 
 var columns = 4;
-var columnWidth = WIDTH/8
+var columnWidth = WIDTH/8;
 var startColumnX = (WIDTH - WIDTH/8*columns)/2;
 var columnXs = [];
 
@@ -3521,7 +3521,7 @@ function game(){
             leftPanelCreditsX = -leftPanelOptionsWidth;
             creditsOpen = false;
 
-            columnWidth = WIDTH/8
+            columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;
             columnXs = [];
         }
@@ -3570,7 +3570,7 @@ function game(){
             leftPanelCreditsX = -leftPanelOptionsWidth;
             creditsOpen = false;
 
-            columnWidth = WIDTH/8
+            columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;
             columnXs = [];
         }
