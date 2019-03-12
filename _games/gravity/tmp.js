@@ -39,6 +39,11 @@ function Object(x, y, mass, density, type){
     this.inactive = false;
 
     this.passedThrough = false;
+    this.affectedByGravity = true;
+
+    if(this.type === 1){
+        this.affectedByGravity = false;
+    }
 
     this.draw = function(){
         ctx.fillStyle = 'blue';
@@ -48,7 +53,7 @@ function Object(x, y, mass, density, type){
 
     };
     this.update = function(){
-        if(this.inactive === false) {
+        if(this.inactive === false && this.affectedByGravity === true) {
             for (var j = 0; j < objects.length; j++) {
                 if (objects[j] !== this) {
                     this.tempX = objects[j].x;
@@ -66,9 +71,17 @@ function Object(x, y, mass, density, type){
                         if(this.distance < 1){
                             this.distance = 1;
                         }
-                        this.velX = this.velX + (objects[j].velX)*(objects[j].mass/this.mass);
-                        console.log(this.velX + " + " + objects[j].velX);
-                        this.velY += (objects[j].velY)*(objects[j].mass/this.mass);
+                        if(objects[j].affectedByGravity === true) {
+                            this.velX = this.velX + (objects[j].velX) * (objects[j].mass / this.mass);
+                            this.velY += (objects[j].velY) * (objects[j].mass / this.mass);
+                            this.x = objects[j].x;
+                            this.y = objects[j].y;
+                        }else{
+                            this.velX = 0;
+                            this.velY = 0;
+                            this.x = objects[j].x;
+                            this.y = objects[j].y;
+                        }
                         this.mass += objects[j].mass;
                         this.radius = Math.sqrt(this.mass/(this.density*3.14));
                         objects[j].inactive = true;
@@ -80,9 +93,17 @@ function Object(x, y, mass, density, type){
                         if(this.distance < 1){
                             this.distance = 1;
                         }
-                        this.velX = this.velX + (objects[j].velX)*(objects[j].mass/this.mass);
-                        console.log(this.velX + " + " + objects[j].velX);
-                        this.velY += (objects[j].velY)*(objects[j].mass/this.mass);
+                        if(objects[j].affectedByGravity === true){
+                            this.velX = this.velX + (objects[j].velX)*(objects[j].mass/this.mass);
+                            this.velY += (objects[j].velY)*(objects[j].mass/this.mass);
+                            this.x = objects[j].x;
+                            this.y = objects[j].y;
+                        }else{
+                            this.velX = 0;
+                            this.velY = 0;
+                            this.x = objects[j].x;
+                            this.y = objects[j].y;
+                        }
                         this.mass += objects[j].mass;
                         this.radius = Math.sqrt(this.mass/(this.density*3.14));
                         objects[j].inactive = true;
@@ -104,8 +125,8 @@ function Object(x, y, mass, density, type){
     }
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 50, 1, 0));
-objects.push(new Object(WIDTH - 40, 40, 10, 1, 0));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 50, 1, 1));
+objects.push(new Object(WIDTH/3, 40, 10, 1, 0));
 
 function game(){
     //SKY FILL
