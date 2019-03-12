@@ -129,15 +129,15 @@ var Lvl3Fg = [
     [88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 88],
     [88, 88, 88, 88, 88, 88, 88, 88, 88],
-    [88, 88, 88, 88, 11, 88, 88, 88, 88],
+    [88, 88, 88, 88, 11, 88, 77, 88, 88],
     [88, 43, 43, 43, 11, 43, 43, 43, 88],
     [88, 43, 88, 88, 11, 88, 88, 43, 88],
     [88, 88, 88, 88, 11, 88, 88, 88, 88],
-    [88, 88, 66, 66, 11, 66, 66, 88, 88],
+    [88, 77, 66, 66, 11, 66, 66, 88, 88],
     [88, 43, 43, 43, 11, 43, 43, 43, 88],
     [88, 43, 88, 88, 11, 88, 88, 43, 88],
     [88, 88, 88, 88, 11, 88, 88, 88, 88],
-    [88, 88, 88, 88, 11, 88, 88, 41, 88],
+    [88, 88, 77, 88, 11, 88, 88, 41, 88],
     [88, 43, 43, 43, 11, 43, 43, 43, 88],
     [88, 43, 88, 88, 11, 88, 88, 43, 88],
     [88, 88, 88, 88, 11, 88, 88, 88, 88],
@@ -267,6 +267,7 @@ GUIDE TO TILE TYPES:
  */
 
 var tileMap = new Image();
+tileMap.onload = startGame();
 tileMap.src = "Flying-House.png";
 
 var tileSize;
@@ -342,7 +343,12 @@ var heartChance = 0.2;
 
 var pauseTimer = 0;
 
-repeatOften(); //Starts Game
+var gameRunning = false;
+
+function startGame(){
+    repeatOften(); //Starts Game
+    gameRunning = true;
+}
 
 function Tile(x, y, width, height, type){
     this.x = x;
@@ -851,6 +857,8 @@ function Player(id, ai, team){
     this.ai = ai;
     this.team = team;
 
+    this.killer = 99;
+
     if(this.id === 0){
         this.name = "Blue";
     }else if(this.id === 1){
@@ -957,7 +965,7 @@ function Player(id, ai, team){
                         if (this.actualYVel < 0) {
                             if (this.y - this.height / 2 + this.actualYVel <= (this.tilePosYTop - 1) * tileSize + tileSize + yOffset) {
                                 this.actualYVel = ((this.tilePosYTop - 1) * tileSize + tileSize + yOffset - this.y + this.height / 2);
-                                console.log(1);
+
                                 break;
                             } else {
 
@@ -1072,7 +1080,7 @@ function Player(id, ai, team){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYTop][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYTop][this.tilePosXLeft] === collidableBlocks[i]) {
                         this.y = this.tilePosYTop*tileSize + tileSize + yOffset + this.height/2;
-                        console.log(5);
+
                     } else {
 
                     }
@@ -1083,7 +1091,7 @@ function Player(id, ai, team){
                 for(var i = 0; i < collidableBlocks.length; i++) {
                     if (map[this.tilePosYBottom][this.tilePosXRight] === collidableBlocks[i] || map[this.tilePosYBottom][this.tilePosXLeft] === collidableBlocks[i]) {
                         this.y = this.tilePosYBottom*tileSize + yOffset - this.height/2;
-                        console.log(5);
+
                     } else {
 
                     }
@@ -1151,6 +1159,7 @@ function Player(id, ai, team){
 
         if(this.canJump === true && this.knockBackXVel === 0){
             this.tempCauseOfDeath = "Slipped Off";
+            this.killer = 99;
         }
 
         if((gameTicks % 400 === 0) && this.totalShots !== 0){
@@ -1228,6 +1237,12 @@ function Player(id, ai, team){
 
     this.die = function(){
         this.lives--;
+        if(this.killer !== 99){
+            console.log(playerPoints[this.killer]);
+            playerPoints[this.killer] += 100;
+            console.log(playerPoints[this.killer]);
+            this.killer = 99;
+        }
         //console.log(this.name + " " + this.tempCauseOfDeath);
         for(var i = 0; i < players.length; i++){
             if(i !== this.id){
@@ -2793,7 +2808,7 @@ function game(){
                                         players[j].weapon = "Potato Launcher";
                                         players[j].bulletCount = 3;
                                         if(GAMESTATE === "GAME"){
-                                            playerPoints[j] += 90;
+                                            playerPoints[j] += 20;
                                         }
                                     } else {
                                         if (livesCanSpawn === false) {
@@ -2801,21 +2816,21 @@ function game(){
                                             players[j].weapon = "Darts";
                                             players[j].bulletCount = 20;
                                             if(GAMESTATE === "GAME") {
-                                                playerPoints[j] += 50;
+                                                playerPoints[j] += 10;
                                             }
                                         } else {
                                             if (random > 1 - potatoLauncherChance - heartChance) {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "+1 Life!!"));
                                                 players[j].lives++;
                                                 if(GAMESTATE === "GAME") {
-                                                    playerPoints[j] += 70;
+                                                    playerPoints[j] += 10;
                                                 }
                                             } else {
                                                 effects.push(new TextBox(tiles[i].x + tiles[i].width / 2, tiles[i].y - tiles[i].height / 2, 0, "Darts!"));
                                                 players[j].weapon = "Darts";
                                                 players[j].bulletCount = 20;
                                                 if(GAMESTATE === "GAME") {
-                                                    playerPoints[j] += 50;
+                                                    playerPoints[j] += 10;
                                                 }
                                             }
 
@@ -2849,13 +2864,15 @@ function game(){
                                 players[bullets[i].shooter].hitAmount++;
                                 if (bullets[i].type === 4 || bullets[i].type === 5) {
                                     players[j].tempCauseOfDeath = "Was Sniped Off By " + players[bullets[i].shooter].name;
+                                    players[j].killer = players[bullets[i].shooter].id;
                                     if(GAMESTATE === "GAME") {
-                                        playerPoints[bullets[i].shooter] += 200;
+                                        playerPoints[bullets[i].shooter] += 5;
                                     }
                                 } else {
                                     players[j].tempCauseOfDeath = "Was Knocked Off By " + players[bullets[i].shooter].name;
+                                    players[j].killer = players[bullets[i].shooter].id;
                                     if(GAMESTATE === "GAME") {
-                                        playerPoints[bullets[i].shooter] += 100;
+                                        playerPoints[bullets[i].shooter] += 4;
                                     }
                                 }
 
@@ -3524,6 +3541,10 @@ function game(){
             columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;
             columnXs = [];
+
+            for(var i = 0; i < columns; i++){
+                columnXs.push(startColumnX + i*columnWidth);
+            }
         }
 
         if (height !== screen.height && FULLSCREEN === true) {
@@ -3573,10 +3594,21 @@ function game(){
             columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;
             columnXs = [];
+
+            for(var i = 0; i < columns; i++){
+                columnXs.push(startColumnX + i*columnWidth);
+            }
         }
     }
 
 }
+
+if(gameRunning === false){
+    ctx.textAlign = 'center';
+    ctx.fillText("Loading...", WIDTH/2, HEIGHT/2);
+    console.log("Loading...");
+}
+
 
 function repeatOften() {
     // Do whatever
