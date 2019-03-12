@@ -1559,7 +1559,7 @@ function Button(text, x, y, width, height){
                         RoundAmount = 5;
                     }
 
-                    if(this.text === "Skip (No points are added)"){
+                    if(this.text === "Skip (No points are added)" && PAUSED === false){
                         playedRounds++;
                         buttons = [];
                         if(playedRounds === RoundAmount){
