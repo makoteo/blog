@@ -12,7 +12,7 @@ var cameraZoom = 1;
 var screenHalfWidth = WIDTH/2;
 
 var massMultiplier = 10;
-var G = 100;
+var G = 10;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -38,6 +38,8 @@ function Object(x, y, mass, density, type){
 
     this.inactive = false;
 
+    this.passedThrough = false;
+
     this.draw = function(){
         ctx.fillStyle = 'blue';
         ctx.beginPath();
@@ -46,39 +48,64 @@ function Object(x, y, mass, density, type){
 
     };
     this.update = function(){
-        for(var j = 0; j < objects.length; j++){
-            if(objects[j] !== this){
-                this.tempX = objects[j].x;
-                this.tempY = objects[j].y;
+        if(this.inactive === false) {
+            for (var j = 0; j < objects.length; j++) {
+                if (objects[j] !== this) {
+                    this.tempX = objects[j].x;
+                    this.tempY = objects[j].y;
 
-                this.distance = Math.sqrt((this.x - this.tempX)*(this.x - this.tempX)+(this.y - this.tempY)*(this.y - this.tempY)); //This is the actual Distance
-                this.magnitude = (G * this.mass * objects[j].mass)/this.distance;
+                    this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
-                if(this.distance > this.radius + objects[j].radius){
-                    this.velX += (G * objects[j].mass / (this.distance*this.distance)) * (objects[j].x - this.x)/this.distance; // F = M*A A = F/M
-                    this.velY += (G * objects[j].mass / (this.distance*this.distance)) * (objects[j].y - this.y)/this.distance;
-                }else{
-                    //this.mass += objects[j].mass;
-                    //this.velX = this.velX + objects[j].velX;
-                    //this.velY = this.velY + objects[j].velY;
-                    objects[j].inactive = true;
-                    objects.splice(j);
+                    if (this.distance > this.radius + objects[j].radius) {
+                        this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
+                        this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+                        if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > this.distance){
+                            this.passedThrough = true;
+                        }
+                    } else {
+                        if(this.distance < 1){
+                            this.distance = 1;
+                        }
+                        this.velX = this.velX + (objects[j].velX)*(objects[j].mass/this.mass);
+                        console.log(this.velX + " + " + objects[j].velX);
+                        this.velY += (objects[j].velY)*(objects[j].mass/this.mass);
+                        this.mass += objects[j].mass;
+                        this.radius = Math.sqrt(this.mass/(this.density*3.14));
+                        objects[j].inactive = true;
+                        objects.splice(j, 1);
+                        break;
+                    }
+
+                    if(this.passedThrough === true){
+                        if(this.distance < 1){
+                            this.distance = 1;
+                        }
+                        this.velX = this.velX + (objects[j].velX)*(objects[j].mass/this.mass);
+                        console.log(this.velX + " + " + objects[j].velX);
+                        this.velY += (objects[j].velY)*(objects[j].mass/this.mass);
+                        this.mass += objects[j].mass;
+                        this.radius = Math.sqrt(this.mass/(this.density*3.14));
+                        objects[j].inactive = true;
+                        objects.splice(j, 1);
+                        break;
+                    }
+                    //console.log(this.distance);
+
                 }
-                //console.log(this.distance);
-
             }
         }
         //console.log(this.velX);
-
+    };
+    this.move = function(){
         this.x += this.velX;
         this.y += this.velY;
 
         this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
-    };
+    }
 }
 
-objects.push(new Object(40, HEIGHT - 40, 50, 1, 0));
-objects.push(new Object(WIDTH - 40, 40, 50, 1, 0));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 50, 1, 0));
+objects.push(new Object(WIDTH - 40, 40, 10, 1, 0));
 
 function game(){
     //SKY FILL
@@ -86,9 +113,20 @@ function game(){
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     for(var i = 0; i < objects.length; i++){
-        objects[i].draw();
-        objects[i].update();
+        if(objects[i].inactive === false){
+            objects[i].draw();
+            objects[i].update();
+
+        }
     }
+    for(var i = 0; i < objects.length; i++){
+        if(objects[i].inactive === false){
+            if(i < objects.length){
+                objects[i].move();
+            }
+        }
+    }
+
 
     if(gameRunning === true) {
 
