@@ -200,11 +200,11 @@ var leftPanelOptionsY = (HEIGHT - leftPanelOptionsHeight)/2;
 var leftPanelOptionsX = -leftPanelOptionsWidth;
 var optionsOpen = false;
 
-var leftPanelCreditsWidth = WIDTH/4;
-var leftPanelCreditsHeight = HEIGHT/2;
-var leftPanelCreditsY = (HEIGHT - leftPanelOptionsHeight)/2;
-var leftPanelCreditsX = -leftPanelOptionsWidth;
-var creditsOpen = false;
+var leftPanelInstructionsWidth = WIDTH/4;
+var leftPanelInstructionsHeight = HEIGHT/2;
+var leftPanelInstructionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+var leftPanelInstructionsX = -leftPanelOptionsWidth;
+var InstructionsOpen = false;
 
 var dragging = false;
 var draggingSlider = false;
@@ -1538,16 +1538,16 @@ function Button(text, x, y, width, height){
                     }else if(this.text === "Options"){
                         if(optionsOpen === false){
                             optionsOpen = true;
-                            creditsOpen = false;
+                            InstructionsOpen = false;
                         }else{
                             optionsOpen = false;
                         }
-                    }else if(this.text === "Credits"){
-                        if(creditsOpen === false){
-                            creditsOpen = true;
+                    }else if(this.text === "Instructions"){
+                        if(InstructionsOpen === false){
+                            InstructionsOpen = true;
                             optionsOpen = false;
                         }else{
-                            creditsOpen = false;
+                            InstructionsOpen = false;
                         }
                     }else if(this.text === "Begin" && players.length > 1){
                         stateToTransitionTo = "GAME";
@@ -2155,7 +2155,7 @@ function checkGameState(){
         buttons.push(new Button("Play", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*5, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Custom Game", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*4, WIDTH/5, HEIGHT/20));
         buttons.push(new Button("Options", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*3, WIDTH/5, HEIGHT/20));
-        buttons.push(new Button("Credits", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
+        buttons.push(new Button("Instructions", WIDTH - WIDTH/5 - WIDTH/20, HEIGHT - HEIGHT/15*2, WIDTH/5, HEIGHT/20));
 
         buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*3, leftPanelOptionsWidth*0.8, 0, ""));
         buttons.push(new Slider(leftPanelOptionsX + leftPanelOptionsWidth/2, leftPanelOptionsY + leftPanelOptionsHeight/10*5, leftPanelOptionsWidth*0.8, 1, ""));
@@ -3430,13 +3430,13 @@ function game(){
             }
         }
 
-        if(creditsOpen === true){
-            if(leftPanelCreditsX < leftPanelCreditsWidth*0.1){
-                leftPanelCreditsX+=50;
+        if(InstructionsOpen === true){
+            if(leftPanelInstructionsX < leftPanelInstructionsWidth*0.1){
+                leftPanelInstructionsX+=50;
             }
         }else{
-            if(leftPanelCreditsX > -leftPanelCreditsWidth){
-                leftPanelCreditsX-=50;
+            if(leftPanelInstructionsX > -leftPanelInstructionsWidth){
+                leftPanelInstructionsX-=50;
             }
         }
         ctx.globalAlpha = 0.2;
@@ -3455,15 +3455,21 @@ function game(){
 
         ctx.globalAlpha = 0.2;
         ctx.fillStyle = 'white';
-        ctx.fillRect(leftPanelCreditsX, leftPanelCreditsY, leftPanelCreditsWidth, leftPanelCreditsHeight);
+        ctx.fillRect(leftPanelInstructionsX, leftPanelInstructionsY, leftPanelInstructionsWidth, leftPanelInstructionsHeight);
         ctx.font = '30px Arial';
         ctx.globalAlpha = 0.8;
         ctx.textAlign = 'center';
-        ctx.fillText("Credits", leftPanelCreditsX + leftPanelCreditsWidth/2, leftPanelCreditsY + leftPanelCreditsHeight/10);
-        ctx.font = '15px Arial';
-        ctx.fillText("All Art, Code and Music made by:", leftPanelCreditsX + leftPanelCreditsWidth/2, leftPanelCreditsY + leftPanelCreditsHeight/10*3);
-        ctx.font = '20px Arial';
-        ctx.fillText("Martin Feranec", leftPanelCreditsX + leftPanelCreditsWidth/2, leftPanelCreditsY + leftPanelCreditsHeight/10*4);
+        ctx.fillText("Instructions", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10);
+        ctx.font = '14px Arial';
+        ctx.fillText("Player 1 - Arrow Keys to move, M to shoot", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10*3);
+        ctx.fillText("Player 2 - ESDF to move, Q to shoot", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10*4);
+        ctx.fillText("Player 3 - IJKL to move, Y to shoot", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10*5);
+        ctx.fillText("Player 4 - 8456 to move, - to shoot", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10*6);
+        ctx.fillText("(All on Numpad)", leftPanelInstructionsX + leftPanelInstructionsWidth/2, leftPanelInstructionsY + leftPanelInstructionsHeight/10*6.5);
+
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText("Copyright (c) Martin Feranec 2019", WIDTH/50, HEIGHT - HEIGHT/20);
     }
 
     if (fullScreenTimer > 0) {
@@ -3532,11 +3538,11 @@ function game(){
             leftPanelOptionsX = -leftPanelOptionsWidth;
             optionsOpen = false;
 
-            leftPanelCreditsWidth = WIDTH/4;
-            leftPanelCreditsHeight = HEIGHT/2;
-            leftPanelCreditsY = (HEIGHT - leftPanelOptionsHeight)/2;
-            leftPanelCreditsX = -leftPanelOptionsWidth;
-            creditsOpen = false;
+            leftPanelInstructionsWidth = WIDTH/4;
+            leftPanelInstructionsHeight = HEIGHT/2;
+            leftPanelInstructionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelInstructionsX = -leftPanelOptionsWidth;
+            InstructionsOpen = false;
 
             columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;
@@ -3585,11 +3591,11 @@ function game(){
             leftPanelOptionsX = -leftPanelOptionsWidth;
             optionsOpen = false;
 
-            leftPanelCreditsWidth = WIDTH/4;
-            leftPanelCreditsHeight = HEIGHT/2;
-            leftPanelCreditsY = (HEIGHT - leftPanelOptionsHeight)/2;
-            leftPanelCreditsX = -leftPanelOptionsWidth;
-            creditsOpen = false;
+            leftPanelInstructionsWidth = WIDTH/4;
+            leftPanelInstructionsHeight = HEIGHT/2;
+            leftPanelInstructionsY = (HEIGHT - leftPanelOptionsHeight)/2;
+            leftPanelInstructionsX = -leftPanelOptionsWidth;
+            InstructionsOpen = false;
 
             columnWidth = WIDTH/8;
             startColumnX = (WIDTH - WIDTH/8*columns)/2;

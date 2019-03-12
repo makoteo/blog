@@ -122,7 +122,7 @@ function game(){
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
 function Start(){
-    if(gameRunning == false){
+    if(gameRunning === false){
         SCORE = 0;
         frameCount = 0;
 
