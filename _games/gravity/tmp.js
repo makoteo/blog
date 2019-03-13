@@ -58,7 +58,7 @@ function Object(x, y, mass, density, type){
     this.exists = false;
     this.passedThrough = false;
     this.affectedByGravity = true;
-    this.curvePoints = [[this.cameraX, this.cameraY]];
+    this.curvePoints = [[this.x, this.y]];
     this.curveVelX = 0;
     this.curveVelY = 0;
 
@@ -85,11 +85,11 @@ function Object(x, y, mass, density, type){
                 this.curveVelX = (savedMouseX - mousePosX)*mouseForce/100;
                 this.curveVelY = (savedMouseY - mousePosY)*mouseForce/100;
 
-                this.curvePoints = [[this.cameraX, this.cameraY]];
+                this.curvePoints = [[this.x, this.y]];
 
                 for(var i = 1; i < lineLength; i++){
                     if(i === 1){
-                        this.curvePoints.push([this.cameraX + this.curveVelX, this.cameraY + this.curveVelY])
+                        this.curvePoints.push([this.x + this.curveVelX, this.y + this.curveVelY])
                     }else{
                         this.curvePoints.push([this.curvePoints[i-1][0] + this.curveVelX, this.curvePoints[i-1][1] + this.curveVelY]);
                     }
@@ -114,8 +114,8 @@ function Object(x, y, mass, density, type){
                     for(var d = 1; d < this.curvePoints.length; d++){
                         ctx.strokeStyle = 'white';
                         ctx.beginPath();
-                        ctx.moveTo(this.curvePoints[d-1][0], this.curvePoints[d-1][1]);
-                        ctx.lineTo(this.curvePoints[d][0], this.curvePoints[d][1]);
+                        ctx.moveTo(((this.curvePoints[d-1][0] - screenHalfWidth) * cameraZoom + screenHalfWidth), ((this.curvePoints[d-1][1] - screenHalfHeight) * cameraZoom + screenHalfHeight));
+                        ctx.lineTo(((this.curvePoints[d][0] - screenHalfWidth) * cameraZoom + screenHalfWidth), ((this.curvePoints[d][1] - screenHalfHeight) * cameraZoom + screenHalfHeight));
                         ctx.stroke();
                     }
                 }
@@ -130,7 +130,7 @@ function Object(x, y, mass, density, type){
 
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
-                    if (this.distance > this.radius + objects[j].radius) {
+                    if (this.distance > (this.radius + objects[j].radius)/cameraZoom) {
                         this.velX += (2*G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += (2*G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
@@ -313,6 +313,9 @@ function MouseWheelHandler(e)
         cameraZoom += delta/20;
     }else{
         cameraZoom = 0.1;
+    }
+    if(cameraZoom > 5){
+        cameraZoom = 5
     }
 }
 
