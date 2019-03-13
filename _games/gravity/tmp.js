@@ -55,7 +55,7 @@ function Object(x, y, mass, density, type){
         this.affectedByGravity = false;
     }
     if(this.type === 2){
-        this.velX = -5;
+        this.velX = -100;
     }
 
     this.draw = function(){
@@ -76,9 +76,45 @@ function Object(x, y, mass, density, type){
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
                     if (this.distance > this.radius + objects[j].radius) {
-                        this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
-                        this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+                        this.velX += (2*G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
+                        this.velY += (2*G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+                        if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > objects[j].radius*2){
+                            var segments = Math.ceil(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))/objects[j].radius*2);
+                            for(var s = 0; s < segments; s++){
+                                if(Math.sqrt((this.x + this.velX/segments*s - this.tempX) * (this.x + this.velX/segments*s - this.tempX) +
+                                        (this.y + this.velY/segments*s - this.tempY) * (this.y + this.velY/segments*s - this.tempY)) < this.radius + objects[j].radius){
+                                    this.passedThrough = true;
+                                    break;
+                                }
+                            }
+                        }
                     } else {
+                        if(this.distance < 1){
+                            this.distance = 1;
+                        }
+                        if(objects[j].affectedByGravity === true) {
+                            this.velX = (this.velX + (objects[j].velX)*(objects[j].mass/this.mass))/2;
+                            this.velY = (this.velY + (objects[j].velY)*(objects[j].mass/this.mass))/2;
+                            if(this.mass < objects[j].mass){
+                                this.x = objects[j].x;
+                                this.y = objects[j].y;
+                            }
+                        }else{
+                            this.velX = 0;
+                            this.velY = 0;
+                            if(this.mass < objects[j].mass){
+                                this.x = objects[j].x;
+                                this.y = objects[j].y;
+                            }
+                            this.affectedByGravity = false;
+                        }
+                        this.mass += objects[j].mass;
+                        this.radius = Math.sqrt(this.mass/(this.density*3.14));
+                        objects[j].inactive = true;
+                        objects.splice(j, 1);
+                    }
+
+                    if(this.passedThrough === true){
                         if(this.distance < 1){
                             this.distance = 1;
                         }
