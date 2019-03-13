@@ -29,6 +29,8 @@ var dragging = false;
 var savedMouseX = 0;
 var savedMouseY = 0;
 
+var simulationSpeed = 1;
+
 var selectedPlanetProperties = {mass:10, density:1, color:'blue'};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -87,7 +89,7 @@ function Object(x, y, mass, density, type){
 
                 this.curvePoints = [[this.x, this.y]];
 
-                for(var i = 1; i < lineLength; i++){
+                for(var i = 1; i < Math.round(lineLength/cameraZoom); i++){
                     if(i === 1){
                         this.curvePoints.push([this.x + this.curveVelX, this.y + this.curveVelY])
                     }else{
@@ -98,7 +100,7 @@ function Object(x, y, mass, density, type){
                             this.tempX = objects[j].x;
                             this.tempY = objects[j].y;
                             this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
-                            if(this.distance > this.radius + objects[j].radius){
+                            if(this.distance > (this.radius + objects[j].radius)/cameraZoom){
                                 this.curveVelX += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                 this.curveVelY += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
                             }else{
@@ -214,31 +216,33 @@ function game(){
 
     //SKY FILL
     if(PAUSED === false){
-        ctx.fillStyle = "rgb(0, 0, 0)";
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        for(var ticks = 0; ticks < simulationSpeed; ticks++){
+            ctx.fillStyle = "rgb(0, 0, 0)";
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        //Cursor
+            //Cursor
 
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.globalAlpha = 1;
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.globalAlpha = 1;
 
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].inactive === false){
-                objects[i].update();
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].inactive === false){
+                    objects[i].update();
+                }
             }
-        }
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].inactive === false){
-                objects[i].move();
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].inactive === false){
+                    objects[i].move();
+                }
             }
-        }
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].inactive === false){
-                objects[i].draw();
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].inactive === false){
+                    objects[i].draw();
+                }
             }
         }
     }
