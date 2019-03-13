@@ -239,11 +239,12 @@ function Object(x, y, mass, density, type, gravityEffect, color){
         }
         this.mass += objects[int].mass;
         this.radius = Math.sqrt(this.mass/(this.density*3.14));
-        objects[int].inactive = true;
-        objects.splice(int, 1);
         if(this.type === 0){
             this.regenerate();
         }
+        this.passedThrough = false;
+        objects[int].inactive = true;
+        objects.splice(int, 1);
     };
 
     this.move = function(){
@@ -321,7 +322,7 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
-//objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue'));
 
 function game(){
