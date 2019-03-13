@@ -17,6 +17,7 @@ var massMultiplier = 10;
 var G = 1;
 var mouseForce = 2;
 var lineLength = 30;
+var absoluteLowTemperature = -200;
 
 var PAUSED = false;
 
@@ -53,13 +54,19 @@ function Object(x, y, mass, density, type, gravityEffect, color){
     this.velX = 0;
     this.velY = 0;
 
-    this.radius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
+    this.radius = Math.sqrt(this.mass/(this.density*3.14));
 
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
+
+    if(this.type === 2){
+        this.temperature = 10000;
+    }
+
     this.gravityEffect = gravityEffect;
 
     this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
     this.cameraY = ((this.y - screenHalfWidth) * cameraZoom + screenHalfHeight);
+    this.cameraRadius = this.radius * cameraZoom;
 
     this.tempX = 0;
     this.tempY = 0;
@@ -81,7 +88,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
         if(this.inactive === false){
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            ctx.arc(this.cameraX, this.cameraY, this.radius, 0, 2 * Math.PI);
+            ctx.arc(this.cameraX, this.cameraY, this.cameraRadius, 0, 2 * Math.PI);
             ctx.fill();
         }
     };
@@ -109,7 +116,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                             this.tempX = objects[j].x;
                             this.tempY = objects[j].y;
                             this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
-                            if(this.distance > (this.radius + objects[j].radius)/cameraZoom){
+                            if(this.distance > (this.radius + objects[j].radius)){
                                 this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                 this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
                             }else{
@@ -141,9 +148,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
 
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
-                    console.log(this.distance + "/" + (this.radius + objects[j].radius)/cameraZoom);
-
-                    if ((this.distance > (this.radius + objects[j].radius)/cameraZoom && cameraZoom > 0.1) || (this.distance > (this.radius + objects[j].radius)*10 && cameraZoom <= 0.1)) {
+                    if ((this.distance > (this.radius + objects[j].radius))) {
                         this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
@@ -160,7 +165,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                             }
                         }
                         if(objects[j].type === 2){
-                            this.temperature = objects[j].radius/this.distance/cameraZoom*100;
+                            this.temperature = objects[j].temperature/this.distance*10 + absoluteLowTemperature;
                             console.log(this.temperature);
                         }
                     } else {
@@ -193,6 +198,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                 this.y = objects[int].y;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
+                this.temperature = objects[int].temperature;
             }
         }else{
             this.velX = 0;
@@ -202,6 +208,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                 this.y = objects[int].y;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
+                this.temperature = objects[int].temperature;
             }
             this.affectedByGravity = false;
         }
@@ -223,7 +230,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
 
         this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
         this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
-        this.radius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
+        this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
 
     };
 }
