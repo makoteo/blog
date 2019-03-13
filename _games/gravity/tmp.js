@@ -143,7 +143,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
 
                     console.log(this.distance + "/" + (this.radius + objects[j].radius)/cameraZoom);
 
-                    if ((this.distance > (this.radius + objects[j].radius)/cameraZoom)) {
+                    if ((this.distance > (this.radius + objects[j].radius)/cameraZoom && cameraZoom > 0.1) || (this.distance > (this.radius + objects[j].radius)*10 && cameraZoom <= 0.1)) {
                         this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
@@ -370,8 +370,8 @@ function MouseWheelHandler(e)
 
     cameraZoom += delta/20;
 
-    if(cameraZoom < 0.12){
-        cameraZoom = 0.12;
+    if(cameraZoom < 0.01){
+        cameraZoom = 0.01;
     }
     if(cameraZoom > 5){
         cameraZoom = 5
