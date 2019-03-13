@@ -98,8 +98,15 @@ function Object(x, y, mass, density, type){
                             this.tempX = objects[j].x;
                             this.tempY = objects[j].y;
                             this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
-                            this.curveVelX += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
-                            this.curveVelY += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
+                            if(this.distance > this.radius + objects[j].radius){
+                                this.curveVelX += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
+                                this.curveVelY += (2 * G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
+                            }else{
+                                this.curveVelX = 0;
+                                this.curveVelY = 0;
+                                break;
+                            }
+
                         }
                     }
                 }
