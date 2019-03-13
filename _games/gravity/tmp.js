@@ -154,7 +154,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                             }
                         }
                     } else {
-                        this.explode(this.distance, j);
+                        this.explode(this.distance, j); 
                         break;
                     }
 
