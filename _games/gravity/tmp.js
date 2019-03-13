@@ -216,8 +216,8 @@ function Object(x, y, mass, density, type, gravityEffect, color){
             distance = 1;
         }
         if(objects[int].affectedByGravity === true) {
-            this.velX = (this.velX + (objects[int].velX)*(objects[int].mass/this.mass))/2;
-            this.velY = (this.velY + (objects[int].velY)*(objects[int].mass/this.mass))/2;
+            this.velX = (this.velX/this.mass + (objects[int].velX)/objects[int].mass)/2;
+            this.velY = (this.velY/this.mass + (objects[int].velY)/objects[int].mass)/2;
             if(this.mass <= objects[int].mass){
                 this.x = objects[int].x;
                 this.y = objects[int].y;
@@ -321,7 +321,7 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
+//objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue'));
 
 function game(){
@@ -345,7 +345,8 @@ function game(){
             ctx.beginPath();
             ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.globalAlpha = 1;
+
+            ctx.globalAlpha = 0.5;
 
             for(var i = 0; i < trails.length; i++){
                 if(trails[i].lifeTime > 0){
@@ -354,6 +355,8 @@ function game(){
                     trails.splice(i, 1)
                 }
             }
+
+            ctx.globalAlpha = 1;
 
             for(var i = 0; i < objects.length; i++){
                 if(objects[i].inactive === false){
