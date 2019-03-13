@@ -216,8 +216,8 @@ function Object(x, y, mass, density, type, gravityEffect, color){
             distance = 1;
         }
         if(objects[int].affectedByGravity === true) {
-            this.velX = (this.velX/this.mass + (objects[int].velX)/objects[int].mass)/2;
-            this.velY = (this.velY/this.mass + (objects[int].velY)/objects[int].mass)/2;
+            this.velX = (this.velX/this.mass + (objects[int].velX)/objects[int].mass)/2*this.mass;
+            this.velY = (this.velY/this.mass + (objects[int].velY)/objects[int].mass)/2*this.mass;
             if(this.mass <= objects[int].mass){
                 this.x = objects[int].x;
                 this.y = objects[int].y;
