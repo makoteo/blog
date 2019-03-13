@@ -20,6 +20,7 @@ var lineLength = 30;
 var absoluteLowTemperature = -200;
 
 var PAUSED = false;
+var gameClock = 0;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -34,8 +35,9 @@ var savedMouseY = 0;
 var simulationSpeed = 1;
 
 var globalTrailLife = 500;
+var globalPlanetMass = 200;
 
-var selectedPlanetProperties = {mass:10, density:1, color:'blue', type:0};
+var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -80,19 +82,42 @@ function Object(x, y, mass, density, type, gravityEffect, color){
     this.curveVelX = 0;
     this.curveVelY = 0;
 
+    this.points = [];
+    this.pointAmount = 0;
+    this.readyPoints = [0, 1, 2, 3];
+
+
     if(this.gravityEffect === false){
         this.affectedByGravity = false;
     }
 
     this.draw = function(){
         if(this.inactive === false){
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.cameraX, this.cameraY, this.cameraRadius, 0, 2 * Math.PI);
-            ctx.fill();
+            if(this.type !== 0){
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.cameraX, this.cameraY, this.cameraRadius, 0, 2 * Math.PI);
+                ctx.fill();
+            }else{
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.moveTo(this.points[0][0] + this.cameraX - this.cameraRadius, this.points[0][1] + this.cameraY - this.cameraRadius);
+                for(var d = 1; d < this.points.length; d++){
+                    //ctx.beginPath();
+                    ctx.lineTo(this.points[d][0] + this.cameraX - this.cameraRadius, this.points[d][1] + this.cameraY - this.cameraRadius);
+                    //ctx.stroke();
+
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+
         }
     };
     this.update = function(){
+        if(gameClock % 20 === 0 && this.type === 0){
+            this.regenerate();
+        }
         this.lifeTimer++;
         if(this.exists === false){
             if(dragging === false){
@@ -166,7 +191,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                         }
                         if(objects[j].type === 2){
                             this.temperature = objects[j].temperature/this.distance*10 + absoluteLowTemperature;
-                            console.log(this.temperature);
+                            //console.log(this.temperature);
                         }
                     } else {
                         this.explode(this.distance, j);
@@ -216,6 +241,9 @@ function Object(x, y, mass, density, type, gravityEffect, color){
         this.radius = Math.sqrt(this.mass/(this.density*3.14));
         objects[int].inactive = true;
         objects.splice(int, 1);
+        if(this.type === 0){
+            this.regenerate();
+        }
     };
 
     this.move = function(){
@@ -233,6 +261,40 @@ function Object(x, y, mass, density, type, gravityEffect, color){
         this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
 
     };
+
+    this.regenerate = function(){
+        if(this.mass < globalPlanetMass){
+            this.points = [];
+            this.pointAmount = 0;
+            this.readyPoints = [0, 1, 2, 3];
+
+            if(this.type === 0){
+                for(var v = 0; v < this.pointAmount; v++){
+                    this.readyPoints.push(Math.round(Math.random()*3));
+                }
+                this.readyPoints.sort(function(a, b){return a-b});
+                for(var i = 0; i < this.readyPoints.length; i++){
+                    if(this.readyPoints[i] === 0){
+                        this.points.push([0, this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5])
+                    }else if(this.readyPoints[i] === 1){
+                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5, 0])
+                    }else if(this.readyPoints[i] === 2){
+                        this.points.push([this.cameraRadius*2, this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5])
+                    }else if(this.readyPoints[i] === 3){
+                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5, this.cameraRadius*2])
+                    }
+                }
+            }
+        }else{
+            this.type = 1;
+            this.color = 'white';
+        }
+
+    };
+
+    if(this.type === 0){
+        this.regenerate();
+    }
 }
 
 function Trail(x1, y1, x2, y2, color){
@@ -263,6 +325,8 @@ objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue'));
 
 function game(){
+
+    gameClock++;
 
     window.onmousemove = logMouseMove;
 
@@ -310,7 +374,7 @@ function game(){
     }
 
     if(clickTimer === 0){
-        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, 1, true, selectedPlanetProperties.color));
+        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, true, selectedPlanetProperties.color));
     }
 
     if(clickTimer < 1){
