@@ -13,7 +13,7 @@ var screenHalfWidth = WIDTH/2;
 var screenHalfHeight = HEIGHT/2;
 
 var massMultiplier = 10;
-var G = 10;
+var G = 1;
 
 var PAUSED = false;
 
@@ -59,16 +59,17 @@ function Object(x, y, mass, density, type){
     }
 
     this.draw = function(){
-        ctx.fillStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(this.cameraX, this.cameraY, this.radius, 0, 2 * Math.PI);
-        ctx.fill();
-
+        if(this.inactive === false){
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.arc(this.cameraX, this.cameraY, this.radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
     };
     this.update = function(){
         if(this.inactive === false && this.affectedByGravity === true) {
             for (var j = 0; j < objects.length; j++) {
-                if (objects[j] !== this) {
+                if (objects[j] !== this && this.inactive === false) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
 
@@ -77,24 +78,21 @@ function Object(x, y, mass, density, type){
                     if (this.distance > this.radius + objects[j].radius) {
                         this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
-                        if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > this.distance){
-                            this.passedThrough = true;
-                        }
                     } else {
                         if(this.distance < 1){
                             this.distance = 1;
                         }
                         if(objects[j].affectedByGravity === true) {
-                            this.velX = this.velX + (objects[j].velX);
-                            this.velY += (objects[j].velY);
-                            if(this.mass <= objects[j].mass){
+                            this.velX = (this.velX + (objects[j].velX)*(objects[j].mass/this.mass))/2;
+                            this.velY = (this.velY + (objects[j].velY)*(objects[j].mass/this.mass))/2;
+                            if(this.mass < objects[j].mass){
                                 this.x = objects[j].x;
                                 this.y = objects[j].y;
                             }
                         }else{
                             this.velX = 0;
                             this.velY = 0;
-                            if(this.mass <= objects[j].mass){
+                            if(this.mass < objects[j].mass){
                                 this.x = objects[j].x;
                                 this.y = objects[j].y;
                             }
@@ -104,36 +102,8 @@ function Object(x, y, mass, density, type){
                         this.radius = Math.sqrt(this.mass/(this.density*3.14));
                         objects[j].inactive = true;
                         objects.splice(j, 1);
-                        console.log(this.distance);
-                        break;
                     }
 
-                    if(this.passedThrough === true){
-                        if(this.distance < 1){
-                            this.distance = 1;
-                        }
-                        if(objects[j].affectedByGravity === true){
-                            this.velX = this.velX + (objects[j].velX);
-                            this.velY += (objects[j].velY);
-                            if(this.mass <= objects[j].mass){
-                                this.x = objects[j].x;
-                                this.y = objects[j].y;
-                            }
-                        }else{
-                            this.velX = 0;
-                            this.velY = 0;
-                            if(this.mass <= objects[j].mass){
-                                this.x = objects[j].x;
-                                this.y = objects[j].y;
-                            }
-                            this.affectedByGravity = false;
-                        }
-                        this.mass += objects[j].mass;
-                        this.radius = Math.sqrt(this.mass/(this.density*3.14));
-                        objects[j].inactive = true;
-                        objects.splice(j, 1);
-                        break;
-                    }
                     //console.log(this.distance);
 
                 }
@@ -142,6 +112,10 @@ function Object(x, y, mass, density, type){
         //console.log(this.velX);
     };
     this.move = function(){
+        if(this.affectedByGravity === false){
+            this.velX = 0;
+            this.velY = 0;
+        }
         this.x += this.velX;
         this.y += this.velY;
 
@@ -149,7 +123,7 @@ function Object(x, y, mass, density, type){
         this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
         this.radius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
 
-    }
+    };
 }
 
 objects.push(new Object(WIDTH/2, HEIGHT/2, 50, 1, 1));
@@ -159,6 +133,7 @@ function game(){
 
     window.onmousemove = logMouseMove;
 
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
     //SKY FILL
     if(PAUSED === false){
         ctx.fillStyle = "rgb(0, 0, 0)";
@@ -166,9 +141,7 @@ function game(){
 
         for(var i = 0; i < objects.length; i++){
             if(objects[i].inactive === false){
-                objects[i].draw();
                 objects[i].update();
-
             }
         }
         for(var i = 0; i < objects.length; i++){
@@ -176,11 +149,15 @@ function game(){
                 objects[i].move();
             }
         }
+        for(var i = 0; i < objects.length; i++){
+            if(objects[i].inactive === false){
+                objects[i].draw();
+            }
+        }
     }
 
     if(clickTimer === 0){
-        objects.push(new Object(mousePosX, mousePosY, 10, 1, 2));
-        console.log(objects.length);
+        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), 10, 1, 2));
     }
 
     if(clickTimer < 1){
@@ -233,6 +210,24 @@ window.addEventListener('keyup', function (e) {
 
 document.addEventListener("mouseup", clickedNow);
 document.addEventListener("mousedown", draggedNow);
+
+    // IE9, Chrome, Safari, Opera
+document.addEventListener("mousewheel", MouseWheelHandler, false);
+    // Firefox
+document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
+
+function MouseWheelHandler(e)
+{
+    // cross-browser wheel delta
+    var e = window.event || e; // old IE support
+    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+    if(cameraZoom >= 0.1){
+        cameraZoom += delta/20;
+    }else{
+        cameraZoom = 0.1;
+    }
+}
 
 function clickedNow(){
     if(clickTimer === 1){
