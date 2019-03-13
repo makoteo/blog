@@ -46,6 +46,10 @@ function Object(x, y, mass, density, type, gravityEffect, color){
     this.density = density;
     this.color = color;
 
+    //Changeable Stuff
+
+    this.temperature = 0;
+
     this.velX = 0;
     this.velY = 0;
 
@@ -137,7 +141,9 @@ function Object(x, y, mass, density, type, gravityEffect, color){
 
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
-                    if (this.distance > (this.radius + objects[j].radius)/cameraZoom) {
+                    console.log(this.distance + "/" + (this.radius + objects[j].radius)/cameraZoom);
+
+                    if ((this.distance > (this.radius + objects[j].radius)/cameraZoom)) {
                         this.velX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
@@ -153,8 +159,12 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                                 }
                             }
                         }
+                        if(objects[j].type === 2){
+                            this.temperature = objects[j].radius/this.distance/cameraZoom*100;
+                            console.log(this.temperature);
+                        }
                     } else {
-                        this.explode(this.distance, j); 
+                        this.explode(this.distance, j);
                         break;
                     }
 
@@ -360,8 +370,8 @@ function MouseWheelHandler(e)
 
     cameraZoom += delta/20;
 
-    if(cameraZoom < 0.1){
-        cameraZoom = 0.1;
+    if(cameraZoom < 0.12){
+        cameraZoom = 0.12;
     }
     if(cameraZoom > 5){
         cameraZoom = 5
