@@ -1,7 +1,6 @@
 var versionCode = "Alpha 0.01";
 var WIDTH = 1024;
 var HEIGHT = 576;
-var gameRunning = false;
 
 var objects = [];
 var trails = [];
@@ -15,9 +14,10 @@ var screenHalfHeight = HEIGHT/2;
 
 var massMultiplier = 10;
 var G = 1;
+var T = 100;
 var mouseForce = 2;
 var lineLength = 30;
-var absoluteLowTemperature = -200;
+var absoluteLowTemperature = -100;
 
 var PAUSED = false;
 var gameClock = 0;
@@ -37,18 +37,21 @@ var simulationSpeed = 1;
 var globalTrailLife = 500;
 var globalPlanetMass = 200;
 
-var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0};
+var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:2, metals:2, ice:1}};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
-function Object(x, y, mass, density, type, gravityEffect, color){
+function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.lifeTimer = 0;
     this.x = x;
     this.y = y;
     this.mass = mass * massMultiplier;
     this.density = density;
     this.color = color;
+    this.materials = materials;
 
+    this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice + this.materials.metals/2;
+    this.reflectivity = this.reflectiveMaterials/this.mass;
     //Changeable Stuff
 
     this.temperature = 0;
@@ -86,6 +89,7 @@ function Object(x, y, mass, density, type, gravityEffect, color){
     this.pointAmount = 0;
     this.readyPoints = [0, 1, 2, 3];
 
+    this.zoom = cameraZoom;
 
     if(this.gravityEffect === false){
         this.affectedByGravity = false;
@@ -115,9 +119,6 @@ function Object(x, y, mass, density, type, gravityEffect, color){
         }
     };
     this.update = function(){
-        if(gameClock % 20 === 0 && this.type === 0){
-            this.regenerate();
-        }
         this.lifeTimer++;
         if(this.exists === false){
             if(dragging === false){
@@ -189,9 +190,9 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                                 }
                             }
                         }
-                        if(objects[j].type === 2){
-                            this.temperature = objects[j].temperature/this.distance*10 + absoluteLowTemperature;
-                            //console.log(this.temperature);
+                        if(objects[j].type === 2 && gameClock % 20 === 0 && this.type !== 2){
+                            this.temperature = Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
+                            console.log(this.temperature);
                         }
                     } else {
                         this.explode(this.distance, j);
@@ -207,6 +208,10 @@ function Object(x, y, mass, density, type, gravityEffect, color){
 
                 }
             }
+        }
+
+        if(this.type === 0 && this.zoom !== cameraZoom){
+            this.regenerate();
         }
         //console.log(this.velX);
     };
@@ -276,13 +281,13 @@ function Object(x, y, mass, density, type, gravityEffect, color){
                 this.readyPoints.sort(function(a, b){return a-b});
                 for(var i = 0; i < this.readyPoints.length; i++){
                     if(this.readyPoints[i] === 0){
-                        this.points.push([0, this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5])
+                        this.points.push([0, this.cameraRadius + Math.round(Math.random()*this.cameraRadius)-this.cameraRadius*0.5])
                     }else if(this.readyPoints[i] === 1){
-                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5, 0])
+                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius)-this.cameraRadius*0.5, 0])
                     }else if(this.readyPoints[i] === 2){
-                        this.points.push([this.cameraRadius*2, this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5])
+                        this.points.push([this.cameraRadius*2, this.cameraRadius + Math.round(Math.random()*this.cameraRadius)-this.cameraRadius*0.5])
                     }else if(this.readyPoints[i] === 3){
-                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius*0.5, this.cameraRadius*2])
+                        this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius, this.cameraRadius*2])
                     }
                 }
             }
@@ -322,8 +327,8 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow'));
-objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue'));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow', {rock:100, ice:0, metals:500}));
+objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:30, ice:0, metals:10}));
 
 function game(){
 
@@ -342,10 +347,15 @@ function game(){
             //Cursor
 
             ctx.globalAlpha = 0.3;
-            ctx.fillStyle = selectedPlanetProperties.color;
-            ctx.beginPath();
-            ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
-            ctx.fill();
+            if(selectedPlanetProperties.type === 0){
+
+            }else{
+                ctx.fillStyle = selectedPlanetProperties.color;
+                ctx.beginPath();
+                ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
 
             ctx.globalAlpha = 0.5;
 
@@ -378,28 +388,28 @@ function game(){
     }
 
     if(clickTimer === 0){
-        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, true, selectedPlanetProperties.color));
+        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, true, selectedPlanetProperties.color, selectedPlanetProperties.materials));
     }
 
     if(clickTimer < 1){
         clickTimer++;
     }
 
-    if(gameRunning === true) {
+    //if(gameRunning === true) {
 
-        frameCount++;
+        if (keys && keys[49]) {
+            selectedPlanetProperties.type = 0;
+        }else if (keys && keys[50]) {
+            selectedPlanetProperties.type = 1;
+        }
 
-        /* (KEY INPUT)
-        if (keys && keys[40] || keys && keys[83]) {player.setVelY(player.getVelY() + 0.2)}
-        */
-
-    }
+    //}
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
 function Start(){
-    if(gameRunning === false){
+    //if(gameRunning === false){
         SCORE = 0;
         frameCount = 0;
 
@@ -408,8 +418,8 @@ function Start(){
         //document.getElementById("scorediv").removeAttribute("hidden");
         //document.getElementById("gamescorediv").removeAttribute("hidden");
         HIGHSCORE = localStorage.getItem("HighScoreBusiness");
-        gameRunning = true;
-    }
+        //gameRunning = true;
+   // }
 }
 
 var keys;
