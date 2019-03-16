@@ -64,7 +64,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
 
     if(this.type === 2){
-        this.temperature = 10000;
+        this.temperature = this.mass;
     }
 
     this.gravityEffect = gravityEffect;
@@ -116,10 +116,29 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.fill();
             }
 
+            if(this.type === 2){
+                ctx.fillStyle = 'yellow';
+                ctx.globalAlpha = 0.1;
+                ctx.beginPath();
+                ctx.arc(this.cameraX, this.cameraY, this.cameraRadius*1.5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.globalAlpha = 0.05;
+                ctx.beginPath();
+                ctx.arc(this.cameraX, this.cameraY, this.cameraRadius*2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
         }
     };
     this.update = function(){
         this.lifeTimer++;
+        if(this.type !== 2){
+            this.temperature = 0;
+        }else{
+            this.temperature = this.mass;
+        }
+
         if(this.exists === false){
             if(dragging === false){
                 this.exists = true;
@@ -191,7 +210,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             }
                         }
                         if(objects[j].type === 2 && gameClock % 20 === 0 && this.type !== 2){
-                            this.temperature = Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
+                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
                             console.log(this.temperature);
                         }
                     } else {
@@ -397,11 +416,19 @@ function game(){
 
     //if(gameRunning === true) {
 
-        if (keys && keys[49]) {
-            selectedPlanetProperties.type = 0;
-        }else if (keys && keys[50]) {
-            selectedPlanetProperties.type = 1;
-        }
+    if (keys && keys[49]) {
+        selectedPlanetProperties.type = 0;
+        selectedPlanetProperties.mass = 5;
+        selectedPlanetProperties.color = 'white';
+    }else if (keys && keys[50]) {
+        selectedPlanetProperties.type = 1;
+        selectedPlanetProperties.mass = 15;
+        selectedPlanetProperties.color = 'blue';
+    }else if (keys && keys[51]) {
+        selectedPlanetProperties.type = 2;
+        selectedPlanetProperties.mass = 500;
+        selectedPlanetProperties.color = 'yellow';
+    }
 
     //}
 }
@@ -410,16 +437,16 @@ function game(){
 
 function Start(){
     //if(gameRunning === false){
-        SCORE = 0;
-        frameCount = 0;
+    SCORE = 0;
+    frameCount = 0;
 
-        //document.getElementById("score").innerHTML = "" + SCORE;
-        //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
-        //document.getElementById("scorediv").removeAttribute("hidden");
-        //document.getElementById("gamescorediv").removeAttribute("hidden");
-        HIGHSCORE = localStorage.getItem("HighScoreBusiness");
-        //gameRunning = true;
-   // }
+    //document.getElementById("score").innerHTML = "" + SCORE;
+    //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
+    //document.getElementById("scorediv").removeAttribute("hidden");
+    //document.getElementById("gamescorediv").removeAttribute("hidden");
+    HIGHSCORE = localStorage.getItem("HighScoreBusiness");
+    //gameRunning = true;
+    // }
 }
 
 var keys;
@@ -442,9 +469,9 @@ window.addEventListener('keyup', function (e) {
 document.addEventListener("mouseup", clickedNow);
 document.addEventListener("mousedown", draggedNow);
 
-    // IE9, Chrome, Safari, Opera
+// IE9, Chrome, Safari, Opera
 document.addEventListener("mousewheel", MouseWheelHandler, false);
-    // Firefox
+// Firefox
 document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 
 function MouseWheelHandler(e)
@@ -453,7 +480,7 @@ function MouseWheelHandler(e)
     var e = window.event || e; // old IE support
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-    cameraZoom += delta/20;
+    cameraZoom += delta*cameraZoom/10;
 
     if(cameraZoom < 0.01){
         cameraZoom = 0.01;
