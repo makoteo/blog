@@ -13,6 +13,12 @@ var cameraX = 0;
 var cameraY = 0;
 var savedMouseX = 0;
 var savedMouseY = 0;
+var mouseonWindow = false;
+var draggingWindow = false;
+var windowId = 0;
+
+var pauseTimer = 0;
+
 var cameraXOffset = 0;
 var cameraYOffset = 0;
 var screenHalfWidth = WIDTH/2;
@@ -23,6 +29,7 @@ var cursorTool = true;
 var massMultiplier = 10;
 var G = 1;
 var T = 100;
+var randomTempConstant = 1.2;
 var mouseForce = 2;
 var lineLength = 30;
 var absoluteLowTemperature = -100;
@@ -38,8 +45,8 @@ var clickTimer = 1;
 
 var dragging = false;
 
-var savedMouseX = 0;
-var savedMouseY = 0;
+var savedMouseX2 = 0;
+var savedMouseY2 = 0;
 
 var simulationSpeed = 1;
 
@@ -78,7 +85,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
 
     if(this.type === 2){
-        this.temperature = this.mass;
+        this.temperature = this.mass * randomTempConstant;
     }
 
     this.gravityEffect = gravityEffect;
@@ -105,18 +112,34 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     this.zoom = cameraZoom;
 
+    this.infoWindowOpen = false;
+    this.infoWindowX = 0;
+    this.infoWindowY = 0;
+    this.infoWindowWidth = WIDTH/5;
+    this.infoWindowHeight = HEIGHT/2;
+
     if(this.gravityEffect === false){
         this.affectedByGravity = false;
     }
 
     this.draw = function(){
         if(this.inactive === false){
+
+            if(this.infoWindowOpen === true){
+                ctx.strokeStyle = 'red';
+                ctx.beginPath();
+                ctx.moveTo(this.cameraX + cameraX, this.cameraY + cameraY);
+                ctx.lineTo(this.cameraX + cameraX + this.velX*4*cameraZoom, this.cameraY + cameraY + this.velY*4*cameraZoom);
+                ctx.stroke();
+            }
+
             if(this.name !== ""){
                 ctx.textAlign = 'center';
                 ctx.fillStyle = 'white';
                 ctx.font = 30 + 'px Arial';
                 ctx.fillText(this.name, this.cameraX + cameraX, this.cameraY + cameraY - this.cameraRadius - WIDTH/40*cameraZoom);
             }
+
             if(this.type !== 0){
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
@@ -149,15 +172,37 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.globalAlpha = 1;
             }
 
+            if(this.infoWindowOpen === true){
+                if(this.infoWindowX === 0){
+                    this.infoWindowX = this.cameraX + this.cameraRadius*3;
+                    this.infoWindowY = this.cameraY - this.infoWindowHeight/2;
+                }
+                ctx.fillStyle = 'rgb(10, 10, 10)';
+                ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+                ctx.strokeStyle = 'gray';
+                ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = 'white';
+                ctx.font = WIDTH/80 + 'px Arial';
+                ctx.fillText("Name: ", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
+                ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
+                ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
+
+                ctx.fillText("Mass: " + this.mass, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4);
+                ctx.fillText("Density: " + this.density, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5);
+                ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6);
+                ctx.fillText("Temperature: " + this.temperature, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*7);
+
+                ctx.fillText("Delta X: " + this.velX, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+                ctx.fillText("Delta Y: " + this.velY, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10);
+            }
+
         }
     };
     this.update = function(){
         this.lifeTimer++;
-        if(this.type !== 2){
-            this.temperature = 0;
-        }else{
-            this.temperature = this.mass;
-        }
+
+        console.log(this.temperature);
 
         if(this.exists === false){
             if(dragging === false){
@@ -206,7 +251,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        if(this.inactive === false && this.affectedByGravity === true && this.exists === true) {
+        if(this.inactive === false && this.affectedByGravity === true && this.exists === true && PAUSED === false) {
             for (var j = 0; j < objects.length; j++) {
                 if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false) {
                     this.tempX = objects[j].x;
@@ -231,6 +276,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             }
                         }
                         if(objects[j].type === 2 && gameClock % 20 === 0 && this.type !== 2){
+                            if(this.type !== 2){
+                                this.temperature = 0;
+                            }else{
+                                this.temperature = this.mass * randomTempConstant;
+                            }
                             this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
                             //console.log(this.temperature);
                         }
@@ -253,6 +303,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.type === 0 && this.zoom !== cameraZoom){
             this.regenerate();
         }
+
+        this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
+        this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
+        this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
         //console.log(this.velX);
     };
 
@@ -269,6 +323,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.name = objects[int].name;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
+                this.infoWindowOpen = objects[int].infoWindowOpen;
                 this.temperature = objects[int].temperature;
             }
         }else{
@@ -280,6 +335,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.name = objects[int].name;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
+                this.infoWindowOpen = objects[int].infoWindowOpen;
                 this.temperature = objects[int].temperature;
             }
             this.affectedByGravity = false;
@@ -303,10 +359,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.y += this.velY;
 
         trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
-
-        this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
-        this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
-        this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
 
     };
 
@@ -354,7 +406,9 @@ function Trail(x1, y1, x2, y2, color){
     this.lifeTime = globalTrailLife;
 
     this.draw = function(){
-        this.lifeTime--;
+        if(PAUSED === false){
+            this.lifeTime--;
+        }
 
         this.cameraX1 = ((this.x1 - screenHalfWidth) * cameraZoom + screenHalfWidth);
         this.cameraY1 = ((this.y1 - screenHalfHeight) * cameraZoom + screenHalfHeight);
@@ -378,11 +432,81 @@ function game(){
 
     window.onmousemove = logMouseMove;
 
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    if(clickTimer === 0 && cursorTool === false){
+        draggingWindow = false;
+        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, selectedPlanetProperties.materials));
+    }else if(clickTimer === 0 && cursorTool === true){
+        for(var i = 0; i < objects.length; i++){
+            if(objects[i].infoWindowOpen === true){
+                if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                    if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+
+                    }else{
+                        objects[i].infoWindowOpen = false;
+                        objects[i].infoWindowX = 0;
+                        objects[i].infoWindowY = 0;
+                    }
+                }else{
+                    objects[i].infoWindowOpen = false;
+                    objects[i].infoWindowX = 0;
+                    objects[i].infoWindowY = 0;
+                }
+            }
+            if(objects[i].cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
+                if(objects[i].cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+                    objects[i].infoWindowOpen = !objects[i].infoWindowOpen;
+                }
+            }
+        }
+    }else if(dragging === true &&  cursorTool === true){
+        mouseonWindow = false;
+        for(var i = 0; i < objects.length; i++){
+            if(objects[i].infoWindowOpen === true){
+                if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                    if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+                        mouseonWindow = true;
+                        windowId = i;
+                        draggingWindow = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if(mouseonWindow === true || draggingWindow === true){
+            if(savedMouseX2 === 0){
+                savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
+                savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
+            }
+
+
+            console.log(savedMouseX2);
+            objects[windowId].infoWindowX = mousePosX + savedMouseX2;
+            objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+        }else{
+            savedMouseX2 = 0;
+            savedMouseY2 = 0;
+            if(savedMouseX === 0){
+                savedMouseX = mousePosX;
+                savedMouseY = mousePosY;
+            }
+            cameraX = mousePosX - savedMouseX + cameraXOffset;
+            cameraY = mousePosY - savedMouseY + cameraYOffset;
+        }
+
+    }else{
+        cameraXOffset = cameraX;
+        cameraYOffset = cameraY;
+        draggingWindow = false;
+        savedMouseX2 = 0;
+        savedMouseY2 = 0;
+    }
+
 
     //SKY FILL
-    if(PAUSED === false){
+    //if(PAUSED === false){
         for(var ticks = 0; ticks < simulationSpeed; ticks++){
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
             ctx.fillStyle = "rgb(0, 0, 0)";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -417,48 +541,32 @@ function game(){
                     objects[i].update();
                 }
             }
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].inactive === false){
-                    objects[i].move();
+
+            if(PAUSED === false){
+                for(var i = 0; i < objects.length; i++){
+                    if(objects[i].inactive === false){
+                        objects[i].move();
+                    }
                 }
             }
+
             for(var i = 0; i < objects.length; i++){
                 if(objects[i].inactive === false){
                     objects[i].draw();
                 }
             }
         }
-    }
-
-    if(clickTimer === 0 && cursorTool === false){
-        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, selectedPlanetProperties.materials));
-    }else if(clickTimer === 0 && cursorTool === true){
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
-                if(objects[i].cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
-                    console.log(objects[i].mass);
-                }
-            }
-        }
-    }else if(dragging === true &&  cursorTool === true){
-        if(savedMouseX === 0){
-            savedMouseX = mousePosX;
-            savedMouseY = mousePosY;
-        }
-
-
-        cameraX = mousePosX - savedMouseX + cameraXOffset;
-        cameraY = mousePosY - savedMouseY + cameraYOffset;
-    }else{
-        cameraXOffset = cameraX;
-        cameraYOffset = cameraY;
-    }
+    //}
 
     if(clickTimer < 1){
         clickTimer++;
     }
 
     //if(gameRunning === true) {
+
+    if(pauseTimer > 0){
+        pauseTimer--;
+    }
 
     if (keys && keys[49]) {
         selectedPlanetProperties.type = 0;
@@ -477,6 +585,11 @@ function game(){
         cursorTool = false;
     }else if (keys && keys[48]) {
         cursorTool = true;
+    }else if ((keys && keys[32])) {
+        if(pauseTimer === 0){
+            PAUSED = !PAUSED;
+        }
+        pauseTimer = 2;
     }
 
     //}
@@ -532,8 +645,8 @@ function MouseWheelHandler(e)
 
     cameraZoom += delta*cameraZoom/10;
 
-    cameraX -= (mousePosX - screenHalfWidth)/10;
-    cameraY -= (mousePosY - screenHalfHeight)/10;
+    cameraX -= (mousePosX - screenHalfWidth)/20;
+    cameraY -= (mousePosY - screenHalfHeight)/20;
 
     if(cameraZoom < 0.01){
         cameraZoom = 0.01;
