@@ -29,6 +29,7 @@ var absoluteLowTemperature = -100;
 
 var PAUSED = false;
 var gameClock = 0;
+var globalPlanetId = 0;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -57,6 +58,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.density = density;
     this.color = color;
     this.materials = materials;
+
+    this.id = globalPlanetId;
+    globalPlanetId++;
+
+    this.name = "";
 
     this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice + this.materials.metals/2;
     this.reflectivity = this.reflectiveMaterials/this.mass;
@@ -105,6 +111,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     this.draw = function(){
         if(this.inactive === false){
+            if(this.name !== ""){
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'white';
+                ctx.font = 30 + 'px Arial';
+                ctx.fillText(this.name, this.cameraX + cameraX, this.cameraY + cameraY - this.cameraRadius - WIDTH/40*cameraZoom);
+            }
             if(this.type !== 0){
                 ctx.fillStyle = this.color;
                 ctx.beginPath();
@@ -220,7 +232,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
                         if(objects[j].type === 2 && gameClock % 20 === 0 && this.type !== 2){
                             this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
-                            console.log(this.temperature);
+                            //console.log(this.temperature);
                         }
                     } else {
                         this.explode(this.distance, j);
@@ -254,6 +266,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             if(this.mass <= objects[int].mass){
                 this.x = objects[int].x;
                 this.y = objects[int].y;
+                this.name = objects[int].name;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
                 this.temperature = objects[int].temperature;
@@ -264,6 +277,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             if(this.mass <= objects[int].mass){
                 this.x = objects[int].x;
                 this.y = objects[int].y;
+                this.name = objects[int].name;
                 this.type = objects[int].type;
                 this.color = objects[int].color;
                 this.temperature = objects[int].temperature;
@@ -418,6 +432,14 @@ function game(){
 
     if(clickTimer === 0 && cursorTool === false){
         objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, selectedPlanetProperties.materials));
+    }else if(clickTimer === 0 && cursorTool === true){
+        for(var i = 0; i < objects.length; i++){
+            if(objects[i].cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
+                if(objects[i].cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+                    console.log(objects[i].mass);
+                }
+            }
+        }
     }else if(dragging === true &&  cursorTool === true){
         if(savedMouseX === 0){
             savedMouseX = mousePosX;
@@ -427,10 +449,6 @@ function game(){
 
         cameraX = mousePosX - savedMouseX + cameraXOffset;
         cameraY = mousePosY - savedMouseY + cameraYOffset;
-    }else if(clickTimer === 0 &&  cursorTool === true){
-        for(var i = 0; i < objects.length; i++){
-
-        }
     }else{
         cameraXOffset = cameraX;
         cameraYOffset = cameraY;
