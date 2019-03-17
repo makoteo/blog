@@ -45,7 +45,7 @@ var simulationSpeed = 1;
 var globalTrailLife = 500;
 var globalPlanetMass = 200;
 
-var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:2, metals:2, ice:1}};
+var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:2, metals:2, ice:1}, affectedByGravity:true};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -160,22 +160,27 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                 for(var i = 1; i < Math.round(lineLength/cameraZoom); i++){
                     this.curvePoints.push([this.curvePoints[i-1][0] + this.curveVelX, this.curvePoints[i-1][1] + this.curveVelY]);
-                    for (var j = 0; j < objects.length; j++) {
-                        if (objects[j] !== this && this.inactive === false && objects[j].exists === true) {
-                            this.tempX = objects[j].x;
-                            this.tempY = objects[j].y;
-                            this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
-                            if(this.distance > (this.radius + objects[j].radius)){
-                                this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
-                                this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
-                            }else{
-                                this.curveVelX = 0;
-                                this.curveVelY = 0;
-                                break;
-                            }
+                    if(this.affectedByGravity === true){
+                        for (var j = 0; j < objects.length; j++) {
+                            if (objects[j] !== this && this.inactive === false && objects[j].exists === true) {
+                                this.tempX = objects[j].x;
+                                this.tempY = objects[j].y;
+                                this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
+                                if(this.distance > (this.radius + objects[j].radius)){
+                                    this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
+                                    this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
+                                }else{
+                                    this.curveVelX = 0;
+                                    this.curveVelY = 0;
+                                    break;
+                                }
 
+                            }
                         }
+                    }else{
+
                     }
+
                 }
                 if(this.lifeTimer > 1){
                     for(var d = 1; d < this.curvePoints.length; d++){
@@ -277,8 +282,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     this.move = function(){
         if(this.affectedByGravity === false){
-            this.velX = 0;
-            this.velY = 0;
+            //this.velX = 0;
+            //this.velY = 0;
         }
         this.x += this.velX;
         this.y += this.velY;
@@ -380,7 +385,7 @@ function game(){
                     ctx.fill();
                 }
             }
-            
+
             ctx.globalAlpha = 0.5;
 
             for(var i = 0; i < trails.length; i++){
@@ -412,7 +417,7 @@ function game(){
     }
 
     if(clickTimer === 0 && cursorTool === false){
-        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, true, selectedPlanetProperties.color, selectedPlanetProperties.materials));
+        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, selectedPlanetProperties.materials));
     }else if(dragging === true &&  cursorTool === true){
         if(savedMouseX === 0){
             savedMouseX = mousePosX;
@@ -422,6 +427,10 @@ function game(){
 
         cameraX = mousePosX - savedMouseX + cameraXOffset;
         cameraY = mousePosY - savedMouseY + cameraYOffset;
+    }else if(clickTimer === 0 &&  cursorTool === true){
+        for(var i = 0; i < objects.length; i++){
+
+        }
     }else{
         cameraXOffset = cameraX;
         cameraYOffset = cameraY;
@@ -499,10 +508,14 @@ document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 function MouseWheelHandler(e)
 {
     // cross-browser wheel delta
+    e.preventDefault();
     var e = window.event || e; // old IE support
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
     cameraZoom += delta*cameraZoom/10;
+
+    cameraX -= (mousePosX - screenHalfWidth)/10;
+    cameraY -= (mousePosY - screenHalfHeight)/10;
 
     if(cameraZoom < 0.01){
         cameraZoom = 0.01;
