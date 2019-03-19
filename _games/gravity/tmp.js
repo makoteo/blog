@@ -1,3 +1,11 @@
+//-----------------------------------------------------------------------------------------------------
+
+//
+// Copyright (c) Martin Feranec 2019 - All Rights Reserved
+//
+
+//-----------------------------------------------------------------------------------------------------
+
 var versionCode = "Alpha 0.01";
 var WIDTH = 1024;
 var HEIGHT = 576;
@@ -161,48 +169,61 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             if(this.type === 2){
                 ctx.fillStyle = 'yellow';
-                ctx.globalAlpha = 0.1;
+                ctx.globalAlpha = 0.05;
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*1.5, 0, 2 * Math.PI);
                 ctx.fill();
-                ctx.globalAlpha = 0.05;
+                ctx.globalAlpha = 0.04;
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*2, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.globalAlpha = 1;
             }
 
-            if(this.infoWindowOpen === true){
-                if(this.infoWindowX === 0){
+        }
+    };
+    this.drawInfoWindow = function(){
+        if(this.infoWindowOpen === true){
+            if(this.infoWindowX === 0){
+                if(this.cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth*1.2){
                     this.infoWindowX = this.cameraX + this.cameraRadius*3;
-                    this.infoWindowY = this.cameraY - this.infoWindowHeight/2;
+                }else{
+                    this.infoWindowX = this.cameraX - this.cameraRadius*3 - this.infoWindowWidth;
                 }
-                ctx.fillStyle = 'rgb(10, 10, 10)';
-                ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-                ctx.strokeStyle = 'gray';
-                ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-                ctx.textAlign = 'left';
-                ctx.fillStyle = 'white';
-                ctx.font = WIDTH/80 + 'px Arial';
-                ctx.fillText("Name: ", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
-                ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
-                ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
 
-                ctx.fillText("Mass: " + this.mass, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4);
-                ctx.fillText("Density: " + this.density, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5);
-                ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6);
-                ctx.fillText("Temperature: " + this.temperature, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*7);
+                this.infoWindowY = this.cameraY - this.infoWindowHeight/2;
 
-                ctx.fillText("Delta X: " + this.velX, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
-                ctx.fillText("Delta Y: " + this.velY, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10);
             }
+            ctx.fillStyle = 'rgb(10, 10, 10)';
+            ctx.globalAlpha = 0.4;
+            ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = 'gray';
+            ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            ctx.font = WIDTH/80 + 'px Arial';
+            ctx.fillText("Name: ", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
+            ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
+            ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
 
+            ctx.fillText("Mass: " + this.mass, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4);
+            ctx.fillText("Density: " + this.density, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5);
+            ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6);
+            ctx.fillText("Temperature: " + this.temperature, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*7);
+
+            ctx.fillText("Delta X: " + this.velX, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+            ctx.fillText("Delta Y: " + this.velY, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10);
         }
     };
     this.update = function(){
         this.lifeTimer++;
 
-        console.log(this.temperature);
+        if(this.type === 3){
+            if(this.lifeTimer > 1){
+                this.exists = true;
+            }
+        }
 
         if(this.exists === false){
             if(dragging === false){
@@ -302,6 +323,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         if(this.type === 0 && this.zoom !== cameraZoom){
             this.regenerate();
+            this.zoom = cameraZoom;
         }
 
         this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
@@ -442,19 +464,21 @@ function game(){
                     if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
 
                     }else{
-                        objects[i].infoWindowOpen = false;
-                        objects[i].infoWindowX = 0;
-                        objects[i].infoWindowY = 0;
+                        ///objects[i].infoWindowOpen = false;
+                        ///objects[i].infoWindowX = 0;
+                        //objects[i].infoWindowY = 0;
                     }
                 }else{
-                    objects[i].infoWindowOpen = false;
-                    objects[i].infoWindowX = 0;
-                    objects[i].infoWindowY = 0;
+                    //objects[i].infoWindowOpen = false;
+                    //objects[i].infoWindowX = 0;
+                    //objects[i].infoWindowY = 0;
                 }
             }
-            if(objects[i].cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
-                if(objects[i].cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+            if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
+                if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
                     objects[i].infoWindowOpen = !objects[i].infoWindowOpen;
+                    objects[i].infoWindowX = 0;
+                    objects[i].infoWindowY = 0;
                 }
             }
         }
@@ -478,8 +502,6 @@ function game(){
                 savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
             }
 
-
-            console.log(savedMouseX2);
             objects[windowId].infoWindowX = mousePosX + savedMouseX2;
             objects[windowId].infoWindowY = mousePosY + savedMouseY2;
         }else{
@@ -555,13 +577,31 @@ function game(){
                     objects[i].draw();
                 }
             }
+
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].inactive === false){
+                    objects[i].drawInfoWindow();
+                }
+            }
         }
     //}
 
     if(clickTimer < 1){
         clickTimer++;
     }
+    if(-(cameraX/cameraZoom) > WIDTH/4/0.01){
+        cameraX = -(WIDTH/4/0.01*cameraZoom);
+    }
+    if(cameraY/cameraZoom > HEIGHT/0.01){
+        cameraY = HEIGHT/0.01*cameraZoom;
+    }
 
+    if(cameraX/cameraZoom < -WIDTH/0.01){
+        cameraX = -WIDTH/0.01*cameraZoom;
+    }
+    if(cameraY/cameraZoom < -HEIGHT/0.01){
+        cameraY = -HEIGHT/0.01*cameraZoom;
+    }
     //if(gameRunning === true) {
 
     if(pauseTimer > 0){
@@ -645,8 +685,14 @@ function MouseWheelHandler(e)
 
     cameraZoom += delta*cameraZoom/10;
 
-    cameraX -= (mousePosX - screenHalfWidth)/20;
-    cameraY -= (mousePosY - screenHalfHeight)/20;
+    if(delta < 0){
+        cameraX += (mousePosX - screenHalfWidth)/30;
+        cameraY += (mousePosY - screenHalfHeight)/30;
+    }else{
+        cameraX -= (mousePosX - screenHalfWidth)/30;
+        cameraY -= (mousePosY - screenHalfHeight)/30;
+    }
+
 
     if(cameraZoom < 0.01){
         cameraZoom = 0.01;
