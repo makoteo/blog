@@ -23,6 +23,7 @@ var savedMouseX = 0;
 var savedMouseY = 0;
 var mouseonWindow = false;
 var draggingWindow = false;
+var draggingScreen = false;
 var windowId = 0;
 
 var pauseTimer = 0;
@@ -184,14 +185,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
     this.drawInfoWindow = function(){
         if(this.infoWindowOpen === true){
-            if(this.infoWindowX === 0){
-                if(this.cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth*1.2){
-                    this.infoWindowX = this.cameraX + this.cameraRadius*3;
+            if(this.infoWindowX === 0 && draggingWindow === false){
+                if(this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth*1.2){
+                    this.infoWindowX = this.cameraX + cameraX + this.cameraRadius*3;
                 }else{
-                    this.infoWindowX = this.cameraX - this.cameraRadius*3 - this.infoWindowWidth;
+                    this.infoWindowX = this.cameraX + cameraX - this.cameraRadius*3 - this.infoWindowWidth;
                 }
 
-                this.infoWindowY = this.cameraY - this.infoWindowHeight/2;
+                this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight/2;
 
             }
             ctx.fillStyle = 'rgb(10, 10, 10)';
@@ -484,26 +485,45 @@ function game(){
         }
     }else if(dragging === true &&  cursorTool === true){
         mouseonWindow = false;
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].infoWindowOpen === true){
-                if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                    if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-                        mouseonWindow = true;
-                        windowId = i;
-                        draggingWindow = true;
-                        break;
+        if(windowId === 0.1){
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].infoWindowOpen === true){
+                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+                            mouseonWindow = true;
+                            windowId = i;
+                            draggingWindow = true;
+                            break;
+                        }
                     }
                 }
             }
         }
-        if(mouseonWindow === true || draggingWindow === true){
+        if((mouseonWindow === true || draggingWindow === true) && draggingScreen === false && windowId !== 0.1){
             if(savedMouseX2 === 0){
                 savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
                 savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
             }
 
-            objects[windowId].infoWindowX = mousePosX + savedMouseX2;
-            objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+            if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
+                if(mousePosX + savedMouseX2 > 0){
+                    objects[windowId].infoWindowX = mousePosX + savedMouseX2;
+                }else{
+                    objects[windowId].infoWindowX = 1;
+                }
+            }else{
+                objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
+            }
+
+            if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
+                if(mousePosY + savedMouseY2 > 0){
+                    objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+                }else{
+                    objects[windowId].infoWindowY = 1;
+                }
+            }else{
+                objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
+            }
         }else{
             savedMouseX2 = 0;
             savedMouseY2 = 0;
@@ -513,12 +533,15 @@ function game(){
             }
             cameraX = mousePosX - savedMouseX + cameraXOffset;
             cameraY = mousePosY - savedMouseY + cameraYOffset;
+            draggingScreen = true;
         }
 
     }else{
         cameraXOffset = cameraX;
         cameraYOffset = cameraY;
+        windowId = 0.1;
         draggingWindow = false;
+        draggingScreen = false;
         savedMouseX2 = 0;
         savedMouseY2 = 0;
     }
