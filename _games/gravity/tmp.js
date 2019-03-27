@@ -10,6 +10,9 @@ var versionCode = "Alpha 0.01";
 var WIDTH = 1024;
 var HEIGHT = 576;
 
+var AREAWIDTH = WIDTH*10;
+var AREAHEIGHT = HEIGHT*10;
+
 var objects = [];
 var trails = [];
 
@@ -531,8 +534,25 @@ function game(){
                 savedMouseX = mousePosX;
                 savedMouseY = mousePosY;
             }
+
             cameraX = mousePosX - savedMouseX + cameraXOffset;
             cameraY = mousePosY - savedMouseY + cameraYOffset;
+
+            AREAWIDTH = WIDTH/2/0.01;
+            AREAHEIGHT = HEIGHT/2/0.01;
+
+            if(-(cameraX/cameraZoom) > AREAWIDTH){
+                cameraX = -cameraZoom*AREAWIDTH;
+            }else if((cameraX/cameraZoom) > AREAWIDTH){
+                cameraX = cameraZoom*AREAWIDTH;
+            }
+
+            if(-(cameraY/cameraZoom) > AREAHEIGHT){
+                cameraY = -cameraZoom*AREAHEIGHT;
+            }else if((cameraY/cameraZoom) > AREAHEIGHT){
+                cameraY = cameraZoom*AREAHEIGHT;
+            }
+
             draggingScreen = true;
         }
 
@@ -611,19 +631,6 @@ function game(){
 
     if(clickTimer < 1){
         clickTimer++;
-    }
-    if(-(cameraX/cameraZoom) > WIDTH/4/0.01){
-        cameraX = -(WIDTH/4/0.01*cameraZoom);
-    }
-    if(cameraY/cameraZoom > HEIGHT/0.01){
-        cameraY = HEIGHT/0.01*cameraZoom;
-    }
-
-    if(cameraX/cameraZoom < -WIDTH/0.01){
-        cameraX = -WIDTH/0.01*cameraZoom;
-    }
-    if(cameraY/cameraZoom < -HEIGHT/0.01){
-        cameraY = -HEIGHT/0.01*cameraZoom;
     }
     //if(gameRunning === true) {
 
