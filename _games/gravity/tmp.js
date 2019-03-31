@@ -22,6 +22,8 @@ var ctx = canvas.getContext("2d");
 var cameraZoom = 1;
 var cameraX = 0;
 var cameraY = 0;
+var cameraActualX = 0;
+var cameraActualY = 0;
 var savedMouseX = 0;
 var savedMouseY = 0;
 var mouseonWindow = false;
@@ -541,18 +543,6 @@ function game(){
             AREAWIDTH = WIDTH/2/0.01;
             AREAHEIGHT = HEIGHT/2/0.01;
 
-            if(-(cameraX/cameraZoom) > AREAWIDTH){
-                cameraX = -cameraZoom*AREAWIDTH;
-            }else if((cameraX/cameraZoom) > AREAWIDTH){
-                cameraX = cameraZoom*AREAWIDTH;
-            }
-
-            if(-(cameraY/cameraZoom) > AREAHEIGHT){
-                cameraY = -cameraZoom*AREAHEIGHT;
-            }else if((cameraY/cameraZoom) > AREAHEIGHT){
-                cameraY = cameraZoom*AREAHEIGHT;
-            }
-
             draggingScreen = true;
         }
 
@@ -570,6 +560,19 @@ function game(){
     //SKY FILL
     //if(PAUSED === false){
         for(var ticks = 0; ticks < simulationSpeed; ticks++){
+
+            if((cameraX)/cameraZoom - WIDTH/2/cameraZoom < -AREAWIDTH){
+                cameraX = (WIDTH/2/cameraZoom - AREAWIDTH) * cameraZoom;
+            }else if((cameraX)/cameraZoom + WIDTH/2/cameraZoom > AREAWIDTH){
+                cameraX = (-WIDTH/2/cameraZoom + AREAWIDTH) * cameraZoom;
+            }
+
+            if((cameraY)/cameraZoom - HEIGHT/2/cameraZoom < -AREAHEIGHT){
+                cameraY = (HEIGHT/2/cameraZoom - AREAHEIGHT) * cameraZoom;
+            }else if((cameraY)/cameraZoom + HEIGHT/2/cameraZoom > AREAHEIGHT){
+                cameraY = (-HEIGHT/2/cameraZoom + AREAHEIGHT) * cameraZoom;
+            }
+            
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
             ctx.fillStyle = "rgb(0, 0, 0)";
@@ -715,6 +718,13 @@ function MouseWheelHandler(e)
 
     cameraZoom += delta*cameraZoom/10;
 
+    if(cameraZoom < 0.01){
+        cameraZoom = 0.01;
+    }
+    if(cameraZoom > 5){
+        cameraZoom = 5
+    }
+
     if(delta < 0){
         cameraX += (mousePosX - screenHalfWidth)/30;
         cameraY += (mousePosY - screenHalfHeight)/30;
@@ -723,13 +733,8 @@ function MouseWheelHandler(e)
         cameraY -= (mousePosY - screenHalfHeight)/30;
     }
 
-
-    if(cameraZoom < 0.01){
-        cameraZoom = 0.01;
-    }
-    if(cameraZoom > 5){
-        cameraZoom = 5
-    }
+    AREAWIDTH = WIDTH/2/0.01;
+    AREAHEIGHT = HEIGHT/2/0.01;
 }
 
 function clickedNow(){
