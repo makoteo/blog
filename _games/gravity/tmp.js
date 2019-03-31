@@ -137,7 +137,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     }
 
     this.draw = function(){
-        if(this.inactive === false){
+        if(this.inactive === false && this.lifeTimer > 1){
 
             if(this.infoWindowOpen === true){
                 ctx.strokeStyle = 'red';
@@ -224,12 +224,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
     this.update = function(){
         this.lifeTimer++;
-
-        if(this.type === 3){
-            if(this.lifeTimer > 1){
-                this.exists = true;
-            }
-        }
 
         if(this.exists === false){
             if(dragging === false){
@@ -368,6 +362,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
             this.affectedByGravity = false;
         }
+
         this.mass += objects[int].mass;
         this.radius = Math.sqrt(this.mass/(this.density*3.14));
         if(this.type === 0){
@@ -386,7 +381,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.x += this.velX;
         this.y += this.velY;
 
-        trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
+        if(this.type !== 3){
+            trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
+        }
+
 
     };
 
@@ -572,11 +570,15 @@ function game(){
             }else if((cameraY)/cameraZoom + HEIGHT/2/cameraZoom > AREAHEIGHT){
                 cameraY = (-HEIGHT/2/cameraZoom + AREAHEIGHT) * cameraZoom;
             }
-            
+
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
             ctx.fillStyle = "rgb(0, 0, 0)";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            //Buttons?
+
+
 
             //Cursor
 
