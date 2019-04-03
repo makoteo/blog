@@ -145,7 +145,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     }
 
     this.draw = function(){
-        if(this.type === 3 && this.lifeTimer > 20){
+        if(this.type === 3 && this.lifeTimer > 5){
             this.exists = true;
             this.affectedByGravity = true;
         }
@@ -380,38 +380,46 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             distance = 1;
         }
         if(this.type !== 3 && objects[int].type !== 3){
-            var random = Math.round(objects[int].mass/massMultiplier/500);
-            if(this.mass > objects[int].mass){
-                random = Math.round(this.mass/massMultiplier/5);
+            var random = 0;
+            if(this.mass < objects[int].mass){
+                random = Math.round(this.mass/massMultiplier/10);
             }else{
-                random = Math.round(objects[int].mass/massMultiplier/5);
+                random = Math.round(objects[int].mass/massMultiplier/10);
             }
             var spawnX = 0;
             var spawnY = 0;
-            if(this.mass < objects[int].mass){
+            if(this.mass <= objects[int].mass){
                 for(var i =0; i < random; i++){
-                    objects.push(new Object(this.x + spawnX + cameraX/cameraZoom, this.y + spawnY + cameraY/cameraZoom, 5, 1, 3, false, 'yellow', {rock:5}));
-                    objects[objects.length - 1].velX = -this.velX/10*Math.random();
-                    objects[objects.length - 1].velY = -this.velY/10*Math.random();
+                    spawnX = Math.random()*this.radius - this.radius/2;
+                    spawnY = Math.random()*this.radius - this.radius/2;
+                    objects.push(new Object(this.x + spawnX + this.velX + cameraX/cameraZoom, this.y + spawnY + this.velY + cameraY/cameraZoom, 5, 1, 3, false, 'yellow', {rock:5}));
+                    objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
+                    objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
                 }
             }else{
                 for(var i =0; i < random; i++) {
-                    objects.push(new Object(objects[int].x + spawnX + cameraX / cameraZoom, objects[int].y + spawnY + cameraY / cameraZoom, 5, 1, 3, false, 'yellow', {rock: 5}));
-                    objects[objects.length - 1].velX = -objects[int].velX / 10 * Math.random();
-                    objects[objects.length - 1].velY = -objects[int].velY / 10 * Math.random();
+                    spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
+                    spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
+                    objects.push(new Object(objects[int].x + spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + spawnY + objects[int].velY + cameraY / cameraZoom, 5, 1, 3, false, 'yellow', {rock: 5}));
+                    objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
+                    objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
                 }
             }
         }else{
-            if(this.type === 3){
-                objects[int].mass+=2;
-            }else{
-                this.mass+=2;
-            }
+
+        }
+
+        if(this.mass < objects[int].mass){
+            objects[int].mass += this.mass/2;
+        }else{
+            this.mass+=objects[int].mass/2;
         }
 
         if(objects[int].affectedByGravity === true) {
-            this.velX = (this.velX*this.mass + objects[int].velX*objects[int].mass)/(this.mass + objects[int].mass);
-            this.velY = (this.velY*this.mass + objects[int].velY*objects[int].mass)/(this.mass + objects[int].mass);
+            if(objects[int].type !== 3 && this.type !== 3){
+                this.velX = (this.velX*this.mass + objects[int].velX*objects[int].mass)/(this.mass + objects[int].mass);
+                this.velY = (this.velY*this.mass + objects[int].velY*objects[int].mass)/(this.mass + objects[int].mass);
+            }
             if(this.mass <= objects[int].mass){
                 this.mass = objects[int].mass;
                 this.x = objects[int].x;
@@ -438,12 +446,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.gravityConstant = 1;
             }
             this.affectedByGravity = false;
-        }
-
-        if(this.type === 3){
-            objects[int].mass+=10;
-        }else if(objects[int].type === 3){
-            this.mass+=10;
         }
 
         this.radius = Math.sqrt(this.mass/(this.density*3.14));
