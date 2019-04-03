@@ -67,6 +67,8 @@ var simulationSpeed = 1;
 var globalTrailLife = 500;
 var globalPlanetMass = 200;
 
+var windowSelectedPlanet = 0;
+
 var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:2, metals:2, ice:1}, affectedByGravity:true};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -209,7 +211,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.textAlign = 'left';
             ctx.fillStyle = 'white';
             ctx.font = WIDTH/80 + 'px Arial';
-            ctx.fillText("Name: ", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
+            ctx.fillText("Name: " + this.name, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
             ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
             ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
 
@@ -220,6 +222,18 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             ctx.fillText("Delta X: " + this.velX, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
             ctx.fillText("Delta Y: " + this.velY, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10);
+
+            if(clickTimer === 0){
+                if(mousePosX > this.infoWindowX + WIDTH/50 && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT/50*2){
+                    modal.style.display = "block";
+                    for(var i = 0; i < objects.length; i++){
+                        if(objects[i] === this){
+                            windowSelectedPlanet = i;
+                            input.value = this.name;
+                        }
+                    }
+                }
+            }
         }
     };
     this.update = function(){
@@ -760,6 +774,32 @@ function logMouseMove(e) {
 
     mousePosX = e.clientX - rect.left;
     mousePosY = e.clientY - rect.top;
+}
+
+var modal = document.getElementById('myModal');
+
+var input = document.getElementById('boxValueChange');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+    objects[windowSelectedPlanet].name = input.value;
+    input.value = "";
+
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+        objects[windowSelectedPlanet].name = input.value;
+        input.value = "";
+    }
 }
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
