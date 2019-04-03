@@ -198,6 +198,19 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.globalAlpha = 1;
             }
 
+            if(this.type === 3){
+                ctx.fillStyle = 'yellow';
+                ctx.globalAlpha = 0.05;
+                ctx.beginPath();
+                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*1.5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.globalAlpha = 0.04;
+                ctx.beginPath();
+                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*5, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
         }
     };
     this.drawInfoWindow = function(){
@@ -249,6 +262,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.update = function(){
         this.lifeTimer++;
 
+        if(this.type !== 3){
+            this.gravityConstant = 1;
+        }
+
         if(this.exists === false && this.type !== 3){
             if(dragging === false){
                 this.exists = true;
@@ -298,7 +315,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         if(this.inactive === false && this.affectedByGravity === true && (this.exists === true || (this.type === 3)) && PAUSED === false) {
             for (var j = 0; j < objects.length; j++) {
-                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false) {
+                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
 
@@ -332,16 +349,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             //console.log(this.temperature);
                         }
                     } else {
-                        if(!(this.type === 3 && objects[j].type === 3)){
-                            this.explode(this.distance, j);
-                        }
+                        this.explode(this.distance, j);
                         break;
                     }
 
                     if(this.passedThrough === true){
-                        if(!(this.type === 3 && objects[j].type === 3)){
-                            this.explode(this.distance, j);
-                        }
+                        this.explode(this.distance, j);
                         break;
                     }
 
@@ -367,25 +380,40 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             distance = 1;
         }
         if(this.type !== 3 && objects[int].type !== 3){
-            var random = Math.round(Math.random()*5);
+            var random = Math.round(objects[int].mass/massMultiplier/500);
+            if(this.mass > objects[int].mass){
+                random = Math.round(this.mass/massMultiplier/5);
+            }else{
+                random = Math.round(objects[int].mass/massMultiplier/5);
+            }
+            var spawnX = 0;
+            var spawnY = 0;
             if(this.mass < objects[int].mass){
                 for(var i =0; i < random; i++){
-                    objects.push(new Object(this.x + cameraX/cameraZoom, this.y + cameraY/cameraZoom, 1, 1, 3, false, 'white', {rock:5}));
+                    objects.push(new Object(this.x + spawnX + cameraX/cameraZoom, this.y + spawnY + cameraY/cameraZoom, 5, 1, 3, false, 'yellow', {rock:5}));
                     objects[objects.length - 1].velX = -this.velX/10*Math.random();
                     objects[objects.length - 1].velY = -this.velY/10*Math.random();
                 }
             }else{
                 for(var i =0; i < random; i++) {
-                    objects.push(new Object(objects[int].x + cameraX / cameraZoom, objects[int].y + cameraY / cameraZoom, 1, 1, 3, false, 'white', {rock: 5}));
+                    objects.push(new Object(objects[int].x + spawnX + cameraX / cameraZoom, objects[int].y + spawnY + cameraY / cameraZoom, 5, 1, 3, false, 'yellow', {rock: 5}));
                     objects[objects.length - 1].velX = -objects[int].velX / 10 * Math.random();
                     objects[objects.length - 1].velY = -objects[int].velY / 10 * Math.random();
                 }
             }
+        }else{
+            if(this.type === 3){
+                objects[int].mass+=2;
+            }else{
+                this.mass+=2;
+            }
         }
+
         if(objects[int].affectedByGravity === true) {
             this.velX = (this.velX*this.mass + objects[int].velX*objects[int].mass)/(this.mass + objects[int].mass);
             this.velY = (this.velY*this.mass + objects[int].velY*objects[int].mass)/(this.mass + objects[int].mass);
             if(this.mass <= objects[int].mass){
+                this.mass = objects[int].mass;
                 this.x = objects[int].x;
                 this.y = objects[int].y;
                 this.name = objects[int].name;
@@ -393,11 +421,13 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.color = objects[int].color;
                 this.infoWindowOpen = objects[int].infoWindowOpen;
                 this.temperature = objects[int].temperature;
+                this.gravityConstant = 1;
             }
         }else{
             this.velX = 0;
             this.velY = 0;
             if(this.mass <= objects[int].mass){
+                this.mass = objects[int].mass;
                 this.x = objects[int].x;
                 this.y = objects[int].y;
                 this.name = objects[int].name;
@@ -405,11 +435,17 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.color = objects[int].color;
                 this.infoWindowOpen = objects[int].infoWindowOpen;
                 this.temperature = objects[int].temperature;
+                this.gravityConstant = 1;
             }
             this.affectedByGravity = false;
         }
 
-        this.mass += objects[int].mass;
+        if(this.type === 3){
+            objects[int].mass+=10;
+        }else if(objects[int].type === 3){
+            this.mass+=10;
+        }
+
         this.radius = Math.sqrt(this.mass/(this.density*3.14));
         if(this.type === 0){
             this.regenerate();
