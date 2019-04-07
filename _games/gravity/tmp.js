@@ -41,7 +41,7 @@ var screenHalfHeight = HEIGHT/2;
 var cursorTool = true;
 
 var massMultiplier = 10;
-var G = 1;
+var G = 0.5;
 var T = 100;
 var randomTempConstant = 1.2;
 var mouseForce = 2;
@@ -51,6 +51,7 @@ var absoluteLowTemperature = -100;
 var PAUSED = false;
 var gameClock = 0;
 var globalPlanetId = 0;
+var globalTrails = true;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -77,7 +78,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.lifeTimer = 0;
     this.x = x - cameraX/cameraZoom;
     this.y = y - cameraY/cameraZoom;
-    this.mass = mass * massMultiplier;
+    if(this.type !== 3){
+        this.mass = mass * massMultiplier;
+    }else{
+        this.mass = mass;
+    }
     this.density = density;
     this.color = color;
     this.materials = materials;
@@ -88,7 +93,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.name = "";
 
     this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice + this.materials.metals/2;
-    this.reflectivity = this.reflectiveMaterials/this.mass;
+    this.totalMaterials = this.materials.rock + this.materials.metals + this.materials.ice;
+    this.reflectivity = this.reflectiveMaterials/this.totalMaterials;
+    if(this.reflectivity > 1 || this.reflectivity < 0){
+        this.reflectivity = 0.5;
+    }
     //Changeable Stuff
 
     this.temperature = 0;
@@ -137,7 +146,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.gravityConstant = 1;
 
     if(this.type === 3){
-        this.gravityConstant = 0.07;
+        if(this.color === 'white'){
+            this.gravityConstant = 0.01;
+        }else{
+            this.gravityConstant = 0.07;
+        }
     }
 
     if(this.gravityEffect === false){
@@ -145,7 +158,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     }
 
     this.draw = function(){
-        if(this.type === 3 && this.lifeTimer > 5){
+        if(this.type === 3 && this.lifeTimer > 10){
             this.exists = true;
             this.affectedByGravity = true;
         }
@@ -324,10 +337,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     if ((this.distance > (this.radius + objects[j].radius))) {
                         this.velX += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+
+                        if((this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 0.25){
+                            this.explode(1, 0.5);
+                        }
+
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
                             if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > objects[j].radius*2){
                                 var segments = Math.ceil(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))/objects[j].radius*2);
-                                console.log("Check");
                                 for(var s = 0; s < segments; s++){
                                     if(Math.sqrt((this.x + this.velX/segments*s - this.tempX) * (this.x + this.velX/segments*s - this.tempX) +
                                             (this.y + this.velY/segments*s - this.tempY) * (this.y + this.velY/segments*s - this.tempY)) < this.radius*2 + objects[j].radius){
@@ -376,85 +393,144 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
 
     this.explode = function(distance, int){
-        if(distance < 1){
-            distance = 1;
-        }
-        if(this.type !== 3 && objects[int].type !== 3){
-            var random = 0;
-            if(this.mass < objects[int].mass){
-                random = Math.round(this.mass/massMultiplier/10);
-            }else{
-                random = Math.round(objects[int].mass/massMultiplier/10);
+        var spawnX = 0;
+        var spawnY = 0;
+        var random = 0;
+        if(int !== 0.5){
+            if(distance < 1){
+                distance = 1;
             }
-            var spawnX = 0;
-            var spawnY = 0;
-            if(this.mass <= objects[int].mass){
-                for(var i =0; i < random; i++){
+            if(this.type !== 3 && objects[int].type !== 3){
+                if(this.mass < objects[int].mass){
+                    random = Math.round(this.mass/massMultiplier/5);
+                }else{
+                    random = Math.round(objects[int].mass/massMultiplier/5);
+                }
+                if(random > 50){
+                    random = 50;
+                }
+                if(this.mass <= objects[int].mass){
+                    for(var i =0; i < random; i++){
+                        spawnX = Math.random()*this.radius - this.radius/2;
+                        spawnY = Math.random()*this.radius - this.radius/2;
+                        objects.push(new Object(this.x + spawnX + this.velX + cameraX/cameraZoom, this.y + spawnY + this.velY + cameraY/cameraZoom, 5, 1, 3, false, 'yellow', {rock:5}));
+                        objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
+                        objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
+                    }
+                }else{
+                    for(var i =0; i < random; i++) {
+                        spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
+                        spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
+                        objects.push(new Object(objects[int].x + spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + spawnY + objects[int].velY + cameraY / cameraZoom, 5, 1, 3, false, 'yellow', {rock: 5}));
+                        objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
+                        objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
+                    }
+                }
+            }else{
+
+            }
+
+            if(this.mass < objects[int].mass){
+                objects[int].mass += this.mass/2;
+            }else{
+                this.mass+=objects[int].mass/2;
+            }
+
+            if(objects[int].affectedByGravity === true) {
+                if(objects[int].type !== 3 || this.type !== 3){
+                    this.velX = (this.velX*this.mass + objects[int].velX*objects[int].mass)/(this.mass + objects[int].mass);
+                    this.velY = (this.velY*this.mass + objects[int].velY*objects[int].mass)/(this.mass + objects[int].mass);
+                }
+                if(this.mass <= objects[int].mass){
+                    this.mass = objects[int].mass;
+                    if(this.affectedByGravity === false){
+                        objects[int].x = this.x;
+                        objects[int].y = this.y;
+                    }else{
+                        this.x = objects[int].x;
+                        this.y = objects[int].y;
+                    }
+                    this.name = objects[int].name;
+                    this.type = objects[int].type;
+                    this.color = objects[int].color;
+                    this.infoWindowOpen = objects[int].infoWindowOpen;
+                    this.temperature = objects[int].temperature;
+                    this.gravityConstant = 1;
+                }
+            }else{
+                this.velX = 0;
+                this.velY = 0;
+                if(this.mass <= objects[int].mass){
+                    this.mass = objects[int].mass;
+                    this.name = objects[int].name;
+                    this.type = objects[int].type;
+                    this.color = objects[int].color;
+                    this.infoWindowOpen = objects[int].infoWindowOpen;
+                    this.temperature = objects[int].temperature;
+                    this.gravityConstant = 1;
+                }
+                if(this.affectedByGravity === true){
+                    this.x = objects[int].x;
+                    this.y = objects[int].y;
+                }
+                this.affectedByGravity = false;
+            }
+
+            this.radius = Math.sqrt(this.mass/(this.density*3.14));
+            if(this.type === 0){
+                this.regenerate();
+            }
+            this.passedThrough = false;
+            objects[int].inactive = true;
+            objects.splice(int, 1);
+        }else{
+            if(distance < 1){
+                distance = 1;
+            }
+            if(this.type !== 3){
+
+                random = Math.round(this.mass/massMultiplier/10);
+
+                if(this.materials.ice / this.totalMaterials >= 0.5){
+                    random = Math.round(this.mass/massMultiplier);
+                }
+
+                if(random > 50){
+                    random = 50;
+                }
+                for(var i = 0; i < random; i++){
                     spawnX = Math.random()*this.radius - this.radius/2;
                     spawnY = Math.random()*this.radius - this.radius/2;
-                    objects.push(new Object(this.x + spawnX + this.velX + cameraX/cameraZoom, this.y + spawnY + this.velY + cameraY/cameraZoom, 5, 1, 3, false, 'yellow', {rock:5}));
-                    objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
-                    objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
+                    if(this.materials.ice / this.totalMaterials >= 0.5){
+                        objects.push(new Object(this.x + spawnX + this.velX + cameraX/cameraZoom, this.y + spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'white', {ice:1}));
+                        objects[objects.length - 1].velX = this.velX/10*Math.random();
+                        objects[objects.length - 1].velY = this.velY/10*Math.random();
+                    }else{
+                        if(this.mass <= 50){
+
+                        }else{
+                            objects.push(new Object(this.x + spawnX + this.velX + cameraX/cameraZoom, this.y + spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'yellow', {rock:3}));
+                            objects[objects.length - 1].velX = this.velX/2*Math.random();
+                            objects[objects.length - 1].velY = this.velY/2*Math.random();
+                        }
+                    }
+                }
+                if(this.materials.ice / this.totalMaterials >= 0.5){
+                    this.mass -= 1;
+                }else{
+                    this.mass -= 3*random;
                 }
             }else{
-                for(var i =0; i < random; i++) {
-                    spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
-                    spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
-                    objects.push(new Object(objects[int].x + spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + spawnY + objects[int].velY + cameraY / cameraZoom, 5, 1, 3, false, 'yellow', {rock: 5}));
-                    objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
-                    objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
-                }
-            }
-        }else{
 
+            }
+
+            this.radius = Math.sqrt(this.mass/(this.density*3.14));
+            if(this.type === 0){
+                this.regenerate();
+            }
+            this.passedThrough = false;
         }
 
-        if(this.mass < objects[int].mass){
-            objects[int].mass += this.mass/2;
-        }else{
-            this.mass+=objects[int].mass/2;
-        }
-
-        if(objects[int].affectedByGravity === true) {
-            if(objects[int].type !== 3 && this.type !== 3){
-                this.velX = (this.velX*this.mass + objects[int].velX*objects[int].mass)/(this.mass + objects[int].mass);
-                this.velY = (this.velY*this.mass + objects[int].velY*objects[int].mass)/(this.mass + objects[int].mass);
-            }
-            if(this.mass <= objects[int].mass){
-                this.mass = objects[int].mass;
-                this.x = objects[int].x;
-                this.y = objects[int].y;
-                this.name = objects[int].name;
-                this.type = objects[int].type;
-                this.color = objects[int].color;
-                this.infoWindowOpen = objects[int].infoWindowOpen;
-                this.temperature = objects[int].temperature;
-                this.gravityConstant = 1;
-            }
-        }else{
-            this.velX = 0;
-            this.velY = 0;
-            if(this.mass <= objects[int].mass){
-                this.mass = objects[int].mass;
-                this.x = objects[int].x;
-                this.y = objects[int].y;
-                this.name = objects[int].name;
-                this.type = objects[int].type;
-                this.color = objects[int].color;
-                this.infoWindowOpen = objects[int].infoWindowOpen;
-                this.temperature = objects[int].temperature;
-                this.gravityConstant = 1;
-            }
-            this.affectedByGravity = false;
-        }
-
-        this.radius = Math.sqrt(this.mass/(this.density*3.14));
-        if(this.type === 0){
-            this.regenerate();
-        }
-        this.passedThrough = false;
-        objects[int].inactive = true;
-        objects.splice(int, 1);
     };
 
     this.move = function(){
@@ -467,10 +543,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.x += this.velX;
         this.y += this.velY;
 
-        if(this.type !== 3){
-            trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
+        if(globalTrails === true){
+            if(this.type !== 3){
+                trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
+            }
         }
-
 
     };
 
@@ -549,26 +626,29 @@ function game(){
         objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, selectedPlanetProperties.materials));
     }else if(clickTimer === 0 && cursorTool === true){
         for(var i = 0; i < objects.length; i++){
-            if(objects[i].infoWindowOpen === true){
-                if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                    if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+            if(objects[i].type !== 3){
+                if(objects[i].infoWindowOpen === true){
+                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
 
+                        }else{
+                            ///objects[i].infoWindowOpen = false;
+                            ///objects[i].infoWindowX = 0;
+                            //objects[i].infoWindowY = 0;
+                        }
                     }else{
-                        ///objects[i].infoWindowOpen = false;
-                        ///objects[i].infoWindowX = 0;
+                        //objects[i].infoWindowOpen = false;
+                        //objects[i].infoWindowX = 0;
                         //objects[i].infoWindowY = 0;
                     }
-                }else{
-                    //objects[i].infoWindowOpen = false;
-                    //objects[i].infoWindowX = 0;
-                    //objects[i].infoWindowY = 0;
                 }
-            }
-            if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
-                if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
-                    objects[i].infoWindowOpen = !objects[i].infoWindowOpen;
-                    objects[i].infoWindowX = 0;
-                    objects[i].infoWindowY = 0;
+                if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
+                    if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+                        objects[i].infoWindowOpen = !objects[i].infoWindowOpen;
+                        objects[i].infoWindowX = 0;
+                        objects[i].infoWindowY = 0;
+                        break;
+                    }
                 }
             }
         }
@@ -694,7 +774,11 @@ function game(){
 
             for(var i = 0; i < objects.length; i++){
                 if(objects[i].inactive === false){
-                    objects[i].update();
+                    if(objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT){
+                        objects.splice(i, 1);
+                    }else{
+                        objects[i].update();
+                    }
                 }
             }
 
@@ -706,18 +790,19 @@ function game(){
                 }
             }
 
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].inactive === false){
-                    objects[i].draw();
-                }
-            }
-
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].inactive === false){
-                    objects[i].drawInfoWindow();
-                }
-            }
         }
+
+    for(var i = 0; i < objects.length; i++){
+        if(objects[i].inactive === false){
+            objects[i].draw();
+        }
+    }
+
+    for(var i = 0; i < objects.length; i++){
+        if(objects[i].inactive === false){
+            objects[i].drawInfoWindow();
+        }
+    }
     //}
 
     if(clickTimer < 1){
@@ -814,11 +899,11 @@ function MouseWheelHandler(e)
     }
 
     if(delta < 0){
-        cameraX += (mousePosX - screenHalfWidth)/30;
-        cameraY += (mousePosY - screenHalfHeight)/30;
+        cameraX += (mousePosX - screenHalfWidth - cameraX)/30;
+        cameraY += (mousePosY - screenHalfHeight - cameraY)/30;
     }else{
-        cameraX -= (mousePosX - screenHalfWidth)/30;
-        cameraY -= (mousePosY - screenHalfHeight)/30;
+        cameraX -= (mousePosX - screenHalfWidth - cameraX)/30;
+        cameraY -= (mousePosY - screenHalfHeight - cameraY)/30;
     }
 
     AREAWIDTH = WIDTH/2/0.01;
