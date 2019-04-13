@@ -309,9 +309,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 if(this.gas > 0.9*this.totalMaterials){
                     this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.materials.ice*2.5 + ")";
                 }else if(this.gas > 0.5*this.totalMaterials){
-                    this.color = "rgb(" + (this.materials.gas*1.2 + this.materials.metals*0.5 + this.materials.rock*0.3 + (this.temperature + 100)/6) + "," + (this.materials.gas*1  + this.materials.metals*0.6 + this.materials.rock*0.5 + (this.temperature + 100)/12) + "," + this.materials.ice*2.2 + ")";
+                    this.color = "rgb(" + (this.materials.gas*1.2 + this.materials.metals*0.5 + this.materials.rock*0.6 + (this.temperature + 100)/6) + "," + (this.materials.gas*1  + this.materials.metals*0.6 + this.materials.rock*0.8 + (this.temperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
                 }else{
-                    this.color = "rgb(" + (this.materials.gas*0.5 + this.materials.metals*1.5 + this.materials.rock*0.2 + (this.temperature + 100)/6) + "," + (this.materials.gas*0.2 + this.materials.metals*0.8 + this.materials.rock*0.6 + (this.temperature + 100)/12) + "," + this.materials.ice*2 + ")";
+                    this.color = "rgb(" + (this.materials.gas*0.5 + this.materials.metals*1.5 + this.materials.rock*0.8 + (this.temperature + 100)/6) + "," + (this.materials.gas*0.2 + this.materials.metals*0.8 + this.materials.rock*1 + (this.temperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
                 }
             }
         }
