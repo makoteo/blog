@@ -47,7 +47,9 @@ var randomTempConstant = 1.2;
 var mouseForce = 2;
 var lineLength = 30;
 var absoluteLowTemperature = -100;
+var waterMeltTemperature = 300;
 var starCreationLimit = 50000;
+var globalDebrieLifetime = 2000;
 
 var PAUSED = false;
 var gameClock = 0;
@@ -103,10 +105,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     if(this.type === 2){
         this.materials.ice = 0;
-        this.materials.gas = this.mass;
+        this.materials.gas = this.mass;0
     }
 
-    this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice + this.materials.metals/2 - this.materials.gas;
+    this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice*0.9 + this.materials.metals/2 - this.materials.gas;
     this.gas = this.materials.gas;
     this.totalMaterials = this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas;
     this.reflectivity = this.reflectiveMaterials/this.totalMaterials;
@@ -202,7 +204,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius, 0, 2 * Math.PI);
                 ctx.fill();
             }else if(this.type === 3){
-                ctx.fillStyle = 'yellow';
+                if(this.materials.ice > 75 && this.mass < 50) {
+                    ctx.fillStyle = 'white';
+                }else{
+                    ctx.fillStyle = 'yellow';
+                }
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius, 0, 2 * Math.PI);
                 ctx.fill();
@@ -321,9 +327,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.type === 1){
             if(gameClock % 10 === 0){
                 if(this.gas > 0.9*this.totalMaterials){
-                    this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.materials.ice*2.5 + ")";
+                    this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*1.5 + "," + this.materials.ice*2.5 + ")";
                 }else if(this.gas > 0.5*this.totalMaterials){
-                    this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + (this.temperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
+                    this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + this.materials.gas*0.4 + (this.temperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.gas*0.2 + this.materials.ice*0.5 +(this.temperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
                 }else{
                     this.color = "rgb(" + (this.materials.metals*1.5 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + 100)/6) + "," + (this.materials.metals*0.8 + this.materials.rock*1 + this.materials.ice*0.5 +(this.temperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
                 }
@@ -440,6 +446,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.type === 0 && this.zoom !== cameraZoom){
             this.regenerate();
             this.zoom = cameraZoom;
+        }
+
+        if(this.temperature > waterMeltTemperature && this.type !== 2 && this.type !== 3){
+            this.explode(1, 0.5);
         }
 
         this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
@@ -560,14 +570,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             if(distance < 1){
                 distance = 1;
             }
-            
+
             if(this.type !== 3){
 
                 this.random = Math.round(this.mass/massMultiplier/10);
-
-                if(this.materials.ice / this.totalMaterials >= 0.5){
-                    this.random = Math.round(this.mass/massMultiplier);
-                }
 
                 if(this.random > 50){
                     this.random = 50;
@@ -575,8 +581,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 for(var i = 0; i < this.random; i++){
                     this.spawnX = Math.random()*this.radius - this.radius/2;
                     this.spawnY = Math.random()*this.radius - this.radius/2;
-                    if(this.materials.ice / this.totalMaterials >= 0.5){
-                        objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'white', {ice:90, metals:0, rock:0, gas: 10}));
+                    if(this.materials.ice >= 50){
+                        objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'blue', {ice:90, metals:0, rock:0, gas: 10}));
                         objects[objects.length - 1].velX = this.velX/10*Math.random();
                         objects[objects.length - 1].velY = this.velY/10*Math.random();
                     }else{
@@ -599,6 +605,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
 
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
+            this.temperature += 20;
             if(this.type === 0){
                 this.regenerate();
             }
@@ -851,7 +858,15 @@ function game(){
                     if(objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT){
                         objects.splice(i, 1);
                     }else{
-                        objects[i].update();
+                        if(objects[i].type === 3){
+                            if(objects[i].lifeTimer > globalDebrieLifetime){
+                                objects.splice(i, 1);
+                            }else{
+                                objects[i].update();
+                            }
+                        }else{
+                            objects[i].update();
+                        }
                     }
                 }
             }
@@ -916,6 +931,13 @@ function game(){
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
+
+function setMaterials(x, y, z, u){
+    selectedPlanetProperties.materials.metals = x;
+    selectedPlanetProperties.materials.rock = y;
+    selectedPlanetProperties.materials.ice = z;
+    selectedPlanetProperties.materials.gas = u;
+}
 
 function Start(){
     //if(gameRunning === false){
