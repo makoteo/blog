@@ -47,7 +47,7 @@ var randomTempConstant = 1.2;
 var mouseForce = 2;
 var lineLength = 30;
 var absoluteLowTemperature = -100;
-var waterMeltTemperature = 300;
+var waterMeltTemperature = 550;
 var starCreationLimit = 50000;
 var globalDebrieLifetime = 2000;
 
@@ -81,11 +81,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.lifeTimer = 0;
     this.x = x - cameraX/cameraZoom;
     this.y = y - cameraY/cameraZoom;
-    if(this.type !== 3){
-        this.mass = mass * massMultiplier;
-    }else{
-        this.mass = mass;
-    }
+
+    this.mass = mass * massMultiplier;
+
     this.density = density;
     this.color = color;
     this.materials = materials;
@@ -105,7 +103,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     if(this.type === 2){
         this.materials.ice = 0;
-        this.materials.gas = this.mass;0
+        this.materials.gas = 100;
     }
 
     this.reflectiveMaterials = this.materials.rock/2 + this.materials.ice*0.9 + this.materials.metals/2 - this.materials.gas;
@@ -115,6 +113,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     if(this.reflectivity > 1 || this.reflectivity < 0){
         this.reflectivity = 0.5;
     }
+
+    //this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
 
     if(this.gas > 0.9*this.totalMaterials){
         this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.materials.ice*2.5 + ")";
@@ -303,6 +303,15 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
     };
     this.update = function(){
+
+        if(this.type === 2){
+            this.materials.ice = 0;
+            this.materials.rock = 0;
+            this.materials.metals = 0;
+            this.materials.gas = 100;
+        }
+
+
         this.lifeTimer++;
 
         if(this.type !== 3){
@@ -500,7 +509,13 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 objects[int].mass += this.mass/2;
             }else{
                 this.mass+=objects[int].mass/2;
+                //console.log(this.mass + " " + objects[int].mass);
             }
+
+            this.materials.ice = (this.mass*this.materials.ice + objects[int].mass*objects[int].materials.ice)/(this.mass+objects[int].mass);
+            this.materials.rock = (this.mass*this.materials.rock + objects[int].mass*objects[int].materials.rock)/(this.mass+objects[int].mass);
+            this.materials.metals = (this.mass*this.materials.metals + objects[int].mass*objects[int].materials.metals)/(this.mass+objects[int].mass);
+            this.materials.gas = (this.mass*this.materials.gas + objects[int].mass*objects[int].materials.gas)/(this.mass+objects[int].mass);
 
             if(objects[int].affectedByGravity === true) {
                 if(!(objects[int].type === 3 || this.type === 3)){
@@ -527,10 +542,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.temperature = objects[int].temperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
-                    this.materials.ice = (this.mass*this.materials.ice + objects[int].mass*objects[int].materials.ice)/(this.mass+objects[int].mass);
-                    this.materials.rock = (this.mass*this.materials.rock + objects[int].mass*objects[int].materials.rock)/(this.mass+objects[int].mass);
-                    this.materials.metals = (this.mass*this.materials.metals + objects[int].mass*objects[int].materials.metals)/(this.mass+objects[int].mass);
-                    this.materials.gas = (this.mass*this.materials.gas + objects[int].mass*objects[int].materials.gas)/(this.mass+objects[int].mass);
+                    console.log("Mix");
                 }else{
 
                 }
@@ -545,10 +557,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.temperature = objects[int].temperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
-                    this.materials.ice = (this.mass*this.materials.ice + objects[int].mass*objects[int].materials.ice)/(this.mass+objects[int].mass);
-                    this.materials.rock = (this.mass*this.materials.rock + objects[int].mass*objects[int].materials.rock)/(this.mass+objects[int].mass);
-                    this.materials.metals = (this.mass*this.materials.metals + objects[int].mass*objects[int].materials.metals)/(this.mass+objects[int].mass);
-                    this.materials.gas = (this.mass*this.materials.gas + objects[int].mass*objects[int].materials.gas)/(this.mass+objects[int].mass);
                 }else{
 
                 }
@@ -563,9 +571,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             if(this.type === 0){
                 this.regenerate();
             }
+
             this.passedThrough = false;
             objects[int].inactive = true;
             objects.splice(int, 1);
+
         }else{
             if(distance < 1){
                 distance = 1;
@@ -589,7 +599,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         if(this.mass <= 50){
 
                         }else{
-                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'yellow', {ice:0, metals:0, rock:100, gas: 0}));
+                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, 1, 1, 3, false, 'yellow', {ice:0, metals:0, rock:20, gas: 80}));
                             objects[objects.length - 1].velX = this.velX/2*Math.random();
                             objects[objects.length - 1].velY = this.velY/2*Math.random();
                         }
@@ -604,6 +614,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             }
 
+            this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
             this.temperature += 20;
             if(this.type === 0){
