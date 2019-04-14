@@ -141,7 +141,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.distance = 0;
 
     this.inactive = false;
-    this.exists = false;
+    if(gameClock !== 0){
+        this.exists = false;
+    }else{
+        this.exists = true;
+    }
+
     this.passedThrough = false;
     this.affectedByGravity = true;
     this.curvePoints = [[this.x, this.y]];
@@ -178,6 +183,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.type === 3 && this.lifeTimer > 10){
             this.exists = true;
             this.affectedByGravity = true;
+        }else if(this.type === 3){
+            this.regenerate();
         }
         if(this.inactive === false && this.lifeTimer > 1){
 
@@ -203,7 +210,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius, 0, 2 * Math.PI);
                 ctx.fill();
-            }else if(this.type === 3){
+            }/*else if(this.type === 3){
                 if(this.materials.ice > 75 && this.mass < 50) {
                     ctx.fillStyle = 'white';
                 }else{
@@ -212,10 +219,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius, 0, 2 * Math.PI);
                 ctx.fill();
-            }
+            }*/
 
-            /*if(this.type === 3){
-                ctx.fillStyle = 'white';
+            if(this.type === 0 || this.type === 3){
+                if(this.materials.ice > 75 && this.mass < 50) {
+                    ctx.fillStyle = 'white';
+                }else{
+                    ctx.fillStyle = 'yellow';
+                }
                 ctx.beginPath();
                 ctx.moveTo(this.points[0][0] + this.cameraX - this.cameraRadius + cameraX, this.points[0][1] + this.cameraY - this.cameraRadius + cameraY);
                 for(var d = 1; d < this.points.length; d++){
@@ -226,7 +237,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 }
                 ctx.closePath();
                 ctx.fill();
-            }*/
+            }
 
             if(this.type === 2){
                 ctx.fillStyle = 'yellow';
@@ -351,8 +362,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.velX = (savedMouseX - mousePosX)*mouseForce/100;
                 this.velY = (savedMouseY - mousePosY)*mouseForce/100;
             }else{
+
                 this.curveVelX = (savedMouseX - mousePosX)*mouseForce/100;
                 this.curveVelY = (savedMouseY - mousePosY)*mouseForce/100;
+
 
                 this.curvePoints = [[this.x, this.y]];
 
@@ -452,7 +465,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        if(this.type === 0 && this.zoom !== cameraZoom){
+        if((this.type === 0 || this.type === 3) && this.zoom !== cameraZoom){
             this.regenerate();
             this.zoom = cameraZoom;
         }
@@ -568,7 +581,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
 
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
-            if(this.type === 0){
+            if(this.type === 0 || this.type === 3){
                 this.regenerate();
             }
 
@@ -617,7 +630,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
             this.temperature += 20;
-            if(this.type === 0){
+            if(this.type === 0 || this.type === 3){
                 this.regenerate();
             }
             this.passedThrough = false;
@@ -649,7 +662,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             this.pointAmount = 0;
             this.readyPoints = [0, 1, 2, 3];
 
-            if(this.type === 0){
+            if(this.type === 0 || this.type === 3){
                 for(var v = 0; v < this.pointAmount; v++){
                     this.readyPoints.push(Math.round(Math.random()*3));
                 }
@@ -673,7 +686,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     };
 
-    if(this.type === 0){
+    if(this.type === 0 || this.type === 3){
         this.regenerate();
     }
 }
