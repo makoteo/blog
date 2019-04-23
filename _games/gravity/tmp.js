@@ -313,7 +313,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth/2 + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
 
             ctx.font = WIDTH/80 + 'px Arial';
-            /*ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6.5);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
@@ -326,7 +326,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
 
             ctx.fillText("X", this.infoWindowX + this.infoWindowWidth*0.9, this.infoWindowY + HEIGHT/25);
-*/
+
             if(clickTimer === 0){
                 if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2){
                     modal.style.display = "block";
@@ -484,7 +484,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                 }
                             }
                         }
-                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && gameClock % 10 === 0){
+                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
                             this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
                             //console.log(this.temperature);
                         }else{
