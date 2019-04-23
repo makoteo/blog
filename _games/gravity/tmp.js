@@ -368,7 +368,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
 
         if(this.type !== 2){
-            if(gameClock % 10 === 0){
+            if(gameClock % 10 === 0 && PAUSED === false){
                 this.temperature = 0;
             }
         }
@@ -518,7 +518,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
         this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
 
-        if(this.planetTemperature > 0){
+        if(this.planetTemperature > 0 && PAUSED === false){
             this.planetTemperature--;
         }
         //console.log(this.velX);
@@ -772,7 +772,9 @@ objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40
 
 function game(){
 
-    gameClock++;
+    if(PAUSED === false){
+        gameClock++;
+    }
 
     window.onmousemove = logMouseMove;
 
@@ -994,7 +996,7 @@ function game(){
     }else if (keys && keys[48]) {
         cursorTool = true;
     }else if ((keys && keys[32])) {
-        if(pauseTimer === 0 && modal.style.display === "none"){
+        if(pauseTimer === 0 && modal.style.display !== "block"){
             PAUSED = !PAUSED;
         }
         pauseTimer = 2;
