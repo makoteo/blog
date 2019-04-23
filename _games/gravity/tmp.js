@@ -6,7 +6,7 @@
 
 //-----------------------------------------------------------------------------------------------------
 
-var versionCode = "Alpha 0.01";
+var versionCode = "Alpha 0.02";
 var WIDTH = 1024;
 var HEIGHT = 576;
 
@@ -928,19 +928,21 @@ function game(){
 
             ctx.globalAlpha = 1;
 
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].inactive === false){
-                    if(objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT){
-                        objects.splice(i, 1);
-                    }else{
-                        if(objects[i].type === 3){
-                            if(objects[i].lifeTimer > globalDebrieLifetime){
-                                objects.splice(i, 1);
+            if(PAUSED === false){
+                for(var i = 0; i < objects.length; i++){
+                    if(objects[i].inactive === false){
+                        if(objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT){
+                            objects.splice(i, 1);
+                        }else{
+                            if(objects[i].type === 3){
+                                if(objects[i].lifeTimer > globalDebrieLifetime){
+                                    objects.splice(i, 1);
+                                }else{
+                                    objects[i].update();
+                                }
                             }else{
                                 objects[i].update();
                             }
-                        }else{
-                            objects[i].update();
                         }
                     }
                 }
