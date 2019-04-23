@@ -318,7 +318,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
 
-            ctx.fillText("X" + this.name, this.infoWindowX + this.infoWindowWidth*0.9, this.infoWindowY + HEIGHT/25);
+            ctx.fillText("X", this.infoWindowX + this.infoWindowWidth*0.9, this.infoWindowY + HEIGHT/25);
 
             if(clickTimer === 0){
                 if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2){
@@ -330,6 +330,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             changeValue = "Name";
                         }
                     }
+                    PAUSED = true;
                 }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*3.5){
                     modal.style.display = "block";
                     for(var i = 0; i < objects.length; i++){
@@ -339,6 +340,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             changeValue = "Mass"
                         }
                     }
+                    PAUSED = true;
                 }else if(mousePosX > this.infoWindowX + this.infoWindowWidth*0.9 && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT/50*2){
                     this.infoWindowOpen = false;
                     this.infoWindowX = 0;
@@ -992,7 +994,7 @@ function game(){
     }else if (keys && keys[48]) {
         cursorTool = true;
     }else if ((keys && keys[32])) {
-        if(pauseTimer === 0){
+        if(pauseTimer === 0 && modal.style.display === "none"){
             PAUSED = !PAUSED;
         }
         pauseTimer = 2;
@@ -1119,6 +1121,7 @@ span.onclick = function() {
     }
 
     input.value = "";
+    PAUSED = false;
 
 }
 
@@ -1130,9 +1133,10 @@ window.onclick = function(event) {
             objects[windowSelectedPlanet].name = input.value;
         }else if(changeValue === "Mass"){
             objects[windowSelectedPlanet].mass = parseInt(input.value);
-            objects[windowSelectedPlanet].radius = (objects[windowSelectedPlanet].mass/objects[windowSelectedPlanet].density)*3.14;
+            console.log(objects[windowSelectedPlanet].mass);
         }
         input.value = "";
+        PAUSED = false;
     }
 }
 
