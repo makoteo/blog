@@ -74,6 +74,13 @@ var changeValue = "";
 
 var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true};
 
+var modal = document.getElementById('myModal');
+
+var input = document.getElementById('boxValueChange');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Object(x, y, mass, density, type, gravityEffect, color, materials){
@@ -1105,13 +1112,6 @@ function logMouseMove(e) {
     mousePosX = e.clientX - rect.left;
     mousePosY = e.clientY - rect.top;
 }
-
-var modal = document.getElementById('myModal');
-
-var input = document.getElementById('boxValueChange');
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
 
 // When the user clicks the button, open the modal
 
