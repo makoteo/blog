@@ -22,8 +22,6 @@ var ctx = canvas.getContext("2d");
 var cameraZoom = 1;
 var cameraX = 0;
 var cameraY = 0;
-var cameraActualX = 0;
-var cameraActualY = 0;
 var savedMouseX = 0;
 var savedMouseY = 0;
 var mouseonWindow = false;
@@ -72,6 +70,7 @@ var globalTrailLife = 500;
 var globalPlanetMass = 200;
 
 var windowSelectedPlanet = 0;
+var changeValue = "";
 
 var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true};
 
@@ -96,6 +95,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
 
     this.temperature = 0;
+    this.planetTemperature = 0;
 
     if(this.type === 2 || this.mass > starCreationLimit){
         this.temperature = this.mass * randomTempConstant;
@@ -222,7 +222,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }*/
 
             if(this.type === 0 || this.type === 3){
-                if(this.materials.ice > 75 && this.mass < 50) {
+                if((this.materials.ice > 75 && this.mass < 50) || this.type === 0) {
                     ctx.fillStyle = 'white';
                 }else{
                     ctx.fillStyle = 'yellow';
@@ -271,9 +271,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.infoWindowOpen === true){
             if(this.infoWindowX === 0 && draggingWindow === false){
                 if(this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth*1.2){
-                    this.infoWindowX = this.cameraX + cameraX + this.cameraRadius*3;
+                    this.infoWindowX = this.cameraX + cameraX;
                 }else{
-                    this.infoWindowX = this.cameraX + cameraX - this.cameraRadius*3 - this.infoWindowWidth;
+                    this.infoWindowX = this.cameraX + cameraX;
                 }
 
                 this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight/2;
@@ -292,23 +292,57 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
             ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
 
-            ctx.fillText("Mass: " + this.mass, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4);
-            ctx.fillText("Density: " + this.density, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5);
-            ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6);
-            ctx.fillText("Temperature: " + this.temperature, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*7);
+            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
+            ctx.fillText("Density: " + Math.round(this.density), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4.5);
+            ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5.5);
+            ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6.5);
 
-            ctx.fillText("Delta X: " + this.velX, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
-            ctx.fillText("Delta Y: " + this.velY, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10);
+            ctx.fillText("Delta X: " + Math.round(this.velX*10000)/10000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
+            ctx.fillText("Delta Y: " + Math.round(this.velY*10000)/10000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+
+            ctx.fillText("Metal: " + Math.round(this.materials.metals) + "%", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
+            ctx.fillText("Rock: " + Math.round(this.materials.rock) + "%", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+            ctx.fillText("Ice: " + Math.round(this.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth/2 + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
+            ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth/2 + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+
+            ctx.font = WIDTH/80 + 'px Arial';
+            ctx.fillText('\u270e', this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25);
+            ctx.fillText('\u270e', this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+
+            ctx.fillText("X" + this.name, this.infoWindowX + this.infoWindowWidth*0.9, this.infoWindowY + HEIGHT/25);
 
             if(clickTimer === 0){
-                if(mousePosX > this.infoWindowX + WIDTH/50 && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT/50*2){
+                if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2){
                     modal.style.display = "block";
                     for(var i = 0; i < objects.length; i++){
                         if(objects[i] === this){
                             windowSelectedPlanet = i;
                             input.value = this.name;
+                            changeValue = "Name";
                         }
                     }
+                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*3.5){
+                    modal.style.display = "block";
+                    for(var i = 0; i < objects.length; i++){
+                        if(objects[i] === this){
+                            windowSelectedPlanet = i;
+                            input.value = this.mass;
+                            changeValue = "Mass"
+                        }
+                    }
+                }else if(mousePosX > this.infoWindowX + this.infoWindowWidth*0.9 && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT/50*2){
+                    this.infoWindowOpen = false;
+                    this.infoWindowX = 0;
+                    this.infoWindowY = 0;
                 }
             }
         }
@@ -331,6 +365,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         }
 
+        if(this.type !== 2){
+            if(gameClock % 10 === 0){
+                this.temperature = 0;
+            }
+        }
+
         if(this.mass > starCreationLimit){
             if(this.type !== 2){
                 this.type = 2;
@@ -349,9 +389,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 if(this.gas > 0.9*this.totalMaterials){
                     this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*1.5 + "," + this.materials.ice*2.5 + ")";
                 }else if(this.gas > 0.5*this.totalMaterials){
-                    this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + this.materials.gas*0.4 + (this.temperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.gas*0.2 + this.materials.ice*0.5 +(this.temperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
+                    this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + this.materials.gas*0.4 + (this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.gas*0.2 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
                 }else{
-                    this.color = "rgb(" + (this.materials.metals*1.5 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + 100)/6) + "," + (this.materials.metals*0.8 + this.materials.rock*1 + this.materials.ice*0.5 +(this.temperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
+                    this.color = "rgb(" + (this.materials.metals*1.5 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.8 + this.materials.rock*1 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
                 }
             }
         }
@@ -435,12 +475,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                 }
                             }
                         }
-                        if(objects[j].type === 2 && (gameClock % 20 === 0) && this.type !== 2){
-                            if(this.type !== 2){
-                                this.temperature = 0;
-                            }else{
-                                this.temperature = this.mass * randomTempConstant;
-                            }
+                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && gameClock % 10 === 0){
                             this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
                             //console.log(this.temperature);
                         }else{
@@ -462,6 +497,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     //console.log(this.distance);
 
                 }
+                if(objects[j] === this){
+                    this.id = j;
+                }
             }
         }
 
@@ -477,6 +515,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.cameraX = ((this.x - screenHalfWidth) * cameraZoom + screenHalfWidth);
         this.cameraY = ((this.y - screenHalfHeight) * cameraZoom + screenHalfHeight);
         this.cameraRadius = Math.sqrt(this.mass/(this.density*3.14)) * cameraZoom;
+
+        if(this.planetTemperature > 0){
+            this.planetTemperature--;
+        }
         //console.log(this.velX);
     };
 
@@ -552,10 +594,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.name = objects[int].name;
                     this.type = objects[int].type;
                     this.infoWindowOpen = objects[int].infoWindowOpen;
+                    this.infoWindowX  = objects[int].infoWindowX;
+                    this.infoWindowY  = objects[int].infoWindowY;
                     this.temperature = objects[int].temperature;
+                    this.planetTemperature = objects[int].planetTemperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
-                    console.log("Mix");
                 }else{
 
                 }
@@ -567,7 +611,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.name = objects[int].name;
                     this.type = objects[int].type;
                     this.infoWindowOpen = objects[int].infoWindowOpen;
+                    this.infoWindowX  = objects[int].infoWindowX;
+                    this.infoWindowY  = objects[int].infoWindowY;
                     this.temperature = objects[int].temperature;
+                    this.planetTemperature = objects[int].planetTemperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
                 }else{
@@ -584,6 +631,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             if(this.type === 0 || this.type === 3){
                 this.regenerate();
             }
+
+            this.planetTemperature += 30;
 
             this.passedThrough = false;
             objects[int].inactive = true;
@@ -629,7 +678,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
-            this.temperature += 20;
             if(this.type === 0 || this.type === 3){
                 this.regenerate();
             }
@@ -717,7 +765,7 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 1000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 2000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
 
 function game(){
@@ -737,19 +785,15 @@ function game(){
                         if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
 
                         }else{
-                            ///objects[i].infoWindowOpen = false;
-                            ///objects[i].infoWindowX = 0;
-                            //objects[i].infoWindowY = 0;
+
                         }
                     }else{
-                        //objects[i].infoWindowOpen = false;
-                        //objects[i].infoWindowX = 0;
-                        //objects[i].infoWindowY = 0;
+
                     }
                 }
                 if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
                     if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
-                        objects[i].infoWindowOpen = !objects[i].infoWindowOpen;
+                        objects[i].infoWindowOpen = true;
                         objects[i].infoWindowX = 0;
                         objects[i].infoWindowY = 0;
                         break;
@@ -761,42 +805,45 @@ function game(){
         mouseonWindow = false;
         if(windowId === 0.1){
             for(var i = 0; i < objects.length; i++){
-                if(objects[i].infoWindowOpen === true){
-                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-                            mouseonWindow = true;
-                            windowId = i;
-                            draggingWindow = true;
-                            break;
+                if(objects[i].type !== 3){
+                    if(objects[i].infoWindowOpen === true){
+                        if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                            if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+                                mouseonWindow = true;
+                                windowId = i;
+                                draggingWindow = true;
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
         if((mouseonWindow === true || draggingWindow === true) && draggingScreen === false && windowId !== 0.1){
-            if(savedMouseX2 === 0){
-                savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
-                savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
-            }
-
-            if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
-                if(mousePosX + savedMouseX2 > 0){
-                    objects[windowId].infoWindowX = mousePosX + savedMouseX2;
-                }else{
-                    objects[windowId].infoWindowX = 1;
+            if(windowId < objects.length){
+                if(savedMouseX2 === 0){
+                    savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
+                    savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
                 }
-            }else{
-                objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
-            }
-
-            if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
-                if(mousePosY + savedMouseY2 > 0){
-                    objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+                if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
+                    if(mousePosX + savedMouseX2 > 0){
+                        objects[windowId].infoWindowX = mousePosX + savedMouseX2;
+                    }else{
+                        objects[windowId].infoWindowX = 1;
+                    }
                 }else{
-                    objects[windowId].infoWindowY = 1;
+                    objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
                 }
-            }else{
-                objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
+
+                if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
+                    if(mousePosY + savedMouseY2 > 0){
+                        objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+                    }else{
+                        objects[windowId].infoWindowY = 1;
+                    }
+                }else{
+                    objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
+                }
             }
         }else{
             savedMouseX2 = 0;
@@ -1065,7 +1112,12 @@ var span = document.getElementsByClassName("close")[0];
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
     modal.style.display = "none";
-    objects[windowSelectedPlanet].name = input.value;
+    if(changeValue === "Name"){
+        objects[windowSelectedPlanet].name = input.value;
+    }else if(changeValue === "Mass"){
+        objects[windowSelectedPlanet].mass = input.value;
+    }
+
     input.value = "";
 
 }
@@ -1074,7 +1126,12 @@ span.onclick = function() {
 window.onclick = function(event) {
     if (event.target == modal) {
         modal.style.display = "none";
-        objects[windowSelectedPlanet].name = input.value;
+        if(changeValue === "Name"){
+            objects[windowSelectedPlanet].name = input.value;
+        }else if(changeValue === "Mass"){
+            objects[windowSelectedPlanet].mass = parseInt(input.value);
+            objects[windowSelectedPlanet].radius = (objects[windowSelectedPlanet].mass/objects[windowSelectedPlanet].density)*3.14;
+        }
         input.value = "";
     }
 }
