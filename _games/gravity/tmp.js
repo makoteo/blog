@@ -1183,11 +1183,11 @@ function MouseWheelHandler(e)
     }
 
     if(delta < 0){
-        cameraX += (mousePosX - screenHalfWidth - cameraX)/30;
-        cameraY += (mousePosY - screenHalfHeight - cameraY)/30;
+        cameraX += (mousePosX - screenHalfWidth)/30 - (cameraX)/10;
+        cameraY += (mousePosY - screenHalfHeight)/30 - (cameraY)/10;
     }else{
-        cameraX -= (mousePosX - screenHalfWidth - cameraX)/30;
-        cameraY -= (mousePosY - screenHalfHeight - cameraY)/30;
+        cameraX -= (mousePosX - screenHalfWidth)/30 - (cameraX)/10;
+        cameraY -= (mousePosY - screenHalfHeight)/30 - (cameraY)/10;
     }
 
     AREAWIDTH = WIDTH/2/0.01;
