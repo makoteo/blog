@@ -321,7 +321,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.font = WIDTH/80 + 'px Arial';
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6.5);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
 
@@ -351,6 +350,26 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             windowSelectedPlanet = i;
                             input.value = this.mass;
                             changeValue = "Mass"
+                        }
+                    }
+                    PAUSED = true;
+                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*8 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*8){
+                    modal.style.display = "block";
+                    for(var i = 0; i < objects.length; i++){
+                        if(objects[i] === this){
+                            windowSelectedPlanet = i;
+                            input.value = this.velX;
+                            changeValue = "DeltaX"
+                        }
+                    }
+                    PAUSED = true;
+                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*9 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*9){
+                    modal.style.display = "block";
+                    for(var i = 0; i < objects.length; i++){
+                        if(objects[i] === this){
+                            windowSelectedPlanet = i;
+                            input.value = this.velY;
+                            changeValue = "DeltaY"
                         }
                     }
                     PAUSED = true;
@@ -1242,6 +1261,10 @@ window.onclick = function(event) {
         }else if(changeValue === "Mass"){
             objects[windowSelectedPlanet].mass = parseInt(input.value);
             console.log(objects[windowSelectedPlanet].mass);
+        }else if(changeValue === "DeltaX"){
+            objects[windowSelectedPlanet].velX = parseInt(input.value);
+        }else if(changeValue === "DeltaY"){
+            objects[windowSelectedPlanet].velY = parseInt(input.value);
         }
         input.value = "";
         PAUSED = false;
