@@ -15,6 +15,7 @@ var AREAHEIGHT = HEIGHT*10;
 
 var objects = [];
 var trails = [];
+var buttons = [];
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -60,6 +61,7 @@ var mousePosY = 0;
 var clickTimer = 1;
 
 var dragging = false;
+var clickingButton = false;
 
 var savedMouseX2 = 0;
 var savedMouseY2 = 0;
@@ -72,7 +74,11 @@ var globalPlanetMass = 200;
 var windowSelectedPlanet = 0;
 var changeValue = "";
 
-var selectedPlanetProperties = {mass:5, density:1, color:'blue', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true};
+var selectedPlanetProperties = [{mass:5, density:1, color:'gray', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true},
+    {mass:10, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:100, gas:0}, affectedByGravity:true},
+    {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}];
+var selectedPlanetButtonNum = 0;
+var planetButtons = 0;
 
 var modal = document.getElementById('myModal');
 
@@ -774,8 +780,86 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
+function Button(type, subtype, id){
+    this.x = 0;
+    this.y = HEIGHT - HEIGHT/50 - WIDTH/16;
+    this.width = WIDTH/18;
+    this.height = WIDTH/16;
+    this.type = type;
+    this.subtype = subtype;
+    this.id = id;
+
+    this.planetButtonNum = 0;
+
+    this.update = function(){
+        if(this.type === 1){
+            if(this.planetButtonNum !== planetButtons){
+                this.x = WIDTH/2 - this.width/2 - (planetButtons-1)*(this.width-WIDTH/50) + this.id*(WIDTH/50+this.width);
+                this.planetButtonNum = planetButtons;
+            }
+        }
+        if(clickTimer === 0){
+            if(mousePosX > this.x && mousePosX < this.x + this.width){
+                if(mousePosY > this.y && mousePosY < this.y + this.height){
+                    selectedPlanetButtonNum = this.id;
+                    cursorTool = false;
+                    clickingButton = true;
+                }
+            }
+        }
+    };
+
+    this.draw = function(){
+        ctx.strokeStyle = 'gray';
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+        if(this.id === selectedPlanetButtonNum){
+            ctx.fillStyle = 'white';
+        }else{
+            ctx.fillStyle = 'gray';
+        }
+        ctx.globalAlpha = 0.1;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'white';
+        ctx.font = WIDTH/80 + 'px Arial';
+        ctx.fillText("\u270e", this.x + this.width/20, this.y+this.height/5);
+        ctx.fillStyle = 'red';
+        ctx.fillText("X", this.x + this.width - this.width/5, this.y+this.height/5);
+        ctx.fillStyle = selectedPlanetProperties[this.id].color;
+        ctx.beginPath();
+        if(selectedPlanetProperties[this.id].type === 2){
+            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.globalAlpha = 0.2;
+            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/40, 0, 2 * Math.PI);
+        }else if(selectedPlanetProperties[this.id].type === 0){
+            ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
+            ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
+            ctx.lineTo(this.x + this.width*0.59, this.y + this.height*0.48);
+            ctx.lineTo(this.x + this.width*0.53, this.y + this.height*0.53);
+            ctx.lineTo(this.x + this.width*0.48, this.y + this.height*0.57);
+        }else{
+            if(selectedPlanetProperties[this.id].mass*0.5 < WIDTH/200){
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/200, 0, 2 * Math.PI);
+            }else if(selectedPlanetProperties[this.id].mass*0.5 < WIDTH/60){
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, selectedPlanetProperties[this.id].mass*0.5, 0, 2 * Math.PI);
+            }else{
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
+            }
+        }
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+}
+
 objects.push(new Object(WIDTH/2, HEIGHT/2, 2000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
+
+buttons.push(new Button(1, 1, 0)); // REMEMBER INCREASING ID RIP
+buttons.push(new Button(1, 1, 1)); // REMEMBER INCREASING ID RIP
+buttons.push(new Button(1, 1, 2));
 
 function game(){
 
@@ -783,11 +867,25 @@ function game(){
         gameClock++;
     }
 
+    planetButtons = 0;
+
+    for(var i = 0; i < buttons.length; i++){
+        if(buttons[i].type === 1){
+            planetButtons++;
+        }
+    }
+
+    for(var i = 0; i < buttons.length; i++){
+        buttons[i].update();
+    }
+
     window.onmousemove = logMouseMove;
 
     if(clickTimer === 0 && cursorTool === false){
         draggingWindow = false;
-        objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties.mass, selectedPlanetProperties.density, selectedPlanetProperties.type, selectedPlanetProperties.affectedByGravity, selectedPlanetProperties.color, {ice:selectedPlanetProperties.materials.ice, gas:selectedPlanetProperties.materials.gas, metals:selectedPlanetProperties.materials.metals, rock:selectedPlanetProperties.materials.rock}));
+        if(clickingButton === false){
+            objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties[selectedPlanetButtonNum].mass, selectedPlanetProperties[selectedPlanetButtonNum].density, selectedPlanetProperties[selectedPlanetButtonNum].type, selectedPlanetProperties[selectedPlanetButtonNum].affectedByGravity, selectedPlanetProperties[selectedPlanetButtonNum].color, {ice:selectedPlanetProperties[selectedPlanetButtonNum].materials.ice, gas:selectedPlanetProperties[selectedPlanetButtonNum].materials.gas, metals:selectedPlanetProperties[selectedPlanetButtonNum].materials.metals, rock:selectedPlanetProperties[selectedPlanetButtonNum].materials.rock}));
+        }
     }else if(clickTimer === 0 && cursorTool === true){
         for(var i = 0; i < objects.length; i++){
             if(objects[i].type !== 3){
@@ -907,18 +1005,28 @@ function game(){
 
             //Buttons?
 
-
+            for(var i = 0; i < buttons.length; i++){
+                buttons[i].update();
+                buttons[i].draw();
+            }
 
             //Cursor
 
             ctx.globalAlpha = 0.3;
             if(cursorTool === false){
-                if(selectedPlanetProperties.type === 0){
-
-                }else{
-                    ctx.fillStyle = selectedPlanetProperties.color;
+                if(selectedPlanetProperties[selectedPlanetButtonNum].type === 0){
+                    ctx.fillStyle = 'white';
                     ctx.beginPath();
-                    ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties.mass*massMultiplier/(selectedPlanetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
+                    ctx.moveTo(mousePosX - WIDTH/20*0.05, mousePosY - WIDTH/20*0.05);
+                    ctx.lineTo(mousePosX + WIDTH/20*0.07, mousePosY - WIDTH/20*0.10);
+                    ctx.lineTo(mousePosX + WIDTH/20*0.09, mousePosY - WIDTH/20*0.02);
+                    ctx.lineTo(mousePosX + WIDTH/20*0.03, mousePosY + WIDTH/20*0.03);
+                    ctx.lineTo(mousePosX - WIDTH/20*0.02, mousePosY + WIDTH/20*0.07);
+                    ctx.fill();
+                }else{
+                    ctx.fillStyle = selectedPlanetProperties[selectedPlanetButtonNum].color;
+                    ctx.beginPath();
+                    ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties[selectedPlanetButtonNum].mass*massMultiplier/(selectedPlanetProperties[selectedPlanetButtonNum].density*3.14)) * cameraZoom, 0, 2 * Math.PI);
                     ctx.fill();
                 }
             }
@@ -987,20 +1095,16 @@ function game(){
         pauseTimer--;
     }
 
+    clickingButton = false;
+
     if (keys && keys[49]) {
-        selectedPlanetProperties.type = 0;
-        selectedPlanetProperties.mass = 5;
-        selectedPlanetProperties.color = 'white';
+        selectedPlanetButtonNum = 0;
         cursorTool = false;
     }else if (keys && keys[50]) {
-        selectedPlanetProperties.type = 1;
-        selectedPlanetProperties.mass = 15;
-        selectedPlanetProperties.color = 'blue';
+        selectedPlanetButtonNum = 1;
         cursorTool = false;
     }else if (keys && keys[51]) {
-        selectedPlanetProperties.type = 2;
-        selectedPlanetProperties.mass = 500;
-        selectedPlanetProperties.color = 'yellow';
+        selectedPlanetButtonNum = 2;
         cursorTool = false;
     }else if (keys && keys[48]) {
         cursorTool = true;
@@ -1017,10 +1121,10 @@ function game(){
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
 function setMaterials(x, y, z, u){
-    selectedPlanetProperties.materials.metals = x;
-    selectedPlanetProperties.materials.rock = y;
-    selectedPlanetProperties.materials.ice = z;
-    selectedPlanetProperties.materials.gas = u;
+    selectedPlanetProperties[selectedPlanetButtonNum].materials.metals = x;
+    selectedPlanetProperties[selectedPlanetButtonNum].materials.rock = y;
+    selectedPlanetProperties[selectedPlanetButtonNum].materials.ice = z;
+    selectedPlanetProperties[selectedPlanetButtonNum].materials.gas = u;
 }
 
 function Start(){
