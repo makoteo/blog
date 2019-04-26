@@ -74,9 +74,6 @@ var globalPlanetMass = 200;
 var windowSelectedPlanet = 0;
 var changeValue = "";
 
-var selectedPlanetProperties = [{mass:5, density:1, color:'gray', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true},
-    {mass:10, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:100, gas:0}, affectedByGravity:true},
-    {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}];
 var selectedPlanetButtonNum = 0;
 var planetButtons = 0;
 
@@ -281,15 +278,15 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
     };
     this.drawInfoWindow = function(){
-        if(this.infoWindowOpen === true){
-            if(this.infoWindowX === 0 && draggingWindow === false){
-                if(this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth*1.2){
+        if(this.infoWindowOpen === true) {
+            if (this.infoWindowX === 0 && draggingWindow === false) {
+                if (this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth * 1.2) {
                     this.infoWindowX = this.cameraX + cameraX;
-                }else{
+                } else {
                     this.infoWindowX = this.cameraX + cameraX;
                 }
 
-                this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight/2;
+                this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight / 2;
 
             }
             ctx.fillStyle = 'rgb(10, 10, 10)';
@@ -300,85 +297,118 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
             ctx.textAlign = 'left';
             ctx.fillStyle = 'white';
-            ctx.font = WIDTH/80 + 'px Arial';
-            ctx.fillText("Name: " + this.name, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25);
-            ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30);
-            ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*2);
+            ctx.font = WIDTH / 80 + 'px Arial';
+            ctx.fillText("Name: " + this.name, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25);
+            ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30);
+            ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 2);
 
-            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
-            ctx.fillText("Density: " + Math.round(this.density), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*4.5);
-            ctx.fillText("Radius: " + Math.round(this.radius)*1000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*5.5);
-            ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*6.5);
+            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
+            ctx.fillText("Density: " + Math.round(this.density), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
+            ctx.fillText("Radius: " + Math.round(this.radius) * 1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 5.5);
+            ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 6.5);
 
-            ctx.fillText("Delta X: " + Math.round(this.velX*10000)/10000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
-            ctx.fillText("Delta Y: " + Math.round(this.velY*10000)/10000, this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+            ctx.fillText("Delta X: " + Math.round(this.velX * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
+            ctx.fillText("Delta Y: " + Math.round(this.velY * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
 
-            ctx.fillText("Metal: " + Math.round(this.materials.metals) + "%", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
-            ctx.fillText("Rock: " + Math.round(this.materials.rock) + "%", this.infoWindowX + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
-            ctx.fillText("Ice: " + Math.round(this.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth/2 + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
-            ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth/2 + WIDTH/50, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+            ctx.fillText("Metal: " + Math.round(this.materials.metals) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("Rock: " + Math.round(this.materials.rock) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+            ctx.fillText("Ice: " + Math.round(this.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
 
-            ctx.font = WIDTH/80 + 'px Arial';
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*3.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*8);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*9);
+            ctx.font = WIDTH / 80 + 'px Arial';
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
 
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
 
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth*0.01 + this.infoWindowWidth/2, this.infoWindowY + HEIGHT/25 + HEIGHT/30*11.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
 
-            ctx.fillText("X", this.infoWindowX + this.infoWindowWidth*0.9, this.infoWindowY + HEIGHT/25);
+            ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
 
-            if(clickTimer === 0){
-                if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2){
-                    modal.style.display = "block";
-                    for(var i = 0; i < objects.length; i++){
-                        if(objects[i] === this){
-                            windowSelectedPlanet = i;
-                            input.value = this.name;
-                            changeValue = "Name";
+            ctx.fillStyle = 'red';
+            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 50);
+            ctx.fillStyle = 'white';
+
+            //if (clickTimer === 0) {
+                if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.name;
+                                changeValue = "Name";
+                            }
                         }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
                     }
-                    PAUSED = true;
-                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*3.5){
-                    modal.style.display = "block";
-                    for(var i = 0; i < objects.length; i++){
-                        if(objects[i] === this){
-                            windowSelectedPlanet = i;
-                            input.value = this.mass;
-                            changeValue = "Mass"
+                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 3.5) {
+                    if(clickTimer === 0) {
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.mass;
+                                changeValue = "Mass"
+                            }
                         }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
                     }
-                    PAUSED = true;
-                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*8 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*8){
-                    modal.style.display = "block";
-                    for(var i = 0; i < objects.length; i++){
-                        if(objects[i] === this){
-                            windowSelectedPlanet = i;
-                            input.value = this.velX;
-                            changeValue = "DeltaX"
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 8) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.velX;
+                                changeValue = "DeltaX"
+                            }
                         }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
                     }
-                    PAUSED = true;
-                }else if(mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT/50 + HEIGHT/30*9 && mousePosX < this.infoWindowX + this.infoWindowWidth*0.05 && mousePosY < this.infoWindowY + HEIGHT/50*2 + HEIGHT/30*9){
-                    modal.style.display = "block";
-                    for(var i = 0; i < objects.length; i++){
-                        if(objects[i] === this){
-                            windowSelectedPlanet = i;
-                            input.value = this.velY;
-                            changeValue = "DeltaY"
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 9 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 9) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.velY;
+                                changeValue = "DeltaY"
+                            }
                         }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
                     }
-                    PAUSED = true;
-                }else if(mousePosX > this.infoWindowX + this.infoWindowWidth*0.9 && mousePosY > this.infoWindowY + HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT/50*2){
-                    this.infoWindowOpen = false;
-                    this.infoWindowX = 0;
-                    this.infoWindowY = 0;
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
+                    if(clickTimer === 0){
+                        this.infoWindowOpen = false;
+                        this.infoWindowX = 0;
+                        this.infoWindowY = 0;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 30 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 50) {
+                    if(clickTimer === 0){
+                        objects.splice(this.id, 1);
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                }else{
+
                 }
-            }
+
         }
     };
     this.update = function(){
@@ -799,7 +829,7 @@ function Trail(x1, y1, x2, y2, color){
     }
 }
 
-function Button(type, subtype, id){
+function Button(type, subtype, id, planetProperties){
     this.x = 0;
     this.y = HEIGHT - HEIGHT/50 - WIDTH/16;
     this.width = WIDTH/18;
@@ -809,6 +839,7 @@ function Button(type, subtype, id){
     this.id = id;
 
     this.planetButtonNum = 0;
+    this.planetProperties = planetProperties;
 
     this.update = function(){
         if(this.type === 1){
@@ -844,25 +875,25 @@ function Button(type, subtype, id){
         ctx.fillText("\u270e", this.x + this.width/20, this.y+this.height/5);
         ctx.fillStyle = 'red';
         ctx.fillText("X", this.x + this.width - this.width/5, this.y+this.height/5);
-        ctx.fillStyle = selectedPlanetProperties[this.id].color;
+        ctx.fillStyle = this.planetProperties.color;
         ctx.beginPath();
-        if(selectedPlanetProperties[this.id].type === 2){
+        if(this.planetProperties.type === 2){
             ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
             ctx.fill();
             ctx.beginPath();
             ctx.globalAlpha = 0.2;
             ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/40, 0, 2 * Math.PI);
-        }else if(selectedPlanetProperties[this.id].type === 0){
+        }else if(this.planetProperties.type === 0){
             ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
             ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
             ctx.lineTo(this.x + this.width*0.59, this.y + this.height*0.48);
             ctx.lineTo(this.x + this.width*0.53, this.y + this.height*0.53);
             ctx.lineTo(this.x + this.width*0.48, this.y + this.height*0.57);
         }else{
-            if(selectedPlanetProperties[this.id].mass*0.5 < WIDTH/200){
+            if(this.planetProperties.mass*0.5 < WIDTH/200){
                 ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/200, 0, 2 * Math.PI);
-            }else if(selectedPlanetProperties[this.id].mass*0.5 < WIDTH/60){
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, selectedPlanetProperties[this.id].mass*0.5, 0, 2 * Math.PI);
+            }else if(this.planetProperties.mass*0.5 < WIDTH/60){
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, this.planetProperties.mass*0.5, 0, 2 * Math.PI);
             }else{
                 ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
             }
@@ -876,9 +907,9 @@ function Button(type, subtype, id){
 objects.push(new Object(WIDTH/2, HEIGHT/2, 2000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
 
-buttons.push(new Button(1, 1, 0)); // REMEMBER INCREASING ID RIP
-buttons.push(new Button(1, 1, 1)); // REMEMBER INCREASING ID RIP
-buttons.push(new Button(1, 1, 2));
+buttons.push(new Button(1, 1, 0, {mass:5, density:1, color:'gray', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
+buttons.push(new Button(1, 1, 1, {mass:10, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:100, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
+buttons.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 
 function game(){
 
@@ -894,7 +925,12 @@ function game(){
         }
     }
 
+    var tempId = 0;
     for(var i = 0; i < buttons.length; i++){
+        if(buttons[i].type === 1){ // PLANET PICKING BUTTONS MUST RESET ID ALL THE TIME
+            buttons[i].id = tempId;
+            tempId++;
+        }
         buttons[i].update();
     }
 
@@ -903,7 +939,7 @@ function game(){
     if(clickTimer === 0 && cursorTool === false){
         draggingWindow = false;
         if(clickingButton === false){
-            objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), selectedPlanetProperties[selectedPlanetButtonNum].mass, selectedPlanetProperties[selectedPlanetButtonNum].density, selectedPlanetProperties[selectedPlanetButtonNum].type, selectedPlanetProperties[selectedPlanetButtonNum].affectedByGravity, selectedPlanetProperties[selectedPlanetButtonNum].color, {ice:selectedPlanetProperties[selectedPlanetButtonNum].materials.ice, gas:selectedPlanetProperties[selectedPlanetButtonNum].materials.gas, metals:selectedPlanetProperties[selectedPlanetButtonNum].materials.metals, rock:selectedPlanetProperties[selectedPlanetButtonNum].materials.rock}));
+            objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), buttons[selectedPlanetButtonNum].planetProperties.mass, buttons[selectedPlanetButtonNum].planetProperties.density, buttons[selectedPlanetButtonNum].planetProperties.type, buttons[selectedPlanetButtonNum].planetProperties.affectedByGravity, buttons[selectedPlanetButtonNum].planetProperties.color, {ice:buttons[selectedPlanetButtonNum].planetProperties.materials.ice, gas:buttons[selectedPlanetButtonNum].planetProperties.materials.gas, metals:buttons[selectedPlanetButtonNum].planetProperties.materials.metals, rock:buttons[selectedPlanetButtonNum].planetProperties.materials.rock}));
         }
     }else if(clickTimer === 0 && cursorTool === true){
         for(var i = 0; i < objects.length; i++){
@@ -1033,7 +1069,7 @@ function game(){
 
             ctx.globalAlpha = 0.3;
             if(cursorTool === false){
-                if(selectedPlanetProperties[selectedPlanetButtonNum].type === 0){
+                if(buttons[selectedPlanetButtonNum].planetProperties === 0){
                     ctx.fillStyle = 'white';
                     ctx.beginPath();
                     ctx.moveTo(mousePosX - WIDTH/20*0.05, mousePosY - WIDTH/20*0.05);
@@ -1043,9 +1079,9 @@ function game(){
                     ctx.lineTo(mousePosX - WIDTH/20*0.02, mousePosY + WIDTH/20*0.07);
                     ctx.fill();
                 }else{
-                    ctx.fillStyle = selectedPlanetProperties[selectedPlanetButtonNum].color;
+                    ctx.fillStyle = buttons[selectedPlanetButtonNum].planetProperties.color;
                     ctx.beginPath();
-                    ctx.arc(mousePosX, mousePosY, Math.sqrt(selectedPlanetProperties[selectedPlanetButtonNum].mass*massMultiplier/(selectedPlanetProperties[selectedPlanetButtonNum].density*3.14)) * cameraZoom, 0, 2 * Math.PI);
+                    ctx.arc(mousePosX, mousePosY, Math.sqrt(buttons[selectedPlanetButtonNum].planetProperties.mass*massMultiplier/(buttons[selectedPlanetButtonNum].planetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
                     ctx.fill();
                 }
             }
@@ -1098,6 +1134,8 @@ function game(){
         }
     }
 
+    document.body.style.cursor = "auto";
+
     for(var i = 0; i < objects.length; i++){
         if(objects[i].inactive === false){
             objects[i].drawInfoWindow();
@@ -1140,10 +1178,10 @@ function game(){
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
 function setMaterials(x, y, z, u){
-    selectedPlanetProperties[selectedPlanetButtonNum].materials.metals = x;
-    selectedPlanetProperties[selectedPlanetButtonNum].materials.rock = y;
-    selectedPlanetProperties[selectedPlanetButtonNum].materials.ice = z;
-    selectedPlanetProperties[selectedPlanetButtonNum].materials.gas = u;
+    buttons[selectedPlanetButtonNum].planetProperties.materials.metals = x;
+    buttons[selectedPlanetButtonNum].planetProperties.materials.rock = y;
+    buttons[selectedPlanetButtonNum].planetProperties.materials.ice = z;
+    buttons[selectedPlanetButtonNum].planetProperties.materials.gas = u;
 }
 
 function Start(){
