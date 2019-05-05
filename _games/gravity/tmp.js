@@ -275,14 +275,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
 
             if(this.type === 3){
-                this.gradient = ctx.createRadialGradient(this.cameraX, this.cameraY, this.cameraRadius/2, this.cameraX, this.cameraY,  this.cameraRadius*5*this.randomNumBcWhyNot);
+                this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*5*this.randomNumBcWhyNot);
                 this.gradient.addColorStop(0, "yellow");
                 this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
                 ctx.fillStyle = this.gradient;
                 ctx.globalAlpha = 0.1;
-                ctx.beginPath();
-                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*1.5*this.randomNumBcWhyNot, 0, 2 * Math.PI);
-                ctx.fill();
                 ctx.beginPath();
                 ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*5*this.randomNumBcWhyNot, 0, 2 * Math.PI);
                 ctx.fill();
@@ -404,7 +401,63 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 10 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 10.5) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.materials.metals;
+                                changeValue = "Metal"
+                            }
+                        }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.materials.rock;
+                                changeValue = "Rock"
+                            }
+                        }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 10 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 10.5) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.materials.ice;
+                                changeValue = "Ice"
+                            }
+                        }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05  + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
+                    if(clickTimer === 0){
+                        modal.style.display = "block";
+                        for (var i = 0; i < objects.length; i++) {
+                            if (objects[i] === this) {
+                                windowSelectedPlanet = i;
+                                input.value = this.materials.gas;
+                                changeValue = "Gas"
+                            }
+                        }
+                        PAUSED = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
                     if(clickTimer === 0){
                         this.infoWindowOpen = false;
                         this.infoWindowX = 0;
@@ -849,6 +902,10 @@ function Button(type, subtype, id, planetProperties){
     this.planetButtonNum = 0;
     this.planetProperties = planetProperties;
 
+    this.infoWindowOpen = false;
+    this.infoWindowWidth = this.width*2;
+    this.infoWindowHeight = this.height;
+
     if(this.planetProperties.materials.gas > 0.9*100){
         this.color = "rgb(" + (this.planetProperties.materials.gas*2 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*0.5) + "," + (this.planetProperties.materials.gas*1.5 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*1) + "," + this.planetProperties.materials.ice*2.5 + ")";
     }else if(this.gas > 0.5*100){
@@ -859,6 +916,10 @@ function Button(type, subtype, id, planetProperties){
 
     this.update = function(){
         if(this.type === 1){
+
+            this.infoWindowX = this.x - this.width/2;
+            this.infoWindowY = this.y - this.height*1.2;
+
             if(this.planetButtonNum !== planetButtons){
                 this.x = WIDTH/2 - this.width/2 - (planetButtons-1)*(this.width-WIDTH/50) + this.id*(WIDTH/50+this.width);
                 this.planetButtonNum = planetButtons;
@@ -948,6 +1009,119 @@ function Button(type, subtype, id, planetProperties){
         ctx.globalAlpha = 1;
         this.y+=this.yOffset;
     }
+
+    this.drawInfoWindow = function(){
+        if(this.infoWindowOpen === true) {
+            ctx.fillStyle = 'rgb(10, 10, 10)';
+            ctx.globalAlpha = 0.4;
+            ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = 'gray';
+            ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'white';
+            ctx.font = WIDTH / 80 + 'px Arial';
+            ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25);
+
+            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30);
+
+            ctx.fillText("Metal: " + Math.round(this.planetProperties.materials.metals) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30*2);
+            ctx.fillText("Rock: " + Math.round(this.planetProperties.materials.rock) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30*3);
+            ctx.fillText("Ice: " + Math.round(this.planetProperties.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 2);
+            ctx.fillText("Gas: " + Math.round(this.planetProperties.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
+
+            ctx.font = WIDTH / 80 + 'px Arial';
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
+
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+
+            ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
+
+            //if (clickTimer === 0) {
+            if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
+                if(clickTimer === 0){
+                    modal.style.display = "block";
+                    for (var i = 0; i < objects.length; i++) {
+                        if (objects[i] === this) {
+                            windowSelectedPlanet = i;
+                            input.value = this.name;
+                            changeValue = "Name";
+                        }
+                    }
+                    PAUSED = true;
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+            }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 3.5) {
+                if(clickTimer === 0) {
+                    modal.style.display = "block";
+                    for (var i = 0; i < objects.length; i++) {
+                        if (objects[i] === this) {
+                            windowSelectedPlanet = i;
+                            input.value = this.mass;
+                            changeValue = "Mass"
+                        }
+                    }
+                    PAUSED = true;
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+            } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 8) {
+                if(clickTimer === 0){
+                    modal.style.display = "block";
+                    for (var i = 0; i < objects.length; i++) {
+                        if (objects[i] === this) {
+                            windowSelectedPlanet = i;
+                            input.value = this.velX;
+                            changeValue = "DeltaX"
+                        }
+                    }
+                    PAUSED = true;
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+            } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 9 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 9) {
+                if(clickTimer === 0){
+                    modal.style.display = "block";
+                    for (var i = 0; i < objects.length; i++) {
+                        if (objects[i] === this) {
+                            windowSelectedPlanet = i;
+                            input.value = this.velY;
+                            changeValue = "DeltaY"
+                        }
+                    }
+                    PAUSED = true;
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+            } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
+                if(clickTimer === 0){
+                    this.infoWindowOpen = false;
+                    this.infoWindowX = 0;
+                    this.infoWindowY = 0;
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+
+            } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 30 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 50) {
+                if(clickTimer === 0){
+                    objects.splice(this.id, 1);
+                }else{
+                    document.body.style.cursor = "pointer";
+                }
+            }else{
+
+            }
+
+        }
+    };
 
 }
 
@@ -1116,6 +1290,7 @@ function game(){
             for(var i = 0; i < buttonsPlanets.length; i++){
                 buttonsPlanets[i].update();
                 buttonsPlanets[i].draw();
+                buttonsPlanets[i].drawInfoWindow();
             }
 
             //Cursor
@@ -1359,6 +1534,86 @@ window.onclick = function(event) {
             objects[windowSelectedPlanet].velX = parseInt(input.value);
         }else if(changeValue === "DeltaY"){
             objects[windowSelectedPlanet].velY = parseInt(input.value);
+        }else if(changeValue === "Metal"){
+            if(parseInt(input.value) > 100){
+                input.value = 100;
+            }
+            objects[windowSelectedPlanet].materials.metals = parseInt(input.value);
+            if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas > 100){
+                objects[windowSelectedPlanet].materials.rock += 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
+                if(objects[windowSelectedPlanet].materials.rock < 0){
+                    objects[windowSelectedPlanet].materials.ice += objects[windowSelectedPlanet].materials.rock;
+                    objects[windowSelectedPlanet].materials.rock = 0;
+                    if(objects[windowSelectedPlanet].materials.ice < 0){
+                        objects[windowSelectedPlanet].materials.gas += objects[windowSelectedPlanet].materials.ice;
+                        objects[windowSelectedPlanet].materials.ice = 0;
+                        if(objects[windowSelectedPlanet].materials.gas < 0){
+                            objects[windowSelectedPlanet].materials.metals = 100;
+                            objects[windowSelectedPlanet].materials.gas = 0;
+                        }
+                    }
+                }
+            }
+        }else if(changeValue === "Rock"){
+            if(parseInt(input.value) > 100){
+                input.value = 100;
+            }
+            objects[windowSelectedPlanet].materials.rock = parseInt(input.value);
+            if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas > 100){
+                objects[windowSelectedPlanet].materials.ice += 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
+                if(objects[windowSelectedPlanet].materials.ice < 0){
+                    objects[windowSelectedPlanet].materials.gas += objects[windowSelectedPlanet].materials.ice;
+                    objects[windowSelectedPlanet].materials.ice = 0;
+                    if(objects[windowSelectedPlanet].materials.gas < 0){
+                        objects[windowSelectedPlanet].materials.metals += objects[windowSelectedPlanet].materials.gas;
+                        objects[windowSelectedPlanet].materials.gas = 0;
+                        if(objects[windowSelectedPlanet].materials.metals < 0){
+                            objects[windowSelectedPlanet].materials.rock = 100;
+                            objects[windowSelectedPlanet].materials.metals = 0;
+                        }
+                    }
+                }
+            }
+        }else if(changeValue === "Ice"){
+            if(parseInt(input.value) > 100){
+                input.value = 100;
+            }
+            objects[windowSelectedPlanet].materials.ice = parseInt(input.value);
+            if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas > 100){
+                objects[windowSelectedPlanet].materials.gas += 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
+                if(objects[windowSelectedPlanet].materials.gas < 0){
+                    objects[windowSelectedPlanet].materials.metals += objects[windowSelectedPlanet].materials.gas;
+                    objects[windowSelectedPlanet].materials.gas = 0;
+                    if(objects[windowSelectedPlanet].materials.metals < 0){
+                        objects[windowSelectedPlanet].materials.rock += objects[windowSelectedPlanet].materials.metals;
+                        objects[windowSelectedPlanet].materials.metals = 0;
+                        if(objects[windowSelectedPlanet].materials.rock < 0){
+                            objects[windowSelectedPlanet].materials.ice = 100;
+                            objects[windowSelectedPlanet].materials.rock = 0;
+                        }
+                    }
+                }
+            }
+        }else if(changeValue === "Gas"){
+            if(parseInt(input.value) > 100){
+                input.value = 100;
+            }
+            objects[windowSelectedPlanet].materials.gas = parseInt(input.value);
+            if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas > 100){
+                objects[windowSelectedPlanet].materials.metals += 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
+                if(objects[windowSelectedPlanet].materials.metals < 0){
+                    objects[windowSelectedPlanet].materials.rock += objects[windowSelectedPlanet].materials.metals;
+                    objects[windowSelectedPlanet].materials.metals = 0;
+                    if(objects[windowSelectedPlanet].materials.rock < 0){
+                        objects[windowSelectedPlanet].materials.ice += objects[windowSelectedPlanet].materials.rock;
+                        objects[windowSelectedPlanet].materials.rock = 0;
+                        if(objects[windowSelectedPlanet].materials.ice < 0){
+                            objects[windowSelectedPlanet].materials.gas = 100;
+                            objects[windowSelectedPlanet].materials.ice = 0;
+                        }
+                    }
+                }
+            }
         }
         input.value = "";
         PAUSED = false;
