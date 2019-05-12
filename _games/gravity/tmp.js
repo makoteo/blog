@@ -102,6 +102,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     this.name = "";
 
+    this.following = false;
+
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
 
     this.temperature = 0;
@@ -344,8 +346,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
 
+            ctx.fillText("Follow", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 25);
+
             ctx.fillStyle = 'red';
-            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 50);
+            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 100);
             ctx.fillStyle = 'white';
 
             //if (clickTimer === 0) {
@@ -470,7 +474,13 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         document.body.style.cursor = "pointer";
                     }
 
-                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 30 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 50) {
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 15 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 30) {
+                    if(clickTimer === 0){
+                        this.following = true;
+                    }else{
+                        document.body.style.cursor = "pointer";
+                    }
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 35 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 100) {
                     if(clickTimer === 0){
                         objects.splice(this.id, 1);
                     }else{
@@ -841,6 +851,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
         this.x += this.velX;
         this.y += this.velY;
+
+        if(this.following === true){
+            cameraX = -this.cameraX + screenHalfWidth;
+            cameraY = -this.cameraY + screenHalfHeight;
+        }
 
         if(globalTrails === true){
             if(this.type !== 3){
@@ -1261,6 +1276,11 @@ function game(){
                 }
             }
         }else{
+
+            for(var x = 0; x < objects.length; x++){
+                objects[x].following = false;
+            }
+
             savedMouseX2 = 0;
             savedMouseY2 = 0;
             if(savedMouseX === 0){
