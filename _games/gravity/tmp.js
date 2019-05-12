@@ -126,9 +126,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     //this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
 
-    if(this.gas > 0.9*this.totalMaterials){
+    if(this.materials.gas > 0.9*this.totalMaterials){
         this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.materials.ice*2.5 + ")";
-    }else if(this.gas > 0.5*this.totalMaterials){
+    }else if(this.materials.gas > 0.5*this.totalMaterials){
         this.color = "rgb(" + (this.materials.gas*1.2 + this.materials.metals*0.5 + this.materials.rock*0.3) + "," + (this.materials.gas*1  + this.materials.metals*0.6 + this.materials.rock*0.5) + "," + this.materials.ice*2.2 + ")";
     }else{
         this.color = "rgb(" + (this.materials.gas*0.5 + this.materials.metals*1.5 + this.materials.rock*0.2) + "," + (this.materials.gas*0.2 + this.materials.metals*0.8 + this.materials.rock*0.6) + "," + this.materials.ice*2 + ")";
@@ -138,6 +138,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.velX = 0;
     this.velY = 0;
 
+    this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
     this.radius = Math.sqrt(this.mass/(this.density*3.14));
 
     this.gravityEffect = gravityEffect;
@@ -190,6 +191,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     if(this.gravityEffect === false){
         this.affectedByGravity = false;
     }
+
+    this.biggestGravAttraction = 0;
+    this.greatestAttractor = 0;
 
     this.draw = function(){
 
@@ -515,19 +519,24 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        if(this.type === 1){
+        if(this.type !== 2){
             if(gameClock % 10 === 0){
-                if(this.gas > 0.9*this.totalMaterials){
+                if(this.materials.gas > 0.9*this.totalMaterials){
                     this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*1.5 + "," + this.materials.ice*2.5 + ")";
-                }else if(this.gas > 0.5*this.totalMaterials){
+                }else if(this.materials.gas > 0.5*this.totalMaterials){
                     this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + this.materials.gas*0.4 + (this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.gas*0.2 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
                 }else{
                     this.color = "rgb(" + (this.materials.metals*1.5 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.8 + this.materials.rock*1 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
                 }
             }
+        }else{
+            this.color = 'yellow';
         }
 
         if(this.exists === false && this.type !== 3){
+            this.greatestAttractor = 0;
+            this.biggestGravAttraction = 0;
+            this.distancefromGreatestAttractor = 0;
             if(dragging === false){
                 this.exists = true;
                 this.velX = (savedMouseX - mousePosX)*mouseForce/100;
@@ -544,13 +553,18 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.curvePoints.push([this.curvePoints[i-1][0] + this.curveVelX, this.curvePoints[i-1][1] + this.curveVelY]);
                     if(this.affectedByGravity === true){
                         for (var j = 0; j < objects.length; j++) {
-                            if (objects[j] !== this && this.inactive === false && objects[j].exists === true) {
+                            if (objects[j] !== this && this.inactive === false && objects[j].exists === true && objects[j].type !== 3) {
                                 this.tempX = objects[j].x;
                                 this.tempY = objects[j].y;
                                 this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
                                 if(this.distance > (this.radius + objects[j].radius)){
                                     this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                     this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
+                                    if((objects[j].mass/(this.distance*this.distance) > this.biggestGravAttraction) && i === 1){
+                                        this.greatestAttractor = j;
+                                        this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
+                                        this.distancefromGreatestAttractor = this.distance;
+                                    }
                                 }else{
                                     this.curveVelX = 0;
                                     this.curveVelY = 0;
@@ -564,6 +578,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }
 
                 }
+
                 if(this.lifeTimer > 1){
                     for(var d = 1; d < this.curvePoints.length; d++){
                         ctx.strokeStyle = 'white';
@@ -572,6 +587,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         ctx.lineTo(((this.curvePoints[d][0] - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.curvePoints[d][1] - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY);
                         ctx.stroke();
                     }
+
+                    ctx.fillStyle = 'white';
+                    ctx.globalAlpha = 0.1;
+                    ctx.beginPath();
+                    ctx.arc(objects[this.greatestAttractor].cameraX + cameraX, objects[this.greatestAttractor].cameraY + cameraY, this.distancefromGreatestAttractor*cameraZoom, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+
                 }
             }
         }
@@ -749,6 +772,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.affectedByGravity = false;
             }
 
+            this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
             if(this.type === 0 || this.type === 3){
                 this.regenerate();
@@ -769,8 +793,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                 this.random = Math.round(this.mass/massMultiplier/10);
 
-                if(this.random > 50){
-                    this.random = 50;
+                if(this.random > 1){
+                    this.random = 1;
                 }
                 for(var i = 0; i < this.random; i++){
                     this.spawnX = Math.random()*this.radius - this.radius/2;
@@ -1125,7 +1149,7 @@ function Button(type, subtype, id, planetProperties){
 
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 2000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 500, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
 
 buttonsPlanets.push(new Button(1, 1, 0, {mass:5, density:1, color:'gray', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
@@ -1133,7 +1157,7 @@ buttonsPlanets.push(new Button(1, 1, 1, {mass:10, density:1, color:'orange', typ
 buttonsPlanets.push(new Button(1, 1, 2, {mass:12, density:1, color:'blue', type:1, materials:{rock:50, metals:0, ice:50, gas:0}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 1, 0, {mass:15, density:1, color:'gray', type:1, materials:{rock:90, metals:10, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 1, {mass:20, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:80, gas:20}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
-buttonsPlanets.push(new Button(1, 1, 0, {mass:100, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
+buttonsPlanets.push(new Button(1, 1, 0, {mass:50, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 
 function game(){
@@ -1553,6 +1577,8 @@ window.onclick = function(event) {
                         }
                     }
                 }
+            }else if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas < 100){
+                objects[windowSelectedPlanet].materials.metals = 100 - (objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
             }
         }else if(changeValue === "Rock"){
             if(parseInt(input.value) > 100){
@@ -1573,6 +1599,8 @@ window.onclick = function(event) {
                         }
                     }
                 }
+            }else if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas < 100){
+                objects[windowSelectedPlanet].materials.rock = 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas);
             }
         }else if(changeValue === "Ice"){
             if(parseInt(input.value) > 100){
@@ -1593,6 +1621,8 @@ window.onclick = function(event) {
                         }
                     }
                 }
+            }else if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas < 100){
+                objects[windowSelectedPlanet].materials.ice = 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.gas);
             }
         }else if(changeValue === "Gas"){
             if(parseInt(input.value) > 100){
@@ -1613,6 +1643,8 @@ window.onclick = function(event) {
                         }
                     }
                 }
+            }else if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas < 100){
+                objects[windowSelectedPlanet].materials.gas = 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.rock);
             }
         }
         input.value = "";
