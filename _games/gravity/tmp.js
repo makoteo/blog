@@ -320,7 +320,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 2);
 
             ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
-            ctx.fillText("Density: " + Math.round(this.density), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
+            ctx.fillText("Density: " + Math.round(this.density*1000)/1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
             ctx.fillText("Radius: " + Math.round(this.radius) * 1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 5.5);
             ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 6.5);
 
