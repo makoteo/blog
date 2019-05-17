@@ -49,6 +49,10 @@ var absoluteLowTemperature = -100;
 var waterMeltTemperature = 550;
 var starCreationLimit = 50000;
 var globalDebrieLifetime = 2000;
+var onlyStarsAffectGravity = false;
+var savedStarsAffectGravity = false;
+var collisions = true;
+var debrietrails = true;
 
 var PAUSED = false;
 var gameClock = 0;
@@ -97,14 +101,18 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.color = color;
     this.materials = materials;
 
-    this.id = globalPlanetId;
-    globalPlanetId++;
+    this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
+
+    if(this.type !== 3){
+        this.id = globalPlanetId;
+        globalPlanetId++;
+    }else{
+        this.id = -1;
+    }
 
     this.name = "";
 
     this.following = false;
-
-    this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
 
     this.temperature = 0;
     this.planetTemperature = 0;
@@ -176,11 +184,13 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.infoWindowX = 0;
     this.infoWindowY = 0;
     this.infoWindowWidth = WIDTH/5;
-    this.infoWindowHeight = HEIGHT/2;
+    this.infoWindowHeight = HEIGHT/2 * 1.2;
 
     this.gravityConstant = 1;
 
     this.randomNumBcWhyNot = Math.random()+1;
+
+    this.gravityAffectsList = [];
 
     if(this.type === 3){
         if(this.color === 'white'){
@@ -318,31 +328,46 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             ctx.fillText("Name: " + this.name, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25);
             ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30);
             ctx.fillText("Id: " + this.id, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 2);
+            if(this.affectedByGravity === false){
+                ctx.fillText("Affected by: " + "Nothing", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
+            }else if(this.gravityAffectsList.length === 0){
+                ctx.fillText("Affected by: " + "All planets", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
+            }else{
+                ctx.fillText("Affected by: " + this.gravityAffectsList, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
+            }
 
-            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
-            ctx.fillText("Density: " + Math.round(this.density*1000)/1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
-            ctx.fillText("Radius: " + Math.round(this.radius) * 1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 5.5);
-            ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 6.5);
+            //Changed here
+            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
+            ctx.fillText("Density: " + Math.round(this.density*1000)/1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 5.5);
+            ctx.fillText("Radius: " + Math.round(this.radius) * 1000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 6.5);
+            ctx.fillText("Temperature: " + Math.round(this.temperature + this.planetTemperature), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 7.5);
 
-            ctx.fillText("Delta X: " + Math.round(this.velX * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
-            ctx.fillText("Delta Y: " + Math.round(this.velY * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
+            ctx.fillText("Delta X: " + Math.round(this.velX * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
+            ctx.fillText("Delta Y: " + Math.round(this.velY * 10000) / 10000, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10);
 
-            ctx.fillText("Metal: " + Math.round(this.materials.metals) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("Rock: " + Math.round(this.materials.rock) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
-            ctx.fillText("Ice: " + Math.round(this.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+            ctx.fillText("Metal: " + Math.round(this.materials.metals) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+            ctx.fillText("Rock: " + Math.round(this.materials.rock) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 12.5);
+            ctx.fillText("Ice: " + Math.round(this.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+            ctx.fillText("Gas: " + Math.round(this.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 12.5);
 
             ctx.font = WIDTH / 80 + 'px Arial';
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
+            if(this.affectedByGravity !== false) {
+                ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
+            }
+
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 4.5);
+
             ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
+            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10);
 
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+            if(this.type !== 2) {
+                ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+                ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 12.5);
 
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+                ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
+                ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 12.5);
+            }
 
             ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
 
@@ -367,7 +392,23 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 3.5) {
+                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 3 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 3) {
+                    if(this.affectedByGravity !== false){
+                        if(clickTimer === 0) {
+                            modal.style.display = "block";
+                            for (var i = 0; i < objects.length; i++) {
+                                if (objects[i] === this) {
+                                    windowSelectedPlanet = i;
+                                    input.value = this.gravityAffectsList;
+                                    changeValue = "AffectedGravity"
+                                }
+                            }
+                            PAUSED = true;
+                        }else{
+                            document.body.style.cursor = "pointer";
+                        }
+                    }
+                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 4.5 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 4.5) {
                     if(clickTimer === 0) {
                         modal.style.display = "block";
                         for (var i = 0; i < objects.length; i++) {
@@ -381,7 +422,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 8) {
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 9 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 9) {
                     if(clickTimer === 0){
                         modal.style.display = "block";
                         for (var i = 0; i < objects.length; i++) {
@@ -395,7 +436,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 9 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 9) {
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 10 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 10) {
                     if(clickTimer === 0){
                         modal.style.display = "block";
                         for (var i = 0; i < objects.length; i++) {
@@ -409,61 +450,69 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 10 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 10.5) {
-                    if(clickTimer === 0){
-                        modal.style.display = "block";
-                        for (var i = 0; i < objects.length; i++) {
-                            if (objects[i] === this) {
-                                windowSelectedPlanet = i;
-                                input.value = this.materials.metals;
-                                changeValue = "Metal"
+                } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
+                    if(this.type !== 2) {
+                        if (clickTimer === 0) {
+                            modal.style.display = "block";
+                            for (var i = 0; i < objects.length; i++) {
+                                if (objects[i] === this) {
+                                    windowSelectedPlanet = i;
+                                    input.value = this.materials.metals;
+                                    changeValue = "Metal"
+                                }
                             }
+                            PAUSED = true;
+                        } else {
+                            document.body.style.cursor = "pointer";
                         }
-                        PAUSED = true;
-                    }else{
-                        document.body.style.cursor = "pointer";
                     }
-                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
-                    if(clickTimer === 0){
-                        modal.style.display = "block";
-                        for (var i = 0; i < objects.length; i++) {
-                            if (objects[i] === this) {
-                                windowSelectedPlanet = i;
-                                input.value = this.materials.rock;
-                                changeValue = "Rock"
+                }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 12 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 12.5) {
+                    if(this.type !== 2) {
+                        if (clickTimer === 0) {
+                            modal.style.display = "block";
+                            for (var i = 0; i < objects.length; i++) {
+                                if (objects[i] === this) {
+                                    windowSelectedPlanet = i;
+                                    input.value = this.materials.rock;
+                                    changeValue = "Rock"
+                                }
                             }
+                            PAUSED = true;
+                        } else {
+                            document.body.style.cursor = "pointer";
                         }
-                        PAUSED = true;
-                    }else{
-                        document.body.style.cursor = "pointer";
                     }
-                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 10 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 10.5) {
-                    if(clickTimer === 0){
-                        modal.style.display = "block";
-                        for (var i = 0; i < objects.length; i++) {
-                            if (objects[i] === this) {
-                                windowSelectedPlanet = i;
-                                input.value = this.materials.ice;
-                                changeValue = "Ice"
+                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
+                    if(this.type !== 2) {
+                        if (clickTimer === 0) {
+                            modal.style.display = "block";
+                            for (var i = 0; i < objects.length; i++) {
+                                if (objects[i] === this) {
+                                    windowSelectedPlanet = i;
+                                    input.value = this.materials.ice;
+                                    changeValue = "Ice"
+                                }
                             }
+                            PAUSED = true;
+                        } else {
+                            document.body.style.cursor = "pointer";
                         }
-                        PAUSED = true;
-                    }else{
-                        document.body.style.cursor = "pointer";
                     }
-                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 11 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05  + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 11.5) {
-                    if(clickTimer === 0){
-                        modal.style.display = "block";
-                        for (var i = 0; i < objects.length; i++) {
-                            if (objects[i] === this) {
-                                windowSelectedPlanet = i;
-                                input.value = this.materials.gas;
-                                changeValue = "Gas"
+                }else if (mousePosX > this.infoWindowX + this.infoWindowWidth/2 && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 12 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05  + this.infoWindowWidth/2 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 12.5) {
+                    if(this.type !== 2) {
+                        if (clickTimer === 0) {
+                            modal.style.display = "block";
+                            for (var i = 0; i < objects.length; i++) {
+                                if (objects[i] === this) {
+                                    windowSelectedPlanet = i;
+                                    input.value = this.materials.gas;
+                                    changeValue = "Gas"
+                                }
                             }
+                            PAUSED = true;
+                        } else {
+                            document.body.style.cursor = "pointer";
                         }
-                        PAUSED = true;
-                    }else{
-                        document.body.style.cursor = "pointer";
                     }
                 }else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
                     if(clickTimer === 0){
@@ -611,7 +660,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         if(this.inactive === false && this.affectedByGravity === true && (this.exists === true || (this.type === 3)) && PAUSED === false) {
             for (var j = 0; j < objects.length; j++) {
-                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3) {
+                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3 && (this.gravityAffectsList.length === 0 || this.gravityAffectsList.includes(objects[j].id))) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
 
@@ -620,11 +669,38 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     if ((this.distance > (this.radius + objects[j].radius))) {
                         this.velX += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
+                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
+                            //console.log(this.temperature);
+                        }else{
+                            if(this.type === 2 || this.mass > starCreationLimit){
+                                this.temperature = this.mass * randomTempConstant;
+                            }
 
-                        if((this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 1){
-                            this.explode(1, 0.5);
                         }
+                    }
 
+                    //console.log(this.distance);
+
+                }
+                /*if(objects[j] === this){
+                    this.id = j;
+                }*/
+            }
+
+            for (var j = 0; j < objects.length; j++) {
+                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3) {
+                    this.tempX = objects[j].x;
+                    this.tempY = objects[j].y;
+
+                    this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
+
+                    if ((this.distance > (this.radius + objects[j].radius))) {
+                        if((this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 1){
+                            if(debrietrails === true){
+                                this.explode(1, 0.5);
+                            }
+                        }
                         if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
                             if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > objects[j].radius*2){
                                 var segments = Math.ceil(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))/objects[j].radius*2);
@@ -639,36 +715,27 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                 }
                             }
                         }
-                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
-                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
-                            //console.log(this.temperature);
-                        }else{
-                            if(this.type === 2 || this.mass > starCreationLimit){
-                                this.temperature = this.mass * randomTempConstant;
-                            }
-
-                        }
                     } else {
-                        this.explode(this.distance, j);
-                        break;
+                        if(collisions === true){
+                            this.explode(this.distance, j);
+                            break;
+                        }
                     }
 
                     if(this.passedThrough === true){
-                        this.explode(this.distance, j);
-                        break;
+                        if(collisions === true) {
+                            this.explode(this.distance, j);
+                            break;
+                        }
                     }
-
-                    //console.log(this.distance);
-
-                }
-                if(objects[j] === this){
-                    this.id = j;
                 }
             }
         }
 
         if(this.temperature > waterMeltTemperature && this.type !== 2 && this.type !== 3){
-            this.explode(1, 0.5);
+            if(debrietrails === true){
+                this.explode(1, 0.5);
+            }
         }
 
         if(this.planetTemperature > 0 && PAUSED === false){
@@ -755,6 +822,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.planetTemperature = objects[int].planetTemperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
+                    this.id = objects[int].id;
                 }else{
 
                 }
@@ -772,6 +840,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.planetTemperature = objects[int].planetTemperature;
                     this.gravityConstant = 1;
                     this.color = objects[int].color;
+                    this.id = objects[int].id;
                 }else{
 
                 }
@@ -1558,6 +1627,8 @@ span.onclick = function() {
         objects[windowSelectedPlanet].name = input.value;
     }else if(changeValue === "Mass"){
         objects[windowSelectedPlanet].mass = input.value;
+    }else if(changeValue = "AffectedGravity"){
+        input.placeholder = "Enter the id's of the planets separated by comas";
     }
 
     input.value = "";
@@ -1567,7 +1638,9 @@ span.onclick = function() {
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
+    input.placeholder = "";
     if (event.target == modal) {
+        if(input.value === ""){input.value = 0;}
         modal.style.display = "none";
         if(changeValue === "Name"){
             objects[windowSelectedPlanet].name = input.value;
@@ -1666,6 +1739,9 @@ window.onclick = function(event) {
             }else if(objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.rock + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.gas < 100){
                 objects[windowSelectedPlanet].materials.gas = 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.rock);
             }
+        }else if(changeValue === "AffectedGravity") {
+            var tmpString = input.value.split(",");
+            objects[windowSelectedPlanet].gravityAffectsList = tmpString;
         }
         input.value = "";
         PAUSED = false;
