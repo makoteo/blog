@@ -110,6 +110,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         this.id = -1;
     }
 
+    this.arrayid = 0;
+
     this.name = "";
 
     this.following = false;
@@ -531,7 +533,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }
                 } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 35 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 100) {
                     if(clickTimer === 0){
-                        objects.splice(this.id, 1);
+                        objects.splice(this.arrayid, 1);
                     }else{
                         document.body.style.cursor = "pointer";
                     }
@@ -660,7 +662,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         if(this.inactive === false && this.affectedByGravity === true && (this.exists === true || (this.type === 3)) && PAUSED === false) {
             for (var j = 0; j < objects.length; j++) {
-                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3 && (this.gravityAffectsList.length === 0 || this.gravityAffectsList.includes(objects[j].id))) {
+                if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3 && (this.gravityAffectsList.length === 0 || arrayInclude(this.gravityAffectsList, objects[j].id))) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
 
@@ -669,23 +671,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     if ((this.distance > (this.radius + objects[j].radius))) {
                         this.velX += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
                         this.velY += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
-                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
-                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance))) + absoluteLowTemperature;
-                            //console.log(this.temperature);
-                        }else{
-                            if(this.type === 2 || this.mass > starCreationLimit){
-                                this.temperature = this.mass * randomTempConstant;
-                            }
-
-                        }
                     }
 
                     //console.log(this.distance);
 
                 }
-                /*if(objects[j] === this){
-                    this.id = j;
-                }*/
+                if(objects[j] === this){
+                    this.arrayid = j;
+                }
             }
 
             for (var j = 0; j < objects.length; j++) {
@@ -697,7 +690,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                     if ((this.distance > (this.radius + objects[j].radius))) {
                         if((this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 1){
-                            if(debrietrails === true){
+                            if(debrietrails === true && PAUSED === false){
                                 this.explode(1, 0.5);
                             }
                         }
@@ -714,6 +707,15 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                     }
                                 }
                             }
+                        }
+
+                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
+                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)));
+                        }else{
+                            if(this.type === 2 || this.mass > starCreationLimit){
+                                this.temperature = this.mass * randomTempConstant;
+                            }
+
                         }
                     } else {
                         if(collisions === true){
@@ -1244,6 +1246,16 @@ buttonsPlanets.push(new Button(1, 1, 1, {mass:20, density:1, color:'blue', type:
 buttonsPlanets.push(new Button(1, 1, 0, {mass:50, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 
+function arrayInclude(array, result){
+    for(var oof = 0; oof < array.length; oof++){
+        if(array[oof] === result){
+            return true;
+            break;
+        }
+    }
+    return false;
+}
+
 function game(){
 
     if(PAUSED === false){
@@ -1740,7 +1752,9 @@ window.onclick = function(event) {
                 objects[windowSelectedPlanet].materials.gas = 100 - (objects[windowSelectedPlanet].materials.metals + objects[windowSelectedPlanet].materials.ice + objects[windowSelectedPlanet].materials.rock);
             }
         }else if(changeValue === "AffectedGravity") {
-            var tmpString = input.value.split(",");
+            var tmpString = input.value.split(",").map(function(item) {
+                return parseInt(item, 10);
+            });
             objects[windowSelectedPlanet].gravityAffectsList = tmpString;
         }
         input.value = "";
