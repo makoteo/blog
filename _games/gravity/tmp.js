@@ -296,15 +296,19 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
 
             if(this.type === 3){
-                this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*5*this.randomNumBcWhyNot);
-                this.gradient.addColorStop(0, "yellow");
-                this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-                ctx.fillStyle = this.gradient;
-                ctx.globalAlpha = 0.1;
-                ctx.beginPath();
-                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*5*this.randomNumBcWhyNot, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+                if(this.lifeTimer > 5){
+                    //console.log(this.arrayid);
+                    this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*5*Math.round(this.randomNumBcWhyNot));
+                    this.gradient.addColorStop(0, "yellow");
+                    this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+                    ctx.fillStyle = this.gradient;
+                    ctx.globalAlpha = 0.1;
+                    ctx.beginPath();
+                    ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*5*this.randomNumBcWhyNot, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+
             }
 
         }
@@ -600,27 +604,29 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.exists === false && this.type !== 3){
             if(dragging === false){
                 this.exists = true;
-                if(autoOrbit === true){
-                    this.pointAX = objects[this.greatestAttractor].x;
-                    this.pointAY = objects[this.greatestAttractor].y - this.distancefromGreatestAttractor;
+                if(autoOrbit === true && objects.length > 1){
+                    if(objects.length > this.greatestAttractor){
+                        this.pointAX = objects[this.greatestAttractor].x;
+                        this.pointAY = objects[this.greatestAttractor].y - this.distancefromGreatestAttractor;
 
-                    //Point B is sun X, Y and point C is planet x Y
+                        //Point B is sun X, Y and point C is planet x Y
 
-                    this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY)*(this.y - this.pointAY) + (this.x - this.pointAX)*(this.x - this.pointAX));
+                        this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY)*(this.y - this.pointAY) + (this.x - this.pointAX)*(this.x - this.pointAX));
 
-                    this.angleBetweenArcs = 2*Math.asin((this.distanceBetweenTopArcToCurrentArc/2)/this.distancefromGreatestAttractor);
+                        this.angleBetweenArcs = 2*Math.asin((this.distanceBetweenTopArcToCurrentArc/2)/this.distancefromGreatestAttractor);
 
-                    console.log(this.angleBetweenArcs);
+                        console.log(this.angleBetweenArcs);
 
-                    this.totalVelocity = Math.sqrt(Math.abs((G*objects[this.greatestAttractor].mass)/(this.distancefromGreatestAttractor)));
+                        this.totalVelocity = Math.sqrt(Math.abs((G*objects[this.greatestAttractor].mass)/(this.distancefromGreatestAttractor)));
 
-                    //Works for right half circle
-                    if(this.x >= this.pointAX){
-                        this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
-                        this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
-                    }else{
-                        this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
-                        this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                        //Works for right half circle
+                        if(this.x >= this.pointAX){
+                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                            this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                        }else{
+                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                            this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                        }
                     }
                 }else{
                     this.velX = (savedMouseX - mousePosX)*mouseForce/100;
@@ -645,6 +651,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                 this.tempX = objects[j].x;
                                 this.tempY = objects[j].y;
                                 this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
+                                if(this.distance < 1){
+                                    this.distance = 1;
+                                }
                                 if(this.distance > (this.radius + objects[j].radius)){
                                     this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                     this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
@@ -797,20 +806,30 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.random = 50;
                 }
                 if(this.mass <= objects[int].mass){
-                    for(var i =0; i < this.random; i++){
-                        this.spawnX = Math.random()*this.radius - this.radius/2;
-                        this.spawnY = Math.random()*this.radius - this.radius/2;
-                        objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
-                        objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
-                        objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
+                    if(this.x !== this.x || this.velX !== this.velX){ //Easy way to check if NaN
+
+                    }else{
+                        for(var debrieNum = 0; debrieNum < this.random; debrieNum++){
+                            this.spawnX = Math.random()*this.radius - this.radius/2;
+                            this.spawnY = Math.random()*this.radius - this.radius/2;
+                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
+                            objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
+                            objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
+                            console.log(this.x + ", " + this.spawnX + ", " + this.velX + ", " + cameraX/cameraZoom);
+                        }
                     }
+
                 }else{
-                    for(var i =0; i < this.random; i++) {
-                        this.spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
-                        this.spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
-                        objects.push(new Object(objects[int].x + this.spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + this.spawnY + objects[int].velY + cameraY / cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
-                        objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
-                        objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
+                    if(objects[int].x !== objects[int].x || objects[int].velX !== objects[int].velX){ //Easy way to check if NaN
+
+                    }else{
+                        for(var debrieNum = 0; debrieNum < this.random; debrieNum++) {
+                            this.spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
+                            this.spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
+                            objects.push(new Object(objects[int].x + this.spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + this.spawnY + objects[int].velY + cameraY / cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
+                            objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
+                            objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
+                        }
                     }
                 }
             }else{
@@ -1011,16 +1030,19 @@ function Trail(x1, y1, x2, y2, color){
     this.y2 = y2;
     this.color = color;
     this.lifeTime = globalTrailLife;
+    this.zoom = 0;
 
     this.draw = function(){
         if(PAUSED === false){
             this.lifeTime--;
         }
 
-        this.cameraX1 = ((this.x1 - screenHalfWidth) * cameraZoom + screenHalfWidth);
-        this.cameraY1 = ((this.y1 - screenHalfHeight) * cameraZoom + screenHalfHeight);
-        this.cameraX2 = ((this.x2 - screenHalfWidth) * cameraZoom + screenHalfWidth);
-        this.cameraY2 = ((this.y2 - screenHalfHeight) * cameraZoom + screenHalfHeight);
+        if(this.zoom !== cameraZoom){
+            this.cameraX1 = ((this.x1 - screenHalfWidth) * cameraZoom + screenHalfWidth);
+            this.cameraY1 = ((this.y1 - screenHalfHeight) * cameraZoom + screenHalfHeight);
+            this.cameraX2 = ((this.x2 - screenHalfWidth) * cameraZoom + screenHalfWidth);
+            this.cameraY2 = ((this.y2 - screenHalfHeight) * cameraZoom + screenHalfHeight);
+        }
 
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -1255,7 +1277,7 @@ function Button(type, subtype, id, planetProperties){
 
             } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 30 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 50) {
                 if(clickTimer === 0){
-                    objects.splice(this.id, 1);
+                    //objects.splice(this.id, 1);
                 }else{
                     document.body.style.cursor = "pointer";
                 }
@@ -1443,14 +1465,6 @@ function game(){
             ctx.fillStyle = "rgb(0, 0, 0)";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-            //Buttons?
-
-            for(var i = 0; i < buttonsPlanets.length; i++){
-                buttonsPlanets[i].update();
-                buttonsPlanets[i].draw();
-                buttonsPlanets[i].drawInfoWindow();
-            }
-
             //Cursor
 
             ctx.globalAlpha = 0.3;
@@ -1524,6 +1538,14 @@ function game(){
         if(objects[i].inactive === false){
             objects[i].drawInfoWindow();
         }
+    }
+
+    //Buttons?
+
+    for(var i = 0; i < buttonsPlanets.length; i++){
+        buttonsPlanets[i].update();
+        buttonsPlanets[i].draw();
+        buttonsPlanets[i].drawInfoWindow();
     }
     //}
 
