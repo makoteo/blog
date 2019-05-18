@@ -595,14 +595,36 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
 
         if(this.exists === false && this.type !== 3){
-            this.greatestAttractor = 0;
-            this.biggestGravAttraction = 0;
-            this.distancefromGreatestAttractor = 0;
             if(dragging === false){
                 this.exists = true;
-                this.velX = (savedMouseX - mousePosX)*mouseForce/100;
-                this.velY = (savedMouseY - mousePosY)*mouseForce/100;
+                //this.velX = (savedMouseX - mousePosX)*mouseForce/100;
+                //this.velY = (savedMouseY - mousePosY)*mouseForce/100;
+
+                this.pointAX = objects[this.greatestAttractor].x;
+                this.pointAY = objects[this.greatestAttractor].y - this.distancefromGreatestAttractor;
+
+                //Point B is sun X, Y and point C is planet x Y
+
+                this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY)*(this.y - this.pointAY) + (this.x - this.pointAX)*(this.x - this.pointAX));
+
+                this.angleBetweenArcs = 2*Math.asin((this.distanceBetweenTopArcToCurrentArc/2)/this.distancefromGreatestAttractor);
+
+                console.log(this.angleBetweenArcs);
+
+                this.totalVelocity = Math.sqrt(Math.abs((G*objects[this.greatestAttractor].mass)/(this.distancefromGreatestAttractor)));
+
+                //Works for right half circle
+                if(this.x >= this.pointAX){
+                    this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity);
+                    this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity);
+                }else{
+                    this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity);
+                    this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity);
+                }
             }else{
+                this.greatestAttractor = 0;
+                this.biggestGravAttraction = 0;
+                this.distancefromGreatestAttractor = 0;
 
                 this.curveVelX = (savedMouseX - mousePosX)*mouseForce/100;
                 this.curveVelY = (savedMouseY - mousePosY)*mouseForce/100;
