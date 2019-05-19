@@ -1635,14 +1635,6 @@ document.getElementById("myCanvas").addEventListener("mousewheel", MouseWheelHan
 // Firefox
 document.getElementById("myCanvas").addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 
-document.getElementById( "myCanvas" ).onwheel = function(event){
-    event.preventDefault();
-};
-
-document.getElementById( "myCanvas" ).onmousewheel = function(event){
-    event.preventDefault();
-};
-
 function MouseWheelHandler(e)
 {
     // cross-browser wheel delta
