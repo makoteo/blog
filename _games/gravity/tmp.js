@@ -1635,6 +1635,14 @@ document.addEventListener("mousewheel", MouseWheelHandler, false);
 // Firefox
 document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 
+document.getElementById( "canvasId" ).onwheel = function(event){
+    event.preventDefault();
+};
+
+document.getElementById( "canvasId" ).onmousewheel = function(event){
+    event.preventDefault();
+};
+
 function MouseWheelHandler(e)
 {
     // cross-browser wheel delta
@@ -1708,8 +1716,6 @@ span.onclick = function() {
     PAUSED = false;
 
 }
-
-window.onwheel = function(){ return false; }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
