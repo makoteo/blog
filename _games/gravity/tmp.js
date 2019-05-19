@@ -7,8 +7,8 @@
 //-----------------------------------------------------------------------------------------------------
 
 var versionCode = "Alpha 0.02";
-var WIDTH = 1024;
-var HEIGHT = 576;
+var WIDTH = 1280; //1024x576
+var HEIGHT = 720;
 
 var AREAWIDTH = WIDTH*10;
 var AREAHEIGHT = HEIGHT*10;
@@ -1639,7 +1639,7 @@ function MouseWheelHandler(e)
 {
     // cross-browser wheel delta
     //var e = window.event || e; // old IE support
-    //e.preventDefault();
+    e.preventDefault();
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
     cameraZoom += delta*cameraZoom/10;
