@@ -1631,9 +1631,9 @@ window.addEventListener("mouseup", clickedNow);
 document.getElementById("myCanvas").addEventListener("mousedown", draggedNow);
 
 // IE9, Chrome, Safari, Opera
-document.addEventListener("mousewheel", MouseWheelHandler, false);
+document.getElementById("myCanvas").addEventListener("mousewheel", MouseWheelHandler, false);
 // Firefox
-document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
+document.getElementById("myCanvas").addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 
 document.getElementById( "myCanvas" ).onwheel = function(event){
     event.preventDefault();
