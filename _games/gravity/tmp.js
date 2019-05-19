@@ -1709,8 +1709,6 @@ span.onclick = function() {
 
 }
 
-window.onwheel = function(){ return false; }
-
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
     input.placeholder = "";
