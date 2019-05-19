@@ -1635,11 +1635,11 @@ document.addEventListener("mousewheel", MouseWheelHandler, false);
 // Firefox
 document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 
-document.getElementById( "canvasId" ).onwheel = function(event){
+document.getElementById( "myCanvas" ).onwheel = function(event){
     event.preventDefault();
 };
 
-document.getElementById( "canvasId" ).onmousewheel = function(event){
+document.getElementById( "myCanvas" ).onmousewheel = function(event){
     event.preventDefault();
 };
 
