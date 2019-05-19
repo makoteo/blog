@@ -559,7 +559,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             this.materials.gas = 100;
         }
 
-
         this.lifeTimer++;
 
         if(this.type !== 3){
@@ -789,11 +788,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
 
     this.explode = function(distance, int){
+        console.log(distance + ", " + int);
         this.spawnX = 0;
         this.spawnY = 0;
         this.random = 0;
         if(int !== 0.5){
-            if(distance < 1){
+            if(distance < 1 || distance !== distance){
                 distance = 1;
             }
             if(this.type !== 3 && objects[int].type !== 3){
@@ -1638,8 +1638,8 @@ document.addEventListener("DOMMouseScroll", MouseWheelHandler, false);
 function MouseWheelHandler(e)
 {
     // cross-browser wheel delta
-    e.preventDefault();
-    var e = window.event || e; // old IE support
+    //var e = window.event || e; // old IE support
+    //e.preventDefault();
     var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
     cameraZoom += delta*cameraZoom/10;
