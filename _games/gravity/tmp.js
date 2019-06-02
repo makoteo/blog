@@ -725,12 +725,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     //console.log(this.distance);
 
                 }
-                if(objects[j] === this){
-                    this.arrayid = j;
-                }
             }
 
             for (var j = 0; j < objects.length; j++) {
+                if(objects[j] === this){
+                    this.arrayid = j;
+                }
                 if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
