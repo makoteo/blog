@@ -84,6 +84,8 @@ var changeValue = "";
 var selectedPlanetButtonNum = 0;
 var planetButtons = 0;
 
+var mouseClickNoTimer = 0;
+
 var modal = document.getElementById('myModal');
 
 var input = document.getElementById('boxValueChange');
@@ -325,12 +327,17 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight / 2;
 
             }
-            ctx.fillStyle = 'rgb(10, 10, 10)';
-            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = 'rgb(100, 100, 100)';
+            ctx.strokeStyle = 'rgb(100, 100, 100)';
+            ctx.globalAlpha = 0.1;
             ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
             ctx.globalAlpha = 1;
-            ctx.strokeStyle = 'gray';
+            ctx.fillRect(this.infoWindowX, this.infoWindowY + this.infoWindowHeight, this.infoWindowWidth, this.infoWindowHeight/100);
+            ctx.lineWidth = 2;
+            ctx.strokeRect(this.infoWindowX, this.infoWindowY + this.infoWindowHeight, this.infoWindowWidth, this.infoWindowHeight/100);
+            ctx.strokeStyle = 'white';
             ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
+            ctx.lineWidth = 1;
             ctx.textAlign = 'left';
             ctx.fillStyle = 'white';
             ctx.font = WIDTH / 80 + 'px Arial';
@@ -528,6 +535,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         this.infoWindowOpen = false;
                         this.infoWindowX = 0;
                         this.infoWindowY = 0;
+                        mouseClickNoTimer = 5;
                     }else{
                         document.body.style.cursor = "pointer";
                     }
@@ -1079,6 +1087,8 @@ function Button(type, subtype, id, planetProperties){
         this.color = "rgb(" + (this.planetProperties.materials.metals*1.5 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.ice*0.5 +(100)/6) + "," + (this.planetProperties.materials.metals*0.8 + this.planetProperties.materials.rock*1 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.7 + this.planetProperties.materials.rock*1) + ")";
     }
 
+    this.planetProperties.density = (this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice*0.8 + this.planetProperties.materials.gas*0.3)/(this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice + this.planetProperties.materials.gas);
+
     this.update = function(){
         if(this.type === 1){
 
@@ -1097,13 +1107,14 @@ function Button(type, subtype, id, planetProperties){
                         selectedPlanetButtonNum = 0;
                         cursorTool = true;
                         clickingButton = true;
-                }else{
-                    if(mousePosX > this.x && mousePosX < this.x + this.width){
-                        if(mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height){
-                            selectedPlanetButtonNum = this.id;
-                            cursorTool = false;
-                            clickingButton = true;
-                        }
+                }else  if(mousePosX > this.x + this.width*0.1 && mousePosX < this.x + this.width*0.3 && mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height*0.2) {
+                    this.infoWindowOpen = true;
+                    mouseClickNoTimer = 5;
+                }else if(mousePosX > this.x && mousePosX < this.x + this.width){
+                    if(mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height){
+                        selectedPlanetButtonNum = this.id;
+                        cursorTool = false;
+                        clickingButton = true;
                     }
                 }
             }else{
@@ -1132,7 +1143,8 @@ function Button(type, subtype, id, planetProperties){
 
     this.draw = function(){
         this.y-=this.yOffset;
-        ctx.strokeStyle = 'gray';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
         ctx.strokeRect(this.x, this.y, this.width, this.height);
         if(this.id === selectedPlanetButtonNum){
             ctx.fillStyle = 'white';
@@ -1336,113 +1348,6 @@ function game(){
         buttonsPlanets[i].update();
     }
 
-    window.onmousemove = logMouseMove;
-
-    if(clickTimer === 0 && cursorTool === false){
-        draggingWindow = false;
-        if(clickingButton === false){
-            objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), buttonsPlanets[selectedPlanetButtonNum].planetProperties.mass, buttonsPlanets[selectedPlanetButtonNum].planetProperties.density, buttonsPlanets[selectedPlanetButtonNum].planetProperties.type, buttonsPlanets[selectedPlanetButtonNum].planetProperties.affectedByGravity, buttonsPlanets[selectedPlanetButtonNum].planetProperties.color, {ice:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.ice, gas:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.gas, metals:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.metals, rock:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.rock}));
-        }
-    }else if(clickTimer === 0 && cursorTool === true){
-        for(var i = 0; i < objects.length; i++){
-            if(objects[i].type !== 3){
-                if(objects[i].infoWindowOpen === true){
-                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-
-                        }else{
-
-                        }
-                    }else{
-
-                    }
-                }
-                if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
-                    if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
-                        objects[i].infoWindowOpen = true;
-                        objects[i].infoWindowX = 0;
-                        objects[i].infoWindowY = 0;
-                        break;
-                    }
-                }
-            }
-        }
-    }else if(dragging === true &&  cursorTool === true){
-        mouseonWindow = false;
-        if(windowId === 0.1){
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].type !== 3){
-                    if(objects[i].infoWindowOpen === true){
-                        if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                            if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-                                mouseonWindow = true;
-                                windowId = i;
-                                draggingWindow = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if((mouseonWindow === true || draggingWindow === true) && draggingScreen === false && windowId !== 0.1){
-            if(windowId < objects.length){
-                if(savedMouseX2 === 0){
-                    savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
-                    savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
-                }
-                if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
-                    if(mousePosX + savedMouseX2 > 0){
-                        objects[windowId].infoWindowX = mousePosX + savedMouseX2;
-                    }else{
-                        objects[windowId].infoWindowX = 1;
-                    }
-                }else{
-                    objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
-                }
-
-                if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
-                    if(mousePosY + savedMouseY2 > 0){
-                        objects[windowId].infoWindowY = mousePosY + savedMouseY2;
-                    }else{
-                        objects[windowId].infoWindowY = 1;
-                    }
-                }else{
-                    objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
-                }
-            }
-        }else{
-
-            for(var x = 0; x < objects.length; x++){
-                objects[x].following = false;
-            }
-
-            savedMouseX2 = 0;
-            savedMouseY2 = 0;
-            if(savedMouseX === 0){
-                savedMouseX = mousePosX;
-                savedMouseY = mousePosY;
-            }
-
-            cameraX = mousePosX - savedMouseX + cameraXOffset;
-            cameraY = mousePosY - savedMouseY + cameraYOffset;
-
-            AREAWIDTH = WIDTH/2/0.01;
-            AREAHEIGHT = HEIGHT/2/0.01;
-
-            draggingScreen = true;
-        }
-
-    }else{
-        cameraXOffset = cameraX;
-        cameraYOffset = cameraY;
-        windowId = 0.1;
-        draggingWindow = false;
-        draggingScreen = false;
-        savedMouseX2 = 0;
-        savedMouseY2 = 0;
-    }
-
 
     //SKY FILL
     //if(PAUSED === false){
@@ -1547,10 +1452,123 @@ function game(){
         buttonsPlanets[i].draw();
         buttonsPlanets[i].drawInfoWindow();
     }
-    //}
+
+
+    //Cursor Logic
+
+    window.onmousemove = logMouseMove;
+
+    if(clickTimer === 0 && cursorTool === false ){
+        draggingWindow = false;
+        if(clickingButton === false && mouseClickNoTimer === 0){
+            objects.push(new Object(((mousePosX - screenHalfWidth) / cameraZoom + screenHalfWidth), ((mousePosY - screenHalfHeight) / cameraZoom + screenHalfHeight), buttonsPlanets[selectedPlanetButtonNum].planetProperties.mass, buttonsPlanets[selectedPlanetButtonNum].planetProperties.density, buttonsPlanets[selectedPlanetButtonNum].planetProperties.type, buttonsPlanets[selectedPlanetButtonNum].planetProperties.affectedByGravity, buttonsPlanets[selectedPlanetButtonNum].planetProperties.color, {ice:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.ice, gas:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.gas, metals:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.metals, rock:buttonsPlanets[selectedPlanetButtonNum].planetProperties.materials.rock}));
+        }
+    }else if(clickTimer === 0 && cursorTool === true){
+        for(var i = 0; i < objects.length; i++){
+            if(objects[i].type !== 3){
+                if(objects[i].infoWindowOpen === true){
+                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+
+                        }else{
+
+                        }
+                    }else{
+
+                    }
+                }
+                if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
+                    if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+                        objects[i].infoWindowOpen = true;
+                        objects[i].infoWindowX = 0;
+                        objects[i].infoWindowY = 0;
+                        break;
+                    }
+                }
+            }
+        }
+    }else if(dragging === true &&  cursorTool === true){
+        mouseonWindow = false;
+        if(windowId === 0.1){
+            for(var i = 0; i < objects.length; i++){
+                if(objects[i].type !== 3){
+                    if(objects[i].infoWindowOpen === true){
+                        if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
+                            if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
+                                mouseonWindow = true;
+                                windowId = i;
+                                draggingWindow = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if((mouseonWindow === true || draggingWindow === true) && draggingScreen === false && windowId !== 0.1){
+            if(windowId < objects.length){
+                if(savedMouseX2 === 0){
+                    savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
+                    savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
+                }
+                if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
+                    if(mousePosX + savedMouseX2 > 0){
+                        objects[windowId].infoWindowX = mousePosX + savedMouseX2;
+                    }else{
+                        objects[windowId].infoWindowX = 1;
+                    }
+                }else{
+                    objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
+                }
+
+                if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
+                    if(mousePosY + savedMouseY2 > 0){
+                        objects[windowId].infoWindowY = mousePosY + savedMouseY2;
+                    }else{
+                        objects[windowId].infoWindowY = 1;
+                    }
+                }else{
+                    objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
+                }
+            }
+        }else{
+
+            for(var x = 0; x < objects.length; x++){
+                objects[x].following = false;
+            }
+
+            savedMouseX2 = 0;
+            savedMouseY2 = 0;
+            if(savedMouseX === 0){
+                savedMouseX = mousePosX;
+                savedMouseY = mousePosY;
+            }
+
+            cameraX = mousePosX - savedMouseX + cameraXOffset;
+            cameraY = mousePosY - savedMouseY + cameraYOffset;
+
+            AREAWIDTH = WIDTH/2/0.01;
+            AREAHEIGHT = HEIGHT/2/0.01;
+
+            draggingScreen = true;
+        }
+
+    }else{
+        cameraXOffset = cameraX;
+        cameraYOffset = cameraY;
+        windowId = 0.1;
+        draggingWindow = false;
+        draggingScreen = false;
+        savedMouseX2 = 0;
+        savedMouseY2 = 0;
+    }
 
     if(clickTimer < 1){
         clickTimer++;
+    }
+
+    if(mouseClickNoTimer > 0){
+        mouseClickNoTimer--;
     }
     //if(gameRunning === true) {
 
