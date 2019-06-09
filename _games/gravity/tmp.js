@@ -622,8 +622,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                         this.angleBetweenArcs = 2*Math.asin((this.distanceBetweenTopArcToCurrentArc/2)/this.distancefromGreatestAttractor);
 
-                        console.log(this.angleBetweenArcs);
-
                         this.totalVelocity = Math.sqrt(Math.abs((G*objects[this.greatestAttractor].mass)/(this.distancefromGreatestAttractor)));
 
                         //Works for right half circle
@@ -650,6 +648,23 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                 this.curvePoints = [[this.x, this.y]];
 
+                for (var j = 0; j < objects.length; j++) {
+                    this.tempX = objects[j].x;
+                    this.tempY = objects[j].y;
+                    if (objects[j] !== this && this.inactive === false && objects[j].exists === true && objects[j].type !== 3) {
+                        this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY));
+                        if(this.distance < 1){
+                            this.distance = 1;
+                        }
+                        if((objects[j].mass/(this.distance*this.distance) > this.biggestGravAttraction)){
+                            this.greatestAttractor = j;
+                            this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
+                            this.distancefromGreatestAttractor = this.distance;
+                        }
+
+                    }
+                }
+
                 for(var i = 1; i < Math.round(lineLength/cameraZoom); i++){
                     this.curvePoints.push([this.curvePoints[i-1][0] + this.curveVelX, this.curvePoints[i-1][1] + this.curveVelY]);
                     if(this.affectedByGravity === true){
@@ -665,9 +680,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                     this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                     this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
                                     if((objects[j].mass/(this.distance*this.distance) > this.biggestGravAttraction) && i === 1){
-                                        this.greatestAttractor = j;
-                                        this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
-                                        this.distancefromGreatestAttractor = this.distance;
+                                        //this.greatestAttractor = j;
+                                        //this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
+                                        //this.distancefromGreatestAttractor = this.distance;
                                     }
                                 }else{
                                     this.curveVelX = 0;
@@ -767,7 +782,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                         }
                     } else {
-                        if(collisions === true){
+                        if(collisions === true && this.distance === this.distance){
+                            if(this.type !== 3 && objects[j].type !== 3){
+                                console.log(j + this.distance);
+                            }
                             this.explode(this.distance, j);
                             break;
                         }
@@ -796,7 +814,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
 
     this.explode = function(distance, int){
-        console.log(distance + ", " + int);
         this.spawnX = 0;
         this.spawnY = 0;
         this.random = 0;
@@ -823,7 +840,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
                             objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
                             objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
-                            console.log(this.x + ", " + this.spawnX + ", " + this.velX + ", " + cameraX/cameraZoom);
                         }
                     }
 
@@ -1102,7 +1118,6 @@ function Button(type, subtype, id, planetProperties){
 
             if(clickTimer === 0){
                 if(mousePosX > this.x + this.width*0.7 && mousePosX < this.x + this.width*0.95 && mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height*0.2){
-                        console.log("Here");
                         buttonsPlanets.splice(this.id, 1);
                         selectedPlanetButtonNum = 0;
                         cursorTool = true;
