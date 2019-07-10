@@ -780,7 +780,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
 
                         if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
-                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)));
+                            this.temperature = Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)));
                         }else{
                             if(this.type === 2 || this.mass > starCreationLimit){
                                 this.temperature = this.mass * randomTempConstant;
@@ -1099,6 +1099,8 @@ function Button(type, subtype, id, planetProperties){
     this.infoWindowWidth = this.width*2;
     this.infoWindowHeight = this.height;
 
+    this.lifeClock = 0;
+
     if(this.subtype === 1){
         if(this.planetProperties.materials.gas > 0.9*100){
             this.color = "rgb(" + (this.planetProperties.materials.gas*2 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*0.5) + "," + (this.planetProperties.materials.gas*1.5 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*1) + "," + this.planetProperties.materials.ice*2.5 + ")";
@@ -1112,8 +1114,8 @@ function Button(type, subtype, id, planetProperties){
     }
 
     this.update = function(){
+        this.lifeClock++;
         if(this.type === 1){
-
             this.infoWindowX = this.x - this.width/2;
             this.infoWindowY = this.y - this.height*1.2;
 
@@ -1124,7 +1126,7 @@ function Button(type, subtype, id, planetProperties){
 
             this.yOffset = (Math.abs(WIDTH/2 - this.x - this.width/2)*Math.abs(WIDTH/2 - this.x - this.width/2))/5000;
 
-            if(gameClock === 1){
+            if(this.lifeClock === 1){
                 globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
                 this.x = this.id*(WIDTH/30+this.width) + globalButtonXOffset;
                 this.xOffset = globalButtonXOffset;
@@ -1139,18 +1141,26 @@ function Button(type, subtype, id, planetProperties){
             }
 
             this.x = this.id*(WIDTH/20+this.width) + this.xOffset;
-
             if(clickTimer === 0){
-                if(mousePosX > this.x + this.width*0.7 && mousePosX < this.x + this.width*0.95 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2){
+                if(mousePosX > this.x + this.width/2 && mousePosX < this.x + this.width/3 + this.width*0.5 && mousePosY > this.y + this.height + this.yOffset && mousePosY < this.y + this.height*0.7 + this.yOffset + this.height*0.5){
+                    if(selectedPlanetButtonNum === this.id){
                         buttonsPlanets.splice(this.id, 1);
-                        selectedPlanetButtonNum = 0;
+                        selectedPlanetButtonNum = this.id;
+                        globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
                         cursorTool = true;
                         clickingButton = true;
-                }else  if(mousePosX > this.x + this.width*0.1 && mousePosX < this.x + this.width*0.3 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2) {
-                    this.infoWindowOpen = true;
-                    mouseClickNoTimer = 5;
+                    }
+                }else if(mousePosX > this.x && mousePosX < this.x + this.width/4 && mousePosY > this.y + this.height + this.yOffset && mousePosY < this.y + this.height*0.7 + this.yOffset + this.height*0.5){
+                    if(selectedPlanetButtonNum === this.id){
+                        bottomPanel.closed = true;
+                        editingPanel.closed = false;
+                        mouseClickNoTimer = 5;
+                    }
+                }
+                if(mousePosX > this.x + this.width*0.1 && mousePosX < this.x + this.width*0.3 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2) {
+                    //mouseClickNoTimer = 5;
                 }else if(mousePosX > this.x && mousePosX < this.x + this.width){
-                    if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height){
+                    if((mousePosY > (this.y + this.yOffset)) && (mousePosY < (this.y + this.yOffset + this.height*0.9))){
                         if(this.subtype === 1){
                             selectedPlanetButtonNum = this.id;
                             if(clickTimer === 0){
@@ -1170,6 +1180,7 @@ function Button(type, subtype, id, planetProperties){
                                 buttonsPlanets.splice(buttonsPlanets.length - 1, 1);
                                 buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
                                 buttonsPlanets.push(new Button(1, 3, 1, {}));
+                                mouseClickNoTimer = 5;
                             }
 
                         }
@@ -1178,16 +1189,25 @@ function Button(type, subtype, id, planetProperties){
                 }
             }else{
                 if(mousePosX > this.x && mousePosX < this.x + this.width){
-                    if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height){
+                    if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.9){
                         if(selectedPlanetButtonNum !== this.id){
                             document.body.style.cursor = "pointer";
                         }
                     }else{
 
                     }
-                }else{
-
                 }
+                if(mousePosX > this.x + this.width/2 && mousePosX < this.x + this.width/3 + this.width*0.5 && mousePosY > this.y + this.height && mousePosY < this.y + this.height*1.2){
+                    if(selectedPlanetButtonNum === this.id){
+                        document.body.style.cursor = "pointer";
+                    }
+                }else if(mousePosX > this.x && mousePosX < this.x + this.width/4 && mousePosY > this.y + this.height && mousePosY < this.y + this.height*1.2){
+                    if(selectedPlanetButtonNum === this.id){
+                        document.body.style.cursor = "pointer";
+                    }
+                }
+
+
             }
         }
 
@@ -1199,10 +1219,10 @@ function Button(type, subtype, id, planetProperties){
             if(selectedPlanetButtonNum === this.id){
                 ctx.globalAlpha = 1;
                 ctx.fillStyle = 'white';
-                ctx.font = WIDTH/80 + 'px Arial';
-                ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
-                ctx.fillStyle = 'red';
-                ctx.fillText("X", this.x + this.width, this.y + this.height*1.5 - this.height/5);
+                //ctx.font = WIDTH/80 + 'px Arial';
+                //ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
+                ctx.drawImage(img, 1600, 0, 800, 800, this.x - this.width/8, this.y + this.height*0.9, this.width*0.6, this.width*0.6);
+                ctx.drawImage(img, 2400, 0, 800, 800, this.x + this.width/3, this.y + this.height*0.7, this.width, this.width);
             }else{
                 ctx.globalAlpha = 0.3;
             }
@@ -1289,9 +1309,8 @@ function Panel(loc, type) {
     }
 
     this.draw = function(){
-
         if(this.closed === true){
-            if(this.offsetY < WIDTH/8) {
+            if(this.offsetY < WIDTH/6) {
                 this.offsetY+=WIDTH/32;
             }
         }else{
@@ -1337,6 +1356,9 @@ buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', ty
 buttonsPlanets.push(new Button(1, 3, 0, {})); // REMEMBER INCREASING ID RIP
 
 bottomPanel = new Panel("bottom", 1);
+editingPanel = new Panel("bottom", 1);
+
+editingPanel.closed = true;
 
 function arrayInclude(array, result){
     for(var oof = 0; oof < array.length; oof++){
@@ -1472,6 +1494,7 @@ function game(){
 
     //Buttons?
     bottomPanel.draw();
+    editingPanel.draw();
 
     for(var i = 0; i < buttonsPlanets.length; i++){
         buttonsPlanets[i].update();
@@ -1607,21 +1630,30 @@ function game(){
         selectedPlanetButtonNum = 0;
         globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
         cursorTool = true;
+        editingPanel.closed = true;
     }else if (keys && keys[49]) {
         selectedPlanetButtonNum = 1;
         globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        bottomPanel.closed = false;
+        editingPanel.closed = true;
         cursorTool = false;
     }else if (keys && keys[50]) {
         selectedPlanetButtonNum = 2;
         globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        bottomPanel.closed = false;
+        editingPanel.closed = true;
         cursorTool = false;
     }else if (keys && keys[51]) {
         selectedPlanetButtonNum = 3;
         globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        bottomPanel.closed = false;
+        editingPanel.closed = true;
         cursorTool = false;
     }else if (keys && keys[52] && buttonsPlanets.length > 3) {
         selectedPlanetButtonNum = 4;
         globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        bottomPanel.closed = false;
+        editingPanel.closed = true;
         cursorTool = false;
     }else if ((keys && keys[32])) {
         if(pauseTimer === 0 && modal.style.display !== "block"){
