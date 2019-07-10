@@ -1174,20 +1174,24 @@ function Button(type, subtype, id, planetProperties){
 
     this.draw = function(){
         this.y = this.y + this.yOffset;
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = 'white';
-        ctx.font = WIDTH/80 + 'px Arial';
-        ctx.fillText("\u270e", this.x + this.width/20, this.y+this.height/5);
-        ctx.fillStyle = 'red';
-        ctx.fillText("X", this.x + this.width - this.width/5, this.y+this.height/5);
+        if(selectedPlanetButtonNum === this.id){
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'white';
+            ctx.font = WIDTH/80 + 'px Arial';
+            ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
+            ctx.fillStyle = 'red';
+            ctx.fillText("X", this.x + this.width, this.y + this.height*1.5 - this.height/5);
+        }else{
+            ctx.globalAlpha = 0.5;
+        }
         ctx.fillStyle = this.color;
         ctx.beginPath();
         if(this.planetProperties.type === 2){
-            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
+            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/30, 0, 2 * Math.PI);
             ctx.fill();
             ctx.beginPath();
             ctx.globalAlpha = 0.2;
-            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/40, 0, 2 * Math.PI);
+            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/20, 0, 2 * Math.PI);
         }else if(this.planetProperties.type === 0){
             ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
             ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
@@ -1196,11 +1200,11 @@ function Button(type, subtype, id, planetProperties){
             ctx.lineTo(this.x + this.width*0.48, this.y + this.height*0.57);
         }else{
             if(this.planetProperties.mass*0.5 < WIDTH/200){
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/200, 0, 2 * Math.PI);
-            }else if(this.planetProperties.mass*0.5 < WIDTH/60){
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, this.planetProperties.mass*0.5, 0, 2 * Math.PI);
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/100, 0, 2 * Math.PI);
+            }else if(this.planetProperties.mass < WIDTH/60){
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, this.planetProperties.mass*0.75, 0, 2 * Math.PI);
             }else{
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/50, 0, 2 * Math.PI);
             }
         }
         this.y = this.y - this.yOffset;
