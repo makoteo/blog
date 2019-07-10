@@ -89,6 +89,9 @@ var mouseClickNoTimer = 0;
 var globalButtonXOffset = 0;
 var planetSelected = 0;
 
+var img = new Image();
+img.src = "IconsGravity.png";
+
 var modal = document.getElementById('myModal');
 
 var input = document.getElementById('boxValueChange');
@@ -1068,7 +1071,7 @@ function Trail(x1, y1, x2, y2, color){
             this.cameraY2 = ((this.y2 - screenHalfHeight) * cameraZoom + screenHalfHeight);
         }
 
-        ctx.fillStyle = this.color;
+        ctx.strokeStyle = this.color;
         ctx.beginPath();
         ctx.moveTo(this.cameraX1 + cameraX, this.cameraY1 + cameraY);
         ctx.lineTo(this.cameraX2 + cameraX, this.cameraY2 + cameraY);
@@ -1096,15 +1099,17 @@ function Button(type, subtype, id, planetProperties){
     this.infoWindowWidth = this.width*2;
     this.infoWindowHeight = this.height;
 
-    if(this.planetProperties.materials.gas > 0.9*100){
-        this.color = "rgb(" + (this.planetProperties.materials.gas*2 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*0.5) + "," + (this.planetProperties.materials.gas*1.5 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*1) + "," + this.planetProperties.materials.ice*2.5 + ")";
-    }else if(this.gas > 0.5*100){
-        this.color = "rgb(" + (this.planetProperties.materials.metals*0.5 + this.planetProperties.materials.rock*0.6 + this.planetProperties.materials.ice*0.5 + this.planetProperties.materials.gas*0.4 + (100)/6) + "," + (this.planetProperties.materials.metals*0.6 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.gas*0.2 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.5 + this.planetProperties.materials.rock*0.9) + ")";
-    }else{
-        this.color = "rgb(" + (this.planetProperties.materials.metals*1.5 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.ice*0.5 +(100)/6) + "," + (this.planetProperties.materials.metals*0.8 + this.planetProperties.materials.rock*1 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.7 + this.planetProperties.materials.rock*1) + ")";
-    }
+    if(this.subtype === 1){
+        if(this.planetProperties.materials.gas > 0.9*100){
+            this.color = "rgb(" + (this.planetProperties.materials.gas*2 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*0.5) + "," + (this.planetProperties.materials.gas*1.5 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*1) + "," + this.planetProperties.materials.ice*2.5 + ")";
+        }else if(this.gas > 0.5*100){
+            this.color = "rgb(" + (this.planetProperties.materials.metals*0.5 + this.planetProperties.materials.rock*0.6 + this.planetProperties.materials.ice*0.5 + this.planetProperties.materials.gas*0.4 + (100)/6) + "," + (this.planetProperties.materials.metals*0.6 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.gas*0.2 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.5 + this.planetProperties.materials.rock*0.9) + ")";
+        }else{
+            this.color = "rgb(" + (this.planetProperties.materials.metals*1.5 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.ice*0.5 +(100)/6) + "," + (this.planetProperties.materials.metals*0.8 + this.planetProperties.materials.rock*1 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.7 + this.planetProperties.materials.rock*1) + ")";
+        }
 
-    this.planetProperties.density = (this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice*0.8 + this.planetProperties.materials.gas*0.3)/(this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice + this.planetProperties.materials.gas);
+        this.planetProperties.density = (this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice*0.8 + this.planetProperties.materials.gas*0.3)/(this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice + this.planetProperties.materials.gas);
+    }
 
     this.update = function(){
         if(this.type === 1){
@@ -1120,8 +1125,8 @@ function Button(type, subtype, id, planetProperties){
             this.yOffset = (Math.abs(WIDTH/2 - this.x - this.width/2)*Math.abs(WIDTH/2 - this.x - this.width/2))/5000;
 
             if(gameClock === 1){
-                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/50+this.width));
-                this.x = this.id*(WIDTH/50+this.width) + globalButtonXOffset;
+                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
+                this.x = this.id*(WIDTH/30+this.width) + globalButtonXOffset;
                 this.xOffset = globalButtonXOffset;
             }
 
@@ -1133,7 +1138,7 @@ function Button(type, subtype, id, planetProperties){
                 }
             }
 
-            this.x = this.id*(WIDTH/50+this.width) + this.xOffset;
+            this.x = this.id*(WIDTH/20+this.width) + this.xOffset;
 
             if(clickTimer === 0){
                 if(mousePosX > this.x + this.width*0.7 && mousePosX < this.x + this.width*0.95 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2){
@@ -1146,13 +1151,29 @@ function Button(type, subtype, id, planetProperties){
                     mouseClickNoTimer = 5;
                 }else if(mousePosX > this.x && mousePosX < this.x + this.width){
                     if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height){
-                        selectedPlanetButtonNum = this.id;
-                        if(clickTimer === 0){
-                            globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/50+this.width));
+                        if(this.subtype === 1){
+                            selectedPlanetButtonNum = this.id;
+                            if(clickTimer === 0){
+                                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
+                            }
+                            cursorTool = false;
+                            clickingButton = true;
+                        }else if(this.subtype === 2){
+                            selectedPlanetButtonNum = this.id;
+                            if(clickTimer === 0){
+                                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
+                            }
+                            cursorTool = true;
+                        }else if(this.subtype === 3){
+                            if(clickTimer === 0){
+                                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/20+this.width));
+                                buttonsPlanets.splice(buttonsPlanets.length - 1, 1);
+                                buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
+                                buttonsPlanets.push(new Button(1, 3, 1, {}));
+                            }
+
                         }
-                        cursorTool = false;
-                        clickingButton = true;
-                        clickTimer = 10;
+
                     }
                 }
             }else{
@@ -1173,43 +1194,71 @@ function Button(type, subtype, id, planetProperties){
     };
 
     this.draw = function(){
-        this.y = this.y + this.yOffset;
-        if(selectedPlanetButtonNum === this.id){
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = 'white';
-            ctx.font = WIDTH/80 + 'px Arial';
-            ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
-            ctx.fillStyle = 'red';
-            ctx.fillText("X", this.x + this.width, this.y + this.height*1.5 - this.height/5);
-        }else{
-            ctx.globalAlpha = 0.5;
-        }
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        if(this.planetProperties.type === 2){
-            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/30, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.globalAlpha = 0.2;
-            ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/20, 0, 2 * Math.PI);
-        }else if(this.planetProperties.type === 0){
-            ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
-            ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
-            ctx.lineTo(this.x + this.width*0.59, this.y + this.height*0.48);
-            ctx.lineTo(this.x + this.width*0.53, this.y + this.height*0.53);
-            ctx.lineTo(this.x + this.width*0.48, this.y + this.height*0.57);
-        }else{
-            if(this.planetProperties.mass*0.5 < WIDTH/200){
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/100, 0, 2 * Math.PI);
-            }else if(this.planetProperties.mass < WIDTH/60){
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, this.planetProperties.mass*0.75, 0, 2 * Math.PI);
+        this.y = this.y + this.yOffset + bottomPanel.offsetY;
+        if(this.subtype === 1){
+            if(selectedPlanetButtonNum === this.id){
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = 'white';
+                ctx.font = WIDTH/80 + 'px Arial';
+                ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
+                ctx.fillStyle = 'red';
+                ctx.fillText("X", this.x + this.width, this.y + this.height*1.5 - this.height/5);
             }else{
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/50, 0, 2 * Math.PI);
+                ctx.globalAlpha = 0.3;
             }
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            if(this.planetProperties.type === 2){
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/35, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.globalAlpha = 0.2;
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/25, 0, 2 * Math.PI);
+            }else if(this.planetProperties.type === 0){
+                ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
+                ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
+                ctx.lineTo(this.x + this.width*0.59, this.y + this.height*0.48);
+                ctx.lineTo(this.x + this.width*0.53, this.y + this.height*0.53);
+                ctx.lineTo(this.x + this.width*0.48, this.y + this.height*0.57);
+            }else{
+                if(this.planetProperties.mass*0.5 < WIDTH/200){
+                    ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/100, 0, 2 * Math.PI);
+                }else if(this.planetProperties.mass < WIDTH/60){
+                    ctx.arc(this.x+this.width/2, this.y+this.height/2, this.planetProperties.mass*0.75, 0, 2 * Math.PI);
+                }else{
+                    ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/50, 0, 2 * Math.PI);
+                }
+            }
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }else if(this.subtype === 2){
+            if(selectedPlanetButtonNum === this.id){
+                ctx.globalAlpha = 1;
+                ctx.font = WIDTH/100 + 'px Arial';
+                ctx.fillStyle = 'white';
+                ctx.globalAlpha = 0.3;
+                ctx.fillText("(Cursor)", this.x + this.width/4, this.y + this.height);
+                ctx.globalAlpha = 1;
+            }else{
+                ctx.globalAlpha = 0.3;
+            }
+            ctx.drawImage(img, 0, 0, 800, 800, this.x + this.width/8, this.y + this.height/8, WIDTH/24, WIDTH/24);
+            ctx.globalAlpha = 1;
+        }else if(this.subtype === 3){
+            if(selectedPlanetButtonNum === this.id){
+                ctx.globalAlpha = 1;
+                ctx.font = WIDTH/100 + 'px Arial';
+                ctx.fillStyle = 'white';
+                ctx.globalAlpha = 0.3;
+                ctx.fillText("(Add new)", this.x + this.width/8, this.y + this.height);
+                ctx.globalAlpha = 1;
+            }else{
+                ctx.globalAlpha = 0.3;
+            }
+            ctx.drawImage(img, 800, 0, 800, 800, this.x + this.width/8, this.y + this.height/8, WIDTH/24, WIDTH/24);
+            ctx.globalAlpha = 1;
         }
-        this.y = this.y - this.yOffset;
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        this.y = this.y - this.yOffset - bottomPanel.offsetY;
     }
 
     this.drawInfoWindow = function(){
@@ -1240,6 +1289,18 @@ function Panel(loc, type) {
     }
 
     this.draw = function(){
+
+        if(this.closed === true){
+            if(this.offsetY < WIDTH/8) {
+                this.offsetY+=WIDTH/32;
+            }
+        }else{
+            if(this.offsetY > 0) {
+                this.offsetY-=WIDTH/32;
+            }
+        }
+
+        this.y = this.y + this.offsetY;
         ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
         if(this.loc === "top"){
             ctx.beginPath();
@@ -1258,16 +1319,14 @@ function Panel(loc, type) {
             ctx.arc(this.x, this.y + this.y/500, this.radius, Math.PI, 2*Math.PI);
             ctx.fill();
         }
-    }
-
-    this.update = function(){
-
+        this.y = this.y - this.offsetY;
     }
 }
 
 objects.push(new Object(WIDTH/2, HEIGHT/2, 500, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
 
+buttonsPlanets.push(new Button(1, 2, 0, {})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 0, {mass:5, density:1, color:'gray', type:0, materials:{rock:60, metals:40, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 1, {mass:10, density:1, color:'orange', type:1, materials:{rock:0, metals:100, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 2, {mass:12, density:1, color:'blue', type:1, materials:{rock:50, metals:0, ice:50, gas:0}, affectedByGravity:true}));
@@ -1275,6 +1334,7 @@ buttonsPlanets.push(new Button(1, 1, 0, {mass:15, density:1, color:'gray', type:
 buttonsPlanets.push(new Button(1, 1, 1, {mass:20, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:80, gas:20}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 0, {mass:50, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
+buttonsPlanets.push(new Button(1, 3, 0, {})); // REMEMBER INCREASING ID RIP
 
 bottomPanel = new Panel("bottom", 1);
 
@@ -1543,17 +1603,26 @@ function game(){
 
     clickingButton = false;
 
-    if (keys && keys[49]) {
+    if (keys && keys[48]) {
         selectedPlanetButtonNum = 0;
+        globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        cursorTool = true;
+    }else if (keys && keys[49]) {
+        selectedPlanetButtonNum = 1;
+        globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
         cursorTool = false;
     }else if (keys && keys[50]) {
-        selectedPlanetButtonNum = 1;
+        selectedPlanetButtonNum = 2;
+        globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
         cursorTool = false;
     }else if (keys && keys[51]) {
-        selectedPlanetButtonNum = 2;
+        selectedPlanetButtonNum = 3;
+        globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
         cursorTool = false;
-    }else if (keys && keys[48]) {
-        cursorTool = true;
+    }else if (keys && keys[52] && buttonsPlanets.length > 3) {
+        selectedPlanetButtonNum = 4;
+        globalButtonXOffset = Math.round(WIDTH/2 - buttonsPlanets[0].width/2 - selectedPlanetButtonNum*(WIDTH/20+buttonsPlanets[0].width));
+        cursorTool = false;
     }else if ((keys && keys[32])) {
         if(pauseTimer === 0 && modal.style.display !== "block"){
             PAUSED = !PAUSED;
