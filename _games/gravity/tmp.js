@@ -86,6 +86,9 @@ var planetButtons = 0;
 
 var mouseClickNoTimer = 0;
 
+var globalButtonXOffset = 0;
+var planetSelected = 0;
+
 var modal = document.getElementById('myModal');
 
 var input = document.getElementById('boxValueChange');
@@ -783,9 +786,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
                     } else {
                         if(collisions === true && this.distance === this.distance){
-                            if(this.type !== 3 && objects[j].type !== 3){
-                                console.log(j + this.distance);
-                            }
                             this.explode(this.distance, j);
                             break;
                         }
@@ -1078,7 +1078,8 @@ function Trail(x1, y1, x2, y2, color){
 
 function Button(type, subtype, id, planetProperties){
     this.x = 0;
-    this.y = HEIGHT - HEIGHT/50 - WIDTH/16;
+    this.y = HEIGHT - HEIGHT/50 - WIDTH/12;
+    this.xOffset = 0;
     this.yOffset = 0;
     this.width = WIDTH/18;
     this.height = WIDTH/16;
@@ -1111,45 +1112,60 @@ function Button(type, subtype, id, planetProperties){
             this.infoWindowX = this.x - this.width/2;
             this.infoWindowY = this.y - this.height*1.2;
 
-            if(this.planetButtonNum !== planetButtons){
+            /*if(this.planetButtonNum !== planetButtons){
                 this.x = WIDTH/2 - this.width/2 - (planetButtons-1)*(this.width-WIDTH/50) + this.id*(WIDTH/50+this.width);
                 this.planetButtonNum = planetButtons;
+            }*/
+
+            this.yOffset = (Math.abs(WIDTH/2 - this.x - this.width/2)*Math.abs(WIDTH/2 - this.x - this.width/2))/5000;
+
+            if(gameClock === 1){
+                globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/50+this.width));
+                this.x = this.id*(WIDTH/50+this.width) + globalButtonXOffset;
+                this.xOffset = globalButtonXOffset;
             }
 
+            if(Math.abs(globalButtonXOffset - this.xOffset) > 10){
+                if(globalButtonXOffset < this.xOffset){
+                    this.xOffset -= WIDTH/128;
+                }else if(globalButtonXOffset > this.xOffset){
+                    this.xOffset += WIDTH/128;
+                }
+            }
+
+            this.x = this.id*(WIDTH/50+this.width) + this.xOffset;
+
             if(clickTimer === 0){
-                if(mousePosX > this.x + this.width*0.7 && mousePosX < this.x + this.width*0.95 && mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height*0.2){
+                if(mousePosX > this.x + this.width*0.7 && mousePosX < this.x + this.width*0.95 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2){
                         buttonsPlanets.splice(this.id, 1);
                         selectedPlanetButtonNum = 0;
                         cursorTool = true;
                         clickingButton = true;
-                }else  if(mousePosX > this.x + this.width*0.1 && mousePosX < this.x + this.width*0.3 && mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height*0.2) {
+                }else  if(mousePosX > this.x + this.width*0.1 && mousePosX < this.x + this.width*0.3 && mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height*0.2) {
                     this.infoWindowOpen = true;
                     mouseClickNoTimer = 5;
                 }else if(mousePosX > this.x && mousePosX < this.x + this.width){
-                    if(mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height){
+                    if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height){
                         selectedPlanetButtonNum = this.id;
+                        if(clickTimer === 0){
+                            globalButtonXOffset = Math.round(WIDTH/2 - this.width/2 - selectedPlanetButtonNum*(WIDTH/50+this.width));
+                        }
                         cursorTool = false;
                         clickingButton = true;
+                        clickTimer = 10;
                     }
                 }
             }else{
                 if(mousePosX > this.x && mousePosX < this.x + this.width){
-                    if(mousePosY > this.y - this.yOffset && mousePosY < this.y - this.yOffset + this.height){
-                        if(this.yOffset < WIDTH/100){
-                            this.yOffset++;
-                        }
+                    if(mousePosY > this.y + this.yOffset && mousePosY < this.y + this.yOffset + this.height){
                         if(selectedPlanetButtonNum !== this.id){
                             document.body.style.cursor = "pointer";
                         }
                     }else{
-                        if(this.yOffset > 0){
-                            this.yOffset--;
-                        }
+
                     }
                 }else{
-                    if(this.yOffset > 0){
-                        this.yOffset--;
-                    }
+
                 }
             }
         }
@@ -1157,17 +1173,7 @@ function Button(type, subtype, id, planetProperties){
     };
 
     this.draw = function(){
-        this.y-=this.yOffset;
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
-        if(this.id === selectedPlanetButtonNum){
-            ctx.fillStyle = 'white';
-        }else{
-            ctx.fillStyle = 'gray';
-        }
-        ctx.globalAlpha = 0.1;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        this.y = this.y + this.yOffset;
         ctx.globalAlpha = 1;
         ctx.fillStyle = 'white';
         ctx.font = WIDTH/80 + 'px Arial';
@@ -1197,124 +1203,62 @@ function Button(type, subtype, id, planetProperties){
                 ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/60, 0, 2 * Math.PI);
             }
         }
+        this.y = this.y - this.yOffset;
         ctx.fill();
         ctx.globalAlpha = 1;
-        this.y+=this.yOffset;
     }
 
     this.drawInfoWindow = function(){
-        if(this.infoWindowOpen === true) {
-            ctx.fillStyle = 'rgb(10, 10, 10)';
-            ctx.globalAlpha = 0.4;
-            ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-            ctx.globalAlpha = 1;
-            ctx.strokeStyle = 'gray';
-            ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-            ctx.textAlign = 'left';
-            ctx.fillStyle = 'white';
-            ctx.font = WIDTH / 80 + 'px Arial';
-            ctx.fillText("Type: " + this.type, this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25);
 
-            ctx.fillText("Mass: " + Math.round(this.mass), this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30);
-
-            ctx.fillText("Metal: " + Math.round(this.planetProperties.materials.metals) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30*2);
-            ctx.fillText("Rock: " + Math.round(this.planetProperties.materials.rock) + "%", this.infoWindowX + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30*3);
-            ctx.fillText("Ice: " + Math.round(this.planetProperties.materials.ice) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 2);
-            ctx.fillText("Gas: " + Math.round(this.planetProperties.materials.gas) + "%", this.infoWindowX + this.infoWindowWidth / 2 + WIDTH / 50, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3);
-
-            ctx.font = WIDTH / 80 + 'px Arial';
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 3.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 8);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 9);
-
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
-
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 10.5);
-            ctx.fillText("\u270e", this.infoWindowX + this.infoWindowWidth * 0.01 + this.infoWindowWidth / 2, this.infoWindowY + HEIGHT / 25 + HEIGHT / 30 * 11.5);
-
-            ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
-
-            //if (clickTimer === 0) {
-            if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
-                if(clickTimer === 0){
-                    modal.style.display = "block";
-                    for (var i = 0; i < objects.length; i++) {
-                        if (objects[i] === this) {
-                            windowSelectedPlanet = i;
-                            input.value = this.name;
-                            changeValue = "Name";
-                        }
-                    }
-                    PAUSED = true;
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-            }else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 3.5 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 3.5) {
-                if(clickTimer === 0) {
-                    modal.style.display = "block";
-                    for (var i = 0; i < objects.length; i++) {
-                        if (objects[i] === this) {
-                            windowSelectedPlanet = i;
-                            input.value = this.mass;
-                            changeValue = "Mass"
-                        }
-                    }
-                    PAUSED = true;
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-            } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 8) {
-                if(clickTimer === 0){
-                    modal.style.display = "block";
-                    for (var i = 0; i < objects.length; i++) {
-                        if (objects[i] === this) {
-                            windowSelectedPlanet = i;
-                            input.value = this.velX;
-                            changeValue = "DeltaX"
-                        }
-                    }
-                    PAUSED = true;
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-            } else if (mousePosX > this.infoWindowX && mousePosY > this.infoWindowY + HEIGHT / 50 + HEIGHT / 30 * 9 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.05 && mousePosY < this.infoWindowY + HEIGHT / 50 * 2 + HEIGHT / 30 * 9) {
-                if(clickTimer === 0){
-                    modal.style.display = "block";
-                    for (var i = 0; i < objects.length; i++) {
-                        if (objects[i] === this) {
-                            windowSelectedPlanet = i;
-                            input.value = this.velY;
-                            changeValue = "DeltaY"
-                        }
-                    }
-                    PAUSED = true;
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-            } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.9 && mousePosY > this.infoWindowY + HEIGHT / 50 && mousePosX < this.infoWindowX + this.infoWindowWidth && mousePosY < this.infoWindowY + HEIGHT / 50 * 2) {
-                if(clickTimer === 0){
-                    this.infoWindowOpen = false;
-                    this.infoWindowX = 0;
-                    this.infoWindowY = 0;
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-
-            } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 30 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 50) {
-                if(clickTimer === 0){
-                    //objects.splice(this.id, 1);
-                }else{
-                    document.body.style.cursor = "pointer";
-                }
-            }else{
-
-            }
-
-        }
     };
 
+}
+
+function Panel(loc, type) {
+    this.loc = loc;
+    this.type = type;
+
+    this.x = 0;
+    this.y = 0;
+    this.radius = 0;
+
+    this.closed = false;
+    this.offsetY = 0;
+
+    if(this.loc === "top"){
+        this.x = WIDTH/2;
+        this.y = -WIDTH*1.85;
+        this.radius = WIDTH*2;
+    }else if(this.loc === "bottom"){
+        this.x = WIDTH/2;
+        this.y = HEIGHT + WIDTH*1.85;
+        this.radius = WIDTH*2;
+    }
+
+    this.draw = function(){
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+        if(this.loc === "top"){
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI);
+            ctx.fill();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y + this.y/500, this.radius, 0, Math.PI);
+            ctx.fill();
+        }else{
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, Math.PI, 2*Math.PI);
+            ctx.fill();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+            ctx.beginPath();
+            ctx.arc(this.x, this.y + this.y/500, this.radius, Math.PI, 2*Math.PI);
+            ctx.fill();
+        }
+    }
+
+    this.update = function(){
+
+    }
 }
 
 objects.push(new Object(WIDTH/2, HEIGHT/2, 500, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
@@ -1327,6 +1271,8 @@ buttonsPlanets.push(new Button(1, 1, 0, {mass:15, density:1, color:'gray', type:
 buttonsPlanets.push(new Button(1, 1, 1, {mass:20, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:80, gas:20}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 0, {mass:50, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
+
+bottomPanel = new Panel("bottom", 1);
 
 function arrayInclude(array, result){
     for(var oof = 0; oof < array.length; oof++){
@@ -1461,11 +1407,11 @@ function game(){
     }
 
     //Buttons?
+    bottomPanel.draw();
 
     for(var i = 0; i < buttonsPlanets.length; i++){
         buttonsPlanets[i].update();
         buttonsPlanets[i].draw();
-        buttonsPlanets[i].drawInfoWindow();
     }
 
 
