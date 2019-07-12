@@ -1563,6 +1563,7 @@ function Button(text, x, y, width, height){
                         playedRounds++;
                         buttons = [];
                         if(playedRounds === RoundAmount){
+                            aiBots = [];
                             stateToTransitionTo = "GAME OVER";
                         }else{
                             Setup(true, true);
@@ -2514,6 +2515,7 @@ function game(){
                         playedRounds++;
                         buttons = [];
                         if (playedRounds === RoundAmount) {
+                            aiBots = [];
                             stateToTransitionTo = "GAME OVER";
                         } else {
                             Setup(true, true);
