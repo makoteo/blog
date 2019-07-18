@@ -76,6 +76,7 @@ var savedMouseY2 = 0;
 var simulationSpeed = 1;
 
 var globalTrailLife = 500;
+var globalTrailSmoothness = 5;
 var globalPlanetMass = 200;
 
 var windowSelectedPlanet = 0;
@@ -88,6 +89,9 @@ var mouseClickNoTimer = 0;
 
 var globalButtonXOffset = 0;
 var planetSelected = 0;
+
+var sunAmount = 0;
+var savedSunAmount = 0;
 
 var img = new Image();
 img.src = "IconsGravity.png";
@@ -150,7 +154,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     //this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
 
     if(this.materials.gas > 0.9*this.totalMaterials){
-        this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.materials.ice*2.5 + ")";
+        this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + (this.materials.ice*2.5) + ")";
     }else if(this.materials.gas > 0.5*this.totalMaterials){
         this.color = "rgb(" + (this.materials.gas*1.2 + this.materials.metals*0.5 + this.materials.rock*0.3) + "," + (this.materials.gas*1  + this.materials.metals*0.6 + this.materials.rock*0.5) + "," + this.materials.ice*2.2 + ")";
     }else{
@@ -291,14 +295,13 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
 
             if(this.type === 2){
-                ctx.fillStyle = 'yellow';
-                ctx.globalAlpha = 0.05;
+                this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*20);
+                this.gradient.addColorStop(0, "rgba(200, 200, 70)");
+                this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+                ctx.fillStyle = this.gradient;
+                ctx.globalAlpha = 0.3;
                 ctx.beginPath();
-                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*1.5, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.globalAlpha = 0.04;
-                ctx.beginPath();
-                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*2, 0, 2 * Math.PI);
+                ctx.arc(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius*20, 0, 2 * Math.PI);
                 ctx.fill();
                 ctx.globalAlpha = 1;
             }
@@ -325,7 +328,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.infoWindowOpen === true) {
             if (this.infoWindowX === 0 && draggingWindow === false) {
                 if (this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth * 1.2) {
-                    this.infoWindowX = this.cameraX + cameraX;
+                    this.infoWindowX = this.cameraX + cameraX + this.radius*1.2;
                 } else {
                     this.infoWindowX = this.cameraX + cameraX;
                 }
@@ -333,17 +336,6 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 this.infoWindowY = this.cameraY + cameraY - this.infoWindowHeight / 2;
 
             }
-            ctx.fillStyle = 'rgb(100, 100, 100)';
-            ctx.strokeStyle = 'rgb(100, 100, 100)';
-            ctx.globalAlpha = 0.1;
-            ctx.fillRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-            ctx.globalAlpha = 1;
-            ctx.fillRect(this.infoWindowX, this.infoWindowY + this.infoWindowHeight, this.infoWindowWidth, this.infoWindowHeight/100);
-            ctx.lineWidth = 2;
-            ctx.strokeRect(this.infoWindowX, this.infoWindowY + this.infoWindowHeight, this.infoWindowWidth, this.infoWindowHeight/100);
-            ctx.strokeStyle = 'white';
-            ctx.strokeRect(this.infoWindowX, this.infoWindowY, this.infoWindowWidth, this.infoWindowHeight);
-            ctx.lineWidth = 1;
             ctx.textAlign = 'left';
             ctx.fillStyle = 'white';
             ctx.font = WIDTH / 80 + 'px Arial';
@@ -611,7 +603,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 }
             }
         }else{
-            this.color = 'yellow';
+            this.blueTemp = Math.min(this.radius/2, 255);
+            this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.blueTemp + ")";
         }
 
         if(this.exists === false && this.type !== 3){
@@ -632,11 +625,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                         //Works for right half circle
                         if(this.x >= this.pointAX){
-                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
-                            this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velX;
+                            this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velY;
                         }else{
-                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
-                            this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection;
+                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velX;
+                            this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velY;
                         }
                     }
                 }else{
@@ -780,10 +773,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
 
                         if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
-                            this.temperature = Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)));
+                            if(savedSunAmount === 0){
+                                savedSunAmount = 1;
+                            }
+                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)))/savedSunAmount;
                         }else{
                             if(this.type === 2 || this.mass > starCreationLimit){
                                 this.temperature = this.mass * randomTempConstant;
+                                sunAmount++;
                             }
 
                         }
@@ -826,9 +823,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
             if(this.type !== 3 && objects[int].type !== 3){
                 if(this.mass < objects[int].mass){
-                    this.random = Math.round(this.mass/massMultiplier/5);
+                    this.random = Math.round(this.mass/massMultiplier/2);
                 }else{
-                    this.random = Math.round(objects[int].mass/massMultiplier/5);
+                    this.random = Math.round(objects[int].mass/massMultiplier/2);
                 }
                 if(this.random > 50){
                     this.random = 50;
@@ -838,9 +835,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                     }else{
                         for(var debrieNum = 0; debrieNum < this.random; debrieNum++){
-                            this.spawnX = Math.random()*this.radius - this.radius/2;
-                            this.spawnY = Math.random()*this.radius - this.radius/2;
-                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
+                            this.spawnX = Math.random()*this.radius*1.4 - this.radius*0.7;
+                            this.spawnY = Math.random()*this.radius*1.4 - this.radius*0.7;
+                            objects.push(new Object(this.x + this.spawnX - this.velX + cameraX/cameraZoom, this.y + this.spawnY - this.velY + cameraY/cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
                             objects[objects.length - 1].velX = this.velX/4*Math.random() - this.velX/8;
                             objects[objects.length - 1].velY = this.velY/4*Math.random() - this.velY/8;
                         }
@@ -851,9 +848,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                     }else{
                         for(var debrieNum = 0; debrieNum < this.random; debrieNum++) {
-                            this.spawnX = Math.random()*objects[int].radius - objects[int].radius/2;
-                            this.spawnY = Math.random()*objects[int].radius - objects[int].radius/2;
-                            objects.push(new Object(objects[int].x + this.spawnX + objects[int].velX + cameraX / cameraZoom, objects[int].y + this.spawnY + objects[int].velY + cameraY / cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
+                            this.spawnX = Math.random()*objects[int].radius*1.4 - objects[int].radius*0.7;
+                            this.spawnY = Math.random()*objects[int].radius*1.4 - objects[int].radius*0.7;
+                            objects.push(new Object(objects[int].x + this.spawnX - objects[int].velX + cameraX / cameraZoom, objects[int].y + this.spawnY - objects[int].velY + cameraY / cameraZoom, Math.round(Math.random()*5)+3, 1, 3, false, 'yellow', {metals:this.materials.metals, ice:this.materials.ice, rock:this.materials.rock, gas:this.materials.gas}));
                             objects[objects.length - 1].velX = objects[int].velX/4*Math.random() - objects[int].velX/8;
                             objects[objects.length - 1].velY = objects[int].velY/4*Math.random() - objects[int].velX/8;
                         }
@@ -882,7 +879,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 }else if(this.type === 3){
                     this.velX = objects[int].velX;
                     this.velY = objects[int].velY;
-                }else if(objects[i].type === 3){
+                }else if(objects[int].type === 3){
 
                 }
                 if(this.mass <= objects[int].mass){
@@ -982,7 +979,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             }
 
-            this.density = (this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
+            this.density = massMultiplier/2*(this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
             if(this.type === 0 || this.type === 3){
                 this.regenerate();
@@ -1008,8 +1005,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
 
         if(globalTrails === true){
-            if(this.type !== 3){
-                trails.push(new Trail(this.x - this.velX, this.y - this.velY, this.x, this.y, 'white'));
+            if(this.type !== 3 && (gameClock % (globalTrailSmoothness-1) === 0)){
+                trails.push(new Trail(this.id, 'white'));
             }
         }
 
@@ -1026,6 +1023,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.readyPoints.push(Math.round(Math.random()*3));
                 }
                 this.readyPoints.sort(function(a, b){return a-b});
+                this.cameraRadius = this.cameraRadius/2;
                 for(var i = 0; i < this.readyPoints.length; i++){
                     if(this.readyPoints[i] === 0){
                         this.points.push([0, this.cameraRadius + Math.round(Math.random()*this.cameraRadius)-this.cameraRadius*0.5])
@@ -1037,6 +1035,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius, this.cameraRadius*2])
                     }
                 }
+                this.cameraRadius = this.cameraRadius*2;
             }
         }else{
             this.type = 1;
@@ -1050,18 +1049,35 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     }
 }
 
-function Trail(x1, y1, x2, y2, color){
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
+function Trail(planetId, color){
+    this.planetId = planetId;
+    this.x1 = 0;
+    this.y1 = 0;
+    for(var temp = 0; temp < objects.length; temp++){
+        if(objects[temp].id === this.planetId){
+            this.x1 = objects[temp].x;
+            this.y1 = objects[temp].y;
+        }
+    }
+    this.x2 = 1.732;
+    this.y2 = 1.732;
     this.color = color;
+    this.interval = globalTrailSmoothness;
     this.lifeTime = globalTrailLife;
     this.zoom = 0;
 
     this.draw = function(){
         if(PAUSED === false){
             this.lifeTime--;
+        }
+
+        if(this.lifeTime === globalTrailLife-this.interval){
+            for(var temp = 0; temp < objects.length; temp++){
+                if(objects[temp].id === this.planetId){
+                    this.x2 = objects[temp].x;
+                    this.y2 = objects[temp].y;
+                }
+            }
         }
 
         if(this.zoom !== cameraZoom){
@@ -1071,11 +1087,14 @@ function Trail(x1, y1, x2, y2, color){
             this.cameraY2 = ((this.y2 - screenHalfHeight) * cameraZoom + screenHalfHeight);
         }
 
-        ctx.strokeStyle = this.color;
-        ctx.beginPath();
-        ctx.moveTo(this.cameraX1 + cameraX, this.cameraY1 + cameraY);
-        ctx.lineTo(this.cameraX2 + cameraX, this.cameraY2 + cameraY);
-        ctx.stroke();
+        if(this.x2 !== 1.732){
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.moveTo(this.cameraX1 + cameraX, this.cameraY1 + cameraY);
+            ctx.lineTo(this.cameraX2 + cameraX, this.cameraY2 + cameraY);
+            ctx.stroke();
+        }
+
     }
 }
 
@@ -1221,8 +1240,8 @@ function Button(type, subtype, id, planetProperties){
                 ctx.fillStyle = 'white';
                 //ctx.font = WIDTH/80 + 'px Arial';
                 //ctx.fillText("\u270e", this.x - this.width/5, this.y + this.height*1.5 - this.height/5);
-                ctx.drawImage(img, 1600, 0, 800, 800, this.x - this.width/8, this.y + this.height*0.9, this.width*0.6, this.width*0.6);
-                ctx.drawImage(img, 2400, 0, 800, 800, this.x + this.width/3, this.y + this.height*0.7, this.width, this.width);
+                ctx.drawImage(img, 1600, 0, 800, 800, this.x + this.width/10, this.y + this.height*1, this.width/2, this.width/2);
+                ctx.drawImage(img, 2400, 0, 800, 800, this.x + this.width/2, this.y + this.height*1, this.width/2, this.width/2);
             }else{
                 ctx.globalAlpha = 0.3;
             }
@@ -1262,7 +1281,7 @@ function Button(type, subtype, id, planetProperties){
             }else{
                 ctx.globalAlpha = 0.3;
             }
-            ctx.drawImage(img, 0, 0, 800, 800, this.x + this.width/8, this.y + this.height/8, WIDTH/24, WIDTH/24);
+            ctx.drawImage(img, 0, 0, 800, 800, this.x - this.width/8, this.y - this.height/4, WIDTH/15, WIDTH/15);
             ctx.globalAlpha = 1;
         }else if(this.subtype === 3){
             if(selectedPlanetButtonNum === this.id){
@@ -1275,7 +1294,7 @@ function Button(type, subtype, id, planetProperties){
             }else{
                 ctx.globalAlpha = 0.3;
             }
-            ctx.drawImage(img, 800, 0, 800, 800, this.x + this.width/8, this.y + this.height/8, WIDTH/24, WIDTH/24);
+            ctx.drawImage(img, 800, 0, 800, 800, this.x + this.width/8, this.y + this.height/8, WIDTH/18, WIDTH/18);
             ctx.globalAlpha = 1;
         }
         this.y = this.y - this.yOffset - bottomPanel.offsetY;
@@ -1359,6 +1378,8 @@ bottomPanel = new Panel("bottom", 1);
 editingPanel = new Panel("bottom", 1);
 
 editingPanel.closed = true;
+
+var clickedOnSomePlanet = false;
 
 function arrayInclude(array, result){
     for(var oof = 0; oof < array.length; oof++){
@@ -1468,6 +1489,8 @@ function game(){
                         }
                     }
                 }
+                savedSunAmount = sunAmount;
+                sunAmount = 0;
             //}
 
             if(PAUSED === false){
@@ -1505,6 +1528,11 @@ function game(){
     //Cursor Logic
 
     window.onmousemove = logMouseMove;
+    if(dragging === true && clickedOnSomePlanet === true){
+        clickedOnSomePlanet = true;
+    }else{
+        clickedOnSomePlanet = false;
+    }
 
     if(clickTimer === 0 && cursorTool === false ){
         draggingWindow = false;
@@ -1514,20 +1542,16 @@ function game(){
     }else if(clickTimer === 0 && cursorTool === true){
         for(var i = 0; i < objects.length; i++){
             if(objects[i].type !== 3){
-                if(objects[i].infoWindowOpen === true){
-                    if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                        if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-
-                        }else{
-
-                        }
-                    }else{
-
-                    }
-                }
                 if(objects[i].cameraX + cameraX - objects[i].cameraRadius - WIDTH/50 < mousePosX && objects[i].cameraX + cameraX + objects[i].cameraRadius + WIDTH/50 > mousePosX){
                     if(objects[i].cameraY + cameraY - objects[i].cameraRadius - WIDTH/50 < mousePosY && objects[i].cameraY + cameraY + objects[i].cameraRadius + WIDTH/50 > mousePosY){
+                        for(var temp = 0; temp < objects.length; temp++){
+                            objects[temp].infoWindowOpen = false;
+                            objects[temp].following = false;
+                        }
+                        clickedOnSomePlanet = true;
                         objects[i].infoWindowOpen = true;
+                        objects[i].following = true;
+                        bottomPanel.closed = true;
                         objects[i].infoWindowX = 0;
                         objects[i].infoWindowY = 0;
                         break;
@@ -1535,59 +1559,23 @@ function game(){
                 }
             }
         }
-    }else if(dragging === true &&  cursorTool === true){
-        mouseonWindow = false;
-        if(windowId === 0.1){
-            for(var i = 0; i < objects.length; i++){
-                if(objects[i].type !== 3){
-                    if(objects[i].infoWindowOpen === true){
-                        if(mousePosX > objects[i].infoWindowX && mousePosX < objects[i].infoWindowX + objects[i].infoWindowWidth){
-                            if(mousePosY > objects[i].infoWindowY && mousePosY < objects[i].infoWindowY + objects[i].infoWindowHeight){
-                                mouseonWindow = true;
-                                windowId = i;
-                                draggingWindow = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+    }else if(dragging === true){
+        var noCreatingPlanets = true;
+        for(var p = 0; p < objects.length; p++){
+            if(objects[p].exists === false){
+                noCreatingPlanets = false;
+                break;
             }
         }
-        if((mouseonWindow === true || draggingWindow === true) && draggingScreen === false && windowId !== 0.1){
-            if(windowId < objects.length){
-                if(savedMouseX2 === 0){
-                    savedMouseX2 = objects[windowId].infoWindowX - mousePosX;
-                    savedMouseY2 = objects[windowId].infoWindowY - mousePosY;
-                }
-                if(mousePosX + savedMouseX2 + objects[windowId].infoWindowWidth < WIDTH){
-                    if(mousePosX + savedMouseX2 > 0){
-                        objects[windowId].infoWindowX = mousePosX + savedMouseX2;
-                    }else{
-                        objects[windowId].infoWindowX = 1;
-                    }
-                }else{
-                    objects[windowId].infoWindowX = WIDTH - objects[windowId].infoWindowWidth;
-                }
-
-                if(mousePosY + savedMouseY2 + objects[windowId].infoWindowHeight < HEIGHT){
-                    if(mousePosY + savedMouseY2 > 0){
-                        objects[windowId].infoWindowY = mousePosY + savedMouseY2;
-                    }else{
-                        objects[windowId].infoWindowY = 1;
-                    }
-                }else{
-                    objects[windowId].infoWindowY = HEIGHT - objects[windowId].infoWindowHeight;
-                }
-            }
-        }else{
-
-            for(var x = 0; x < objects.length; x++){
+        if(clickedOnSomePlanet === false && noCreatingPlanets === true) {
+            for (var x = 0; x < objects.length; x++) {
                 objects[x].following = false;
+                objects[x].infoWindowOpen = false;
             }
 
             savedMouseX2 = 0;
             savedMouseY2 = 0;
-            if(savedMouseX === 0){
+            if (savedMouseX === 0) {
                 savedMouseX = mousePosX;
                 savedMouseY = mousePosY;
             }
@@ -1595,8 +1583,8 @@ function game(){
             cameraX = mousePosX - savedMouseX + cameraXOffset;
             cameraY = mousePosY - savedMouseY + cameraYOffset;
 
-            AREAWIDTH = WIDTH/2/0.01;
-            AREAHEIGHT = HEIGHT/2/0.01;
+            AREAWIDTH = WIDTH / 2 / 0.01;
+            AREAHEIGHT = HEIGHT / 2 / 0.01;
 
             draggingScreen = true;
         }
@@ -1655,6 +1643,10 @@ function game(){
         bottomPanel.closed = false;
         editingPanel.closed = true;
         cursorTool = false;
+    }else if (keys && keys[88]) {
+        bottomPanel.closed = true;
+    }else if (keys && keys[79]) {
+        bottomPanel.closed = false;
     }else if ((keys && keys[32])) {
         if(pauseTimer === 0 && modal.style.display !== "block"){
             PAUSED = !PAUSED;
