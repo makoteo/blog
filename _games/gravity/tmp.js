@@ -211,9 +211,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     if(this.type === 3){
         if(this.color === 'white'){
-            this.gravityConstant = 0.01;
+            this.gravityConstant = 0.02*G;
         }else{
-            this.gravityConstant = 0.07;
+            this.gravityConstant = 0.14*G;
         }
     }
 
@@ -723,7 +723,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        if(this.inactive === false && this.affectedByGravity === true && (this.exists === true || (this.type === 3)) && PAUSED === false) {
+        if(this.inactive === false && (this.exists === true || (this.type === 3)) && PAUSED === false && this.affectedByGravity === true) {
             for (var j = 0; j < objects.length; j++) {
                 if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3 && (this.gravityAffectsList.length === 0 || arrayInclude(this.gravityAffectsList, objects[j].id))) {
                     this.tempX = objects[j].x;
@@ -732,19 +732,15 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
                     if ((this.distance > (this.radius + objects[j].radius))) {
-                        this.velX += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
-                        this.velY += this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
+                        this.velX += this.gravityConstant * (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance; // F = M*A A = F/M
+                        this.velY += this.gravityConstant * (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.y) / this.distance;
                     }
 
                     //console.log(this.distance);
 
                 }
             }
-
             for (var j = 0; j < objects.length; j++) {
-                if(objects[j] === this){
-                    this.arrayid = j;
-                }
                 if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3) {
                     this.tempX = objects[j].x;
                     this.tempY = objects[j].y;
@@ -798,6 +794,12 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
                     }
                 }
+            }
+        }
+
+        for (var j = 0; j < objects.length; j++) {
+            if (objects[j] === this) {
+                this.arrayid = j;
             }
         }
 
@@ -996,6 +998,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }else if(this.type === 3){
 
         }
+
         this.x += this.velX;
         this.y += this.velY;
 
