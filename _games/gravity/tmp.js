@@ -589,9 +589,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.color = "rgb(" + (this.materials.metals * 1.5 + this.materials.rock * 0.8 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.8 + this.materials.rock * 1 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.7 + this.materials.rock * 1) + ")";
                 }*/
                 if(this.materials.gas > 0.9*this.totalMaterials){
-                    this.color = "rgb(" + this.materials.gas*1.8 + "," + this.materials.gas*1.6 + "," + (this.materials.ice*2.2) + ")";
+                    this.color = "rgb(" + this.materials.gas*1.5 + "," + this.materials.gas*1.2 + "," + (this.materials.ice*2) + ")";
                 }else if (this.materials.gas > 0.5 * this.totalMaterials) {
-                    this.color = "rgb(" + (this.materials.metals * 0.5 + this.materials.rock * 0.6 + this.materials.ice * 0.5 + this.materials.gas * 0.4 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.6 + this.materials.rock * 0.8 + this.materials.gas * 0.2 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.5 + this.materials.rock * 0.9) + ")";
+                    this.color = "rgb(" + (this.materials.metals * 0.5 + this.materials.rock * 0.6 + this.materials.ice * 0.5 + this.materials.gas * 0.8 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.6 + this.materials.rock * 0.8 + this.materials.gas * 0.4 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.5 + this.materials.rock * 0.9) + ")";
                 } else {
                     this.color = "rgb(" + (this.materials.metals * 1.5 + this.materials.rock * 0.8 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.8 + this.materials.rock * 1 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.7 + this.materials.rock * 1) + ")";
                 }
