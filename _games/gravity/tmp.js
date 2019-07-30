@@ -1123,6 +1123,8 @@ function Button(type, subtype, id, planetProperties){
     this.planetButtonNum = 0;
     this.planetProperties = planetProperties;
 
+    this.tempPlanetRadius = Math.sqrt(this.planetProperties.mass/(3.14));
+
     this.infoWindowOpen = false;
     this.infoWindowWidth = this.width*2;
     this.infoWindowHeight = this.height;
@@ -1130,12 +1132,26 @@ function Button(type, subtype, id, planetProperties){
     this.lifeClock = 0;
 
     if(this.subtype === 1){
-        if(this.planetProperties.materials.gas > 0.9*100){
+        /*if(this.planetProperties.materials.gas > 0.9*100){
             this.color = "rgb(" + (this.planetProperties.materials.gas*2 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*0.5) + "," + (this.planetProperties.materials.gas*1.5 + (this.planetProperties.type-1)*this.planetProperties.materials.gas*1) + "," + this.planetProperties.materials.ice*2.5 + ")";
         }else if(this.gas > 0.5*100){
             this.color = "rgb(" + (this.planetProperties.materials.metals*0.5 + this.planetProperties.materials.rock*0.6 + this.planetProperties.materials.ice*0.5 + this.planetProperties.materials.gas*0.4 + (100)/6) + "," + (this.planetProperties.materials.metals*0.6 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.gas*0.2 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.5 + this.planetProperties.materials.rock*0.9) + ")";
         }else{
             this.color = "rgb(" + (this.planetProperties.materials.metals*1.5 + this.planetProperties.materials.rock*0.8 + this.planetProperties.materials.ice*0.5 +(100)/6) + "," + (this.planetProperties.materials.metals*0.8 + this.planetProperties.materials.rock*1 + this.planetProperties.materials.ice*0.5 +(100)/12) + "," + (this.planetProperties.materials.ice*1.7 + this.planetProperties.materials.rock*1) + ")";
+        }*/
+        if(this.planetProperties.materials.gas > 0.9*100){
+            if(this.planetProperties.type === 2){
+                this.blueTemp = Math.min(this.tempPlanetRadius / 4, 255);
+                this.redTemp = Math.max(Math.min(this.planetProperties.materials.gas * 2.3 - this.tempPlanetRadius/1000, 230), 180);
+                this.yellowTemp = Math.max(Math.min(this.planetProperties.materials.gas * 2.0 - this.tempPlanetRadius/5000, 200), 130);
+                this.color = "rgb(" + this.redTemp + "," + this.yellowTemp + "," + this.blueTemp + ")";
+            }else{
+                this.color = "rgb(" + this.planetProperties.materials.gas*1.5 + "," + this.planetProperties.materials.gas*1.2 + "," + (this.planetProperties.materials.ice*2) + ")";
+            }
+        }else if (this.planetProperties.materials.gas > 0.5 * 100) {
+            this.color = "rgb(" + (this.planetProperties.materials.metals * 0.5 + this.planetProperties.materials.rock * 0.6 + this.planetProperties.materials.ice * 0.5 + this.planetProperties.materials.gas * 0.8) + "," + (this.planetProperties.materials.metals * 0.6 + this.planetProperties.materials.rock * 0.8 + this.planetProperties.materials.gas * 0.4 + this.planetProperties.materials.ice) * 0.5 + "," + (this.planetProperties.materials.ice * 1.5 + this.planetProperties.materials.rock * 0.9) + ")";
+        } else {
+            this.color = "rgb(" + (this.planetProperties.materials.metals * 1.5 + this.planetProperties.materials.rock * 0.8 + this.planetProperties.materials.ice * 0.5) + "," + (this.planetProperties.materials.metals * 0.8 + this.planetProperties.materials.rock * 1 + this.planetProperties.materials.ice * 0.5) + "," + (this.planetProperties.materials.ice * 1.7 + this.planetProperties.materials.rock * 1) + ")";
         }
 
         this.planetProperties.density = (this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice*0.8 + this.planetProperties.materials.gas*0.3)/(this.planetProperties.materials.rock + this.planetProperties.materials.metals + this.planetProperties.materials.ice + this.planetProperties.materials.gas);
@@ -1259,9 +1275,9 @@ function Button(type, subtype, id, planetProperties){
             if(this.planetProperties.type === 2){
                 ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/35, 0, 2 * Math.PI);
                 ctx.fill();
-                ctx.beginPath();
-                ctx.globalAlpha = 0.2;
-                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/25, 0, 2 * Math.PI);
+                //ctx.beginPath();
+                //ctx.globalAlpha = 0.05;
+                //ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/25, 0, 2 * Math.PI);
             }else if(this.planetProperties.type === 0){
                 ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
                 ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
