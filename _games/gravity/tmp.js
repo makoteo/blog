@@ -778,7 +778,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             if (savedSunAmount === 0) {
                                 savedSunAmount = 1;
                             }
-                            this.temperature += Math.round(T * Math.pow(Math.pow(objects[j].radius, 2) * Math.PI * objects[j].temperature/4 * (1 - this.reflectivity) / 16 * Math.PI, 1 / 4) * (1 / Math.sqrt(this.distance))) / savedSunAmount;
+                            this.tempTemp = Math.round(T * Math.pow(Math.pow(objects[j].radius, 2) * Math.PI * objects[j].temperature/4 * (1 - this.reflectivity) / 16 * Math.PI, 1 / 4) * (1 / Math.sqrt(this.distance)));
+                            if(this.tempTemp > this.temperature){
+                                this.temperature += Math.round(T * Math.pow(Math.pow(objects[j].radius, 2) * Math.PI * objects[j].temperature/4 * (1 - this.reflectivity) / 16 * Math.PI, 1 / 4) * (1 / Math.sqrt(this.distance)));
+                            }
                         } else {
                             if (this.type === 2) {
                                 this.temperature = Math.sqrt(this.mass) * randomTempConstant * 20;
