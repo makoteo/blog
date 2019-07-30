@@ -68,6 +68,7 @@ var dragging = false;
 var clickingButton = false;
 
 var autoOrbit = false;
+var autoCOMOrbit = false;
 var orbitalDirection = -1;
 
 var savedMouseX2 = 0;
@@ -227,6 +228,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
     this.biggestGravAttraction = 0;
     this.greatestAttractor = 0;
+
+    this.pointAX = 0;
+    this.pointAY = 0;
 
     this.draw = function(){
 
@@ -641,6 +645,37 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.velX = (savedMouseX - mousePosX) * mouseForce / 100;
                     this.velY = (savedMouseY - mousePosY) * mouseForce / 100;
                 }
+                if(autoCOMOrbit === true && objects.length > 1){
+                    this.tempAllXAndMass = 0;
+                    this.tempAllYAndMass = 0;
+                    this.tempMass = 0;
+                    for(var massMes = 0; massMes < objects.length; massMes++){
+                        this.tempAllXAndMass += objects[massMes].x*objects[massMes].mass;
+                        this.tempAllYAndMass += objects[massMes].y*objects[massMes].mass;
+                        this.tempMass += objects[massMes].mass;
+                    }
+
+                    this.pointAX = this.tempAllXAndMass/this.tempMass;
+                    this.pointAY = this.tempAllYAndMass/this.tempMass;
+
+                    //Point B is sun X, Y and point C is planet x Y
+
+                    this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY) * (this.y - this.pointAY) + (this.x - this.pointAX) * (this.x - this.pointAX));
+
+                    this.angleBetweenArcs = 2 * Math.asin((this.distanceBetweenTopArcToCurrentArc / 2) / this.distanceBetweenTopArcToCurrentArc );
+
+                    this.totalVelocity = Math.sqrt(Math.abs((G * this.tempMass/objects.length) / (this.distanceBetweenTopArcToCurrentArc )));
+
+                    //Works for right half circle
+                    if (this.x >= this.pointAX) {
+                        this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                        this.velY = (Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                    } else {
+                        this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                        this.velY = -(Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                    }
+
+                }
             } else {
                 this.greatestAttractor = 0;
                 this.biggestGravAttraction = 0;
@@ -703,7 +738,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 }
 
                 if (this.lifeTimer > 1) {
-                    if (autoOrbit === false) {
+                    if (autoOrbit === false && autoCOMOrbit === false) {
                         for (var d = 1; d < this.curvePoints.length; d++) {
                             ctx.strokeStyle = 'white';
                             ctx.beginPath();
@@ -713,17 +748,48 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         }
                     }
 
-                    ctx.fillStyle = 'white';
-                    if (autoOrbit === true) {
-                        ctx.globalAlpha = 0.5;
-                    } else {
-                        ctx.globalAlpha = 0.1;
+                    if(autoCOMOrbit === false){
+                        ctx.fillStyle = 'white';
+                        if (autoOrbit === true) {
+                            ctx.globalAlpha = 0.5;
+                        } else {
+                            ctx.globalAlpha = 0.1;
+                        }
+
+                        ctx.strokeStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(objects[this.greatestAttractor].cameraX + cameraX, objects[this.greatestAttractor].cameraY + cameraY, this.distancefromGreatestAttractor * cameraZoom, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }else{
+
+                        if(autoCOMOrbit === true && objects.length > 1){
+                            this.tempAllXAndMass = 0;
+                            this.tempAllYAndMass = 0;
+                            this.tempMass = 0;
+                            for(var massMes = 0; massMes < objects.length; massMes++){
+                                this.tempAllXAndMass += objects[massMes].x*objects[massMes].mass;
+                                this.tempAllYAndMass += objects[massMes].y*objects[massMes].mass;
+                                this.tempMass += objects[massMes].mass;
+                            }
+                            this.pointAX = this.tempAllXAndMass/this.tempMass;
+                            this.pointAY = this.tempAllYAndMass/this.tempMass;
+
+                            console.log(this.pointAX);
+
+                            this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY) * (this.y - this.pointAY) + (this.x - this.pointAX) * (this.x - this.pointAX));
+
+                        }
+
+                        ctx.strokeStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(((this.pointAX - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.pointAY - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY, this.distanceBetweenTopArcToCurrentArc * cameraZoom, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(((this.pointAX - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.pointAY - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY, 5, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
                     }
-                    ctx.strokeStyle = 'white';
-                    ctx.beginPath();
-                    ctx.arc(objects[this.greatestAttractor].cameraX + cameraX, objects[this.greatestAttractor].cameraY + cameraY, this.distancefromGreatestAttractor * cameraZoom, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.globalAlpha = 1;
 
                 }
             }
@@ -1702,6 +1768,12 @@ function game(){
         autoOrbit = true;
     }else{
         autoOrbit = false;
+    }
+
+    if (keys && keys[17]) {
+        autoCOMOrbit = true;
+    }else{
+        autoCOMOrbit = false;
     }
 
     //}
