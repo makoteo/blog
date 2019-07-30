@@ -40,7 +40,7 @@ var screenHalfHeight = HEIGHT/2;
 var cursorTool = true;
 
 var massMultiplier = 10;
-var G = 0.5;
+var G = 0.3;
 var T = 100;
 var randomTempConstant = 1.2;
 var mouseForce = 2;
@@ -135,7 +135,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.planetTemperature = 0;
 
     if(this.type === 2 || this.mass > starCreationLimit){
-        this.temperature = this.mass * randomTempConstant;
+        this.temperature = Math.sqrt(this.mass) * randomTempConstant * 20;
     }
 
     if(this.type === 2){
@@ -156,7 +156,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     if(this.materials.gas > 0.9*this.totalMaterials){
         this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + (this.materials.ice*2.5) + ")";
     }else if(this.materials.gas > 0.5*this.totalMaterials){
-        this.color = "rgb(" + (this.materials.gas*1.2 + this.materials.metals*0.5 + this.materials.rock*0.3) + "," + (this.materials.gas*1  + this.materials.metals*0.6 + this.materials.rock*0.5) + "," + this.materials.ice*2.2 + ")";
+        this.color = "rgb(" + (this.materials.gas*1.5 + this.materials.metals*0.5 + this.materials.rock*0.3) + "," + (this.materials.gas + this.materials.metals*0.6 + this.materials.rock*0.5) + "," + this.materials.ice*2.2 + ")";
     }else{
         this.color = "rgb(" + (this.materials.gas*0.5 + this.materials.metals*1.5 + this.materials.rock*0.2) + "," + (this.materials.gas*0.2 + this.materials.metals*0.8 + this.materials.rock*0.6) + "," + this.materials.ice*2 + ")";
     }
@@ -296,7 +296,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             if(this.type === 2){
                 this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*20);
-                this.gradient.addColorStop(0, "rgba(200, 200, 70)");
+                this.gradient.addColorStop(0, this.color);
                 this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
                 ctx.fillStyle = this.gradient;
                 ctx.globalAlpha = 0.3;
@@ -328,7 +328,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if(this.infoWindowOpen === true) {
             if (this.infoWindowX === 0 && draggingWindow === false) {
                 if (this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth * 1.2) {
-                    this.infoWindowX = this.cameraX + cameraX + this.radius*1.2;
+                    this.infoWindowX = this.cameraX + cameraX + this.cameraRadius*1.2;
                 } else {
                     this.infoWindowX = this.cameraX + cameraX;
                 }
@@ -556,9 +556,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         }
     };
-    this.update = function(){
+    this.update = function() {
 
-        if(this.type === 2){
+        if (this.type === 2) {
             this.materials.ice = 0;
             this.materials.rock = 0;
             this.materials.metals = 0;
@@ -567,82 +567,78 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
         this.lifeTimer++;
 
-        if(this.type !== 3){
+        if (this.type !== 3) {
             this.gravityConstant = 1;
-        }else{
+        } else {
 
         }
 
-        if(this.type !== 2){
-            if(gameClock % 10 === 0 && PAUSED === false){
+        if (this.type !== 2) {
+            if (gameClock % 10 === 0 && PAUSED === false) {
                 this.temperature = 0;
             }
         }
 
-        if(this.mass > starCreationLimit){
-            if(this.type !== 2){
-                this.type = 2;
-                this.explode(1, 0.5);
-                this.materials.gas = 100;
-                this.materials.rock = 0;
-                this.materials.metals = 0;
-                this.materials.ice = 0;
-                this.color = 'yellow';
-                this.temperature = 1000;
-            }
-        }
-
-        if(this.type !== 2){
-            if(gameClock % 10 === 0){
+        if (this.type !== 2) {
+            if (gameClock % 10 === 0) {
+                /*if (this.materials.gas > 0.9 * this.totalMaterials) {
+                    this.color = "rgb(" + this.materials.gas * 2 + "," + this.materials.gas * 1.5 + "," + this.materials.ice * 2.5 + ")";
+                } else if (this.materials.gas > 0.5 * this.totalMaterials) {
+                    this.color = "rgb(" + (this.materials.metals * 0.5 + this.materials.rock * 0.6 + this.materials.ice * 0.5 + this.materials.gas * 0.4 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.6 + this.materials.rock * 0.8 + this.materials.gas * 0.2 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.5 + this.materials.rock * 0.9) + ")";
+                } else {
+                    this.color = "rgb(" + (this.materials.metals * 1.5 + this.materials.rock * 0.8 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.8 + this.materials.rock * 1 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.7 + this.materials.rock * 1) + ")";
+                }*/
                 if(this.materials.gas > 0.9*this.totalMaterials){
-                    this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*1.5 + "," + this.materials.ice*2.5 + ")";
-                }else if(this.materials.gas > 0.5*this.totalMaterials){
-                    this.color = "rgb(" + (this.materials.metals*0.5 + this.materials.rock*0.6 + this.materials.ice*0.5 + this.materials.gas*0.4 + (this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.6 + this.materials.rock*0.8 + this.materials.gas*0.2 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.5 + this.materials.rock*0.9) + ")";
-                }else{
-                    this.color = "rgb(" + (this.materials.metals*1.5 + this.materials.rock*0.8 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/6) + "," + (this.materials.metals*0.8 + this.materials.rock*1 + this.materials.ice*0.5 +(this.temperature + this.planetTemperature + 100)/12) + "," + (this.materials.ice*1.7 + this.materials.rock*1) + ")";
+                    this.color = "rgb(" + this.materials.gas*1.8 + "," + this.materials.gas*1.6 + "," + (this.materials.ice*2.2) + ")";
+                }else if (this.materials.gas > 0.5 * this.totalMaterials) {
+                    this.color = "rgb(" + (this.materials.metals * 0.5 + this.materials.rock * 0.6 + this.materials.ice * 0.5 + this.materials.gas * 0.4 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.6 + this.materials.rock * 0.8 + this.materials.gas * 0.2 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.5 + this.materials.rock * 0.9) + ")";
+                } else {
+                    this.color = "rgb(" + (this.materials.metals * 1.5 + this.materials.rock * 0.8 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 6) + "," + (this.materials.metals * 0.8 + this.materials.rock * 1 + this.materials.ice * 0.5 + (this.temperature + this.planetTemperature + 100) / 12) + "," + (this.materials.ice * 1.7 + this.materials.rock * 1) + ")";
                 }
             }
-        }else{
-            this.blueTemp = Math.min(this.radius/2, 255);
-            this.color = "rgb(" + this.materials.gas*2 + "," + this.materials.gas*2 + "," + this.blueTemp + ")";
+        } else {
+            this.blueTemp = Math.min(this.radius / 4, 255);
+            this.redTemp = Math.max(Math.min(this.materials.gas * 2.3 - this.radius/1000, 230), 180);
+            this.yellowTemp = Math.max(Math.min(this.materials.gas * 2.0 - this.radius/5000, 200), 130);
+            this.color = "rgb(" + this.redTemp + "," + this.yellowTemp + "," + this.blueTemp + ")";
         }
 
-        if(this.exists === false && this.type !== 3){
-            if(dragging === false){
+        if (this.exists === false && this.type !== 3) {
+            if (dragging === false) {
                 this.exists = true;
-                if(autoOrbit === true && objects.length > 1){
-                    if(objects.length > this.greatestAttractor){
+                if (autoOrbit === true && objects.length > 1) {
+                    if (objects.length > this.greatestAttractor) {
                         this.pointAX = objects[this.greatestAttractor].x;
                         this.pointAY = objects[this.greatestAttractor].y - this.distancefromGreatestAttractor;
 
                         //Point B is sun X, Y and point C is planet x Y
 
-                        this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY)*(this.y - this.pointAY) + (this.x - this.pointAX)*(this.x - this.pointAX));
+                        this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY) * (this.y - this.pointAY) + (this.x - this.pointAX) * (this.x - this.pointAX));
 
-                        this.angleBetweenArcs = 2*Math.asin((this.distanceBetweenTopArcToCurrentArc/2)/this.distancefromGreatestAttractor);
+                        this.angleBetweenArcs = 2 * Math.asin((this.distanceBetweenTopArcToCurrentArc / 2) / this.distancefromGreatestAttractor);
 
-                        this.totalVelocity = Math.sqrt(Math.abs((G*objects[this.greatestAttractor].mass)/(this.distancefromGreatestAttractor)));
+                        this.totalVelocity = Math.sqrt(Math.abs((G * objects[this.greatestAttractor].mass) / (this.distancefromGreatestAttractor)));
 
                         //Works for right half circle
-                        if(this.x >= this.pointAX){
-                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velX;
-                            this.velY = (Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velY;
-                        }else{
-                            this.velX = (Math.cos(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velX;
-                            this.velY = -(Math.sin(this.angleBetweenArcs)*this.totalVelocity)*orbitalDirection + objects[this.greatestAttractor].velY;
+                        if (this.x >= this.pointAX) {
+                            this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection + objects[this.greatestAttractor].velX;
+                            this.velY = (Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection + objects[this.greatestAttractor].velY;
+                        } else {
+                            this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection + objects[this.greatestAttractor].velX;
+                            this.velY = -(Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection + objects[this.greatestAttractor].velY;
                         }
                     }
-                }else{
-                    this.velX = (savedMouseX - mousePosX)*mouseForce/100;
-                    this.velY = (savedMouseY - mousePosY)*mouseForce/100;
+                } else {
+                    this.velX = (savedMouseX - mousePosX) * mouseForce / 100;
+                    this.velY = (savedMouseY - mousePosY) * mouseForce / 100;
                 }
-            }else{
+            } else {
                 this.greatestAttractor = 0;
                 this.biggestGravAttraction = 0;
                 this.distancefromGreatestAttractor = 0;
 
-                this.curveVelX = (savedMouseX - mousePosX)*mouseForce/100;
-                this.curveVelY = (savedMouseY - mousePosY)*mouseForce/100;
+                this.curveVelX = (savedMouseX - mousePosX) * mouseForce / 100;
+                this.curveVelY = (savedMouseY - mousePosY) * mouseForce / 100;
 
 
                 this.curvePoints = [[this.x, this.y]];
@@ -652,38 +648,38 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.tempY = objects[j].y;
                     if (objects[j] !== this && this.inactive === false && objects[j].exists === true && objects[j].type !== 3) {
                         this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY));
-                        if(this.distance < 1){
+                        if (this.distance < 1) {
                             this.distance = 1;
                         }
-                        if((objects[j].mass/(this.distance*this.distance) > this.biggestGravAttraction)){
+                        if ((objects[j].mass / (this.distance * this.distance) > this.biggestGravAttraction)) {
                             this.greatestAttractor = j;
-                            this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
+                            this.biggestGravAttraction = objects[j].mass / (this.distance * this.distance);
                             this.distancefromGreatestAttractor = this.distance;
                         }
 
                     }
                 }
 
-                for(var i = 1; i < Math.round(lineLength/cameraZoom); i++){
-                    this.curvePoints.push([this.curvePoints[i-1][0] + this.curveVelX, this.curvePoints[i-1][1] + this.curveVelY]);
-                    if(this.affectedByGravity === true){
+                for (var i = 1; i < Math.round(lineLength / cameraZoom); i++) {
+                    this.curvePoints.push([this.curvePoints[i - 1][0] + this.curveVelX, this.curvePoints[i - 1][1] + this.curveVelY]);
+                    if (this.affectedByGravity === true) {
                         for (var j = 0; j < objects.length; j++) {
                             if (objects[j] !== this && this.inactive === false && objects[j].exists === true && objects[j].type !== 3) {
                                 this.tempX = objects[j].x;
                                 this.tempY = objects[j].y;
                                 this.distance = Math.sqrt((this.curvePoints[i][0] - this.tempX) * (this.curvePoints[i][0] - this.tempX) + (this.curvePoints[i][1] - this.tempY) * (this.curvePoints[i][1] - this.tempY));
-                                if(this.distance < 1){
+                                if (this.distance < 1) {
                                     this.distance = 1;
                                 }
-                                if(this.distance > (this.radius + objects[j].radius)){
+                                if (this.distance > (this.radius + objects[j].radius)) {
                                     this.curveVelX += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.curvePoints[i][0]) / this.distance; // F = M*A A = F/M
                                     this.curveVelY += (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].y - this.curvePoints[i][1]) / this.distance;
-                                    if((objects[j].mass/(this.distance*this.distance) > this.biggestGravAttraction) && i === 1){
+                                    if ((objects[j].mass / (this.distance * this.distance) > this.biggestGravAttraction) && i === 1) {
                                         //this.greatestAttractor = j;
                                         //this.biggestGravAttraction = objects[j].mass/(this.distance*this.distance);
                                         //this.distancefromGreatestAttractor = this.distance;
                                     }
-                                }else{
+                                } else {
                                     this.curveVelX = 0;
                                     this.curveVelY = 0;
                                     break;
@@ -691,31 +687,32 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                             }
                         }
-                    }else{
+                    } else {
 
                     }
 
                 }
 
-                if(this.lifeTimer > 1){
-                    if(autoOrbit === false){
-                        for(var d = 1; d < this.curvePoints.length; d++){
+                if (this.lifeTimer > 1) {
+                    if (autoOrbit === false) {
+                        for (var d = 1; d < this.curvePoints.length; d++) {
                             ctx.strokeStyle = 'white';
                             ctx.beginPath();
-                            ctx.moveTo(((this.curvePoints[d-1][0] - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.curvePoints[d-1][1] - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY);
+                            ctx.moveTo(((this.curvePoints[d - 1][0] - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.curvePoints[d - 1][1] - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY);
                             ctx.lineTo(((this.curvePoints[d][0] - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.curvePoints[d][1] - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY);
                             ctx.stroke();
                         }
                     }
 
                     ctx.fillStyle = 'white';
-                    if(autoOrbit === true){
+                    if (autoOrbit === true) {
                         ctx.globalAlpha = 0.5;
-                    }else{
+                    } else {
                         ctx.globalAlpha = 0.1;
                     }
+                    ctx.strokeStyle = 'white';
                     ctx.beginPath();
-                    ctx.arc(objects[this.greatestAttractor].cameraX + cameraX, objects[this.greatestAttractor].cameraY + cameraY, this.distancefromGreatestAttractor*cameraZoom, 0, 2 * Math.PI);
+                    ctx.arc(objects[this.greatestAttractor].cameraX + cameraX, objects[this.greatestAttractor].cameraY + cameraY, this.distancefromGreatestAttractor * cameraZoom, 0, 2 * Math.PI);
                     ctx.stroke();
                     ctx.globalAlpha = 1;
 
@@ -723,7 +720,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        if(this.inactive === false && (this.exists === true || (this.type === 3)) && PAUSED === false && this.affectedByGravity === true) {
+        if (this.inactive === false && (this.exists === true || (this.type === 3)) && PAUSED === false && this.affectedByGravity === true) {
             for (var j = 0; j < objects.length; j++) {
                 if (objects[j] !== this && this.inactive === false && objects[j].exists === true && this.passedThrough === false && objects[j].type !== 3 && (this.gravityAffectsList.length === 0 || arrayInclude(this.gravityAffectsList, objects[j].id))) {
                     this.tempX = objects[j].x;
@@ -748,18 +745,18 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.distance = Math.sqrt((this.x - this.tempX) * (this.x - this.tempX) + (this.y - this.tempY) * (this.y - this.tempY)); //This is the actual Distance
 
                     if ((this.distance > (this.radius + objects[j].radius))) {
-                        if((this.gravityConstant*(G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 1){
-                            if(debrietrails === true && PAUSED === false){
+                        if ((this.gravityConstant * (G * objects[j].mass / (this.distance * this.distance)) * (objects[j].x - this.x) / this.distance) > 1) {
+                            if (debrietrails === true && PAUSED === false) {
                                 this.explode(1, 0.5);
                             }
                         }
-                        if(this.distance < objects[j].radius*2 + Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))*2){
-                            if(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY)) > objects[j].radius*2){
-                                var segments = Math.ceil(Math.sqrt((this.velX)*(this.velX) + (this.velY)*(this.velY))/objects[j].radius*2);
-                                for(var s = 0; s < segments; s++){
-                                    if(Math.sqrt((this.x + this.velX/segments*s - this.tempX) * (this.x + this.velX/segments*s - this.tempX) +
-                                            (this.y + this.velY/segments*s - this.tempY) * (this.y + this.velY/segments*s - this.tempY)) < this.radius*2 + objects[j].radius){
-                                        if(!(this.type === 3 && objects[j].type === 3)) {
+                        if (this.distance < objects[j].radius * 2 + Math.sqrt((this.velX) * (this.velX) + (this.velY) * (this.velY)) * 2) {
+                            if (Math.sqrt((this.velX) * (this.velX) + (this.velY) * (this.velY)) > objects[j].radius * 2) {
+                                var segments = Math.ceil(Math.sqrt((this.velX) * (this.velX) + (this.velY) * (this.velY)) / objects[j].radius * 2);
+                                for (var s = 0; s < segments; s++) {
+                                    if (Math.sqrt((this.x + this.velX / segments * s - this.tempX) * (this.x + this.velX / segments * s - this.tempX) +
+                                            (this.y + this.velY / segments * s - this.tempY) * (this.y + this.velY / segments * s - this.tempY)) < this.radius * 2 + objects[j].radius) {
+                                        if (!(this.type === 3 && objects[j].type === 3)) {
                                             this.passedThrough = true;
                                         }
                                         break;
@@ -768,27 +765,27 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             }
                         }
 
-                        if((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)){
-                            if(savedSunAmount === 0){
+                        if ((objects[j].type === 2 || objects[j].type.temperature > 1000) && this.type !== 2 && this.type !== 3 && (gameClock % 10 === 0)) {
+                            if (savedSunAmount === 0) {
                                 savedSunAmount = 1;
                             }
-                            this.temperature += Math.round(T*Math.pow(Math.pow(objects[j].radius,2)*Math.PI*objects[j].temperature*(1-this.reflectivity)/16*Math.PI,1/4)*(1/Math.sqrt(this.distance)))/savedSunAmount;
-                        }else{
-                            if(this.type === 2 || this.mass > starCreationLimit){
-                                this.temperature = this.mass * randomTempConstant;
+                            this.temperature += Math.round(T * Math.pow(Math.pow(objects[j].radius, 2) * Math.PI * objects[j].temperature/4 * (1 - this.reflectivity) / 16 * Math.PI, 1 / 4) * (1 / Math.sqrt(this.distance))) / savedSunAmount;
+                        } else {
+                            if (this.type === 2) {
+                                this.temperature = Math.sqrt(this.mass) * randomTempConstant * 20;
                                 sunAmount++;
                             }
 
                         }
                     } else {
-                        if(collisions === true && this.distance === this.distance){
+                        if (collisions === true && this.distance === this.distance) {
                             this.explode(this.distance, j);
                             break;
                         }
                     }
 
-                    if(this.passedThrough === true){
-                        if(collisions === true) {
+                    if (this.passedThrough === true) {
+                        if (collisions === true) {
                             this.explode(this.distance, j);
                             break;
                         }
@@ -797,9 +794,11 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }
         }
 
-        for (var j = 0; j < objects.length; j++) {
-            if (objects[j] === this) {
-                this.arrayid = j;
+        if (this.inactive === false && (this.exists === true || (this.type === 3)) && PAUSED === false) {
+            for (var j = 0; j < objects.length; j++) {
+                if (objects[j] === this) {
+                    this.arrayid = j;
+                }
             }
         }
 
@@ -1074,6 +1073,10 @@ function Trail(planetId, color){
             this.lifeTime--;
         }
 
+        if(simulationSpeed !== 1){
+            this.lifeTime = 0;
+        }
+
         if(this.lifeTime === globalTrailLife-this.interval){
             for(var temp = 0; temp < objects.length; temp++){
                 if(objects[temp].id === this.planetId){
@@ -1090,12 +1093,15 @@ function Trail(planetId, color){
             this.cameraY2 = ((this.y2 - screenHalfHeight) * cameraZoom + screenHalfHeight);
         }
 
-        if(this.x2 !== 1.732){
-            ctx.strokeStyle = this.color;
-            ctx.beginPath();
-            ctx.moveTo(this.cameraX1 + cameraX, this.cameraY1 + cameraY);
-            ctx.lineTo(this.cameraX2 + cameraX, this.cameraY2 + cameraY);
-            ctx.stroke();
+
+        if(planetSelected !== -1 && planetSelected < objects.length){
+            if(this.x2 !== 1.732 && simulationSpeed === 1 && objects[planetSelected].id === this.planetId){ //THIS IS WRONG BUT ITS THE RIGHT IDEA
+                ctx.strokeStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.cameraX1 + cameraX, this.cameraY1 + cameraY);
+                ctx.lineTo(this.cameraX2 + cameraX, this.cameraY2 + cameraY);
+                ctx.stroke();
+            }
         }
 
     }
@@ -1364,7 +1370,7 @@ function Panel(loc, type) {
     }
 }
 
-objects.push(new Object(WIDTH/2, HEIGHT/2, 500, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
+objects.push(new Object(WIDTH/2, HEIGHT/2, 2000, 1, 2, false, 'yellow', {rock:0, metals:0, ice:0, gas:100}));
 objects.push(new Object(WIDTH/3, 40, 10, 1, 1, true, 'blue', {rock:60, metals:40, ice:0, gas:0}));
 
 buttonsPlanets.push(new Button(1, 2, 0, {})); // REMEMBER INCREASING ID RIP
@@ -1374,7 +1380,7 @@ buttonsPlanets.push(new Button(1, 1, 2, {mass:12, density:1, color:'blue', type:
 buttonsPlanets.push(new Button(1, 1, 0, {mass:15, density:1, color:'gray', type:1, materials:{rock:90, metals:10, ice:0, gas:0}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 1, {mass:20, density:1, color:'blue', type:1, materials:{rock:0, metals:0, ice:80, gas:20}, affectedByGravity:true})); // REMEMBER INCREASING ID RIP
 buttonsPlanets.push(new Button(1, 1, 0, {mass:50, density:1, color:'yellow', type:1, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
-buttonsPlanets.push(new Button(1, 1, 2, {mass:500, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
+buttonsPlanets.push(new Button(1, 1, 2, {mass:2000, density:1, color:'yellow', type:2, materials:{rock:0, metals:0, ice:0, gas:100}, affectedByGravity:true}));
 buttonsPlanets.push(new Button(1, 3, 0, {})); // REMEMBER INCREASING ID RIP
 
 bottomPanel = new Panel("bottom", 1);
@@ -1460,6 +1466,7 @@ function game(){
                     ctx.arc(mousePosX, mousePosY, Math.sqrt(buttonsPlanets[selectedPlanetButtonNum].planetProperties.mass*massMultiplier/(buttonsPlanets[selectedPlanetButtonNum].planetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
                     ctx.fill();
                 }
+
             }
 
             ctx.globalAlpha = 0.5;
@@ -1553,6 +1560,7 @@ function game(){
                         }
                         clickedOnSomePlanet = true;
                         objects[i].infoWindowOpen = true;
+                        planetSelected = i;
                         objects[i].following = true;
                         bottomPanel.closed = true;
                         objects[i].infoWindowX = 0;
@@ -1571,6 +1579,7 @@ function game(){
             }
         }
         if(clickedOnSomePlanet === false && noCreatingPlanets === true) {
+            planetSelected = -1;
             for (var x = 0; x < objects.length; x++) {
                 objects[x].following = false;
                 objects[x].infoWindowOpen = false;
