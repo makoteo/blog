@@ -113,10 +113,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     this.mass = mass * massMultiplier;
 
     this.density = density;
-    this.color = color;
     this.materials = materials;
 
     this.type = type; // 0 = Meteorite, 1 = Planet, 2 = Star, 3 = Debris
+    if(this.type !== 3 && this.type !== 0){
+        this.color = color;
+    }else{
+        this.color = 'black';
+    }
 
     if(this.type !== 3){
         this.id = globalPlanetId;
@@ -277,11 +281,14 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             }*/
 
             if(this.type === 0 || this.type === 3){
-                if((this.materials.ice > 75 && this.mass < 50) || this.type === 0) {
-                    ctx.fillStyle = 'white';
-                }else{
-                    ctx.fillStyle = 'yellow';
-                }
+                //if(this.color === 'black'){
+                    if((this.materials.ice > 75 && this.mass < 50) || this.type === 0) {
+                        this.color = "rgb(" + Math.floor(Math.random()*55 + 200) + "," +  Math.floor(Math.random()*55 + 200) + "," + Math.floor(Math.random()*45 + 210) +")";
+                    }else{
+                        this.color = "rgb(" + Math.floor(Math.random()*55 + 200) + "," +  Math.floor(Math.random()*55 + 200) + "," + Math.floor(Math.random()*100) +")";
+                    }
+                //}
+                ctx.fillStyle = this.color;
                 ctx.beginPath();
                 ctx.moveTo(this.points[0][0] + this.cameraX - this.cameraRadius + cameraX, this.points[0][1] + this.cameraY - this.cameraRadius + cameraY);
                 for(var d = 1; d < this.points.length; d++){
@@ -310,7 +317,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 if(this.lifeTimer > 5){
                     //console.log(this.arrayid);
                     this.gradient = ctx.createRadialGradient(this.cameraX + cameraX, this.cameraY + cameraY, this.cameraRadius/2, this.cameraX + cameraX, this.cameraY + cameraY,  this.cameraRadius*5*Math.round(this.randomNumBcWhyNot));
-                    this.gradient.addColorStop(0, "yellow");
+                    this.gradient.addColorStop(0, this.color);
                     this.gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
                     ctx.fillStyle = this.gradient;
                     ctx.globalAlpha = 0.1;
@@ -326,6 +333,8 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
     };
     this.drawInfoWindow = function(){
         if(this.infoWindowOpen === true) {
+            planetSelected = this.arrayid;
+            this.following = true;
             if (this.infoWindowX === 0 && draggingWindow === false) {
                 if (this.cameraX + cameraX + this.cameraRadius < WIDTH - this.infoWindowWidth * 1.2) {
                     this.infoWindowX = this.cameraX + cameraX + this.cameraRadius*1.2;
@@ -1025,7 +1034,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     this.readyPoints.push(Math.round(Math.random()*3));
                 }
                 this.readyPoints.sort(function(a, b){return a-b});
-                this.cameraRadius = this.cameraRadius/2;
+                if(this.type === 3){
+                    this.cameraRadius = this.cameraRadius/2;
+                }
                 for(var i = 0; i < this.readyPoints.length; i++){
                     if(this.readyPoints[i] === 0){
                         this.points.push([0, this.cameraRadius + Math.round(Math.random()*this.cameraRadius)-this.cameraRadius*0.5])
@@ -1037,7 +1048,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         this.points.push([this.cameraRadius + Math.round(Math.random()*this.cameraRadius*0.5)-this.cameraRadius, this.cameraRadius*2])
                     }
                 }
-                this.cameraRadius = this.cameraRadius*2;
+                if(this.type === 3){
+                    this.cameraRadius = this.cameraRadius*2;
+                }
             }
         }else{
             this.type = 1;
@@ -1275,9 +1288,9 @@ function Button(type, subtype, id, planetProperties){
             if(this.planetProperties.type === 2){
                 ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/35, 0, 2 * Math.PI);
                 ctx.fill();
-                //ctx.beginPath();
-                //ctx.globalAlpha = 0.05;
-                //ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/25, 0, 2 * Math.PI);
+                ctx.beginPath();
+                ctx.globalAlpha = 0.1;
+                ctx.arc(this.x+this.width/2, this.y+this.height/2, WIDTH/25, 0, 2 * Math.PI);
             }else if(this.planetProperties.type === 0){
                 ctx.moveTo(this.x + this.width*0.45, this.y + this.height*0.45);
                 ctx.lineTo(this.x + this.width*0.57, this.y + this.height*0.40);
