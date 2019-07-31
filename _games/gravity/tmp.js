@@ -46,7 +46,8 @@ var randomTempConstant = 1.2;
 var mouseForce = 2;
 var lineLength = 30;
 var absoluteLowTemperature = -100;
-var waterMeltTemperature = 550;
+var waterMeltTemperature = 200;
+var destructionTemperature = 500;
 var starCreationLimit = 50000;
 var globalDebrieLifetime = 2000;
 var onlyStarsAffectGravity = false;
@@ -641,11 +642,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             this.velY = -(Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection + objects[this.greatestAttractor].velY;
                         }
                     }
-                } else {
-                    this.velX = (savedMouseX - mousePosX) * mouseForce / 100;
-                    this.velY = (savedMouseY - mousePosY) * mouseForce / 100;
-                }
-                if(autoCOMOrbit === true && objects.length > 1){
+                }/*else if(autoCOMOrbit === true && objects.length > 1){
                     this.tempAllXAndMass = 0;
                     this.tempAllYAndMass = 0;
                     this.tempMass = 0;
@@ -662,20 +659,26 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
                     this.distanceBetweenTopArcToCurrentArc = Math.sqrt((this.y - this.pointAY) * (this.y - this.pointAY) + (this.x - this.pointAX) * (this.x - this.pointAX));
 
-                    this.angleBetweenArcs = 2 * Math.asin((this.distanceBetweenTopArcToCurrentArc / 2) / this.distanceBetweenTopArcToCurrentArc );
+                    this.angleBetweenArcs = 2 * Math.asin((this.distanceBetweenTopArcToCurrentArc / 2) / this.distanceBetweenTopArcToCurrentArc);
 
-                    this.totalVelocity = Math.sqrt(Math.abs((G * this.tempMass/objects.length) / (this.distanceBetweenTopArcToCurrentArc )));
+                    this.totalVelocity = Math.sqrt(Math.abs((G * this.tempMass/objects.length) / (this.distanceBetweenTopArcToCurrentArc)))/objects.length;
 
                     //Works for right half circle
-                    if (this.x >= this.pointAX) {
-                        this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
-                        this.velY = (Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
-                    } else {
-                        this.velX = (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
-                        this.velY = -(Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                    for(var obj = 0; obj < objects.length; obj++){
+                        if (objects[obj].x >= this.pointAX) {
+                            objects[obj].velX += (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                            objects[obj].velY += (Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                        } else {
+                            objects[obj].velX += (Math.cos(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                            objects[obj].velY += -(Math.sin(this.angleBetweenArcs) * this.totalVelocity) * orbitalDirection;
+                        }
                     }
 
+                } */else {
+                    this.velX = (savedMouseX - mousePosX) * mouseForce / 100;
+                    this.velY = (savedMouseY - mousePosY) * mouseForce / 100;
                 }
+
             } else {
                 this.greatestAttractor = 0;
                 this.biggestGravAttraction = 0;
@@ -763,7 +766,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         ctx.globalAlpha = 1;
                     }else{
 
-                        if(autoCOMOrbit === true && objects.length > 1){
+                        /*if(autoCOMOrbit === true && objects.length > 1){
                             this.tempAllXAndMass = 0;
                             this.tempAllYAndMass = 0;
                             this.tempMass = 0;
@@ -788,7 +791,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                         ctx.beginPath();
                         ctx.arc(((this.pointAX - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.pointAY - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY, 5, 0, 2 * Math.PI);
                         ctx.stroke();
-                        ctx.globalAlpha = 1;
+                        ctx.globalAlpha = 1;*/
                     }
 
                 }
@@ -849,10 +852,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                                 this.temperature += Math.round(T * Math.pow(Math.pow(objects[j].radius, 2) * Math.PI * objects[j].temperature/4 * (1 - this.reflectivity) / 16 * Math.PI, 1 / 4) * (1 / Math.sqrt(this.distance)));
                             }
                         } else {
-                            if (this.type === 2) {
-                                this.temperature = Math.sqrt(this.mass) * randomTempConstant * 20;
-                                sunAmount++;
-                            }
+
 
                         }
                     } else {
@@ -877,6 +877,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 if (objects[j] === this) {
                     this.arrayid = j;
                 }
+            }
+            if (this.type === 2) {
+                this.temperature = Math.sqrt(this.mass) * randomTempConstant * 20;
+                sunAmount++;
             }
         }
 
@@ -1027,38 +1031,56 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             if(this.type !== 3){
 
-                this.random = Math.round(this.mass/massMultiplier/10);
+                this.random = Math.random();
 
-                if(this.random > 1){
-                    this.random = 1;
-                }
-                for(var i = 0; i < this.random; i++){
-                    this.spawnX = Math.random()*this.radius - this.radius/2;
-                    this.spawnY = Math.random()*this.radius - this.radius/2;
-                    if(this.materials.ice >= 50){
-                        objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random())+1, 1, 3, false, 'blue', {ice:90, metals:0, rock:0, gas: 10}));
-                        objects[objects.length - 1].velX = this.velX/10*Math.random();
-                        objects[objects.length - 1].velY = this.velY/10*Math.random();
-                    }else{
-                        if(this.mass <= 50){
+                if(this.random < 0.1) {
 
-                        }else{
-                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX/cameraZoom, this.y + this.spawnY + this.velY + cameraY/cameraZoom, Math.round(Math.random())+1, 1, 3, false, 'yellow', {ice:0, metals:0, rock:20, gas: 80}));
-                            objects[objects.length - 1].velX = this.velX/2*Math.random();
-                            objects[objects.length - 1].velY = this.velY/2*Math.random();
+                    for (var i = 0; i < this.random; i++) {
+                        this.spawnX = Math.random() * this.radius - this.radius / 2;
+                        this.spawnY = Math.random() * this.radius - this.radius / 2;
+                        if (this.materials.ice >= 50) {
+                            objects.push(new Object(this.x + this.spawnX + this.velX + cameraX / cameraZoom, this.y + this.spawnY + this.velY + cameraY / cameraZoom, Math.round(Math.random()) + 1, 1, 3, false, 'blue', {
+                                ice: 90,
+                                metals: 0,
+                                rock: 0,
+                                gas: 10
+                            }));
+                            objects[objects.length - 1].velX = this.velX / 10 * Math.random();
+                            objects[objects.length - 1].velY = this.velY / 10 * Math.random();
+                        } else if (this.temperature > destructionTemperature) {
+                            if (this.mass <= 50) {
+
+                            } else {
+                                objects.push(new Object(this.x + this.spawnX + this.velX + cameraX / cameraZoom, this.y + this.spawnY + this.velY + cameraY / cameraZoom, Math.round(Math.random()) + 1, 1, 3, false, 'yellow', {
+                                    ice: 0,
+                                    metals: 0,
+                                    rock: 20,
+                                    gas: 80
+                                }));
+                                objects[objects.length - 1].velX = this.velX / 2 * Math.random();
+                                objects[objects.length - 1].velY = this.velY / 2 * Math.random();
+                            }
                         }
                     }
+
+                    if(this.temperature > destructionTemperature){
+                        this.mass -= 3*this.random;
+                    }else{
+                        if(this.materials.ice / this.totalMaterials >= 0.5){
+                            this.mass -= 1;
+                        }
+                    }
+
+                    if(this.mass === 0){
+                        objects.splice(this.arrayid, 1);
+                    }
                 }
-                if(this.materials.ice / this.totalMaterials >= 0.5){
-                    this.mass -= 1;
-                }else{
-                    this.mass -= 3*this.random;
-                }
+
             }else{
 
             }
 
-            this.density = massMultiplier/2*(this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
+            //this.density = massMultiplier/2*(this.materials.rock + this.materials.metals + this.materials.ice*0.8 + this.materials.gas*0.3)/(this.materials.rock + this.materials.metals + this.materials.ice + this.materials.gas);
             this.radius = Math.sqrt(this.mass/(this.density*3.14));
             if(this.type === 0 || this.type === 3){
                 this.regenerate();
@@ -1770,11 +1792,11 @@ function game(){
         autoOrbit = false;
     }
 
-    if (keys && keys[17]) {
+    /*if (keys && keys[17]) {
         autoCOMOrbit = true;
     }else{
         autoCOMOrbit = false;
-    }
+    }*/
 
     //}
 }
