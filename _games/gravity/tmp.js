@@ -95,6 +95,8 @@ var planetSelected = 0;
 var sunAmount = 0;
 var savedSunAmount = 0;
 
+var guitimer = 0;
+
 var img = new Image();
 img.src = "IconsGravity.png";
 
@@ -1776,14 +1778,19 @@ function game(){
         editingPanel.closed = true;
         cursorTool = false;
     }else if (keys && keys[88]) {
-        bottomPanel.closed = true;
-    }else if (keys && keys[79]) {
-        bottomPanel.closed = false;
+        if(modal.style.display !== "block" && guitimer === 0){
+            bottomPanel.closed = !bottomPanel.closed;
+            guitimer = 20;
+        }
     }else if ((keys && keys[32])) {
         if(pauseTimer === 0 && modal.style.display !== "block"){
             PAUSED = !PAUSED;
         }
         pauseTimer = 2;
+    }
+
+    if(guitimer > 0){
+        guitimer--;
     }
 
     if (keys && keys[16]) {
@@ -1914,7 +1921,7 @@ span.onclick = function() {
         objects[windowSelectedPlanet].name = input.value;
     }else if(changeValue === "Mass"){
         objects[windowSelectedPlanet].mass = input.value;
-    }else if(changeValue = "AffectedGravity"){
+    }else if(changeValue === "AffectedGravity"){
         input.placeholder = "Enter the id's of the planets separated by comas";
     }
 
@@ -1925,8 +1932,14 @@ span.onclick = function() {
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
-    input.placeholder = "";
     if (event.target == modal) {
+        updateParameters();
+    }
+}
+
+function updateParameters(){
+    input.placeholder = "";
+    //if (event.target == modal) {
         if(input.value === ""){input.value = 0;}
         modal.style.display = "none";
         if(changeValue === "Name"){
@@ -2034,7 +2047,7 @@ window.onclick = function(event) {
         }
         input.value = "";
         PAUSED = false;
-    }
+    //}
 }
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
@@ -2049,6 +2062,13 @@ function Reload() {
 function repeatOften() {
     // Do whatever
     game();
+
+    if ((keys && keys[13])) {
+        if(modal.style.display !== "none") {
+            updateParameters();
+        }
+    }
+
     requestAnimationFrame(repeatOften);
 }
 requestAnimationFrame(repeatOften);
