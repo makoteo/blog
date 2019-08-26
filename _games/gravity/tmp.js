@@ -1,14 +1,16 @@
 //-----------------------------------------------------------------------------------------------------
 
 //
-// Copyright (c) Martin Feranec 2019 - All Rights Reserved
+// Copyright (c) Martin Feranec (TheMartianAnt) 2019 - All Rights Reserved
 //
 
 //-----------------------------------------------------------------------------------------------------
 
-var versionCode = "Alpha 0.02";
+var versionCode = "Full Release 1.0.2";
 var WIDTH = 1280; //1024x576
 var HEIGHT = 720;
+
+var GUI = true;
 
 var AREAWIDTH = WIDTH*10;
 var AREAHEIGHT = HEIGHT*10;
@@ -622,7 +624,9 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         if (this.exists === false && this.type !== 3) {
             ctx.fillStyle = 'white';
             ctx.globalAlpha = 0.5;
-            ctx.fillText("Drag to change trajectory, hold down shift to automatically place object into orbit.", 10, 20);
+            if(GUI === true){
+                ctx.fillText("Drag to change trajectory, hold down shift to automatically place object into orbit.", 10, 20);
+            }
             ctx.globalAlpha = 1;
             if (dragging === false) {
                 this.exists = true;
@@ -1807,7 +1811,9 @@ function game(){
     if(bottomPanel.closed === true){
         ctx.fillStyle = "white";
         ctx.globalAlpha = 0.5;
-        ctx.fillText("Press X to toggle planet menu.", WIDTH/2 - WIDTH/15, HEIGHT - 20);
+        if(GUI === true){
+            ctx.fillText("Press X to toggle planet menu.", WIDTH/2 - WIDTH/15, HEIGHT - 20);
+        }
         ctx.globalAlpha = 1;
     }
 
