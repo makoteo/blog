@@ -329,20 +329,35 @@ function game(){
                 }
             }
         }
-        var random = Math.floor(Math.random()*availableSpotsX.length);
-        boards[boardToPlayIn].boardArrangement[availableSpotsY[random]][availableSpotsX[random]] = 1;
-        boardToPlayIn = availableSpotsX[random];
-        turn = 1;
-
-        noWin = false;
-        console.log(boards[boardToPlayIn].boardArrangement);
-        for(var p1 = 0; p1 < boards[boardToPlayIn].boardArrangement.length; p1++){
-            for(var p2 = 0; p2 < boards[boardToPlayIn].boardArrangement[0].length; p2++){
-                if(boards[boardToPlayIn].boardArrangement[p1][p2] === 0){
-                    noWin = true;
+        if(availableSpotsX.length === 0){
+            for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++) {
+                for (var a2 = 0; a2 < boards[boardToPlayIn].boardArrangement.length; a2++) {
+                    if(boards[boardToPlayIn].boardArrangement[a1][a2] === 0){
+                        availableSpotsX.push(a2);
+                        availableSpotsY.push(a1);
+                    }
                 }
             }
         }
+        var random = Math.floor(Math.random()*availableSpotsX.length);
+        if(availableSpotsX.length === 0){
+            noWin = false;
+        }else{
+            boards[boardToPlayIn].boardArrangement[availableSpotsY[random]][availableSpotsX[random]] = 1;
+            boardToPlayIn = availableSpotsX[random];
+            turn = 1;
+
+            noWin = false;
+            console.log(boards[boardToPlayIn].boardArrangement);
+            for(var p1 = 0; p1 < boards[boardToPlayIn].boardArrangement.length; p1++){
+                for(var p2 = 0; p2 < boards[boardToPlayIn].boardArrangement[0].length; p2++){
+                    if(boards[boardToPlayIn].boardArrangement[p1][p2] === 0){
+                        noWin = true;
+                    }
+                }
+            }
+        }
+
         if(noWin === false){
             console.log("Game Over!!");
         }
