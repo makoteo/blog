@@ -38,6 +38,9 @@ var board3Arrangement = [
 var boardToPlayIn = 3; //ANY BOARD
 var turn = 1; //Alternates between 1 and 2
 
+var noWin = true;
+var AI = true;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Board(id){
@@ -194,14 +197,16 @@ function Board(id){
                                 }else{
                                     turn = 1;
                                 }
+                                noWin = false;
                                 for(var p1 = 0; p1 < boards[boardToPlayIn].boardArrangement.length; p1++){
                                     for(var p2 = 0; p2 < boards[boardToPlayIn].boardArrangement[0].length; p2++){
                                         if(boards[boardToPlayIn].boardArrangement[p1][p2] === 0){
-                                            break;
-                                        }else if(p1 === 2 && p2 === 2){
-                                            console.log("Game Over!!");
+                                            noWin = true;
                                         }
                                     }
+                                }
+                                if(noWin === false){
+                                    console.log("Game Over!!");
                                 }
                             }
                         }
@@ -245,13 +250,68 @@ function game(){
     ctx.textAlign = 'center';
     ctx.fillStyle = 'black';
     ctx.font = "20px Arial";
-    ctx.fillText("Player " + turn + "'s turn.", WIDTH/2, 350);
+    if(noWin === true){
+        ctx.fillText("Player " + turn + "'s turn.", WIDTH/2, 350);
+    }else{
+        if(turn === 1){
+            ctx.fillText("Player 2 Wins!!", WIDTH/2, 350);
+        }else{
+            ctx.fillText("Player 1 Wins!!", WIDTH/2, 350);
+        }
+    }
 
     if(gameRunning === true) {
 
         frameCount++;
 
     }
+
+    if(turn === 2 && AI === true){
+        var availableSpotsX = [];
+        var availableSpotsY = [];
+        var playCS = false;
+        var boardToPushTo = 4;
+        for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++){
+            for(var a2 = 0; a2 < boards[boardToPlayIn].boardArrangement.length; a2++){
+                if(boards[boardToPlayIn].boardArrangement[a1][a2] === 1){
+                    if(a2 === boardToPlayIn) {
+                        playCS = true;
+                    }
+                }
+            }
+        }
+        for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++) {
+            for (var a2 = 0; a2 < boards[boardToPlayIn].boardArrangement.length; a2++) {
+                if(boards[boardToPlayIn].boardArrangement[a1][a2] === 0){
+                    if(boardToPushTo !== 4){
+                        if(playCS === false){
+                            if(a2 !== boardToPlayIn) {
+                                availableSpotsX.push(a2);
+                                availableSpotsY.push(a1);
+                            }
+                        }else{
+                            if(a2 === boardToPlayIn) {
+                                availableSpotsX.push(a2);
+                                availableSpotsY.push(a1);
+                            }
+                            boardToPushTo = boardToPlayIn;
+                        }
+                    }else{
+                        if(a2 === boardToPushTo) {
+                            availableSpotsX.push(a2);
+                            availableSpotsY.push(a1);
+                        }
+                    }
+                }
+            }
+        }
+        var random = Math.floor(Math.random()*availableSpotsX.length);
+        boards[boardToPlayIn].boardArrangement[availableSpotsY[random]][availableSpotsX[random]] = 1;
+        boardToPlayIn = a2;
+        turn = 1;
+
+    }
+
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
