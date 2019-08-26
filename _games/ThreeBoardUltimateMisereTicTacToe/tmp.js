@@ -39,7 +39,12 @@ var boardToPlayIn = 3; //ANY BOARD
 var turn = 1; //Alternates between 1 and 2
 
 var noWin = true;
+
+//AI STUFF
 var AI = true;
+
+var playCS = false;
+var boardToPushTo = 4;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -114,6 +119,9 @@ function Board(id){
             if(this.boardArrangement[1][1] === 1){
                 this.boardArrangement[2][2] = 2;
             }
+            if(this.boardArrangement[2][0] === 1){
+                this.boardArrangement[1][0] = 2;
+            }
         }
         if(this.boardArrangement[0][1] === 1){
             if(this.boardArrangement[0][2] === 1){
@@ -121,6 +129,9 @@ function Board(id){
             }
             if(this.boardArrangement[1][1] === 1){
                 this.boardArrangement[2][1] = 2;
+            }
+            if(this.boardArrangement[2][1] === 1){
+                this.boardArrangement[1][1] = 2;
             }
         }
         if(this.boardArrangement[0][2] === 1){
@@ -132,6 +143,9 @@ function Board(id){
             }
             if(this.boardArrangement[1][2] === 1){
                 this.boardArrangement[2][2] = 2;
+            }
+            if(this.boardArrangement[2][2] === 1){
+                this.boardArrangement[1][2] = 2;
             }
         }
 
@@ -269,8 +283,6 @@ function game(){
     if(turn === 2 && AI === true){
         var availableSpotsX = [];
         var availableSpotsY = [];
-        var playCS = false;
-        var boardToPushTo = 4;
         for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++){
             for(var a2 = 0; a2 < boards[boardToPlayIn].boardArrangement.length; a2++){
                 if(boards[boardToPlayIn].boardArrangement[a1][a2] === 1){
@@ -283,7 +295,7 @@ function game(){
         for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++) {
             for (var a2 = 0; a2 < boards[boardToPlayIn].boardArrangement.length; a2++) {
                 if(boards[boardToPlayIn].boardArrangement[a1][a2] === 0){
-                    if(boardToPushTo !== 4){
+                    if(boardToPushTo === 4){
                         if(playCS === false){
                             if(a2 !== boardToPlayIn) {
                                 availableSpotsX.push(a2);
@@ -307,8 +319,21 @@ function game(){
         }
         var random = Math.floor(Math.random()*availableSpotsX.length);
         boards[boardToPlayIn].boardArrangement[availableSpotsY[random]][availableSpotsX[random]] = 1;
-        boardToPlayIn = a2;
+        boardToPlayIn = availableSpotsX[random];
         turn = 1;
+
+        noWin = false;
+        console.log(boards[boardToPlayIn].boardArrangement);
+        for(var p1 = 0; p1 < boards[boardToPlayIn].boardArrangement.length; p1++){
+            for(var p2 = 0; p2 < boards[boardToPlayIn].boardArrangement[0].length; p2++){
+                if(boards[boardToPlayIn].boardArrangement[p1][p2] === 0){
+                    noWin = true;
+                }
+            }
+        }
+        if(noWin === false){
+            console.log("Game Over!!");
+        }
 
     }
 
