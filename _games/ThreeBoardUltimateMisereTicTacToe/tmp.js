@@ -42,7 +42,7 @@ var noWin = true;
 
 //AI STUFF
 var AI = true;
-
+var AItimer = 0;
 var playCS = false;
 var boardToPushTo = 4;
 
@@ -122,6 +122,9 @@ function Board(id){
             if(this.boardArrangement[2][0] === 1){
                 this.boardArrangement[1][0] = 2;
             }
+            if(this.boardArrangement[2][2] === 1){
+                this.boardArrangement[1][1] = 2;
+            }
         }
         if(this.boardArrangement[0][1] === 1){
             if(this.boardArrangement[0][2] === 1){
@@ -146,6 +149,9 @@ function Board(id){
             }
             if(this.boardArrangement[2][2] === 1){
                 this.boardArrangement[1][2] = 2;
+            }
+            if(this.boardArrangement[2][0] === 1){
+                this.boardArrangement[1][1] = 2;
             }
         }
 
@@ -222,6 +228,7 @@ function Board(id){
                                 if(noWin === false){
                                     console.log("Game Over!!");
                                 }
+                                AItimer = 30;
                             }
                         }
                     }
@@ -244,6 +251,11 @@ boards.push(new Board(2));
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
+
+    if(AItimer > 0){
+        AItimer--;
+    }
+
     window.onmousemove = logMouseMove;
     //SKY FILL
     ctx.fillStyle = "rgb(240, 240, 240)";
@@ -280,7 +292,7 @@ function game(){
 
     }
 
-    if(turn === 2 && AI === true){
+    if(turn === 2 && AI === true && AItimer === 0){
         var availableSpotsX = [];
         var availableSpotsY = [];
         for(var a1 = 0; a1 < boards[boardToPlayIn].boardArrangement.length; a1++){
@@ -385,12 +397,14 @@ function Reload() {
 window.addEventListener("mouseup", clickedNow);
 
 function clickedNow(){
-    if(boardToPlayIn === 3){
-        for(var bleh = 0; bleh < boards.length; bleh++){
-            boards[bleh].click();
+    if((AI === false) || (AI === true && turn === 1)){
+        if(boardToPlayIn === 3){
+            for(var bleh = 0; bleh < boards.length; bleh++){
+                boards[bleh].click();
+            }
+        }else{
+            boards[boardToPlayIn].click();
         }
-    }else{
-        boards[boardToPlayIn].click();
     }
 }
 
