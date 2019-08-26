@@ -620,6 +620,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
         }
 
         if (this.exists === false && this.type !== 3) {
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 0.5;
+            ctx.fillText("Drag to change trajectory, hold down shift to automatically place object into orbit.", 10, 20);
+            ctx.globalAlpha = 1;
             if (dragging === false) {
                 this.exists = true;
                 if (autoOrbit === true && objects.length > 1) {
@@ -745,7 +749,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                 }
 
                 if (this.lifeTimer > 1) {
-                    /*if (autoOrbit === false && autoCOMOrbit === false) {
+                    if (autoOrbit === false && autoCOMOrbit === false) {
                         for (var d = 1; d < this.curvePoints.length; d++) {
                             ctx.strokeStyle = 'white';
                             ctx.beginPath();
@@ -753,7 +757,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                             ctx.lineTo(((this.curvePoints[d][0] - screenHalfWidth) * cameraZoom + screenHalfWidth) + cameraX, ((this.curvePoints[d][1] - screenHalfHeight) * cameraZoom + screenHalfHeight) + cameraY);
                             ctx.stroke();
                         }
-                    }*/
+                    }
 
                     if(autoCOMOrbit === false){
                         ctx.fillStyle = 'white';
@@ -1549,7 +1553,6 @@ function game(){
         buttonsPlanets[i].update();
     }
 
-
     //SKY FILL
     //if(PAUSED === false){
         for(var ticks = 0; ticks < simulationSpeed; ticks++){
@@ -1799,6 +1802,13 @@ function game(){
         autoOrbit = true;
     }else{
         autoOrbit = false;
+    }
+
+    if(bottomPanel.closed === true){
+        ctx.fillStyle = "white";
+        ctx.globalAlpha = 0.5;
+        ctx.fillText("Press X to toggle planet menu.", WIDTH/2 - WIDTH/15, HEIGHT - 20);
+        ctx.globalAlpha = 1;
     }
 
     /*if (keys && keys[17]) {
