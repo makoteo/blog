@@ -100,7 +100,7 @@ function Board(id){
                     }
                     ctx.lineWidth = 1;
                 }else if(this.boardArrangement[p][o] === 2){
-                    ctx.globalAlpha = 0.5;
+                    ctx.globalAlpha = 0.2;
                     ctx.fillStyle = 'red';
                     ctx.fillRect(this.x + o*100, this.y + p*100, 100, 100);
                     ctx.globalAlpha = 1;
