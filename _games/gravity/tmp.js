@@ -401,10 +401,10 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
 
             ctx.fillText("X", this.infoWindowX + this.infoWindowWidth * 0.9, this.infoWindowY + HEIGHT / 25);
 
-            ctx.fillText("Follow", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 25);
+            //ctx.fillText("Follow", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 25);
 
             ctx.fillStyle = 'red';
-            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 100);
+            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 10);
             ctx.fillStyle = 'white';
 
             //if (clickTimer === 0) {
@@ -560,7 +560,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 35 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 100) {
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 10) {
                     if(clickTimer === 0){
                         objects.splice(this.arrayid, 1);
                     }else{
