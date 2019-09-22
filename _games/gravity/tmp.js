@@ -1572,7 +1572,7 @@ function game(){
     }
 
     //SKY FILL
-    if(slowdown !== 1) {
+    if(gameClock % slowdown === 0) {
         for (var ticks = 0; ticks < simulationSpeed; ticks++) {
 
             if ((cameraX) / cameraZoom - WIDTH / 2 / cameraZoom < -AREAWIDTH) {
