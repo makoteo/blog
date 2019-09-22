@@ -46,6 +46,9 @@ var AItimer = 0;
 var playCS = false;
 var boardToPushTo = 4;
 
+var moveNumber = 0;
+var displayMoveNum = true;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Board(id){
@@ -229,6 +232,7 @@ function Board(id){
                                     console.log("Game Over!!");
                                 }
                                 AItimer = 30;
+                                moveNumber++;
                             }
                         }
                     }
@@ -361,6 +365,8 @@ function game(){
         if(noWin === false){
             console.log("Game Over!!");
         }
+
+        moveNumber++;
 
     }
 

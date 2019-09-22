@@ -99,6 +99,8 @@ var savedSunAmount = 0;
 
 var guitimer = 0;
 
+var FULLSCREEN = false;
+
 var img = new Image();
 img.src = "IconsGravity.png";
 
@@ -406,7 +408,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
             //ctx.fillText("Follow", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 25);
 
             ctx.fillStyle = 'red';
-            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + this.infoWindowHeight - HEIGHT / 10);
+            ctx.fillText("Delete", this.infoWindowX + this.infoWindowWidth * 0.4, this.infoWindowY + HEIGHT / 2);
             ctx.fillStyle = 'white';
 
             //if (clickTimer === 0) {
@@ -1274,6 +1276,7 @@ function Button(type, subtype, id, planetProperties){
     }
 
     this.update = function(){
+        this.y = HEIGHT - HEIGHT/50 - WIDTH/12;
         this.lifeClock++;
         if(this.type === 1){
             this.infoWindowX = this.x - this.width/2;
@@ -1469,6 +1472,15 @@ function Panel(loc, type) {
     }
 
     this.draw = function(){
+        if(this.loc === "top"){
+            this.x = WIDTH/2;
+            this.y = -WIDTH*1.85;
+            this.radius = WIDTH*2;
+        }else if(this.loc === "bottom"){
+            this.x = WIDTH/2;
+            this.y = HEIGHT + WIDTH*1.85;
+            this.radius = WIDTH*2;
+        }
         if(this.closed === true){
             if(this.offsetY < WIDTH/6) {
                 this.offsetY+=WIDTH/32;
@@ -1532,6 +1544,8 @@ function arrayInclude(array, result){
     return false;
 }
 
+slowdown = 1;
+
 function game(){
 
     if(PAUSED === false){
@@ -1558,19 +1572,19 @@ function game(){
     }
 
     //SKY FILL
-    //if(PAUSED === false){
-        for(var ticks = 0; ticks < simulationSpeed; ticks++){
+    if(slowdown !== 1) {
+        for (var ticks = 0; ticks < simulationSpeed; ticks++) {
 
-            if((cameraX)/cameraZoom - WIDTH/2/cameraZoom < -AREAWIDTH){
-                cameraX = (WIDTH/2/cameraZoom - AREAWIDTH) * cameraZoom;
-            }else if((cameraX)/cameraZoom + WIDTH/2/cameraZoom > AREAWIDTH){
-                cameraX = (-WIDTH/2/cameraZoom + AREAWIDTH) * cameraZoom;
+            if ((cameraX) / cameraZoom - WIDTH / 2 / cameraZoom < -AREAWIDTH) {
+                cameraX = (WIDTH / 2 / cameraZoom - AREAWIDTH) * cameraZoom;
+            } else if ((cameraX) / cameraZoom + WIDTH / 2 / cameraZoom > AREAWIDTH) {
+                cameraX = (-WIDTH / 2 / cameraZoom + AREAWIDTH) * cameraZoom;
             }
 
-            if((cameraY)/cameraZoom - HEIGHT/2/cameraZoom < -AREAHEIGHT){
-                cameraY = (HEIGHT/2/cameraZoom - AREAHEIGHT) * cameraZoom;
-            }else if((cameraY)/cameraZoom + HEIGHT/2/cameraZoom > AREAHEIGHT){
-                cameraY = (-HEIGHT/2/cameraZoom + AREAHEIGHT) * cameraZoom;
+            if ((cameraY) / cameraZoom - HEIGHT / 2 / cameraZoom < -AREAHEIGHT) {
+                cameraY = (HEIGHT / 2 / cameraZoom - AREAHEIGHT) * cameraZoom;
+            } else if ((cameraY) / cameraZoom + HEIGHT / 2 / cameraZoom > AREAHEIGHT) {
+                cameraY = (-HEIGHT / 2 / cameraZoom + AREAHEIGHT) * cameraZoom;
             }
 
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -1581,20 +1595,20 @@ function game(){
             //Cursor
 
             ctx.globalAlpha = 0.3;
-            if(cursorTool === false){
-                if(buttonsPlanets[selectedPlanetButtonNum].planetProperties === 0){
+            if (cursorTool === false) {
+                if (buttonsPlanets[selectedPlanetButtonNum].planetProperties === 0) {
                     ctx.fillStyle = 'white';
                     ctx.beginPath();
-                    ctx.moveTo(mousePosX - WIDTH/20*0.05, mousePosY - WIDTH/20*0.05);
-                    ctx.lineTo(mousePosX + WIDTH/20*0.07, mousePosY - WIDTH/20*0.10);
-                    ctx.lineTo(mousePosX + WIDTH/20*0.09, mousePosY - WIDTH/20*0.02);
-                    ctx.lineTo(mousePosX + WIDTH/20*0.03, mousePosY + WIDTH/20*0.03);
-                    ctx.lineTo(mousePosX - WIDTH/20*0.02, mousePosY + WIDTH/20*0.07);
+                    ctx.moveTo(mousePosX - WIDTH / 20 * 0.05, mousePosY - WIDTH / 20 * 0.05);
+                    ctx.lineTo(mousePosX + WIDTH / 20 * 0.07, mousePosY - WIDTH / 20 * 0.10);
+                    ctx.lineTo(mousePosX + WIDTH / 20 * 0.09, mousePosY - WIDTH / 20 * 0.02);
+                    ctx.lineTo(mousePosX + WIDTH / 20 * 0.03, mousePosY + WIDTH / 20 * 0.03);
+                    ctx.lineTo(mousePosX - WIDTH / 20 * 0.02, mousePosY + WIDTH / 20 * 0.07);
                     ctx.fill();
-                }else{
+                } else {
                     ctx.fillStyle = buttonsPlanets[selectedPlanetButtonNum].color;
                     ctx.beginPath();
-                    ctx.arc(mousePosX, mousePosY, Math.sqrt(buttonsPlanets[selectedPlanetButtonNum].planetProperties.mass*massMultiplier/(buttonsPlanets[selectedPlanetButtonNum].planetProperties.density*3.14)) * cameraZoom, 0, 2 * Math.PI);
+                    ctx.arc(mousePosX, mousePosY, Math.sqrt(buttonsPlanets[selectedPlanetButtonNum].planetProperties.mass * massMultiplier / (buttonsPlanets[selectedPlanetButtonNum].planetProperties.density * 3.14)) * cameraZoom, 0, 2 * Math.PI);
                     ctx.fill();
                 }
 
@@ -1602,10 +1616,10 @@ function game(){
 
             ctx.globalAlpha = 0.5;
 
-            for(var i = 0; i < trails.length; i++){
-                if(trails[i].lifeTime > 0){
+            for (var i = 0; i < trails.length; i++) {
+                if (trails[i].lifeTime > 0) {
                     trails[i].draw();
-                }else{
+                } else {
                     trails.splice(i, 1)
                 }
             }
@@ -1613,37 +1627,37 @@ function game(){
             ctx.globalAlpha = 1;
 
             //if(PAUSED === false){
-                for(var i = 0; i < objects.length; i++){
-                    if(objects[i].inactive === false){
-                        if(objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT){
-                            objects.splice(i, 1);
-                        }else{
-                            if(objects[i].type === 3){
-                                if(objects[i].lifeTimer > globalDebrieLifetime){
-                                    objects.splice(i, 1);
-                                }else{
-                                    objects[i].update();
-                                }
-                            }else{
+            for (var i = 0; i < objects.length; i++) {
+                if (objects[i].inactive === false) {
+                    if (objects[i].x < -AREAWIDTH || objects[i].x > AREAWIDTH || objects[i].y < -AREAHEIGHT || objects[i].y > AREAHEIGHT) {
+                        objects.splice(i, 1);
+                    } else {
+                        if (objects[i].type === 3) {
+                            if (objects[i].lifeTimer > globalDebrieLifetime) {
+                                objects.splice(i, 1);
+                            } else {
                                 objects[i].update();
                             }
+                        } else {
+                            objects[i].update();
                         }
                     }
                 }
-                savedSunAmount = sunAmount;
-                sunAmount = 0;
+            }
+            savedSunAmount = sunAmount;
+            sunAmount = 0;
             //}
 
-            if(PAUSED === false){
-                for(var i = 0; i < objects.length; i++){
-                    if(objects[i].inactive === false){
+            if (PAUSED === false) {
+                for (var i = 0; i < objects.length; i++) {
+                    if (objects[i].inactive === false) {
                         objects[i].move();
                     }
                 }
             }
 
         }
-
+    }
     for(var i = 0; i < objects.length; i++){
         if(objects[i].inactive === false){
             objects[i].draw();
@@ -1824,6 +1838,42 @@ function game(){
     }*/
 
     //}
+
+    var tempCanvas = document.getElementById("myCanvas");
+
+    var height = document.documentElement.clientHeight;
+
+    if (height === screen.height && FULLSCREEN === false) {
+        unloadScrollBars();
+        tempCanvas.width = document.body.clientWidth;
+        tempCanvas.height = tempCanvas.width * 0.5625;
+        document.getElementById("canvasHolder").style.position = "absolute";
+        document.getElementById("canvasHolder").style.left = '0px';
+        document.getElementById("canvasHolder").style.top = '0px';
+        document.getElementById("canvasHolder").style.border = '0px solid lightgray';
+        FULLSCREEN = true;
+
+        WIDTH = tempCanvas.width;
+        HEIGHT = tempCanvas.height;
+
+        screenHalfWidth = WIDTH/2;
+        screenHalfHeight = HEIGHT/2;
+    }
+
+    if (height !== screen.height && FULLSCREEN === true) {
+        reloadScrollBars();
+        tempCanvas.width = 1280;
+        tempCanvas.height = 720;
+        document.getElementById("canvasHolder").style.position = "relative";
+        document.getElementById("canvasHolder").style.border = '3px solid lightgray';
+        FULLSCREEN = false;
+        WIDTH = tempCanvas.width;
+        HEIGHT = tempCanvas.height;
+
+        screenHalfWidth = WIDTH/2;
+        screenHalfHeight = HEIGHT/2;
+    }
+
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
@@ -2065,6 +2115,8 @@ function updateParameters(){
         }
         input.value = "";
         PAUSED = false;
+
+
     //}
 }
 
@@ -2073,6 +2125,16 @@ function updateParameters(){
 function Reload() {
     localStorage.setItem("HighScoreBusiness", 0);
     //localStorage.clear();
+}
+
+function reloadScrollBars() {
+    document.documentElement.style.overflow = 'auto';  // firefox, chrome
+    document.body.scroll = "yes"; // ie only
+}
+
+function unloadScrollBars() {
+    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+    document.body.scroll = "no"; // ie only
 }
 
 // ---------------------------------------------------------- GAME LOOP ------------------------------------------------------------------------ //
