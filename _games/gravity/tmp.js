@@ -1572,6 +1572,13 @@ function game(){
     }
 
     //SKY FILL
+
+
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
     if(gameClock % slowdown === 0) {
         for (var ticks = 0; ticks < simulationSpeed; ticks++) {
 
@@ -1586,11 +1593,6 @@ function game(){
             } else if ((cameraY) / cameraZoom + HEIGHT / 2 / cameraZoom > AREAHEIGHT) {
                 cameraY = (-HEIGHT / 2 / cameraZoom + AREAHEIGHT) * cameraZoom;
             }
-
-            ctx.clearRect(0, 0, WIDTH, HEIGHT);
-
-            ctx.fillStyle = "rgb(0, 0, 0)";
-            ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
             //Cursor
 
