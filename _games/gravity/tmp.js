@@ -6,7 +6,7 @@
 
 //-----------------------------------------------------------------------------------------------------
 
-var versionCode = "Full Release 1.0.2";
+var versionCode = "Alpha 1.0.3";
 var WIDTH = 1280; //1024x576
 var HEIGHT = 720;
 
@@ -564,7 +564,7 @@ function Object(x, y, mass, density, type, gravityEffect, color, materials){
                     }else{
                         document.body.style.cursor = "pointer";
                     }
-                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + this.infoWindowHeight - HEIGHT / 8 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + this.infoWindowHeight - HEIGHT / 10) {
+                } else if (mousePosX > this.infoWindowX + this.infoWindowWidth * 0.3 && mousePosY > this.infoWindowY + HEIGHT/2 - HEIGHT/50 && mousePosX < this.infoWindowX + this.infoWindowWidth * 0.7 && mousePosY < this.infoWindowY + HEIGHT/2) {
                     if(clickTimer === 0){
                         objects.splice(this.arrayid, 1);
                     }else{
