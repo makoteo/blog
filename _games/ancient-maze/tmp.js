@@ -20,6 +20,8 @@ var mapheight = 70; //THESE NUMBERS MUST BE DIVISIBLE BY TEN
 
 var roomsize = 8;
 
+var doorsGenerated = false;
+
 generateMap();
 var creators = [];
 creators.push(new Creator(1, 1, false));
@@ -162,18 +164,20 @@ function generateMap(){
         }
         map.push(temparray);
     }
-    //OUTER DOORS
-    /*var doorrnd1 = Math.floor(Math.random()*mapwidth);
+}
+
+function generateDoors(){
+    var doorrnd1 = Math.floor(Math.random()*mapwidth);
     while(map[doorrnd1][1] === 1){
         doorrnd1 = Math.floor(Math.random()*mapwidth);
     }
     map[doorrnd1][0] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapwidth);
-    while(map[doorrnd1][mapheight-2] === 1){
+    while(map[doorrnd1][mapheight-1] === 1){
         doorrnd1 = Math.floor(Math.random()*mapwidth);
     }
-    map[doorrnd1][mapheight-1] = 2;
+    map[doorrnd1][mapheight] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapheight);
     while(map[1][doorrnd1] === 1){
@@ -182,10 +186,10 @@ function generateMap(){
     map[0][doorrnd1] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapheight);
-    while(map[mapwidth-2][1] === 1){
+    while(map[mapwidth-1][1] === 1){
         doorrnd1 = Math.floor(Math.random()*mapheight);
     }
-    map[mapwidth - 1][doorrnd1] = 2;*/
+    map[mapwidth][doorrnd1] = 2;
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
@@ -217,7 +221,14 @@ function game(){
             if(creators[i].dead === false){
                 creators[i].update();
                 creators[i].draw();
+            }else{
+                creators.splice(i, 1);
             }
+        }
+
+        if(creators.length === 0 && doorsGenerated === false){
+            generateDoors();
+            doorsGenerated = true;
         }
 
         /* (KEY INPUT)
