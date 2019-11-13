@@ -186,7 +186,7 @@ function generateDoors(){
     map[0][doorrnd1] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapheight);
-    while(map[mapwidth-1][1] === 1){
+    while(map[mapwidth-1][doorrnd1] === 1){
         doorrnd1 = Math.floor(Math.random()*mapheight);
     }
     map[mapwidth][doorrnd1] = 2;
