@@ -16,7 +16,7 @@ var map = [];
  */
 
 var mapwidth = 70;
-var mapheight = 70; //THESE NUMBERS MUST BE DIVISIBLE BY TEN
+var mapheight = 70; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
 
 var roomsize = 8;
 
@@ -25,7 +25,6 @@ var doorsGenerated = false;
 generateMap();
 var creators = [];
 creators.push(new Creator(1, 1, false));
-creators.push(new Creator(mapwidth-1, mapheight-1, false));
 
 // EXAMPLE ARRAY coins = [];
 
@@ -65,7 +64,7 @@ function Creator(x, y, killable){
         this.spawnNew = Math.random();
         this.die = Math.random();
 
-        if(this.spawnNew < 0.23){
+        if(this.spawnNew < 0.26){
             creators.push(new Creator(this.x, this.y, true));
         }
 
@@ -101,26 +100,7 @@ function Creator(x, y, killable){
             if(this.possibleDirections.length === 0) {
                 this.dead = true;
                 //BACKTRACKER 2
-                /*if (this.y > 2) {
-                    if (map[this.y - 1][this.x] === 0) {
-                        this.possibleDirections.push(0);
-                    }
-                }
-                if (this.x < map.length - 1) {
-                    if (map[this.y][this.x + 1] === 0) {
-                        this.possibleDirections.push(1);
-                    }
-                }
-                if (this.y < map[0].length - 1) {
-                    if (map[this.y + 1][this.x] === 0) {
-                        this.possibleDirections.push(2);
-                    }
-                }
-                if (this.x > 2) {
-                    if (map[this.y][this.x - 1] === 0) {
-                        this.possibleDirections.push(3);
-                    }
-                }*/
+                this.dir = [1, 2, 3, 0];
             }
             this.dir = this.possibleDirections[Math.floor(Math.random()*this.possibleDirections.length)];
         }
@@ -217,14 +197,16 @@ function game(){
 
         frameCount++;
 
-        for(var i = 0; i < creators.length; i++){
-            if(creators[i].dead === false){
-                creators[i].update();
-                creators[i].draw();
-            }else{
-                creators.splice(i, 1);
+        //if(frameCount % 10 === 0){
+            for(var i = 0; i < creators.length; i++){
+                if(creators[i].dead === false){
+                    creators[i].update();
+                    creators[i].draw();
+                }else{
+                    creators.splice(i, 1);
+                }
             }
-        }
+        //}
 
         if(creators.length === 0 && doorsGenerated === false){
             generateDoors();
