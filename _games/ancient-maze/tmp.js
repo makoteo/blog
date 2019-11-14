@@ -45,9 +45,59 @@ function Player(x, y, width, height){
     this.gameX = 0;
     this.gameY = 0;
 
+    this.tileX = 0;
+    this.tileY = 0;
+
     this.update = function(){
         this.gameX = cameraX + WIDTH/2;
         this.gameY = cameraY + HEIGHT/2;
+
+        this.tileX = Math.floor(this.gameX/tileSize);
+        this.tileY = Math.floor(this.gameY/tileSize);
+
+        this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
+        this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
+
+        if(Math.floor((this.gameY - playerSpeed)/tileSize) !== this.tileY){
+            if(map[this.tileY - 1][this.tileX] === 1 || map[this.tileY - 1][this.tileX2] === 1){
+                if (keys && keys[38] || keys && keys[87]) {cameraY+=(this.tileY)*tileSize+1-(this.gameY);}
+            }else{
+                if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
+            }
+        }else{
+            if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
+        }
+
+        if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
+            if(map[this.tileY][this.tileX - 1] === 1 || map[this.tileY2][this.tileX - 1] === 1){
+                if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX);}
+            }else{
+                if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
+            }
+        }else{
+            if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
+        }
+
+        if(Math.floor((this.gameY + this.height*tileSize + playerSpeed)/tileSize) !== this.tileY2){
+            if(map[this.tileY2 + 1][this.tileX] === 1 || map[this.tileY2 + 1][this.tileX2] === 1){
+                if (keys && keys[40] || keys && keys[83]) {cameraY+=((this.tileY2+1)*tileSize - (this.gameY + this.height*tileSize))-1;}
+            }else{
+                if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
+            }
+        }else{
+            if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
+        }
+
+        if(Math.floor((this.gameX + this.width*tileSize + playerSpeed)/tileSize) !== this.tileX2){
+            if(map[this.tileY][this.tileX2 + 1] === 1 || map[this.tileY2][this.tileX2 + 1] === 1){
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1;}
+            }else{
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
+            }
+        }else{
+            if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
+        }
+
     };
 
     this.draw = function(){
@@ -252,9 +302,6 @@ function game(){
         //}
 
         player.update();
-        if(frameCount % 5 === 0){
-            console.log(player.gameX + ", " + player.gameY);
-        }
         player.draw();
 
         if(creators.length === 0 && doorsGenerated === false){
@@ -262,11 +309,6 @@ function game(){
             generateDoors();
             doorsGenerated = true;
         }
-
-        if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
-        if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
-        if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
-        if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
