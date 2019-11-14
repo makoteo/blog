@@ -7,18 +7,21 @@ var TIME = 0;
 var frameCount = 0;
 
 var map = [];
-/*
 
-111 101 111 111 111 111 111 111 111 111 111 111 111 111
-111 101
-111 111
+var mapdimensions = 70;
 
- */
-
-var mapwidth = 70;
-var mapheight = 70; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
+var mapwidth = mapdimensions;
+var mapheight = mapdimensions; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
 
 var roomsize = 8;
+
+var tileSize = 100;
+var offset = 0;
+
+var cameraX = tileSize*(mapwidth - 8)/2;
+var cameraY = tileSize*mapheight/2;
+
+var playerSpeed = 5;
 
 var doorsGenerated = false;
 
@@ -39,17 +42,20 @@ function Player(x, y, width, height){
     this.width = width;
     this.height = height;
 
-    this.draw = function(){
+    this.gameX = 0;
+    this.gameY = 0;
 
+    this.update = function(){
+        this.gameX = cameraX + WIDTH/2;
+        this.gameY = cameraY + HEIGHT/2;
+    };
+
+    this.draw = function(){
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.x - this.width/2, this.y - this.height, this.width*tileSize, this.height*tileSize);
     };
 
 }
-
-// ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
-
-player = new Player(WIDTH/2, HEIGHT - HEIGHT/8 - 16, 16, 32, 0); //Add the Player
-
-// ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
 function Creator(x, y, killable){
     this.x = x;
@@ -58,8 +64,13 @@ function Creator(x, y, killable){
     this.previousdir = 0;
     this.dead = false;
     this.killable = killable;
+    this.aliveTime = 0;
     this.update = function() {
         //CHECK DIRECTIONS
+        if(this.killable === false){
+            this.aliveTime++;
+        }
+
         this.possibleDirections = [];
         this.spawnNew = Math.random();
         this.die = Math.random();
@@ -97,10 +108,24 @@ function Creator(x, y, killable){
         }else{
             //BACKTRACKER
 
-            if(this.possibleDirections.length === 0) {
+
+            if((this.possibleDirections.length === 0 && this.killable === true) || (this.possibleDirections.length === 0 && this.killable === false && this.aliveTime > 100)) {
                 this.dead = true;
-                //BACKTRACKER 2
-                this.dir = [1, 2, 3, 0];
+                //The following creates so many junctions:
+                if(Math.random() < 0.3) {
+                    if(this.y > 2 && map[this.y - 2][this.x] !== 3){
+                        this.possibleDirections.push(0);
+                    }
+                    if(this.x < map.length - 2  && map[this.y][this.x + 2] !== 3){
+                        this.possibleDirections.push(1);
+                    }
+                    if(this.y < map[0].length - 2  && map[this.y + 2][this.x] !== 3){
+                        this.possibleDirections.push(2);
+                    }
+                    if(this.x > 2  && map[this.y][this.x - 2] !== 3){
+                        this.possibleDirections.push(3);
+                    }
+                }
             }
             this.dir = this.possibleDirections[Math.floor(Math.random()*this.possibleDirections.length)];
         }
@@ -126,9 +151,16 @@ function Creator(x, y, killable){
     };
     this.draw = function(){
         ctx.fillStyle = 'blue';
-        ctx.fillRect(this.x*2+5, this.y*2+5, 2, 2);
+        ctx.fillRect(this.x*tileSize + offset- cameraX, this.y*tileSize + offset - cameraY, tileSize, tileSize);
     }
 }
+// ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
+
+player = new Player(WIDTH/2, HEIGHT/2, 1/2, 3/4); //Add the Player
+
+// ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
+
+
 
 function generateMap(){
     //EDGES AND CENTER ROOM
@@ -146,7 +178,7 @@ function generateMap(){
     }
 }
 
-function generateDoors(){
+function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
     var doorrnd1 = Math.floor(Math.random()*mapwidth);
     while(map[doorrnd1][1] === 1){
         doorrnd1 = Math.floor(Math.random()*mapwidth);
@@ -172,6 +204,17 @@ function generateDoors(){
     map[mapwidth][doorrnd1] = 2;
 }
 
+//KINDA COOL LOL
+function fillRooms(){
+    for(var i = 2; i < map.length - 2; i+=2){
+        for(var j = 2; j < map[0].length - 2; j+=2){
+            if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0){
+                map[i][j] = 0;
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
@@ -189,7 +232,7 @@ function game(){
             }else if(map[j][i] === 3){
                 ctx.fillStyle = 'green'; //INDESTRUCTABLE WALL
             }
-            ctx.fillRect(i*2 + 5, j*2 + 5, 2, 2);
+            ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
         }
     }
 
@@ -208,14 +251,22 @@ function game(){
             }
         //}
 
+        player.update();
+        if(frameCount % 5 === 0){
+            console.log(player.gameX + ", " + player.gameY);
+        }
+        player.draw();
+
         if(creators.length === 0 && doorsGenerated === false){
+            fillRooms();
             generateDoors();
             doorsGenerated = true;
         }
 
-        /* (KEY INPUT)
-        if (keys && keys[40] || keys && keys[83]) {player.setVelY(player.getVelY() + 0.2)}
-        */
+        if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
+        if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
+        if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
+        if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
