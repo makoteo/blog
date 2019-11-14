@@ -220,6 +220,8 @@ function generateMap(){
             if(i === 0 || j === 0 || i === (mapheight) || j === (mapheight) || ((i === mapheight/2-roomsize/2 || i === mapheight/2+roomsize/2) && (j >= mapwidth/2-roomsize/2 && j <= mapwidth/2+roomsize/2))
                 || ((j === mapwidth/2-roomsize/2 || j === mapwidth/2+roomsize/2) && (i >= mapheight/2-roomsize/2 && i <= mapheight/2+roomsize/2))){
                 temparray.push(3);
+            }else if(i > mapheight/2 - roomsize/2 && i < mapheight/2 + roomsize/2 && j > mapwidth/2 - roomsize/2 && j < mapwidth/2 + roomsize/2){
+                temparray.push(0);
             }else{
                 temparray.push(1);
             }
@@ -260,6 +262,53 @@ function fillRooms(){
         for(var j = 2; j < map[0].length - 2; j+=2){
             if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0){
                 map[i][j] = 0;
+            }
+        }
+    }
+}
+
+function genExitsFromMain(){
+    var rnd = Math.floor(Math.random()*roomsize-2);
+    for(var i = 0; i <= mapheight; i++){
+        for(var j = 0; j <= mapwidth; j++) {
+            if(i === mapheight/2 - roomsize/2 && j === mapwidth/2 - roomsize/2 + rnd + 1){
+                while(map[j][i] === 1 || map[j][i] === 3){
+                    map[j][i] = 0;
+                    i--;
+                }
+            }
+        }
+    }
+    rnd = Math.floor(Math.random()*roomsize-2);
+    for(var i = 0; i <= mapheight; i++){
+        for(var j = 0; j <= mapwidth; j++) {
+            if(i === mapheight/2 + roomsize/2 && j === mapwidth/2 - roomsize/2 + rnd + 1){
+                while(map[j][i] === 1 || map[j][i] === 3){
+                    map[j][i] = 0;
+                    i++;
+                }
+            }
+        }
+    }
+    rnd = Math.floor(Math.random()*roomsize-2);
+    for(var i = 0; i <= mapheight; i++){
+        for(var j = 0; j <= mapwidth; j++) {
+            if(i === mapheight/2 - roomsize/2 + rnd + 1 && j === mapwidth/2 - roomsize/2){
+                while(map[j][i] === 1 || map[j][i] === 3){
+                    map[j][i] = 0;
+                    j--;
+                }
+            }
+        }
+    }
+    rnd = Math.floor(Math.random()*roomsize-2);
+    for(var i = 0; i <= mapheight; i++){
+        for(var j = 0; j <= mapwidth; j++) {
+            if(i === mapheight/2 - roomsize/2 + rnd + 1 && j === mapwidth/2 + roomsize/2){
+                while(map[j][i] === 1 || map[j][i] === 3){
+                    map[j][i] = 0;
+                    j++;
+                }
             }
         }
     }
@@ -307,6 +356,7 @@ function game(){
         if(creators.length === 0 && doorsGenerated === false){
             fillRooms();
             generateDoors();
+            genExitsFromMain();
             doorsGenerated = true;
         }
 
