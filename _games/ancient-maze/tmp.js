@@ -8,7 +8,7 @@ var frameCount = 0;
 
 var map = [];
 
-// 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom
+// 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom, 6 = lockedDoor
 
 var mapdimensions = 70; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
 
@@ -17,7 +17,7 @@ var mapheight = mapdimensions;
 
 var roomsize = 8; //8
 
-var room2size = 32; //32
+var room2size = 36; //32
 var room2 = true;
 
 var tileSize = 5; //100
@@ -38,8 +38,14 @@ var lootChances = 0.03; //0.03
 generateMap();
 var creators = [];
 creators.push(new Creator(1, 1, false));
+creators.push(new Creator(mapwidth-1, mapheight-1, false));
+creators.push(new Creator(1, mapheight-1, false));
+creators.push(new Creator(mapwidth-1, 1, false));
 if(room2 === true){
     creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
+    creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
+    creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2+room2size/2 - 2, false));
+    creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2-room2size/2 + 2, false));
 }
 
 // EXAMPLE ARRAY coins = [];
@@ -314,8 +320,12 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
                 tmp = i;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3){
-                    map[j][tmp] = 0;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp > 0){
+                    if(map[j][tmp] === 3 && size !== roomsize){
+                        map[j][tmp] = 6;
+                    }else{
+                        map[j][tmp] = 0;
+                    }
                     tmp--;
                 }
                 tmp = i+1;
@@ -331,8 +341,12 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
                 tmp = i;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3){
-                    map[j][tmp] = 0;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3  && tmp < mapdimensions){
+                    if(map[j][tmp] === 3 && size !== roomsize){
+                        map[j][tmp] = 6;
+                    }else{
+                        map[j][tmp] = 0;
+                    }
                     tmp++;
                 }
                 tmp = i-1;
@@ -349,12 +363,16 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
                 tmp = j;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3){
-                    map[tmp][i] = 0;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp > 0){
+                    if(map[tmp][i] === 3 && size !== roomsize){
+                        map[tmp][i] = 6;
+                    }else{
+                        map[tmp][i] = 0;
+                    }
                     tmp--;
                 }
                 tmp = j+1;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3 && j < mapdimensions){
+                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp < mapdimensions){
                     map[tmp][i] = 0;
                     tmp++;
                 }
@@ -366,17 +384,34 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
                 tmp = j;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3){
-                    map[tmp][i] = 0;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp < mapdimensions){
+                    if(map[tmp][i] === 3 && size !== roomsize){
+                        map[tmp][i] = 6;
+                    }else{
+                        map[tmp][i] = 0;
+                    }
                     tmp++;
                 }
                 tmp = j-1;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3){
+                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp > 0){
                     map[tmp][i] = 0;
                     tmp--;
                 }
             }
         }
+    }
+}
+
+function generate(){
+    if(creators.length === 0 && doorsGenerated === false){
+        fillRooms();
+        generateDoors();
+        genExitsFromMain(roomsize);
+        if(room2 === true){
+            genExitsFromMain(room2size);
+        }
+        generateLoot();
+        doorsGenerated = true;
     }
 }
 
@@ -400,6 +435,8 @@ function game(){
                 ctx.fillStyle = 'yellow';
             }else if(map[j][i] === 5){
                 ctx.fillStyle = 'gray';
+            }else if(map[j][i] === 6){
+                ctx.fillStyle = 'brown';
             }
             ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
         }
@@ -423,16 +460,7 @@ function game(){
         //player.update();
         //player.draw();
 
-        if(creators.length === 0 && doorsGenerated === false){
-            fillRooms();
-            generateDoors();
-            genExitsFromMain(roomsize);
-            if(room2 === true){
-                genExitsFromMain(room2size);
-            }
-            generateLoot();
-            doorsGenerated = true;
-        }
+        generate();
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
