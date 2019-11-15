@@ -20,14 +20,14 @@ var roomsize = 8; //8
 var room2size = 36; //32
 var room2 = true;
 
-var tileSize = 5; //100
+var tileSize = 100; //100
 var offset = 0;
 
-//var cameraX = tileSize*(mapwidth - 8)/2;
-//var cameraY = tileSize*mapheight/2;
+var cameraX = tileSize*(mapwidth - 8)/2;
+var cameraY = tileSize*mapheight/2;
 
-var cameraX = 0;
-var cameraY = 0;
+//var cameraX = 0;
+//var cameraY = 0;
 
 var playerSpeed = 5; //5
 
@@ -35,18 +35,9 @@ var doorsGenerated = false;
 
 var lootChances = 0.03; //0.03
 
-generateMap();
 var creators = [];
-creators.push(new Creator(1, 1, false));
-creators.push(new Creator(mapwidth-1, mapheight-1, false));
-creators.push(new Creator(1, mapheight-1, false));
-creators.push(new Creator(mapwidth-1, 1, false));
-if(room2 === true){
-    creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
-    creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
-    creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2+room2size/2 - 2, false));
-    creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2-room2size/2 + 2, false));
-}
+//KICKSTART GAME
+generateMap();
 
 // EXAMPLE ARRAY coins = [];
 
@@ -236,6 +227,18 @@ player = new Player(WIDTH/2, HEIGHT/2, 1/2, 3/4); //Add the Player
 
 
 function generateMap(){
+    creators = [];
+    map = [];
+    creators.push(new Creator(1, 1, false));
+    creators.push(new Creator(mapwidth-1, mapheight-1, false));
+    //creators.push(new Creator(1, mapheight-1, false));
+    //creators.push(new Creator(mapwidth-1, 1, false));
+    if(room2 === true){
+        creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
+        creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
+        //creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2+room2size/2 - 2, false));
+        //creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2-room2size/2 + 2, false));
+    }
     //EDGES AND CENTER ROOM
     for(var i = 0; i <= mapheight; i++){
         var temparray = [];
@@ -254,6 +257,7 @@ function generateMap(){
         }
         map.push(temparray);
     }
+
 }
 
 function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
@@ -320,7 +324,7 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
                 tmp = i;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp > 0){
+                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
                     if(map[j][tmp] === 3 && size !== roomsize){
                         map[j][tmp] = 6;
                     }else{
@@ -329,7 +333,7 @@ function genExitsFromMain(size){
                     tmp--;
                 }
                 tmp = i+1;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp < mapdimensions){
+                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp < mapdimensions&& map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
                     map[j][tmp] = 0;
                     tmp++;
                 }
@@ -341,7 +345,7 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
                 tmp = i;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3  && tmp < mapdimensions){
+                while((map[j][tmp] === 1 || map[j][tmp] === 3)  && tmp < mapdimensions && map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
                     if(map[j][tmp] === 3 && size !== roomsize){
                         map[j][tmp] = 6;
                     }else{
@@ -350,7 +354,7 @@ function genExitsFromMain(size){
                     tmp++;
                 }
                 tmp = i-1;
-                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp > 0){
+                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
                     map[j][tmp] = 0;
                     tmp--;
                     console.log(tmp);
@@ -363,7 +367,7 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
                 tmp = j;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp > 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -372,7 +376,7 @@ function genExitsFromMain(size){
                     tmp--;
                 }
                 tmp = j+1;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp < mapdimensions){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp++;
                 }
@@ -384,7 +388,7 @@ function genExitsFromMain(size){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
                 tmp = j;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp < mapdimensions){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -393,7 +397,7 @@ function genExitsFromMain(size){
                     tmp++;
                 }
                 tmp = j-1;
-                while(map[tmp][i] === 1 || map[tmp][i] === 3 && tmp > 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp--;
                 }
@@ -403,7 +407,17 @@ function genExitsFromMain(size){
 }
 
 function generate(){
-    if(creators.length === 0 && doorsGenerated === false){
+    var paths = 0;
+    for(var i = 0; i < mapheight; i++){
+        for(var j = 0; j < mapwidth; j++){
+            if(map[j][i] === 0){
+                paths++;
+            }
+        }
+    }
+    if(paths < 0.43*mapwidth*mapheight){
+        generateMap();
+    }else{
         fillRooms();
         generateDoors();
         genExitsFromMain(roomsize);
@@ -457,10 +471,12 @@ function game(){
             }
         //}
 
-        //player.update();
-        //player.draw();
+        player.update();
+        player.draw();
 
-        generate();
+        if(creators.length === 0 && doorsGenerated === false) {
+            generate();
+        }
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
