@@ -8,26 +8,39 @@ var frameCount = 0;
 
 var map = [];
 
-var mapdimensions = 70;
+// 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom
+
+var mapdimensions = 70; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
 
 var mapwidth = mapdimensions;
-var mapheight = mapdimensions; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
+var mapheight = mapdimensions;
 
-var roomsize = 8;
+var roomsize = 8; //8
 
-var tileSize = 100;
+var room2size = 32; //32
+var room2 = true;
+
+var tileSize = 5; //100
 var offset = 0;
 
-var cameraX = tileSize*(mapwidth - 8)/2;
-var cameraY = tileSize*mapheight/2;
+//var cameraX = tileSize*(mapwidth - 8)/2;
+//var cameraY = tileSize*mapheight/2;
 
-var playerSpeed = 5;
+var cameraX = 0;
+var cameraY = 0;
+
+var playerSpeed = 5; //5
 
 var doorsGenerated = false;
+
+var lootChances = 0.03; //0.03
 
 generateMap();
 var creators = [];
 creators.push(new Creator(1, 1, false));
+if(room2 === true){
+    creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
+}
 
 // EXAMPLE ARRAY coins = [];
 
@@ -48,6 +61,8 @@ function Player(x, y, width, height){
     this.tileX = 0;
     this.tileY = 0;
 
+    this.topMargin = 2/5;
+
     this.update = function(){
         this.gameX = cameraX + WIDTH/2;
         this.gameY = cameraY + HEIGHT/2;
@@ -55,12 +70,14 @@ function Player(x, y, width, height){
         this.tileX = Math.floor(this.gameX/tileSize);
         this.tileY = Math.floor(this.gameY/tileSize);
 
+        this.tileY3 = Math.floor((this.gameY+this.height*this.topMargin*tileSize)/tileSize);
+
         this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
-        if(Math.floor((this.gameY - playerSpeed)/tileSize) !== this.tileY){
-            if(map[this.tileY - 1][this.tileX] === 1 || map[this.tileY - 1][this.tileX2] === 1){
-                if (keys && keys[38] || keys && keys[87]) {cameraY+=(this.tileY)*tileSize+1-(this.gameY);}
+        if(Math.floor((this.gameY + this.height*this.topMargin*tileSize - playerSpeed)/tileSize) !== this.tileY3){
+            if(map[this.tileY3 - 1][this.tileX] === 1 || map[this.tileY3 - 1][this.tileX2] === 1){
+                if (keys && keys[38] || keys && keys[87]) {cameraY+=Math.round((this.tileY3)*tileSize+1-(this.gameY)-(this.height*this.topMargin*tileSize));}
             }else{
                 if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
             }
@@ -69,7 +86,7 @@ function Player(x, y, width, height){
         }
 
         if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
-            if(map[this.tileY][this.tileX - 1] === 1 || map[this.tileY2][this.tileX - 1] === 1){
+            if(map[this.tileY3][this.tileX - 1] === 1 || map[this.tileY2][this.tileX - 1] === 1){
                 if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX);}
             }else{
                 if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
@@ -89,7 +106,7 @@ function Player(x, y, width, height){
         }
 
         if(Math.floor((this.gameX + this.width*tileSize + playerSpeed)/tileSize) !== this.tileX2){
-            if(map[this.tileY][this.tileX2 + 1] === 1 || map[this.tileY2][this.tileX2 + 1] === 1){
+            if(map[this.tileY3][this.tileX2 + 1] === 1 || map[this.tileY2][this.tileX2 + 1] === 1){
                 if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1;}
             }else{
                 if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
@@ -220,8 +237,11 @@ function generateMap(){
             if(i === 0 || j === 0 || i === (mapheight) || j === (mapheight) || ((i === mapheight/2-roomsize/2 || i === mapheight/2+roomsize/2) && (j >= mapwidth/2-roomsize/2 && j <= mapwidth/2+roomsize/2))
                 || ((j === mapwidth/2-roomsize/2 || j === mapwidth/2+roomsize/2) && (i >= mapheight/2-roomsize/2 && i <= mapheight/2+roomsize/2))){
                 temparray.push(3);
+            }else if(room2 === true && (((i === mapheight/2-room2size/2 || i === mapheight/2+room2size/2) && (j >= mapwidth/2-room2size/2 && j <= mapwidth/2+room2size/2))
+                || ((j === mapwidth/2-room2size/2 || j === mapwidth/2+room2size/2) && (i >= mapheight/2-room2size/2 && i <= mapheight/2+room2size/2)))){
+                temparray.push(3);
             }else if(i > mapheight/2 - roomsize/2 && i < mapheight/2 + roomsize/2 && j > mapwidth/2 - roomsize/2 && j < mapwidth/2 + roomsize/2){
-                temparray.push(0);
+                temparray.push(5);
             }else{
                 temparray.push(1);
             }
@@ -260,54 +280,100 @@ function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and widt
 function fillRooms(){
     for(var i = 2; i < map.length - 2; i+=2){
         for(var j = 2; j < map[0].length - 2; j+=2){
-            if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0){
-                map[i][j] = 0;
+            if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0 && map[i][j] === 1){
+                var rnd = Math.random();
+                if(rnd < 0.8){
+                    map[i][j] = 4;
+                }else{
+                    map[i][j] = 0;
+                }
             }
         }
     }
 }
 
-function genExitsFromMain(){
-    var rnd = Math.floor(Math.random()*roomsize-2);
-    for(var i = 0; i <= mapheight; i++){
-        for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 - roomsize/2 && j === mapwidth/2 - roomsize/2 + rnd + 1){
-                while(map[j][i] === 1 || map[j][i] === 3){
-                    map[j][i] = 0;
-                    i--;
+function generateLoot(){
+    for(var i = 1; i < map.length - 1; i+=2){
+        for(var j = 1; j < map[0].length - 1; j+=2){
+            if(map[i][j] === 0){
+                var rnd = Math.random();
+                if(rnd < lootChances){
+                    map[i][j] = 4;
+                }else{
+                    map[i][j] = 0;
                 }
             }
         }
     }
-    rnd = Math.floor(Math.random()*roomsize-2);
+}
+
+function genExitsFromMain(size){
+    var tmp = i;
+    var rnd = Math.floor(Math.random()*(size-2));
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 + roomsize/2 && j === mapwidth/2 - roomsize/2 + rnd + 1){
-                while(map[j][i] === 1 || map[j][i] === 3){
-                    map[j][i] = 0;
-                    i++;
+            if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
+                tmp = i;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3){
+                    map[j][tmp] = 0;
+                    tmp--;
+                }
+                tmp = i+1;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp < mapdimensions){
+                    map[j][tmp] = 0;
+                    tmp++;
                 }
             }
         }
     }
-    rnd = Math.floor(Math.random()*roomsize-2);
+    rnd = Math.floor(Math.random()*(size-2));
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 - roomsize/2 + rnd + 1 && j === mapwidth/2 - roomsize/2){
-                while(map[j][i] === 1 || map[j][i] === 3){
-                    map[j][i] = 0;
-                    j--;
+            if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
+                tmp = i;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3){
+                    map[j][tmp] = 0;
+                    tmp++;
+                }
+                tmp = i-1;
+                while(map[j][tmp] === 1 || map[j][tmp] === 3 && tmp > 0){
+                    map[j][tmp] = 0;
+                    tmp--;
+                    console.log(tmp);
                 }
             }
         }
     }
-    rnd = Math.floor(Math.random()*roomsize-2);
+    rnd = Math.floor(Math.random()*(size-2));
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 - roomsize/2 + rnd + 1 && j === mapwidth/2 + roomsize/2){
-                while(map[j][i] === 1 || map[j][i] === 3){
-                    map[j][i] = 0;
-                    j++;
+            if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
+                tmp = j;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3){
+                    map[tmp][i] = 0;
+                    tmp--;
+                }
+                tmp = j+1;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3 && j < mapdimensions){
+                    map[tmp][i] = 0;
+                    tmp++;
+                }
+            }
+        }
+    }
+    rnd = Math.floor(Math.random()*(size-2));
+    for(var i = 0; i <= mapheight; i++){
+        for(var j = 0; j <= mapwidth; j++) {
+            if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
+                tmp = j;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3){
+                    map[tmp][i] = 0;
+                    tmp++;
+                }
+                tmp = j-1;
+                while(map[tmp][i] === 1 || map[tmp][i] === 3){
+                    map[tmp][i] = 0;
+                    tmp--;
                 }
             }
         }
@@ -330,6 +396,10 @@ function game(){
                 ctx.fillStyle = 'red';
             }else if(map[j][i] === 3){
                 ctx.fillStyle = 'green'; //INDESTRUCTABLE WALL
+            }else if(map[j][i] === 4){
+                ctx.fillStyle = 'yellow';
+            }else if(map[j][i] === 5){
+                ctx.fillStyle = 'gray';
             }
             ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
         }
@@ -350,13 +420,17 @@ function game(){
             }
         //}
 
-        player.update();
-        player.draw();
+        //player.update();
+        //player.draw();
 
         if(creators.length === 0 && doorsGenerated === false){
             fillRooms();
             generateDoors();
-            genExitsFromMain();
+            genExitsFromMain(roomsize);
+            if(room2 === true){
+                genExitsFromMain(room2size);
+            }
+            generateLoot();
             doorsGenerated = true;
         }
 
