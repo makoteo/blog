@@ -478,6 +478,8 @@ function game(){
             generate();
         }
 
+
+
         /* SPAWNING
         if(frameCount % spawnRate === 0){
             addWave();

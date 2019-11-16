@@ -1,7 +1,7 @@
 ---
 layout: default
-permalink: /games/tmp-setup/index.html
-title: This is the tmp setup!!
+permalink: /games/tbuttt/index.html
+title: Three Board Ultimate Tic Tac Toe
 ---
 
 [Back To Main Page](../../).

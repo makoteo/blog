@@ -1,7 +1,7 @@
 ---
 layout: default
-permalink: /games/tmp-setup/index.html
-title: This is the tmp setup!!
+permalink: /games/ancient-maze/index.html
+title: Ancient Maze
 ---
 
 [Back To Main Page](../../).
