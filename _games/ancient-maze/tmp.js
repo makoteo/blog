@@ -17,7 +17,7 @@ var mapheight = mapdimensions;
 
 var roomsize = 8; //8
 
-var room2size = 36; //32
+var room2size = 36; //36
 var room2 = true;
 
 var tileSize = 100; //100
@@ -37,7 +37,9 @@ var lootChances = 0.03; //0.03
 
 var creators = [];
 //KICKSTART GAME
-generateMap();
+var tileMap = new Image();
+tileMap.onload = generateMap();
+tileMap.src = "AncientMaze.png";
 
 // EXAMPLE ARRAY coins = [];
 
@@ -73,7 +75,7 @@ function Player(x, y, width, height){
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
         if(Math.floor((this.gameY + this.height*this.topMargin*tileSize - playerSpeed)/tileSize) !== this.tileY3){
-            if(map[this.tileY3 - 1][this.tileX] === 1 || map[this.tileY3 - 1][this.tileX2] === 1){
+            if(Math.floor(map[this.tileY3 - 1][this.tileX]) === 1 || Math.floor(map[this.tileY3 - 1][this.tileX2]) === 1){
                 if (keys && keys[38] || keys && keys[87]) {cameraY+=Math.round((this.tileY3)*tileSize+1-(this.gameY)-(this.height*this.topMargin*tileSize));}
             }else{
                 if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
@@ -83,7 +85,7 @@ function Player(x, y, width, height){
         }
 
         if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
-            if(map[this.tileY3][this.tileX - 1] === 1 || map[this.tileY2][this.tileX - 1] === 1){
+            if(Math.floor(map[this.tileY3][this.tileX - 1]) === 1 || Math.floor(map[this.tileY2][this.tileX - 1]) === 1){
                 if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX);}
             }else{
                 if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
@@ -93,7 +95,7 @@ function Player(x, y, width, height){
         }
 
         if(Math.floor((this.gameY + this.height*tileSize + playerSpeed)/tileSize) !== this.tileY2){
-            if(map[this.tileY2 + 1][this.tileX] === 1 || map[this.tileY2 + 1][this.tileX2] === 1){
+            if(Math.floor(map[this.tileY2 + 1][this.tileX]) === 1 || Math.floor(map[this.tileY2 + 1][this.tileX2]) === 1){
                 if (keys && keys[40] || keys && keys[83]) {cameraY+=((this.tileY2+1)*tileSize - (this.gameY + this.height*tileSize))-1;}
             }else{
                 if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
@@ -103,7 +105,7 @@ function Player(x, y, width, height){
         }
 
         if(Math.floor((this.gameX + this.width*tileSize + playerSpeed)/tileSize) !== this.tileX2){
-            if(map[this.tileY3][this.tileX2 + 1] === 1 || map[this.tileY2][this.tileX2 + 1] === 1){
+            if(Math.floor(map[this.tileY3][this.tileX2 + 1]) === 1 || Math.floor(map[this.tileY2][this.tileX2 + 1]) === 1){
                 if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1;}
             }else{
                 if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
@@ -406,6 +408,40 @@ function genExitsFromMain(size){
     }
 }
 
+function generateTextureMap(){
+    for(var i = 0; i < map[0].length; i++){
+        for(var j = 0; j < map.length; j++){
+            if(map[j][i] === 0){
+                var rnd = Math.random();
+                if(rnd < 0.02){
+                    map[j][i] = 0;
+                }else if(rnd < 0.5){
+                    map[j][i] = 0.1;
+                }else if(rnd < 0.51){
+                    map[j][i] = 0.2;
+                }else{
+                    map[j][i] = 0.3;
+                }
+            }
+            if(map[j][i] === 1 && i > 1 && i < map.length - 1){
+                if(((Math.floor(map[j][i - 1]) === 0) ||(Math.floor(map[j][i - 1]) === 4)) && ((Math.floor(map[j][i + 1]) === 0) || (Math.floor(map[j][i + 1]) === 4))){
+                    map[j][i] = 1.05;
+                }
+            }
+            if(map[j][i] === 1 && i < map.length - 1){
+                if((Math.floor(map[j][i + 1]) === 0) || (Math.floor(map[j][i + 1]) === 4)){
+                    map[j][i] = 1.1;
+                }
+            }
+            if(map[j][i] === 1 && i > 1){
+                if((Math.floor(map[j][i - 1]) === 0) || (Math.floor(map[j][i - 1]) === 0)){
+                    map[j][i] = 1.2;
+                }
+            }
+        }
+    }
+}
+
 function generate(){
     var paths = 0;
     for(var i = 0; i < mapheight; i++){
@@ -425,6 +461,7 @@ function generate(){
             genExitsFromMain(room2size);
         }
         generateLoot();
+        generateTextureMap();
         doorsGenerated = true;
     }
 }
@@ -435,24 +472,45 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    for(var i = 0; i < map.length; i++){
-        for(var j = 0; j < map[0].length; j++){
+    for (var i = Math.max(player.tileX - 5, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+    //for (var i = 0; i < mapwidth; i++) {
+    //    for (var j = 0; j < mapheight; j++) {
             if(map[j][i] === 0){
-                ctx.fillStyle = 'black';
+                ctx.drawImage(tileMap, 0, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                //ctx.fillStyle = 'black';
+            }else if(map[j][i] === 0.1){
+                ctx.drawImage(tileMap, 224, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                //ctx.fillStyle = 'black';
+            }else if(map[j][i] === 0.2){
+                ctx.drawImage(tileMap, 0, 224, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                //ctx.fillStyle = 'black';
+            }else if(map[j][i] === 0.3){
+                ctx.drawImage(tileMap, 224, 224, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                //ctx.fillStyle = 'black';
             }else if(map[j][i] === 1){
                 ctx.fillStyle = 'white';
+            }else if(map[j][i] === 1.05){
+                ctx.drawImage(tileMap, 448, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+            }else if(map[j][i] === 1.1){
+                ctx.drawImage(tileMap, 0, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+            }else if(map[j][i] === 1.2){
+                ctx.drawImage(tileMap, 224, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 2){
                 ctx.fillStyle = 'red';
             }else if(map[j][i] === 3){
                 ctx.fillStyle = 'green'; //INDESTRUCTABLE WALL
             }else if(map[j][i] === 4){
-                ctx.fillStyle = 'yellow';
+                ctx.drawImage(tileMap, 448, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 5){
                 ctx.fillStyle = 'gray';
-            }else if(map[j][i] === 6){
+            }else if(map[j][i] === 6) {
                 ctx.fillStyle = 'brown';
             }
-            ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 1.05 && map[j][i] !== 1.1 && map[j][i] !== 1.2) {
+                ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
+            }
+
         }
     }
 

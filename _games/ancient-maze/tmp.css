@@ -5,6 +5,11 @@ div.relative {
     border: 3px solid lightgray;
 }
 
+canvas {
+    image-rendering: -webkit-optimize-contrast; /* webkit */
+    image-rendering: -moz-crisp-edges /* Firefox */
+}
+
 div.absolute {
     position: absolute;
     top: 100px;
