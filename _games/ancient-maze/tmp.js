@@ -20,8 +20,10 @@ var roomsize = 8; //8
 var room2size = 36; //36
 var room2 = true;
 
-var tileSize = 100; //100
+var tileSize = 80; //100
 var offset = 0;
+
+var textureSize = 30*7;
 
 var cameraX = tileSize*(mapwidth - 8)/2;
 var cameraY = tileSize*mapheight/2;
@@ -264,25 +266,25 @@ function generateMap(){
 
 function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
     var doorrnd1 = Math.floor(Math.random()*mapwidth);
-    while(map[doorrnd1][1] === 1){
+    while(map[doorrnd1][1] === 1 || map[doorrnd1][1] === 3){
         doorrnd1 = Math.floor(Math.random()*mapwidth);
     }
     map[doorrnd1][0] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapwidth);
-    while(map[doorrnd1][mapheight-1] === 1){
+    while(map[doorrnd1][mapheight-1] === 1 || map[doorrnd1][mapheight-1] === 3){
         doorrnd1 = Math.floor(Math.random()*mapwidth);
     }
     map[doorrnd1][mapheight] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapheight);
-    while(map[1][doorrnd1] === 1){
+    while(map[1][doorrnd1] === 1 || map[1][doorrnd1] === 3){
         doorrnd1 = Math.floor(Math.random()*mapheight);
     }
     map[0][doorrnd1] = 2;
 
     doorrnd1 = Math.floor(Math.random()*mapheight);
-    while(map[mapwidth-1][doorrnd1] === 1){
+    while(map[mapwidth-1][doorrnd1] === 1 || map[mapwidth-1][doorrnd1] === 3){
         doorrnd1 = Math.floor(Math.random()*mapheight);
     }
     map[mapwidth][doorrnd1] = 2;
@@ -413,7 +415,7 @@ function generateTextureMap(){
         for(var j = 0; j < map.length; j++){
             if(map[j][i] === 0){
                 var rnd = Math.random();
-                if(rnd < 0.02){
+                if(rnd < 0.48){
                     map[j][i] = 0;
                 }else if(rnd < 0.5){
                     map[j][i] = 0.1;
@@ -423,19 +425,18 @@ function generateTextureMap(){
                     map[j][i] = 0.3;
                 }
             }
-            if(map[j][i] === 1 && i > 1 && i < map.length - 1){
-                if(((Math.floor(map[j][i - 1]) === 0) ||(Math.floor(map[j][i - 1]) === 4)) && ((Math.floor(map[j][i + 1]) === 0) || (Math.floor(map[j][i + 1]) === 4))){
+            if(map[j][i] === 1 && j > 1 && j < map.length - 1){
+                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4))){
                     map[j][i] = 1.05;
+                }else{
+                    map[j][i] = 1;
                 }
             }
-            if(map[j][i] === 1 && i < map.length - 1){
-                if((Math.floor(map[j][i + 1]) === 0) || (Math.floor(map[j][i + 1]) === 4)){
+            if(map[j][i] === 3 && j > 1 && j < map.length - 1){
+                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4) || (Math.floor(map[j + 1][i]) === 5))){
+                    map[j][i] = 1.15;
+                }else{
                     map[j][i] = 1.1;
-                }
-            }
-            if(map[j][i] === 1 && i > 1){
-                if((Math.floor(map[j][i - 1]) === 0) || (Math.floor(map[j][i - 1]) === 0)){
-                    map[j][i] = 1.2;
                 }
             }
         }
@@ -477,37 +478,33 @@ function game(){
     //for (var i = 0; i < mapwidth; i++) {
     //    for (var j = 0; j < mapheight; j++) {
             if(map[j][i] === 0){
-                ctx.drawImage(tileMap, 0, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-                //ctx.fillStyle = 'black';
+                ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
             }else if(map[j][i] === 0.1){
-                ctx.drawImage(tileMap, 224, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-                //ctx.fillStyle = 'black';
+                ctx.drawImage(tileMap, textureSize, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //MOSS
             }else if(map[j][i] === 0.2){
-                ctx.drawImage(tileMap, 0, 224, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-                //ctx.fillStyle = 'black';
+                ctx.drawImage(tileMap, 0, textureSize, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //BLUE
             }else if(map[j][i] === 0.3){
-                ctx.drawImage(tileMap, 224, 224, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-                //ctx.fillStyle = 'black';
-            }else if(map[j][i] === 1){
-                ctx.fillStyle = 'white';
+                ctx.drawImage(tileMap, textureSize, textureSize, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL2
+            }//WALLS
+            else if(map[j][i] === 1){
+                ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 1.05){
-                ctx.drawImage(tileMap, 448, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 1.1){
-                ctx.drawImage(tileMap, 0, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 1.2){
-                ctx.drawImage(tileMap, 224, 448, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                ctx.drawImage(tileMap, textureSize, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 2){
                 ctx.fillStyle = 'red';
-            }else if(map[j][i] === 3){
-                ctx.fillStyle = 'green'; //INDESTRUCTABLE WALL
+            }//INDESTRUCTABLE WALLS
+            else if(map[j][i] === 1.1){
+                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+            }else if(map[j][i] === 1.15){
+                ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 4){
-                ctx.drawImage(tileMap, 448, 0, 224, 224, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+                ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 5){
                 ctx.fillStyle = 'gray';
             }else if(map[j][i] === 6) {
                 ctx.fillStyle = 'brown';
             }
-            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 1.05 && map[j][i] !== 1.1 && map[j][i] !== 1.2) {
+            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && Math.floor(map[j][i]) !== 1) {
                 ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
             }
 
