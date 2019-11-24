@@ -64,6 +64,8 @@ function Player(x, y, width, height){
 
     this.topMargin = 2/5;
 
+    this.dir = 0;
+
     this.update = function(){
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
         this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
@@ -88,12 +90,12 @@ function Player(x, y, width, height){
 
         if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
             if(Math.floor(map[this.tileY3][this.tileX - 1]) === 1 || Math.floor(map[this.tileY2][this.tileX - 1]) === 1){
-                if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX);}
+                if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX); this.dir = 1;}
             }else{
-                if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
+                if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 1;}
             }
         }else{
-            if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed;}
+            if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 1;}
         }
 
         if(Math.floor((this.gameY + this.height*tileSize + playerSpeed)/tileSize) !== this.tileY2){
@@ -108,19 +110,18 @@ function Player(x, y, width, height){
 
         if(Math.floor((this.gameX + this.width*tileSize + playerSpeed)/tileSize) !== this.tileX2){
             if(Math.floor(map[this.tileY3][this.tileX2 + 1]) === 1 || Math.floor(map[this.tileY2][this.tileX2 + 1]) === 1){
-                if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1;}
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1; this.dir = 0;}
             }else{
-                if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 0;}
             }
         }else{
-            if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed;}
+            if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 0;}
         }
 
     };
 
     this.draw = function(){
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize);
+        ctx.drawImage(tileMap, textureSize*3 + textureSize*0.3*this.dir, 0, textureSize*0.3, textureSize, this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize); //NORMAL
     };
 
 }
@@ -224,7 +225,7 @@ function Creator(x, y, killable){
 }
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-player = new Player(WIDTH/2, HEIGHT/2, 1/2, 3/4); //Add the Player
+player = new Player(WIDTH/2, HEIGHT/2, 0.26, 3/4); //Add the Player
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
