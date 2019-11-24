@@ -65,8 +65,8 @@ function Player(x, y, width, height){
     this.topMargin = 2/5;
 
     this.update = function(){
-        this.gameX = cameraX + WIDTH/2;
-        this.gameY = cameraY + HEIGHT/2;
+        this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
+        this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
 
         this.tileX = Math.floor(this.gameX/tileSize);
         this.tileY = Math.floor(this.gameY/tileSize);
@@ -120,7 +120,7 @@ function Player(x, y, width, height){
 
     this.draw = function(){
         ctx.fillStyle = 'red';
-        ctx.fillRect(this.x - this.width/2, this.y - this.height, this.width*tileSize, this.height*tileSize);
+        ctx.fillRect(this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize);
     };
 
 }
@@ -425,19 +425,21 @@ function generateTextureMap(){
                     map[j][i] = 0.3;
                 }
             }
-            if(map[j][i] === 1 && j > 1 && j < map.length - 1){
+            if(map[j][i] === 1 && j < map.length - 1){
                 if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4))){
                     map[j][i] = 1.05;
                 }else{
                     map[j][i] = 1;
                 }
             }
-            if(map[j][i] === 3 && j > 1 && j < map.length - 1){
+            if(map[j][i] === 3 && j < map.length - 1){
                 if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4) || (Math.floor(map[j + 1][i]) === 5))){
                     map[j][i] = 1.15;
                 }else{
                     map[j][i] = 1.1;
                 }
+            }else if(map[j][i] === 3){
+                map[j][i] = 1.15;
             }
         }
     }
@@ -468,6 +470,10 @@ function generate(){
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
+
+var grd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, 10, WIDTH/2, HEIGHT/2, tileSize*5);
+grd.addColorStop(0, 'rgba(0, 0, 0, 0)');
+grd.addColorStop(1, "black");
 
 function game(){
     ctx.fillStyle = 'black';
@@ -500,11 +506,11 @@ function game(){
             }else if(map[j][i] === 4){
                 ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
             }else if(map[j][i] === 5){
-                ctx.fillStyle = 'gray';
+                ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
             }else if(map[j][i] === 6) {
                 ctx.fillStyle = 'brown';
             }
-            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && Math.floor(map[j][i]) !== 1) {
+            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 5 && Math.floor(map[j][i]) !== 1) {
                 ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
             }
 
@@ -528,6 +534,10 @@ function game(){
 
         player.update();
         player.draw();
+
+
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
         if(creators.length === 0 && doorsGenerated === false) {
             generate();
