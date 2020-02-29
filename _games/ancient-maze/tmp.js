@@ -20,7 +20,7 @@ var roomsize = 8; //8
 var room2size = 36; //36
 var room2 = true;
 
-var tileSize = 80; //100
+var tileSize = 70; //100
 var offset = 0;
 
 var textureSize = 30*7;
@@ -31,7 +31,7 @@ var cameraY = tileSize*mapheight/2;
 //var cameraX = 0;
 //var cameraY = 0;
 
-var playerSpeed = 5; //5
+var playerSpeed = 4; //5
 
 var doorsGenerated = false;
 
@@ -480,7 +480,7 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    for (var i = Math.max(player.tileX - 5, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
     //for (var i = 0; i < mapwidth; i++) {
     //    for (var j = 0; j < mapheight; j++) {
