@@ -327,6 +327,7 @@ function generateLoot(){
 function genExitsFromMain(size){
     var tmp = i;
     var rnd = Math.floor(Math.random()*(size-2));
+    var swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
@@ -335,7 +336,12 @@ function genExitsFromMain(size){
                     if(map[j][tmp] === 3 && size !== roomsize){
                         map[j][tmp] = 6;
                     }else{
-                        map[j][tmp] = 0;
+                        if(swtchgtd === false) {
+                            map[j][tmp] = 5;
+                            swtchgtd = true;
+                        }else{
+                            map[j][tmp] = 0;
+                        }
                     }
                     tmp--;
                 }
@@ -348,6 +354,7 @@ function genExitsFromMain(size){
         }
     }
     rnd = Math.floor(Math.random()*(size-2));
+    swtchgtd = false; // Makes sure the first tile leading out of the center room is gold
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
@@ -356,7 +363,12 @@ function genExitsFromMain(size){
                     if(map[j][tmp] === 3 && size !== roomsize){
                         map[j][tmp] = 6;
                     }else{
-                        map[j][tmp] = 0;
+                        if(swtchgtd === false) {
+                            map[j][tmp] = 5;
+                            swtchgtd = true;
+                        }else{
+                            map[j][tmp] = 0;
+                        }
                     }
                     tmp++;
                 }
@@ -370,6 +382,7 @@ function genExitsFromMain(size){
         }
     }
     rnd = Math.floor(Math.random()*(size-2));
+    swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
@@ -378,7 +391,12 @@ function genExitsFromMain(size){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
-                        map[tmp][i] = 0;
+                        if(swtchgtd === false) {
+                            map[tmp][i] = 5;
+                            swtchgtd = true;
+                        }else{
+                            map[tmp][i] = 0;
+                        }
                     }
                     tmp--;
                 }
@@ -391,6 +409,7 @@ function genExitsFromMain(size){
         }
     }
     rnd = Math.floor(Math.random()*(size-2));
+    swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
@@ -399,7 +418,12 @@ function genExitsFromMain(size){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
-                        map[tmp][i] = 0;
+                        if(swtchgtd === false) {
+                            map[tmp][i] = 5;
+                            swtchgtd = true;
+                        }else{
+                            map[tmp][i] = 0;
+                        }
                     }
                     tmp++;
                 }
@@ -414,25 +438,40 @@ function genExitsFromMain(size){
 }
 
 function generateTextureMap(){
+    var rndgtm = Math.random();
     for(var i = 0; i < map[0].length; i++){
         for(var j = 0; j < map.length; j++){
             if(map[j][i] === 0){
-                var rnd = Math.random();
-                if(rnd < 0.48){
+                rndgtm = Math.random();
+                if(rndgtm < 0.9){
                     map[j][i] = 0;
-                }else if(rnd < 0.5){
+                }else if(rndgtm < 0.93){
                     map[j][i] = 0.1;
-                }else if(rnd < 0.51){
+                }else if(rndgtm < 0.98){
                     map[j][i] = 0.2;
                 }else{
                     map[j][i] = 0.3;
                 }
             }
             if(map[j][i] === 1 && j < map.length - 1){
-                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4))){
-                    map[j][i] = 1.05;
+                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4)) || (Math.floor(map[j + 1][i]) === 5)){
+                    rndgtm = Math.random();
+                    if(rndgtm < 0.9){
+                        map[j][i] = 1.05;
+                    }else if(rndgtm < 0.93){
+                        map[j][i] = 1.25;
+                    }else{
+                        map[j][i] = 1.35;
+                    }
                 }else{
-                    map[j][i] = 1;
+                    rndgtm = Math.random();
+                    if(rndgtm < 0.9){
+                        map[j][i] = 1;
+                    }else if(rndgtm < 0.93){
+                        map[j][i] = 1.20;
+                    }else{
+                        map[j][i] = 1.30;
+                    }
                 }
             }
             if(map[j][i] === 3 && j < map.length - 1){
@@ -484,11 +523,22 @@ function renderTile(i, j){
     }else if(map[j][i] === 0.3){
         ctx.drawImage(tileMap, textureSize*3, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL2
     }//WALLS
+
     else if(map[j][i] === 1){
         ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
     }else if(map[j][i] === 1.05){
         ctx.drawImage(tileMap, 0, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
-    }else if(map[j][i] === 2){
+    }else if(map[j][i] === 1.20){ //SKIPPED CAUSE 1.10 and 1.15 ARE INDESTRUCTIBLE WALLS
+        ctx.drawImage(tileMap, textureSize, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
+    }else if(map[j][i] === 1.25){
+        ctx.drawImage(tileMap, textureSize, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.30){
+        ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
+    }else if(map[j][i] === 1.35){
+        ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }
+
+    else if(map[j][i] === 2){
         ctx.fillStyle = 'red';
     }//INDESTRUCTABLE WALLS
     else if(map[j][i] === 1.1){
@@ -496,9 +546,9 @@ function renderTile(i, j){
     }else if(map[j][i] === 1.15){
         ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
     }else if(map[j][i] === 4){
-        //ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+        ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
     }else if(map[j][i] === 5){
-        //ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 6) {
         //ctx.fillStyle = 'brown';
     }
@@ -519,7 +569,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 0){
+            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5){
                 renderTile(i, j);
             }
         }
@@ -527,7 +577,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
@@ -539,7 +589,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0) {
+            if(Math.floor(map[j][i]) !== 0&& Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
