@@ -562,7 +562,7 @@ function renderTile(i, j){
     }else if(map[j][i] === 1.15){
         ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
     }else if(map[j][i] === 4){
-        ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 6) {
@@ -576,10 +576,24 @@ function renderTile(i, j){
 function doLighting(){
     var tempmap = [];
     var theta = 0;
+    var wholeXOffset = -99;
+    var wholeYOffset = -99;
     for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 4, mapheight); i++){
+        if(wholeXOffset === -99){
+            if(i === 0){
+                wholeXOffset = player.tileY - 3;
+            }
+        }
         //tempmap.fill(0, 0, 8);
         for(var j = Math.max(player.tileX - 6, 0); j <= Math.min(player.tileX + 6, mapwidth); j++){
-            if(Math.floor(map[i][j]) === 0){
+            if(wholeYOffset === -99){
+                if(j === 0){
+                    wholeYOffset = player.tileX - 6;
+                }
+            }
+            if(Math.floor(map[i][j]) === 4){
+                tempmap[j-player.tileX+6] = 0;
+            }else if(Math.floor(map[i][j]) === 0){
                 rayseg = Math.sqrt((cameraX + player.x - j*tileSize - tileSize/2)*(cameraX + player.x - j*tileSize - tileSize/2) + (cameraY + player.y - i*tileSize - tileSize/2)*(cameraY + player.y - i*tileSize - tileSize/2))/seglength;
                 theta = Math.atan2((i*tileSize + tileSize/2) - (cameraY + player.y), (j*tileSize + tileSize/2) - (cameraX + player.x));
                 currentLight = 0;
@@ -608,7 +622,7 @@ function doLighting(){
 
     for(var i = 0; i < lightmap.length; i++){
         for(var j = 0; j < lightmap[0].length; j++){
-            if((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0))){
+            if(((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0)))){
                 lightmap[i][j] = 0.25;
             }
         }
@@ -619,7 +633,15 @@ function doLighting(){
             ctx.fillStyle = 'rgba(0, 0, 0, ' + lightmap[i][j] + ')';
             var tmpLightoffSetY = cameraY - Math.max(player.tileY - 3, 0)*tileSize;
             var tmpLightoffSetX = cameraX - Math.max(player.tileX - 6, 0)*tileSize;
-            ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY - tileSize*0.5, tileSize, tileSize);
+            if(wholeXOffset === -99 && wholeYOffset === -99){
+                ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY - tileSize*0.5, tileSize, tileSize);
+            }else if(wholeXOffset !== -99 && wholeYOffset === -99){
+                ctx.fillRect(j*tileSize - tmpLightoffSetX - wholeXOffset*tileSize, i*tileSize - tmpLightoffSetY - tileSize*0.5, tileSize, tileSize);
+            }else if(wholeXOffset === -99 && wholeYOffset !== -99){
+                ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY - tileSize*0.5 - wholeYOffset*tileSize, tileSize, tileSize);
+            }else{
+
+            }
         }
     }
 }
@@ -663,6 +685,14 @@ function game(){
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) !== 0&& Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
+            }
+        }
+    }
+
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) === 4) {
+                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
             }
         }
     }
