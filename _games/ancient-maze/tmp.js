@@ -48,6 +48,22 @@ tileMap.src = "TileSetForMaze.png";
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
+//LIGHTING
+var rayseg = 1;
+var seglength = tileSize/10;
+
+var lightmap = [];
+var temprowlm = [];
+for(var i = 0; i < 8; i++){
+    temprowlm = [];
+    for(var j = 0; j < 13; j++){
+        temprowlm.push(0);
+    }
+    lightmap.push(temprowlm);
+}
+
+var currentLight = 0;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Player(x, y, width, height){
@@ -557,6 +573,58 @@ function renderTile(i, j){
     }
 }
 
+function doLighting(){
+    var tempmap = [];
+    var theta = 0;
+    for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 4, mapheight); i++){
+        //tempmap.fill(0, 0, 8);
+        for(var j = Math.max(player.tileX - 6, 0); j <= Math.min(player.tileX + 6, mapwidth); j++){
+            if(Math.floor(map[i][j]) === 0){
+                rayseg = Math.sqrt((cameraX + player.x - j*tileSize - tileSize/2)*(cameraX + player.x - j*tileSize - tileSize/2) + (cameraY + player.y - i*tileSize - tileSize/2)*(cameraY + player.y - i*tileSize - tileSize/2))/seglength;
+                theta = Math.atan2((i*tileSize + tileSize/2) - (cameraY + player.y), (j*tileSize + tileSize/2) - (cameraX + player.x));
+                currentLight = 0;
+                for(var k = 0; k < rayseg; k++){
+                    if(Math.floor(map[Math.floor((cameraY + player.y + (seglength*(k+1))*Math.sin(theta))/tileSize)][Math.floor((cameraX + player.x + (seglength*(k+1))*Math.cos(theta))/tileSize)]) === 1){
+                        currentLight += 0.1;
+                    }
+
+                    /*ctx.strokeStyle = 'rgba(0, 0, 0, ' + Math.min(1, currentLight) + ')';
+                    ctx.beginPath();
+                    ctx.moveTo(player.x, player.y);
+                    ctx.lineTo(player.x + (seglength*(k+1))*Math.cos(theta), (player.y + (seglength*(k+1))*Math.sin(theta)));
+                    ctx.stroke();*/
+                }
+                tempmap[j-player.tileX+6] = (Math.min(1, currentLight));
+            }else if(Math.floor(map[i][j]) === 5){
+                tempmap[j-player.tileX+6] = 0;
+            }else{
+                tempmap[j-player.tileX+6] = 1;
+            }
+        }
+        for(var l = 0; l < tempmap.length; l++){
+            lightmap[i-player.tileY+3][l] = tempmap[l];
+        }
+    }
+
+    for(var i = 0; i < lightmap.length; i++){
+        for(var j = 0; j < lightmap[0].length; j++){
+            if((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0))){
+                lightmap[i][j] = 0.25;
+            }
+        }
+    }
+
+    for(var i = 0; i < lightmap.length; i++){
+        for(var j = 0; j < lightmap[0].length; j++){
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + lightmap[i][j] + ')';
+            var tmpLightoffSetY = cameraY - Math.max(player.tileY - 3, 0)*tileSize;
+            var tmpLightoffSetX = cameraX - Math.max(player.tileX - 6, 0)*tileSize;
+            ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY, tileSize, tileSize);
+        }
+    }
+}
+
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 var grd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, 10, WIDTH/2, HEIGHT/2, tileSize*5);
@@ -567,8 +635,12 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
+    if(gameRunning === true){
+        player.update();
+    }
+
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY + - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5){
                 renderTile(i, j);
             }
@@ -618,8 +690,7 @@ function game(){
             generate();
         }
 
-        player.update();
-
+        doLighting();
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
