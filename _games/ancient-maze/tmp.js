@@ -619,7 +619,7 @@ function doLighting(){
             ctx.fillStyle = 'rgba(0, 0, 0, ' + lightmap[i][j] + ')';
             var tmpLightoffSetY = cameraY - Math.max(player.tileY - 3, 0)*tileSize;
             var tmpLightoffSetX = cameraX - Math.max(player.tileX - 6, 0)*tileSize;
-            ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY, tileSize, tileSize);
+            ctx.fillRect(j*tileSize - tmpLightoffSetX, i*tileSize - tmpLightoffSetY - tileSize*0.5, tileSize, tileSize);
         }
     }
 }
