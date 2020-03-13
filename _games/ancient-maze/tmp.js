@@ -1,4 +1,4 @@
-var versionCode = "Alpha 0.9  Lighting Update";
+var versionCode = "Alpha 0.92  Lighting Update";
 var WIDTH = 800;
 var HEIGHT = 450;
 var gameRunning = true;
@@ -602,7 +602,7 @@ function doLighting(){
             }
 
             if(i === 0 || j === 0 || i === map.length || j === map[0].length){
-                tempmap[j-player.tileX+6] = 0;
+                tempmap[j-player.tileX+6] = 0.25;
             }
 
             for(var l = 0; l < tempmap.length; l++){
