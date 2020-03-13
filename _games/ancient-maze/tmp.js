@@ -677,6 +677,14 @@ function game(){
         }
     }
 
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) === 4) {
+                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
+            }
+        }
+    }
+
     if(gameRunning === true){
         player.draw();
     }
@@ -685,14 +693,6 @@ function game(){
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) !== 0&& Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
-            }
-        }
-    }
-
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 4) {
-                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
             }
         }
     }
