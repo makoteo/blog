@@ -20,10 +20,10 @@ var roomsize = 8; //8
 var room2size = 36; //36
 var room2 = true;
 
-var tileSize = 70; //100
+var tileSize = 72; //100
 var offset = 0;
 
-var textureSize = 30*7;
+var textureSize = 16*5;
 
 var cameraX = tileSize*(mapwidth - 8)/2;
 var cameraY = tileSize*mapheight/2;
@@ -41,7 +41,7 @@ var creators = [];
 //KICKSTART GAME
 var tileMap = new Image();
 tileMap.onload = generateMap();
-tileMap.src = "AncientMaze.png";
+tileMap.src = "TileSetForMaze.png";
 
 // EXAMPLE ARRAY coins = [];
 
@@ -121,7 +121,9 @@ function Player(x, y, width, height){
     };
 
     this.draw = function(){
-        ctx.drawImage(tileMap, textureSize*3 + textureSize*0.3*this.dir, 0, textureSize*0.3, textureSize, this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize); //NORMAL
+        //ctx.drawImage(tileMap, textureSize*3 + textureSize*0.3*this.dir, 0, textureSize*0.3, textureSize, this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize); //NORMAL
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize);
     };
 
 }
@@ -470,6 +472,41 @@ function generate(){
     }
 }
 
+function renderTile(i, j){
+    //for (var i = 0; i < mapwidth; i++) {
+    //    for (var j = 0; j < mapheight; j++) {
+    if(map[j][i] === 0){
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+    }else if(map[j][i] === 0.1){
+        ctx.drawImage(tileMap, textureSize, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //MOSS
+    }else if(map[j][i] === 0.2){
+        ctx.drawImage(tileMap, textureSize*2, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //BLUE
+    }else if(map[j][i] === 0.3){
+        ctx.drawImage(tileMap, textureSize*3, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL2
+    }//WALLS
+    else if(map[j][i] === 1){
+        ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
+    }else if(map[j][i] === 1.05){
+        ctx.drawImage(tileMap, 0, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 2){
+        ctx.fillStyle = 'red';
+    }//INDESTRUCTABLE WALLS
+    else if(map[j][i] === 1.1){
+        ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
+    }else if(map[j][i] === 1.15){
+        ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 4){
+        //ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
+    }else if(map[j][i] === 5){
+        //ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+    }else if(map[j][i] === 6) {
+        //ctx.fillStyle = 'brown';
+    }
+    if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 5 && Math.floor(map[j][i]) !== 1) {
+        ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
+    }
+}
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 var grd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, 10, WIDTH/2, HEIGHT/2, tileSize*5);
@@ -481,40 +518,30 @@ function game(){
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-    //for (var i = 0; i < mapwidth; i++) {
-    //    for (var j = 0; j < mapheight; j++) {
-            if(map[j][i] === 0){
-                ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
-            }else if(map[j][i] === 0.1){
-                ctx.drawImage(tileMap, textureSize, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //MOSS
-            }else if(map[j][i] === 0.2){
-                ctx.drawImage(tileMap, 0, textureSize, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //BLUE
-            }else if(map[j][i] === 0.3){
-                ctx.drawImage(tileMap, textureSize, textureSize, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL2
-            }//WALLS
-            else if(map[j][i] === 1){
-                ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 1.05){
-                ctx.drawImage(tileMap, textureSize, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 2){
-                ctx.fillStyle = 'red';
-            }//INDESTRUCTABLE WALLS
-            else if(map[j][i] === 1.1){
-                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 1.15){
-                ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 4){
-                ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize);
-            }else if(map[j][i] === 5){
-                ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
-            }else if(map[j][i] === 6) {
-                ctx.fillStyle = 'brown';
+        for (var j = Math.max(player.tileY + - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) === 0){
+                renderTile(i, j);
             }
-            if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 5 && Math.floor(map[j][i]) !== 1) {
-                ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
-            }
+        }
+    }
 
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
+            if(Math.floor(map[j][i]) !== 0) {
+                renderTile(i, j);
+            }
+        }
+    }
+
+    if(gameRunning === true){
+        player.draw();
+    }
+
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) !== 0) {
+                renderTile(i, j);
+            }
         }
     }
 
@@ -533,9 +560,6 @@ function game(){
             }
         //}
 
-        player.update();
-        player.draw();
-
 
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -544,6 +568,7 @@ function game(){
             generate();
         }
 
+        player.update();
 
 
         /* SPAWNING
