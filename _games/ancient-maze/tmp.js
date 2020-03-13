@@ -561,6 +561,10 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
     }else if(map[j][i] === 1.15){
         ctx.drawImage(tileMap, textureSize*3, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+        if(j === mapheight){
+            ctx.fillStyle = 'black';
+            ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY + tileSize/2, tileSize, tileSize/2);
+        }
     }else if(map[j][i] === 4){
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 5){
@@ -577,7 +581,7 @@ function doLighting(){
     var tempmap = [];
     var theta = 0;
     for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 4, mapheight); i++){
-        //tempmap.fill(0, 0, 8);
+        tempmap.fill(1, 0, 8);
         for(var j = Math.max(player.tileX - 6, 0); j <= Math.min(player.tileX + 6, mapwidth); j++){
             if(Math.floor(map[i][j]) === 0 || Math.floor(map[i][j]) === 4){
                 rayseg = Math.sqrt((cameraX + player.x - j*tileSize - tileSize/2)*(cameraX + player.x - j*tileSize - tileSize/2) + (cameraY + player.y - i*tileSize - tileSize/2)*(cameraY + player.y - i*tileSize - tileSize/2))/seglength;
@@ -604,6 +608,7 @@ function doLighting(){
             for(var l = 0; l < tempmap.length; l++){
                 lightmap[i-player.tileY+3][l] = tempmap[l];
             }
+
         }
     }
 
@@ -617,7 +622,7 @@ function doLighting(){
 
     for(var i = 0; i < lightmap.length; i++){
         for(var j = 0; j < lightmap[0].length; j++){
-            ctx.fillStyle = 'rgba(0, 0, 0, ' + lightmap[i][j] + ')';
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + Math.min(1, lightmap[i][j]) + ')';
             var tmpLightoffSetY = cameraY - (player.tileY - 3)*tileSize;
             var tmpLightoffSetX = cameraX - (player.tileX - 6)*tileSize;
             ctx.fillRect(j*tileSize - tmpLightoffSetX - 0.005, i*tileSize - tmpLightoffSetY - tileSize*0.5 - 0.005, tileSize*1.01, tileSize*1.01);
