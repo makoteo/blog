@@ -31,7 +31,7 @@ var cameraY = tileSize*mapheight/2;
 //var cameraX = 0;
 //var cameraY = 0;
 
-var playerSpeed = 4; //5
+var playerSpeed = 5; //5
 
 var doorsGenerated = false;
 
@@ -64,6 +64,15 @@ for(var i = 0; i < 8; i++){
 
 var currentLight = 0;
 
+var xCameraOffset = 0;
+var yCameraOffset = 0;
+
+var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
+var SEED = ORIGINALSEED;
+
+var showMap = false;
+var mapTileSize = 3;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Player(x, y, width, height){
@@ -82,9 +91,14 @@ function Player(x, y, width, height){
 
     this.dir = 0;
 
+    this.animationFrame = 0;
+    this.animationTimer = 0;
+
+    this.moving = false;
+
     this.update = function(){
-        this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
-        this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
+        this.gameX = cameraX - this.width/2*tileSize + WIDTH/2 + xCameraOffset;
+        this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2 + yCameraOffset;
 
         this.tileX = Math.floor(this.gameX/tileSize);
         this.tileY = Math.floor(this.gameY/tileSize);
@@ -94,52 +108,77 @@ function Player(x, y, width, height){
         this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
-        if(Math.floor((this.gameY + this.height*this.topMargin*tileSize - playerSpeed)/tileSize) !== this.tileY3){
-            if(Math.floor(map[this.tileY3 - 1][this.tileX]) === 1 || Math.floor(map[this.tileY3 - 1][this.tileX2]) === 1){
-                if (keys && keys[38] || keys && keys[87]) {cameraY+=Math.round((this.tileY3)*tileSize+1-(this.gameY)-(this.height*this.topMargin*tileSize));}
-            }else{
-                if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
-            }
-        }else{
-            if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed;}
-        }
+        this.checkCollisions(1);
+    };
 
-        if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
-            if(Math.floor(map[this.tileY3][this.tileX - 1]) === 1 || Math.floor(map[this.tileY2][this.tileX - 1]) === 1){
-                if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX); this.dir = 1;}
+    this.checkCollisions = function(block){
+        if(Math.floor((this.gameY + this.height*this.topMargin*tileSize - playerSpeed)/tileSize) !== this.tileY3){
+            if(Math.floor(map[this.tileY3 - 1][this.tileX]) === block || Math.floor(map[this.tileY3 - 1][this.tileX2]) === block){
+                if (keys && keys[38] || keys && keys[87]) {cameraY+=Math.round((this.tileY3)*tileSize+1-(this.gameY)-(this.height*this.topMargin*tileSize)); this.dir = 3;}
             }else{
-                if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 1;}
+                if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed; this.dir = 3;}
             }
         }else{
-            if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 1;}
+            if (keys && keys[38] || keys && keys[87]) {cameraY-=playerSpeed; this.dir = 3;}
         }
 
         if(Math.floor((this.gameY + this.height*tileSize + playerSpeed)/tileSize) !== this.tileY2){
-            if(Math.floor(map[this.tileY2 + 1][this.tileX]) === 1 || Math.floor(map[this.tileY2 + 1][this.tileX2]) === 1){
-                if (keys && keys[40] || keys && keys[83]) {cameraY+=((this.tileY2+1)*tileSize - (this.gameY + this.height*tileSize))-1;}
+            if(Math.floor(map[this.tileY2 + 1][this.tileX]) === block || Math.floor(map[this.tileY2 + 1][this.tileX2]) === block){
+                if (keys && keys[40] || keys && keys[83]) {cameraY+=((this.tileY2+1)*tileSize - (this.gameY + this.height*tileSize))-1; this.dir = 2;}
             }else{
-                if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
+                if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed; this.dir = 2;}
             }
         }else{
-            if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed;}
+            if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed; this.dir = 2;}
+        }
+
+        if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
+            if(Math.floor(map[this.tileY3][this.tileX - 1]) === block || Math.floor(map[this.tileY2][this.tileX - 1]) === block){
+                if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX); this.dir = 0;}
+            }else{
+                if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 0;}
+            }
+        }else{
+            if (keys && keys[65] || keys && keys[37]) {cameraX-=playerSpeed; this.dir = 0;}
         }
 
         if(Math.floor((this.gameX + this.width*tileSize + playerSpeed)/tileSize) !== this.tileX2){
-            if(Math.floor(map[this.tileY3][this.tileX2 + 1]) === 1 || Math.floor(map[this.tileY2][this.tileX2 + 1]) === 1){
-                if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1; this.dir = 0;}
+            if(Math.floor(map[this.tileY3][this.tileX2 + 1]) === block || Math.floor(map[this.tileY2][this.tileX2 + 1]) === block){
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=((this.tileX2+1)*tileSize - (this.gameX + this.width*tileSize))-1; this.dir = 1;}
             }else{
-                if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 0;}
+                if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 1;}
             }
         }else{
-            if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 0;}
+            if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 1;}
         }
-
-    };
+    }
 
     this.draw = function(){
-        //ctx.drawImage(tileMap, textureSize*3 + textureSize*0.3*this.dir, 0, textureSize*0.3, textureSize, this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize); //NORMAL
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.x - this.width/2*tileSize, this.y - this.height/2*tileSize, this.width*tileSize, this.height*tileSize);
+
+        this.breathCycle = Math.round(Math.sin(frameCount/25)*2) + 2;
+
+        //yCameraOffset++;
+
+        this.moving = false;
+
+        if(keys && keys[68] || keys && keys[39] || keys && keys[40] || keys && keys[83] || keys && keys[65] || keys && keys[37] || keys && keys[38] || keys && keys[87]){
+            this.moving = true;
+        }
+
+        if(this.moving === true){
+            this.animationTimer++;
+            if(this.animationTimer === 8){
+                this.animationFrame++;
+                this.animationTimer = 0;
+            }
+            if(this.animationFrame > 3){
+                this.animationFrame = 0;
+            }
+        }else{
+            this.animationFrame = 3;
+        }
+
+        ctx.drawImage(tileMap, textureSize*4+textureSize*0.75*this.animationFrame, textureSize*this.dir, textureSize*0.75, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
     };
 
 }
@@ -159,8 +198,8 @@ function Creator(x, y, killable){
         }
 
         this.possibleDirections = [];
-        this.spawnNew = Math.random();
-        this.die = Math.random();
+        this.spawnNew = randomNum();
+        this.die = randomNum();
 
         if(this.spawnNew < 0.26){
             creators.push(new Creator(this.x, this.y, true));
@@ -191,7 +230,7 @@ function Creator(x, y, killable){
             }
         }
         if(this.possibleDirections.length > 0){
-            this.dir = this.possibleDirections[Math.floor(Math.random()*this.possibleDirections.length)];
+            this.dir = this.possibleDirections[Math.floor(randomNum()*this.possibleDirections.length)];
         }else{
             //BACKTRACKER
 
@@ -199,7 +238,7 @@ function Creator(x, y, killable){
             if((this.possibleDirections.length === 0 && this.killable === true) || (this.possibleDirections.length === 0 && this.killable === false && this.aliveTime > 100)) {
                 this.dead = true;
                 //The following creates so many junctions:
-                if(Math.random() < 0.3) {
+                if(randomNum() < 0.3) {
                     if(this.y > 2 && map[this.y - 2][this.x] !== 3){
                         this.possibleDirections.push(0);
                     }
@@ -214,7 +253,7 @@ function Creator(x, y, killable){
                     }
                 }
             }
-            this.dir = this.possibleDirections[Math.floor(Math.random()*this.possibleDirections.length)];
+            this.dir = this.possibleDirections[Math.floor(randomNum()*this.possibleDirections.length)];
         }
 
         map[this.y][this.x] = 0;
@@ -243,11 +282,14 @@ function Creator(x, y, killable){
 }
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-player = new Player(WIDTH/2, HEIGHT/2, 0.26, 3/4); //Add the Player
+player = new Player(WIDTH/2, HEIGHT/2, 0.75, 1); //Add the Player
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-
+function randomNum() {
+    var x = Math.sin(SEED++) * 10000;
+    return x - Math.floor(x);
+}
 
 function generateMap(){
     creators = [];
@@ -273,7 +315,12 @@ function generateMap(){
                 || ((j === mapwidth/2-room2size/2 || j === mapwidth/2+room2size/2) && (i >= mapheight/2-room2size/2 && i <= mapheight/2+room2size/2)))){
                 temparray.push(3);
             }else if(i > mapheight/2 - roomsize/2 && i < mapheight/2 + roomsize/2 && j > mapwidth/2 - roomsize/2 && j < mapwidth/2 + roomsize/2){
-                temparray.push(5);
+                if((i === mapheight/2 - 1 && j === mapwidth/2 - 1) || (i === mapheight/2 + 1 && j === mapwidth/2 - 1) || (i === mapheight/2 - 1 && j === mapwidth/2 + 1) || (i === mapheight/2 + 1 && j === mapwidth/2 + 1)){
+                    temparray.push(1.97);
+                }else{
+                    temparray.push(5);
+                }
+
             }else{
                 temparray.push(1);
             }
@@ -284,27 +331,27 @@ function generateMap(){
 }
 
 function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
-    var doorrnd1 = Math.floor(Math.random()*mapwidth);
+    var doorrnd1 = Math.floor(randomNum()*mapwidth);
     while(map[doorrnd1][1] === 1 || map[doorrnd1][1] === 3){
-        doorrnd1 = Math.floor(Math.random()*mapwidth);
+        doorrnd1 = Math.floor(randomNum()*mapwidth);
     }
     map[doorrnd1][0] = 2;
 
-    doorrnd1 = Math.floor(Math.random()*mapwidth);
+    doorrnd1 = Math.floor(randomNum()*mapwidth);
     while(map[doorrnd1][mapheight-1] === 1 || map[doorrnd1][mapheight-1] === 3){
-        doorrnd1 = Math.floor(Math.random()*mapwidth);
+        doorrnd1 = Math.floor(randomNum()*mapwidth);
     }
     map[doorrnd1][mapheight] = 2;
 
-    doorrnd1 = Math.floor(Math.random()*mapheight);
+    doorrnd1 = Math.floor(randomNum()*mapheight);
     while(map[1][doorrnd1] === 1 || map[1][doorrnd1] === 3){
-        doorrnd1 = Math.floor(Math.random()*mapheight);
+        doorrnd1 = Math.floor(randomNum()*mapheight);
     }
     map[0][doorrnd1] = 2;
 
-    doorrnd1 = Math.floor(Math.random()*mapheight);
+    doorrnd1 = Math.floor(randomNum()*mapheight);
     while(map[mapwidth-1][doorrnd1] === 1 || map[mapwidth-1][doorrnd1] === 3){
-        doorrnd1 = Math.floor(Math.random()*mapheight);
+        doorrnd1 = Math.floor(randomNum()*mapheight);
     }
     map[mapwidth][doorrnd1] = 2;
 }
@@ -314,7 +361,7 @@ function fillRooms(){
     for(var i = 2; i < map.length - 2; i+=2){
         for(var j = 2; j < map[0].length - 2; j+=2){
             if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0 && map[i][j] === 1){
-                var rnd = Math.random();
+                var rnd = randomNum();
                 if(rnd < 0.8){
                     map[i][j] = 4;
                 }else{
@@ -329,7 +376,7 @@ function generateLoot(){
     for(var i = 1; i < map.length - 1; i+=2){
         for(var j = 1; j < map[0].length - 1; j+=2){
             if(map[i][j] === 0){
-                var rnd = Math.random();
+                var rnd = randomNum();
                 if(rnd < lootChances){
                     map[i][j] = 4;
                 }else{
@@ -342,7 +389,7 @@ function generateLoot(){
 
 function genExitsFromMain(size){
     var tmp = i;
-    var rnd = Math.floor(Math.random()*(size-2));
+    var rnd = Math.floor(randomNum()*(size-2));
     var swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
@@ -369,7 +416,7 @@ function genExitsFromMain(size){
             }
         }
     }
-    rnd = Math.floor(Math.random()*(size-2));
+    rnd = Math.floor(randomNum()*(size-2));
     swtchgtd = false; // Makes sure the first tile leading out of the center room is gold
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
@@ -397,7 +444,7 @@ function genExitsFromMain(size){
             }
         }
     }
-    rnd = Math.floor(Math.random()*(size-2));
+    rnd = Math.floor(randomNum()*(size-2));
     swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
@@ -424,7 +471,7 @@ function genExitsFromMain(size){
             }
         }
     }
-    rnd = Math.floor(Math.random()*(size-2));
+    rnd = Math.floor(randomNum()*(size-2));
     swtchgtd = false;
     for(var i = 0; i <= mapheight; i++){
         for(var j = 0; j <= mapwidth; j++) {
@@ -454,11 +501,11 @@ function genExitsFromMain(size){
 }
 
 function generateTextureMap(){
-    var rndgtm = Math.random();
+    var rndgtm = randomNum();
     for(var i = 0; i < map[0].length; i++){
         for(var j = 0; j < map.length; j++){
             if(map[j][i] === 0){
-                rndgtm = Math.random();
+                rndgtm = randomNum();
                 if(rndgtm < 0.9){
                     map[j][i] = 0;
                 }else if(rndgtm < 0.93){
@@ -471,7 +518,7 @@ function generateTextureMap(){
             }
             if(map[j][i] === 1 && j < map.length - 1){
                 if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4)) || (Math.floor(map[j + 1][i]) === 5)){
-                    rndgtm = Math.random();
+                    rndgtm = randomNum();
                     if(rndgtm < 0.9){
                         map[j][i] = 1.05;
                     }else if(rndgtm < 0.93){
@@ -480,7 +527,7 @@ function generateTextureMap(){
                         map[j][i] = 1.35;
                     }
                 }else{
-                    rndgtm = Math.random();
+                    rndgtm = randomNum();
                     if(rndgtm < 0.9){
                         map[j][i] = 1;
                     }else if(rndgtm < 0.93){
@@ -554,6 +601,11 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize*1.5);
     }
 
+    else if(map[j][i] === 1.97){ //LIGHTS
+        ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, 0, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize + tileSize/2, tileSize, tileSize*1.5);
+    }
+
     else if(map[j][i] === 2){
         ctx.fillStyle = 'red';
     }//INDESTRUCTABLE WALLS
@@ -570,11 +622,41 @@ function renderTile(i, j){
     }else if(map[j][i] === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 6) {
-        //ctx.fillStyle = 'brown';
+        ctx.fillStyle = 'brown';
     }
     if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 5 && Math.floor(map[j][i]) !== 1) {
         ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
     }
+}
+
+
+function drawMinimap(){
+    var minimapOffset = 5;
+    for (var i = 0; i <= mapwidth; i++) {
+        for (var j = 0; j <= mapheight; j++) {
+            if (Math.floor(map[i][j]) === 0) {
+                ctx.fillStyle = 'black';
+            }
+
+            else if (Math.floor(map[i][j]) === 1) {
+                ctx.fillStyle = 'white';
+            }
+
+            else if (map[i][j] === 2) {
+                ctx.fillStyle = 'red';
+            }//INDESTRUCTABLE WALLS
+            else if (map[i][j] === 4) {
+                ctx.fillStyle = 'yellow';
+            } else if (map[i][j] === 5) {
+                ctx.fillStyle = 'green';
+            } else if (map[i][j] === 6) {
+                ctx.fillStyle = 'brown';
+            }
+            ctx.fillRect(mapTileSize*j + minimapOffset, mapTileSize*i + minimapOffset, mapTileSize, mapTileSize);
+        }
+    }
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(player.tileX*mapTileSize + minimapOffset, (player.tileY+1)*mapTileSize + minimapOffset, mapTileSize, mapTileSize);
 }
 
 function doLighting(){
@@ -601,6 +683,8 @@ function doLighting(){
                 tempmap[j-player.tileX+6] = (Math.min(1, currentLight));
             }else if(Math.floor(map[i][j]) === 5){
                 tempmap[j-player.tileX+6] = 0;
+            }else if(map[i][j] === 1.97){
+                tempmap[j-player.tileX+6] = 0;
             }else{
                 tempmap[j-player.tileX+6] = 1;
             }
@@ -614,7 +698,7 @@ function doLighting(){
 
     for(var i = 0; i < lightmap.length; i++){
         for(var j = 0; j < lightmap[0].length; j++){
-            if(((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0)))){
+            if((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0))){
                 lightmap[i][j] = 0.25;
             }
         }
@@ -667,7 +751,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0&& Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
@@ -705,6 +789,11 @@ function game(){
         }
 
         doLighting();
+
+        if(showMap === true){
+            drawMinimap();
+        }
+
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
