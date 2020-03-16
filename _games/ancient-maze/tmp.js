@@ -74,10 +74,12 @@ var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YO
 //8468407084;
 var SEED = ORIGINALSEED;
 
-var showMap = true;
+var showMap = false;
 var mapTileSize = 3;
 
 var player;
+
+var maxTunnelLength = 7;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -250,7 +252,7 @@ function Creator(x, y, killable){
             creators.push(new Creator(this.x, this.y, true));
         }
 
-        if(this.die < 0.05 && this.killable === true){
+        if(this.die < 0.025 && this.killable === true){
             this.dead = true;
         }
 
@@ -280,7 +282,7 @@ function Creator(x, y, killable){
             //BACKTRACKER
 
 
-            if((this.possibleDirections.length === 0 && this.killable === true) || (this.possibleDirections.length === 0 && this.killable === false && this.aliveTime > 100)) {
+            if((this.possibleDirections.length <= 3 && this.killable === true) || (this.possibleDirections.length === 0 && this.killable === false && this.aliveTime > 100)) {
                 this.dead = true;
                 //The following creates so many junctions:
                 if(randomNum() < 0.3) {
@@ -353,7 +355,7 @@ function generateMap(){
     //creators.push(new Creator(mapwidth-1, 1, false));
     if(room2 === true){
         creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
-        //creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
+        creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
         //creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2+room2size/2 - 2, false));
         //creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2-room2size/2 + 2, false));
     }
@@ -537,7 +539,7 @@ function genExitsFromMain(size, room){
                         }
                     }
                     tmp--;
-                    if(tmp < j-6){
+                    if(tmp < j-maxTunnelLength){
                         incorrectGen = true;
                     }
                 }
@@ -571,7 +573,7 @@ function genExitsFromMain(size, room){
                         }
                     }
                     tmp++;
-                    if(tmp > j+6){
+                    if(tmp > j+maxTunnelLength){
                         incorrectGen = true;
                     }
                 }
