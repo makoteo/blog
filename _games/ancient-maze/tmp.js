@@ -1,6 +1,6 @@
 var versionCode = "Alpha 0.92  Lighting Update 2.0";
-var WIDTH = 800;
-var HEIGHT = 450;
+var WIDTH = 800;//800
+var HEIGHT = 450;//450
 var gameRunning = true;
 var TIME = 0;
 
@@ -23,7 +23,7 @@ var room2 = true; //true, true, true
 var room3size = 72; //null, null, 72
 var room3 = false; //false, false, true
 
-var tileSize = 72; //100
+var tileSize = Math.floor(72*(WIDTH/800)); //100
 var offset = 0;
 
 var textureSize = 16*5;
@@ -34,7 +34,7 @@ var cameraY = tileSize*(mapheight-6)/2;
 //var cameraX = 0;
 //var cameraY = 0;
 
-var playerSpeed = 5; //5
+var playerSpeed = 5*(WIDTH/800); //5
 
 var doorsGenerated = false;
 
@@ -107,6 +107,8 @@ function Player(x, y, width, height){
     this.frozen = false;
 
     this.inventory = [];
+
+    this.ereleased = true;
 
     this.update = function(){
         this.winStateCheck();
@@ -217,7 +219,11 @@ function Player(x, y, width, height){
             ctx.font = '40px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
+            if(this.inventory.length < 3){
+                ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
+            }else{
+                ctx.fillText("INVENTORY FULL", WIDTH/2, 350);
+            }
         }
     }
 
@@ -239,9 +245,13 @@ function Player(x, y, width, height){
                 }
             }
             //SACRIFICE
-            else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
+            else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
+                this.ereleased = false;
                 this.inventory.splice(0, 1);
+                ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
             }
+        }else{
+            this.ereleased = true;
         }
     }
 
