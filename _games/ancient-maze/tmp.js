@@ -10,15 +10,18 @@ var map = [];
 
 // 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom, 6 = lockedDoor
 
-var mapdimensions = 70; //I think 50, 70, 90 are the sizes we want... (Tho 110 works and it's ridiculous lol)
+var mapdimensions = 70; //70, 90, 110
 
 var mapwidth = mapdimensions;
 var mapheight = mapdimensions;
 
 var roomsize = 8; //8
 
-var room2size = 36; //36
-var room2 = true;
+var room2size = 36; //36, 40, 40
+var room2 = true; //true, true, true
+
+var room3size = 72; //null, null, 72
+var room3 = false; //false, false, true
 
 var tileSize = 72; //100
 var offset = 0;
@@ -68,9 +71,10 @@ var xCameraOffset = 0;
 var yCameraOffset = 0;
 
 var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
+//8468407084;
 var SEED = ORIGINALSEED;
 
-var showMap = false;
+var showMap = true;
 var mapTileSize = 3;
 
 var player;
@@ -349,9 +353,13 @@ function generateMap(){
     //creators.push(new Creator(mapwidth-1, 1, false));
     if(room2 === true){
         creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2-room2size/2 + 2, false));
-        creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
+        //creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2+room2size/2 - 2, false));
         //creators.push(new Creator(mapwidth/2-room2size/2 + 2, mapheight/2+room2size/2 - 2, false));
         //creators.push(new Creator(mapwidth/2+room2size/2 - 2, mapheight/2-room2size/2 + 2, false));
+    }
+    if(room2 === true){
+        creators.push(new Creator(mapwidth/2-room3size/2 + 2, mapheight/2-room3size/2 + 2, false));
+        creators.push(new Creator(mapwidth/2+room3size/2 - 2, mapheight/2+room3size/2 - 2, false));
     }
     //EDGES AND CENTER ROOM
     for(var i = 0; i <= mapheight; i++){
@@ -362,6 +370,9 @@ function generateMap(){
                 temparray.push(3);
             }else if(room2 === true && (((i === mapheight/2-room2size/2 || i === mapheight/2+room2size/2) && (j >= mapwidth/2-room2size/2 && j <= mapwidth/2+room2size/2))
                 || ((j === mapwidth/2-room2size/2 || j === mapwidth/2+room2size/2) && (i >= mapheight/2-room2size/2 && i <= mapheight/2+room2size/2)))){
+                temparray.push(3);
+            }else if(room3 === true && (((i === mapheight/2-room3size/2 || i === mapheight/2+room3size/2) && (j >= mapwidth/2-room3size/2 && j <= mapwidth/2+room3size/2))
+                || ((j === mapwidth/2-room3size/2 || j === mapwidth/2+room3size/2) && (i >= mapheight/2-room3size/2 && i <= mapheight/2+room3size/2)))){
                 temparray.push(3);
             }else if(i > mapheight/2 - roomsize/2 && i < mapheight/2 + roomsize/2 && j > mapwidth/2 - roomsize/2 && j < mapwidth/2 + roomsize/2){
                 if((i === mapheight/2 - 1 && j === mapwidth/2 - 1) || (i === mapheight/2 - 1 && j === mapwidth/2 + 1)){
@@ -441,6 +452,7 @@ function generateLoot(){
 function genExitsFromMain(size, room){
     var tmp = i;
     var rnd = Math.floor(randomNum()*(size-2));
+    var incorrectGen = false;
     /*if(room === true){
         var swtchgtd = false;
     }else{
@@ -525,6 +537,9 @@ function genExitsFromMain(size, room){
                         }
                     }
                     tmp--;
+                    if(tmp < j-6){
+                        incorrectGen = true;
+                    }
                 }
                 tmp = j+1;
                 while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
@@ -556,6 +571,9 @@ function genExitsFromMain(size, room){
                         }
                     }
                     tmp++;
+                    if(tmp > j+6){
+                        incorrectGen = true;
+                    }
                 }
                 tmp = j-1;
                 while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
@@ -564,6 +582,11 @@ function genExitsFromMain(size, room){
                 }
             }
         }
+    }
+    if(incorrectGen === true){
+        doorsGenerated = false;
+        creators = [];
+        generateMap();
     }
 }
 
@@ -640,15 +663,18 @@ function generate(){
     if(paths < 0.43*mapwidth*mapheight){
         generateMap();
     }else{
+        doorsGenerated = true;
         fillRooms();
         generateDoors();
         genExitsFromMain(roomsize, true);
         if(room2 === true){
             genExitsFromMain(room2size, false);
         }
+        if(room3 === true){
+            genExitsFromMain(room3size, false);
+        }
         generateLoot();
         generateTextureMap();
-        doorsGenerated = true;
     }
 }
 
