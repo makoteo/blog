@@ -98,7 +98,10 @@ function Player(x, y, width, height){
 
     this.moving = false;
 
+    this.frozen = false;
+
     this.update = function(){
+        this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2 + xCameraOffset;
         this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2 + yCameraOffset;
 
@@ -110,8 +113,10 @@ function Player(x, y, width, height){
         this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
-        this.checkCollisions(1);
-        this.actionButtonCheck();
+        if(this.frozen === false){
+            this.checkCollisions(1);
+            this.actionButtonCheck();
+        }
     };
 
     this.checkCollisions = function(block){
@@ -186,13 +191,13 @@ function Player(x, y, width, height){
     };
 
     this.renderGUI = function(){
-        if(map[this.tileY3][this.tileX] === 0.5){
+        if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
             ctx.font = '60px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
         }
-        if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
+        if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
             ctx.font = '40px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -207,6 +212,13 @@ function Player(x, y, width, height){
             }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2){
                 map[this.tileY + 2][this.tileX] = 6.1;
             }
+        }
+    }
+
+    this.winStateCheck = function(){
+        if(this.tileY < 0 || this.tileY === mapheight - 1){
+            console.log("YOU WIN!");
+            this.frozen = true;
         }
     }
 
