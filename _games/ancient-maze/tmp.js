@@ -106,6 +106,8 @@ function Player(x, y, width, height){
 
     this.frozen = false;
 
+    this.inventory = [];
+
     this.update = function(){
         this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2 + xCameraOffset;
@@ -198,10 +200,12 @@ function Player(x, y, width, height){
 
     this.renderGUI = function(){
         if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
-            ctx.font = '60px quickPixel';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
+            if(this.inventory.length > 0){
+                ctx.font = '60px quickPixel';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
+            }
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
             ctx.font = '40px quickPixel';
@@ -209,14 +213,34 @@ function Player(x, y, width, height){
             ctx.textAlign = 'center';
             ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
         }
+        if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
+            ctx.font = '40px quickPixel';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
+        }
     }
 
     this.actionButtonCheck = function(){
         if(keys && keys[69]){
+            //DOORS
             if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2)){
                 map[this.tileY][this.tileX] = 6.1;
             }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2){
                 map[this.tileY + 2][this.tileX] = 6.1;
+            }
+            //ITEM PICK UP
+            else if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
+                if(this.inventory.length < 3){
+                    map[this.tileY2][this.tileX] = 0;
+                    this.inventory.push("ITEM");
+                }else{
+                    //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
+                }
+            }
+            //SACRIFICE
+            else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
+                this.inventory.splice(0, 1);
             }
         }
     }
@@ -747,11 +771,9 @@ function renderTile(i, j){
             ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
     }else if(map[j][i] === 4){
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, 0, textureSize*5.5, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
-    }else if(map[j][i] === 6) {
-        ctx.fillStyle = 'brown';
     }
 }
 
@@ -866,7 +888,11 @@ function game(){
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5){
-                renderTile(i, j);
+                if(map[j][i] !== 4){
+                    renderTile(i, j);
+                }else{
+                    ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+                }
             }
         }
     }
@@ -874,6 +900,14 @@ function game(){
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
             if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
+                renderTile(i, j);
+            }
+        }
+    }
+
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) === 4){
                 renderTile(i, j);
             }
         }
@@ -887,14 +921,6 @@ function game(){
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
-            }
-        }
-    }
-
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 4) {
-                ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2, tileSize, tileSize);
             }
         }
     }
