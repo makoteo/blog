@@ -352,16 +352,16 @@ function generateMap(){
 
 function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
     var doorrnd1 = Math.floor(randomNum()*mapwidth);
-    while(map[doorrnd1][1] === 1 || map[doorrnd1][1] === 3){
+    /*while(map[doorrnd1][1] === 1 || map[doorrnd1][1] === 3){
         doorrnd1 = Math.floor(randomNum()*mapwidth);
     }
-    map[doorrnd1][0] = 2;
+    map[doorrnd1][0] = 2;*/
 
-    doorrnd1 = Math.floor(randomNum()*mapwidth);
+    /*doorrnd1 = Math.floor(randomNum()*mapwidth);
     while(map[doorrnd1][mapheight-1] === 1 || map[doorrnd1][mapheight-1] === 3){
         doorrnd1 = Math.floor(randomNum()*mapwidth);
     }
-    map[doorrnd1][mapheight] = 2;
+    map[doorrnd1][mapwidth] = 2;*/
 
     doorrnd1 = Math.floor(randomNum()*mapheight);
     while(map[1][doorrnd1] === 1 || map[1][doorrnd1] === 3){
@@ -373,7 +373,7 @@ function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and widt
     while(map[mapwidth-1][doorrnd1] === 1 || map[mapwidth-1][doorrnd1] === 3){
         doorrnd1 = Math.floor(randomNum()*mapheight);
     }
-    map[mapwidth][doorrnd1] = 2;
+    map[mapheight][doorrnd1] = 2;
 }
 
 //KINDA COOL LOL
@@ -410,7 +410,7 @@ function generateLoot(){
 function genExitsFromMain(size, room){
     var tmp = i;
     var rnd = Math.floor(randomNum()*(size-2));
-    if(room === true){
+    /*if(room === true){
         var swtchgtd = false;
     }else{
         var swtchgtd = true;
@@ -471,7 +471,7 @@ function genExitsFromMain(size, room){
                 }
             }
         }
-    }
+    }*/
     rnd = Math.floor(randomNum()*(size-2));
     if(room === true){
         var swtchgtd = false;
@@ -579,6 +579,8 @@ function generateTextureMap(){
                     map[j][i] = 1.8;
                 }else if(Math.floor(map[j-1][i]) === 0){
                     map[j][i] = 1.8;
+                }else if(Math.floor(map[j][i+1]) === 0){
+                    map[j][i] = 1.81;
                 }
             }
 
@@ -658,7 +660,11 @@ function renderTile(i, j){
     else if(map[j][i] === 1.8){//DOOR WALL
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.81){//DOOR WALL
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize, textureSize*5.3, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
     }
+
     else if(map[j][i] === 6.1){//DOOR WALL
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
