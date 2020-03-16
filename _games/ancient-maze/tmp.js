@@ -54,7 +54,7 @@ var seglength = tileSize/10;
 
 var lightmap = [];
 var temprowlm = [];
-for(var i = 0; i < 8; i++){
+for(var i = 0; i < 9; i++){
     temprowlm = [];
     for(var j = 0; j < 13; j++){
         temprowlm.push(0);
@@ -72,6 +72,8 @@ var SEED = ORIGINALSEED;
 
 var showMap = false;
 var mapTileSize = 3;
+
+var player;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -109,6 +111,7 @@ function Player(x, y, width, height){
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
         this.checkCollisions(1);
+        this.actionButtonCheck();
     };
 
     this.checkCollisions = function(block){
@@ -188,6 +191,22 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
+        }
+        if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
+            ctx.font = '40px quickPixel';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
+        }
+    }
+
+    this.actionButtonCheck = function(){
+        if(keys && keys[69]){
+            if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2)){
+                map[this.tileY][this.tileX] = 6.1;
+            }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2){
+                map[this.tileY + 2][this.tileX] = 6.1;
+            }
         }
     }
 
@@ -293,7 +312,7 @@ function Creator(x, y, killable){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-player = new Player(WIDTH/2, HEIGHT/2, 0.75, 1); //Add the Player
+restartGame();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -729,7 +748,7 @@ function drawMinimap(){
 function doLighting(){
     var tempmap = [];
     var theta = 0;
-    for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 4, mapheight); i++){
+    for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 5, mapheight); i++){
         tempmap.fill(1, 0, 8);
         for(var j = Math.max(player.tileX - 6, 0); j <= Math.min(player.tileX + 6, mapwidth); j++){
             if((map[i][j] !== 0.5 && Math.floor(map[i][j]) === 0) || Math.floor(map[i][j]) === 4 || Math.floor(map[i][j]) === 6){
@@ -783,6 +802,10 @@ function doLighting(){
             ctx.fillRect(j*tileSize - tmpLightoffSetX - 0.005, i*tileSize - tmpLightoffSetY - tileSize*0.5 - 0.005, tileSize*1.01, tileSize*1.01);
         }
     }
+}
+
+function restartGame(){
+    player = new Player(WIDTH/2, HEIGHT/2, 0.75, 1); //Add the Player
 }
 
 
