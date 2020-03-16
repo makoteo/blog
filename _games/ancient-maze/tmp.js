@@ -25,8 +25,8 @@ var offset = 0;
 
 var textureSize = 16*5;
 
-var cameraX = tileSize*(mapwidth - 8)/2;
-var cameraY = tileSize*mapheight/2;
+var cameraX = tileSize*(mapwidth-10)/2;
+var cameraY = tileSize*(mapheight-6)/2;
 
 //var cameraX = 0;
 //var cameraY = 0;
@@ -39,14 +39,14 @@ var lootChances = 0.03; //0.03
 
 var creators = [];
 //KICKSTART GAME
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+
 var tileMap = new Image();
 tileMap.onload = generateMap();
 tileMap.src = "TileSetForMaze.png";
 
 // EXAMPLE ARRAY coins = [];
-
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 
 //LIGHTING
 var rayseg = 1;
@@ -155,7 +155,7 @@ function Player(x, y, width, height){
 
     this.draw = function(){
 
-        this.breathCycle = Math.round(Math.sin(frameCount/25)*2) + 2;
+        this.breathCycle = Math.round(Math.sin(frameCount/30)*2) + 2;
 
         //yCameraOffset++;
 
@@ -167,7 +167,7 @@ function Player(x, y, width, height){
 
         if(this.moving === true){
             this.animationTimer++;
-            if(this.animationTimer === 8){
+            if(this.animationTimer === 7){
                 this.animationFrame++;
                 this.animationTimer = 0;
             }
@@ -179,7 +179,17 @@ function Player(x, y, width, height){
         }
 
         ctx.drawImage(tileMap, textureSize*4+textureSize*0.75*this.animationFrame, textureSize*this.dir, textureSize*0.75, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
+
     };
+
+    this.renderGUI = function(){
+        if(map[this.tileY3][this.tileX] === 0.5){
+            ctx.font = '60px quickPixel';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
+        }
+    }
 
 }
 
@@ -280,11 +290,18 @@ function Creator(x, y, killable){
         ctx.fillRect(this.x*tileSize + offset- cameraX, this.y*tileSize + offset - cameraY, tileSize, tileSize);
     }
 }
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 player = new Player(WIDTH/2, HEIGHT/2, 0.75, 1); //Add the Player
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
+
+function loadFont(){
+    ctx.font = "10px quickPixel";
+    ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+    ctx.fillText("Hey!", 0, 0);
+}
 
 function randomNum() {
     var x = Math.sin(SEED++) * 10000;
@@ -292,6 +309,7 @@ function randomNum() {
 }
 
 function generateMap(){
+    loadFont();
     creators = [];
     map = [];
     creators.push(new Creator(1, 1, false));
@@ -315,8 +333,10 @@ function generateMap(){
                 || ((j === mapwidth/2-room2size/2 || j === mapwidth/2+room2size/2) && (i >= mapheight/2-room2size/2 && i <= mapheight/2+room2size/2)))){
                 temparray.push(3);
             }else if(i > mapheight/2 - roomsize/2 && i < mapheight/2 + roomsize/2 && j > mapwidth/2 - roomsize/2 && j < mapwidth/2 + roomsize/2){
-                if((i === mapheight/2 - 1 && j === mapwidth/2 - 1) || (i === mapheight/2 + 1 && j === mapwidth/2 - 1) || (i === mapheight/2 - 1 && j === mapwidth/2 + 1) || (i === mapheight/2 + 1 && j === mapwidth/2 + 1)){
+                if((i === mapheight/2 - 1 && j === mapwidth/2 - 1) || (i === mapheight/2 - 1 && j === mapwidth/2 + 1)){
                     temparray.push(1.97);
+                }else if(i >= mapheight/2 - 1 && i <= mapheight/2 + 1 && j >= mapwidth/2 - 1 && j <= mapwidth/2 + 1) {
+                    temparray.push(0.5);
                 }else{
                     temparray.push(5);
                 }
@@ -585,6 +605,9 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize*2, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //BLUE
     }else if(map[j][i] === 0.3){
         ctx.drawImage(tileMap, textureSize*3, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL2
+    }else if(map[j][i] === 0.5){
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //CARPET
     }//WALLS
 
     else if(map[j][i] === 1){
@@ -602,7 +625,8 @@ function renderTile(i, j){
     }
 
     else if(map[j][i] === 1.97){ //LIGHTS
-        ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, 0, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize + tileSize/2, tileSize, tileSize*1.5);
     }
 
@@ -623,9 +647,6 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }else if(map[j][i] === 6) {
         ctx.fillStyle = 'brown';
-    }
-    if(map[j][i] !== 0 && map[j][i] !== 0.1 && map[j][i] !== 0.2 && map[j][i] !== 0.3 && map[j][i] !== 4 && map[j][i] !== 5 && Math.floor(map[j][i]) !== 1) {
-        ctx.fillRect(i * tileSize + offset - cameraX, j * tileSize + offset - cameraY, tileSize, tileSize);
     }
 }
 
@@ -665,7 +686,7 @@ function doLighting(){
     for(var i = Math.max(player.tileY - 3, 0); i <= Math.min(player.tileY + 4, mapheight); i++){
         tempmap.fill(1, 0, 8);
         for(var j = Math.max(player.tileX - 6, 0); j <= Math.min(player.tileX + 6, mapwidth); j++){
-            if(Math.floor(map[i][j]) === 0 || Math.floor(map[i][j]) === 4){
+            if((map[i][j] !== 0.5 && Math.floor(map[i][j]) === 0) || Math.floor(map[i][j]) === 4){
                 rayseg = Math.sqrt((cameraX + player.x - j*tileSize - tileSize/2)*(cameraX + player.x - j*tileSize - tileSize/2) + (cameraY + player.y - i*tileSize - tileSize/2)*(cameraY + player.y - i*tileSize - tileSize/2))/seglength;
                 theta = Math.atan2((i*tileSize + tileSize/2) - (cameraY + player.y), (j*tileSize + tileSize/2) - (cameraX + player.x));
                 currentLight = 0;
@@ -684,6 +705,8 @@ function doLighting(){
             }else if(Math.floor(map[i][j]) === 5){
                 tempmap[j-player.tileX+6] = 0;
             }else if(map[i][j] === 1.97){
+                tempmap[j-player.tileX+6] = 0;
+            }else if(map[i][j] === 0.5){
                 tempmap[j-player.tileX+6] = 0;
             }else{
                 tempmap[j-player.tileX+6] = 1;
@@ -794,6 +817,7 @@ function game(){
             drawMinimap();
         }
 
+        player.renderGUI();
 
         /* SPAWNING
         if(frameCount % spawnRate === 0){
