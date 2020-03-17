@@ -81,6 +81,14 @@ var player;
 
 var maxTunnelLength = 7;
 
+var mousePosX = 0;
+var mousePosY = 0;
+
+var clicked = false;
+
+var itemNames = ["SWORD", "GOLD", "KEY"];
+var itemSacrificeValues = [];
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Player(x, y, width, height){
@@ -95,7 +103,7 @@ function Player(x, y, width, height){
     this.tileX = 0;
     this.tileY = 0;
 
-    this.topMargin = 2/5;
+    this.topMargin = 1/2; //2/5
 
     this.dir = 0;
 
@@ -109,6 +117,15 @@ function Player(x, y, width, height){
     this.inventory = [];
 
     this.ereleased = true;
+
+    this.inventorySelected = 0;
+
+    this.inventoryX = WIDTH - WIDTH/3;
+    this.inventoryY = HEIGHT- HEIGHT/5;
+    this.inventorySize = WIDTH/10;
+    this.inventoryOffset = WIDTH/100;
+
+    this.inventoryItemOffset = WIDTH/100;
 
     this.update = function(){
         this.winStateCheck();
@@ -169,7 +186,7 @@ function Player(x, y, width, height){
         }else{
             if (keys && keys[68] || keys && keys[39]) {cameraX+=playerSpeed; this.dir = 1;}
         }
-    }
+    };
 
     this.draw = function(){
 
@@ -202,11 +219,11 @@ function Player(x, y, width, height){
 
     this.renderGUI = function(){
         if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
-            if(this.inventory.length > 0){
+            if(this.inventory.length > 0 && this.inventorySelected < this.inventory.length){
                 ctx.font = '60px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
-                ctx.fillText("Press E to SACRIFICE", WIDTH/2, 350);
+                ctx.fillText("Press E to SACRIFICE " + itemNames[this.inventory[this.inventorySelected]], WIDTH/2, 350);
             }
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
@@ -225,7 +242,21 @@ function Player(x, y, width, height){
                 ctx.fillText("INVENTORY FULL", WIDTH/2, 350);
             }
         }
-    }
+
+        //INVENTORY
+        for(var inv = 0; inv < 3; inv++){
+            if(inv === this.inventorySelected){
+                ctx.drawImage(tileMap, textureSize, textureSize*6.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
+            }else{
+                ctx.drawImage(tileMap, 0, textureSize*6.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
+            }
+        }
+
+        for(var sl = 0; sl < this.inventory.length; sl++){
+            ctx.drawImage(tileMap, Math.floor(this.inventory[sl]*10)*textureSize, textureSize*5.5, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
+        }
+
+    };
 
     this.actionButtonCheck = function(){
         if(keys && keys[69]){
@@ -238,29 +269,40 @@ function Player(x, y, width, height){
             //ITEM PICK UP
             else if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
                 if(this.inventory.length < 3){
+                    this.inventory.push(map[this.tileY2][this.tileX] - 4);
                     map[this.tileY2][this.tileX] = 0;
-                    this.inventory.push("ITEM");
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
                 }
             }
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
-                this.ereleased = false;
-                this.inventory.splice(0, 1);
-                ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
+                if(this.inventorySelected < this.inventory.length){
+                    this.ereleased = false;
+                    this.inventory.splice(this.inventorySelected, 1);
+                }
             }
         }else{
             this.ereleased = true;
         }
-    }
+
+        if(clicked === true){
+            for(var invs = 0; invs < 3; invs++){
+                if(mousePosX > this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs && mousePosX < this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs + this.inventorySize &&
+                mousePosY > this.inventoryY && mousePosY < this.inventoryY + this.inventorySize){
+                    this.inventorySelected = invs;
+                }
+            }
+        }
+
+    };
 
     this.winStateCheck = function(){
         if(this.tileY < 0 || this.tileY === mapheight - 1){
             console.log("YOU WIN!");
             this.frozen = true;
         }
-    }
+    };
 
 }
 
@@ -753,21 +795,15 @@ function renderTile(i, j){
     else if(map[j][i] === 1.8){//DOOR WALL
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
-    }else if(map[j][i] === 1.81){//DOOR WALL
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
-        ctx.drawImage(tileMap, textureSize, textureSize*5.3, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
     }
 
     else if(map[j][i] === 6.1){//DOOR WALL
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
         map[j][i] = 6.2;
     }else if(map[j][i] === 6.2){//DOOR WALL
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*3, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
         map[j][i] = 6.3;
     }else if(map[j][i] === 6.3){//DOOR WALL
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*4, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
     }
 
@@ -888,6 +924,7 @@ grd.addColorStop(0, 'rgba(0, 0, 0, 0)');
 grd.addColorStop(1, "black");
 
 function game(){
+
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -897,8 +934,8 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5){
-                if(map[j][i] !== 4){
+            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6){
+                if(map[j][i] !== 4 && Math.floor(map[j][i]) !== 6){
                     renderTile(i, j);
                 }else{
                     ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
@@ -917,7 +954,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 4){
+            if(Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 6){
                 renderTile(i, j);
             }
         }
@@ -980,6 +1017,7 @@ function game(){
         */
 
     }
+    clicked = false;
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
@@ -1026,6 +1064,20 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type == "keydown");
 }, false);
+
+function findScreenCoords(mouseEvent)
+{
+    var rect = canvas.getBoundingClientRect();
+    mousePosX = mouseEvent.clientX - rect.left;
+    mousePosY = mouseEvent.clientY - rect.top;
+}
+
+function click(){
+    clicked = true;
+}
+document.getElementById("myCanvas").onmousemove = findScreenCoords;
+document.getElementById("myCanvas").onclick = click;
+
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
 
