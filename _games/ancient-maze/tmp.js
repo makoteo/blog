@@ -118,6 +118,7 @@ function Player(x, y, width, height){
     this.inventory = [];
 
     this.ereleased = true;
+    this.spaceReleased = true;
 
     this.inventorySelected = 0;
 
@@ -139,6 +140,7 @@ function Player(x, y, width, height){
     this.hunger = this.maxHunger;
 
     this.saturationList = [0.2, 0.8];
+
 
     this.update = function(){
         this.winStateCheck();
@@ -327,10 +329,15 @@ function Player(x, y, width, height){
         }
 
         if(itemNames[this.inventory[this.inventorySelected]] === "BREAD"){
-            ctx.font = '20px quickPixel';
+            ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.fillText("Press SPACE to EAT BREAD", WIDTH/2, 350);
+            ctx.fillText("Press SPACE to EAT BREAD", WIDTH/2, HEIGHT - HEIGHT/10);
+        }else if(itemNames[this.inventory[this.inventorySelected]] === "SWORD"){
+            ctx.font = '30px quickPixel';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText("Press SPACE to ATTACK", WIDTH/2, HEIGHT - HEIGHT/10);
         }
 
         //INVENTORY
@@ -396,11 +403,18 @@ function Player(x, y, width, height){
             this.ereleased = true;
         }
 
+        //SPACE KEY
+
+        //EATING FOOD
+
         if(keys && keys[32]){
-            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD"){
+            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.spaceReleased === true){
                 this.inventory.splice(this.inventorySelected, 1);
                 this.hunger = Math.min(this.hunger + 50, this.maxHunger);
+                this.spaceReleased = false;
             }
+        }else{
+            this.spaceReleased = true;
         }
 
         if(clicked === true){
