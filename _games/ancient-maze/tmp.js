@@ -140,6 +140,9 @@ function Player(x, y, width, height){
         this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
         this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
 
+        this.tileX3 = Math.floor((this.gameX+this.width/2*tileSize)/tileSize);
+        this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
+
         if(this.frozen === false){
             this.checkCollisions(1);
             this.actionButtonCheck();
@@ -239,7 +242,7 @@ function Player(x, y, width, height){
                 ctx.fillText("You need a KEY to open this door", WIDTH/2, 350);
             }
         }
-        if(this.tileY3 < mapheight && this.tileY3 > -1 && Math.floor(map[this.tileY3][this.tileX]) === 4){
+        if(this.tileY4 < mapheight && this.tileY4 > -1 && Math.floor(map[this.tileY4][this.tileX3]) === 4){
             ctx.font = '40px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -276,10 +279,10 @@ function Player(x, y, width, height){
                 this.inventory.splice(this.inventorySelected, 1);
             }
             //ITEM PICK UP
-            else if(this.tileY3 < mapheight && this.tileY3 > -1 && Math.floor(map[this.tileY3][this.tileX]) === 4){
+            else if(this.tileY4 < mapheight && this.tileY4 > -1 && Math.floor(map[this.tileY4][this.tileX3]) === 4){
                 if(this.inventory.length < 3){
-                    this.inventory.push(Math.round((map[this.tileY3][this.tileX] - 4)*10));
-                    map[this.tileY3][this.tileX] = 0;
+                    this.inventory.push(Math.round((map[this.tileY4][this.tileX3] - 4)*10));
+                    map[this.tileY4][this.tileX3] = 0;
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
                 }
