@@ -110,7 +110,8 @@ function Player(x, y, width, height){
     this.animationFrame = 0;
     this.animationTimer = 0;
 
-    this.moving = false;
+    this.movingX = false;
+    this.movingY = false;
 
     this.frozen = false;
 
@@ -127,10 +128,28 @@ function Player(x, y, width, height){
 
     this.inventoryItemOffset = WIDTH/100;
 
+    this.previousGameX = cameraX - this.width/2*tileSize + WIDTH/2;
+    this.previousGameY = cameraY - this.height/2*tileSize + HEIGHT/2;
+
     this.update = function(){
         this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
         this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
+
+        if(this.previousGameX !== this.gameX){
+            this.movingX = true;
+        }else{
+            this.movingX = false;
+        }
+
+        if(this.previousGameY !== this.gameY){
+            this.movingY = true;
+        }else{
+            this.movingY = false;
+        }
+
+        this.previousGameX = this.gameX;
+        this.previousGameY = this.gameY;
 
         this.tileX = Math.floor(this.gameX/tileSize);
         this.tileY = Math.floor(this.gameY/tileSize);
@@ -146,6 +165,49 @@ function Player(x, y, width, height){
         if(this.frozen === false){
             this.checkCollisions(1);
             this.actionButtonCheck();
+        }
+
+        this.calculateCamera();
+    };
+
+    this.calculateCamera = function(){
+        if((keys && keys[68] || keys && keys[39] || keys && keys[40] || keys && keys[83] || keys && keys[65] || keys && keys[37] || keys && keys[38] || keys && keys[87])){
+            switch(this.dir) {
+                case 0:
+                    if(xCameraOffset > -12 && this.movingX === true){
+                        xCameraOffset-=2;
+                    }
+                    break;
+                case 1:
+                    if(xCameraOffset < 12 && this.movingX === true){
+                        xCameraOffset+=2;
+                    }
+                    break;
+                case 2:
+                    if(yCameraOffset < 12 && this.movingY === true){
+                        yCameraOffset+=2;
+                    }
+                    break;
+                case 3:
+                    if(yCameraOffset > -12 && this.movingY === true){
+                        yCameraOffset-=2;
+                    }
+                    break;
+            }
+        }
+        if(!this.movingX) {
+            if (xCameraOffset > 0) {
+                xCameraOffset -= 1;
+            } else if (xCameraOffset < 0) {
+                xCameraOffset += 1;
+            }
+        }
+        if(!this.movingY){
+            if(yCameraOffset > 0){
+                yCameraOffset -= 1;
+            }else if(yCameraOffset < 0){
+                yCameraOffset += 1;
+            }
         }
     };
 
@@ -195,15 +257,7 @@ function Player(x, y, width, height){
 
         this.breathCycle = Math.round(Math.sin(frameCount/30)*2) + 2;
 
-        //yCameraOffset++;
-
-        this.moving = false;
-
-        if(keys && keys[68] || keys && keys[39] || keys && keys[40] || keys && keys[83] || keys && keys[65] || keys && keys[37] || keys && keys[38] || keys && keys[87]){
-            this.moving = true;
-        }
-
-        if(this.moving === true){
+        if(this.movingX === true || this.movingY === true){
             this.animationTimer++;
             if(this.animationTimer === 7){
                 this.animationFrame++;
