@@ -131,12 +131,12 @@ function Player(x, y, width, height){
     this.previousGameX = cameraX - this.width/2*tileSize + WIDTH/2;
     this.previousGameY = cameraY - this.height/2*tileSize + HEIGHT/2;
 
-    this.health = 100;
-    this.hunger = 100;
-
     this.maxHealth = 100;
     this.maxHunger = 100;
     this.saturation = 0.2;
+
+    this.health = this.maxHealth;
+    this.hunger = this.maxHunger;
 
     this.saturationList = [0.2, 0.8];
 
@@ -326,6 +326,13 @@ function Player(x, y, width, height){
             }
         }
 
+        if(itemNames[this.inventory[this.inventorySelected]] === "BREAD"){
+            ctx.font = '20px quickPixel';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText("Press SPACE to EAT BREAD", WIDTH/2, 350);
+        }
+
         //INVENTORY
         for(var inv = 0; inv < 3; inv++){
             if(inv === this.inventorySelected){
@@ -340,11 +347,22 @@ function Player(x, y, width, height){
         }
 
         //HEALTH AND HUNGER
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.maxHealth*2, HEIGHT/20);
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.maxHunger*2, HEIGHT/20);
+
+        ctx.fillStyle = 'rgb(150, 0, 0)';
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.health*2, HEIGHT/20);
 
-        ctx.fillStyle = 'green';
+        ctx.fillStyle = 'rgb(0, 100, 0)';
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2, HEIGHT/20);
+
+
+        ctx.font = '25px quickPixel';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(200, 200, 200)';
+        ctx.fillText("HEALTH", WIDTH/100 + this.maxHealth, this.inventoryY + HEIGHT/17);
+        ctx.fillText("HUNGER", WIDTH/100 + this.maxHunger, this.inventoryY + HEIGHT/17 + HEIGHT/20 + HEIGHT/100);
 
     };
 
@@ -376,6 +394,13 @@ function Player(x, y, width, height){
             }
         }else{
             this.ereleased = true;
+        }
+
+        if(keys && keys[32]){
+            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD"){
+                this.inventory.splice(this.inventorySelected, 1);
+                this.hunger = Math.min(this.hunger + 50, this.maxHunger);
+            }
         }
 
         if(clicked === true){
@@ -1049,7 +1074,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
@@ -1057,7 +1082,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 6){
+            if(Math.floor(map[j][i]) === 6){
                 renderTile(i, j);
             }
         }
@@ -1067,17 +1092,9 @@ function game(){
         player.draw();
     }
 
-    for (var i = Math.max(player.tileX, 0); i <= Math.min(player.tileX, mapwidth); i++) {
-        for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 4) {
-                renderTile(i, j);
-            }
-        }
-    }
-
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
