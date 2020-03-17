@@ -34,7 +34,8 @@ var cameraY = tileSize*(mapheight-6)/2;
 //var cameraX = 0;
 //var cameraY = 0;
 
-var playerSpeed = 5*(WIDTH/800); //5
+var playerSpeedsList = [5, 3];
+var playerSpeed = playerSpeedsList[0]*(WIDTH/800); //5
 
 var doorsGenerated = false;
 
@@ -89,6 +90,8 @@ var clicked = false;
 var itemNames = ["SWORD", "BREAD", "KEY"];
 var itemSacrificeValues = [];
 
+var spikesAnimFrame = 0;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Player(x, y, width, height){
@@ -141,6 +144,8 @@ function Player(x, y, width, height){
 
     this.saturationList = [0.2, 0.8];
 
+    this.moveAnimSpeed = 7;
+
 
     this.update = function(){
         this.winStateCheck();
@@ -183,11 +188,38 @@ function Player(x, y, width, height){
         if(frameCount % 60 === 0){
             this.countBars();
         }
+        this.countHealth();
 
     };
 
     this.countBars = function(){
-        this.hunger -= this.saturation;
+        if(this.hunger  > 0){
+            this.hunger = Math.max(0, this.hunger - this.saturation);
+        }
+
+        if(this.hunger < 30){
+            playerSpeed = playerSpeedsList[1]*(WIDTH/800);
+            this.moveAnimSpeed = 12;
+        }else{
+            playerSpeed = playerSpeedsList[0]*(WIDTH/800);
+            this.moveAnimSpeed = 7;
+        }
+
+        if(this.hunger < 10){
+            if(this.health > 0){
+                this.health = Math.max(0, this.health - 10);
+            }
+        }
+
+        if(this.hunger > 45){
+            this.health = Math.min(this.health + 0.2, this.maxHealth);
+        }
+    };
+
+    this.countHealth = function(){
+        if(map[this.tileY2][this.tileX3] === 0.63){
+            this.health-=2;
+        }
     }
 
     this.calculateCamera = function(){
@@ -280,7 +312,7 @@ function Player(x, y, width, height){
 
         if(this.movingX === true || this.movingY === true){
             this.animationTimer++;
-            if(this.animationTimer === 7){
+            if(this.animationTimer === this.moveAnimSpeed){
                 this.animationFrame++;
                 this.animationTimer = 0;
             }
@@ -431,6 +463,10 @@ function Player(x, y, width, height){
     this.winStateCheck = function(){
         if(this.tileY < 0 || this.tileY === mapheight - 1){
             console.log("YOU WIN!");
+            this.frozen = true;
+        }
+        if(this.health === 0){
+            console.log("YOU LOSE!");
             this.frozen = true;
         }
     };
@@ -825,6 +861,11 @@ function generateTextureMap(){
                 }else{
                     map[j][i] = 0.3;
                 }
+
+                rndgtm = randomNum();
+                if(rndgtm < 0.03 && j > 1 && map[j-1][i] !== 0.6){
+                    map[j][i] = 0.6;
+                }
             }
             if(map[j][i] === 1 && j < map.length - 1){
                 if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4)) || (Math.floor(map[j + 1][i]) === 5)){
@@ -913,6 +954,21 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //CARPET
     }//WALLS
+
+    else if(Math.floor(map[j][i]*10) === 6){
+        if(map[j][i] !== 0.6 && map[j][i] !== 0.63 && spikesAnimFrame === 0){
+            map[j][i] += 0.01;
+        }else if(map[j][i] !== 0.6 && map[j][i] !== 0.63 && spikesAnimFrame === 1){
+            map[j][i] -= 0.01;
+        }else if(map[j][i] === 0.63 && frameCount % 120 === 0){
+            map[j][i] -= 0.01;
+            spikesAnimFrame = 1;
+        }else if(map[j][i] === 0.6 && frameCount % 120 === 0){
+            map[j][i] += 0.01;
+            spikesAnimFrame = 0;
+        }
+        ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
+    }
 
     else if(map[j][i] === 1){
         ctx.drawImage(tileMap, 0, 0, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize);
@@ -1017,7 +1073,7 @@ function doLighting(){
                      ctx.stroke();*/
                 }
                 tempmap[j-player.tileX+6] = (Math.min(1, currentLight));
-            }else if(map[i][j] === 5){
+            }else if(Math.floor(map[i][j]) === 5){
                 tempmap[j-player.tileX+6] = 0;
             }else if(map[i][j] === 1.97){
                 tempmap[j-player.tileX+6] = 0;
@@ -1038,7 +1094,7 @@ function doLighting(){
 
     for(var i = 0; i < lightmap.length; i++){
         for(var j = 0; j < lightmap[0].length; j++){
-            if((lightmap[i][j] !== 0) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0))){
+            if((lightmap[i][j] === 1) && ((i > 0 && lightmap[i-1][j] === 0) || (i < lightmap.length-1 && lightmap[i+1][j] === 0) || (j > 0 && lightmap[i][j-1] === 0) || (j < lightmap[0].length-1 && lightmap[i][j+1] === 0))){
                 lightmap[i][j] = 0.25;
             }
         }
@@ -1088,7 +1144,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
+            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
@@ -1108,7 +1164,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
+            if((Math.floor(map[j][i]) !== 0) && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
