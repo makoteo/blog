@@ -131,6 +131,15 @@ function Player(x, y, width, height){
     this.previousGameX = cameraX - this.width/2*tileSize + WIDTH/2;
     this.previousGameY = cameraY - this.height/2*tileSize + HEIGHT/2;
 
+    this.health = 100;
+    this.hunger = 100;
+
+    this.maxHealth = 100;
+    this.maxHunger = 100;
+    this.saturation = 0.2;
+
+    this.saturationList = [0.2, 0.8];
+
     this.update = function(){
         this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
@@ -167,11 +176,21 @@ function Player(x, y, width, height){
             this.actionButtonCheck();
         }
 
-        this.calculateCamera();
+        this.saturation = this.saturationList[0]; //RESET BEFORE FUNCTION SEES IF PLAYER IS MOVING
+        this.calculateCamera(); //CAUSE THIS FUNCTION ALSO SETS SATURATION IF PLAYER MOVES
+        if(frameCount % 60 === 0){
+            this.countBars();
+        }
+
     };
+
+    this.countBars = function(){
+        this.hunger -= this.saturation;
+    }
 
     this.calculateCamera = function(){
         if((keys && keys[68] || keys && keys[39] || keys && keys[40] || keys && keys[83] || keys && keys[65] || keys && keys[37] || keys && keys[38] || keys && keys[87])){
+            this.saturation = this.saturationList[1];
             switch(this.dir) {
                 case 0:
                     if(xCameraOffset > -12 && this.movingX === true){
@@ -319,6 +338,13 @@ function Player(x, y, width, height){
         for(var sl = 0; sl < this.inventory.length; sl++){
             ctx.drawImage(tileMap, Math.floor(this.inventory[sl])*textureSize, textureSize*5.5, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
         }
+
+        //HEALTH AND HUNGER
+        ctx.fillStyle = 'red';
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.health*2, HEIGHT/20);
+
+        ctx.fillStyle = 'green';
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2, HEIGHT/20);
 
     };
 
@@ -894,7 +920,7 @@ function renderTile(i, j){
             ctx.fillRect(i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset  + yCameraOffset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
     }else if(Math.floor(map[j][i]) === 4){
-        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/3 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
     }
@@ -1041,9 +1067,17 @@ function game(){
         player.draw();
     }
 
+    for (var i = Math.max(player.tileX, 0); i <= Math.min(player.tileX, mapwidth); i++) {
+        for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if(Math.floor(map[j][i]) === 4) {
+                renderTile(i, j);
+            }
+        }
+    }
+
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
