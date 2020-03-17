@@ -221,7 +221,7 @@ function Player(x, y, width, height){
             this.health = Math.min(this.health + 0.3, this.maxHealth);
         }
 
-        GODSATISFACTION -= godDecreasePerSecond;
+        GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0);
     };
 
     this.countHealth = function(){
@@ -449,7 +449,7 @@ function Player(x, y, width, height){
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
-                    GODSATISFACTION += itemSacrificeValues[this.inventory[this.inventorySelected]];
+                    GODSATISFACTION = Math.min(GODSATISFACTION + itemSacrificeValues[this.inventory[this.inventorySelected]], MAXGODSATISFACTION);
                     this.inventory.splice(this.inventorySelected, 1);
                     this.ereleased = false;
                 }
