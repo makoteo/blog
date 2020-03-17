@@ -96,7 +96,7 @@ var spikesAnimFrame = 0;
 var GODSATISFACTION = 100;
 var MAXGODSATISFACTION = 200;
 
-var godDecreasePerSecond = 0.4;
+var godDecreasePerSecond = 0.6;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -226,7 +226,7 @@ function Player(x, y, width, height){
 
     this.countHealth = function(){
         if(map[this.tileY2][this.tileX3] === 0.63){
-            this.health-=2;
+            this.health = Math.max(this.health - 2, 0);
         }
     }
 
