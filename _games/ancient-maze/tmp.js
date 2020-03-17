@@ -227,12 +227,19 @@ function Player(x, y, width, height){
             }
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
-            ctx.font = '40px quickPixel';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
+            if(itemNames[this.inventory[this.inventorySelected]] === "KEY"){
+                ctx.font = '40px quickPixel';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
+            }else{
+                ctx.font = '40px quickPixel';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText("You need a KEY to open this door", WIDTH/2, 350);
+            }
         }
-        if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
+        if(this.tileY3 < mapheight && this.tileY3 > -1 && Math.floor(map[this.tileY3][this.tileX]) === 4){
             ctx.font = '40px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -261,16 +268,18 @@ function Player(x, y, width, height){
     this.actionButtonCheck = function(){
         if(keys && keys[69]){
             //DOORS
-            if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2)){
+            if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) && itemNames[this.inventory[this.inventorySelected]] === "KEY"){
                 map[this.tileY][this.tileX] = 6.1;
-            }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2){
+                this.inventory.splice(this.inventorySelected, 1);
+            }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2 && itemNames[this.inventory[this.inventorySelected]] === "KEY"){
                 map[this.tileY + 2][this.tileX] = 6.1;
+                this.inventory.splice(this.inventorySelected, 1);
             }
             //ITEM PICK UP
-            else if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
+            else if(this.tileY3 < mapheight && this.tileY3 > -1 && Math.floor(map[this.tileY3][this.tileX]) === 4){
                 if(this.inventory.length < 3){
-                    this.inventory.push(Math.round((map[this.tileY2][this.tileX] - 4)*10));
-                    map[this.tileY2][this.tileX] = 0;
+                    this.inventory.push(Math.round((map[this.tileY3][this.tileX] - 4)*10));
+                    map[this.tileY3][this.tileX] = 0;
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
                 }
@@ -828,7 +837,7 @@ function renderTile(i, j){
             ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
     }else if(Math.floor(map[j][i]) === 4){
-        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/4 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }
