@@ -39,7 +39,7 @@ var playerSpeed = playerSpeedsList[0]*(WIDTH/800); //5
 
 var doorsGenerated = false;
 
-var lootChances = 0.04; //0.03
+var lootChances = 0.042; //0.03
 
 var creators = [];
 //KICKSTART GAME
@@ -360,7 +360,7 @@ function Player(x, y, width, height){
             }
         }
 
-        if(itemNames[this.inventory[this.inventorySelected]] === "BREAD"){
+        if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.hunger !== this.maxHunger){
             ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -440,7 +440,7 @@ function Player(x, y, width, height){
         //EATING FOOD
 
         if(keys && keys[32]){
-            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.spaceReleased === true){
+            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.spaceReleased === true && this.hunger !== this.maxHunger){
                 this.inventory.splice(this.inventorySelected, 1);
                 this.hunger = Math.min(this.hunger + 50, this.maxHunger);
                 this.spaceReleased = false;
@@ -452,7 +452,7 @@ function Player(x, y, width, height){
         if(clicked === true){
             for(var invs = 0; invs < 3; invs++){
                 if(mousePosX > this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs && mousePosX < this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs + this.inventorySize &&
-                mousePosY > this.inventoryY && mousePosY < this.inventoryY + this.inventorySize){
+                    mousePosY > this.inventoryY && mousePosY < this.inventoryY + this.inventorySize){
                     this.inventorySelected = invs;
                 }
             }
@@ -640,15 +640,15 @@ function generateMap(){
 function generateDoors(){ //TODO Make sure doors can't generate at 0, 0 and width, height;
     var doorrnd1 = Math.floor(randomNum()*mapwidth);
     /*while(map[doorrnd1][1] === 1 || map[doorrnd1][1] === 3){
-        doorrnd1 = Math.floor(randomNum()*mapwidth);
-    }
-    map[doorrnd1][0] = 2;*/
+     doorrnd1 = Math.floor(randomNum()*mapwidth);
+     }
+     map[doorrnd1][0] = 2;*/
 
     /*doorrnd1 = Math.floor(randomNum()*mapwidth);
-    while(map[doorrnd1][mapheight-1] === 1 || map[doorrnd1][mapheight-1] === 3){
-        doorrnd1 = Math.floor(randomNum()*mapwidth);
-    }
-    map[doorrnd1][mapwidth] = 2;*/
+     while(map[doorrnd1][mapheight-1] === 1 || map[doorrnd1][mapheight-1] === 3){
+     doorrnd1 = Math.floor(randomNum()*mapwidth);
+     }
+     map[doorrnd1][mapwidth] = 2;*/
 
     doorrnd1 = Math.floor(randomNum()*mapheight);
     while(map[1][doorrnd1] === 1 || map[1][doorrnd1] === 3){
@@ -669,7 +669,7 @@ function fillRooms(){
         for(var j = 2; j < map[0].length - 2; j+=2){
             if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0 && map[i][j] === 1){
                 var rnd = randomNum();
-                if(rnd < 0.8){
+                if(rnd < 0.9){
                     rndLoot(i, j);
                 }else{
                     map[i][j] = 0;
@@ -710,67 +710,67 @@ function genExitsFromMain(size, room){
     var rnd = Math.floor(randomNum()*(size-2));
     var incorrectGen = false;
     /*if(room === true){
-        var swtchgtd = false;
-    }else{
-        var swtchgtd = true;
-    }
-    for(var i = 0; i <= mapheight; i++){
-        for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
-                tmp = i;
-                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
-                    if(map[j][tmp] === 3 && size !== roomsize){
-                        map[j][tmp] = 6;
-                    }else{
-                        if(swtchgtd === false) {
-                            map[j][tmp] = 5.1;
-                            swtchgtd = true;
-                        }else{
-                            map[j][tmp] = 0;
-                        }
-                    }
-                    tmp--;
-                }
-                tmp = i+1;
-                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp < mapdimensions&& map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
-                    map[j][tmp] = 0;
-                    tmp++;
-                }
-            }
-        }
-    }
-    rnd = Math.floor(randomNum()*(size-2));
-    if(room === true){
-        var swtchgtd = false;
-    }else{
-        var swtchgtd = true;
-    } // Makes sure the first tile leading out of the center room is gold
-    for(var i = 0; i <= mapheight; i++){
-        for(var j = 0; j <= mapwidth; j++) {
-            if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
-                tmp = i;
-                while((map[j][tmp] === 1 || map[j][tmp] === 3)  && tmp < mapdimensions && map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
-                    if(map[j][tmp] === 3 && size !== roomsize){
-                        map[j][tmp] = 6;
-                    }else{
-                        if(swtchgtd === false) {
-                            map[j][tmp] = 5.1;
-                            swtchgtd = true;
-                        }else{
-                            map[j][tmp] = 0;
-                        }
-                    }
-                    tmp++;
-                }
-                tmp = i-1;
-                while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
-                    map[j][tmp] = 0;
-                    tmp--;
-                    console.log(tmp);
-                }
-            }
-        }
-    }*/
+     var swtchgtd = false;
+     }else{
+     var swtchgtd = true;
+     }
+     for(var i = 0; i <= mapheight; i++){
+     for(var j = 0; j <= mapwidth; j++) {
+     if(i === mapheight/2 - size/2 && j === mapwidth/2 - size/2 + rnd + 1){
+     tmp = i;
+     while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
+     if(map[j][tmp] === 3 && size !== roomsize){
+     map[j][tmp] = 6;
+     }else{
+     if(swtchgtd === false) {
+     map[j][tmp] = 5.1;
+     swtchgtd = true;
+     }else{
+     map[j][tmp] = 0;
+     }
+     }
+     tmp--;
+     }
+     tmp = i+1;
+     while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp < mapdimensions&& map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
+     map[j][tmp] = 0;
+     tmp++;
+     }
+     }
+     }
+     }
+     rnd = Math.floor(randomNum()*(size-2));
+     if(room === true){
+     var swtchgtd = false;
+     }else{
+     var swtchgtd = true;
+     } // Makes sure the first tile leading out of the center room is gold
+     for(var i = 0; i <= mapheight; i++){
+     for(var j = 0; j <= mapwidth; j++) {
+     if(i === mapheight/2 + size/2 && j === mapwidth/2 - size/2 + rnd + 1){
+     tmp = i;
+     while((map[j][tmp] === 1 || map[j][tmp] === 3)  && tmp < mapdimensions && map[j-1][tmp-1] !== 0 && map[j+1][tmp-1] !== 0){
+     if(map[j][tmp] === 3 && size !== roomsize){
+     map[j][tmp] = 6;
+     }else{
+     if(swtchgtd === false) {
+     map[j][tmp] = 5.1;
+     swtchgtd = true;
+     }else{
+     map[j][tmp] = 0;
+     }
+     }
+     tmp++;
+     }
+     tmp = i-1;
+     while((map[j][tmp] === 1 || map[j][tmp] === 3) && tmp > 0 && map[j-1][tmp+1] !== 0 && map[j+1][tmp+1] !== 0){
+     map[j][tmp] = 0;
+     tmp--;
+     console.log(tmp);
+     }
+     }
+     }
+     }*/
     rnd = Math.floor(randomNum()*(size-2));
     if(room === true){
         var swtchgtd = false;
@@ -863,7 +863,7 @@ function generateTextureMap(){
                 }
 
                 rndgtm = randomNum();
-                if(rndgtm < 0.03 && j > 1 && map[j-1][i] !== 0.6){
+                if(rndgtm < 0.03 && j > 1 && map[j-1][i] !== 0.6 && map[j-1][i] !== 6  && map[j-1][i] !== 2 && j < mapheight && map[j+1][i] !== 6  && map[j+1][i] !== 2){
                     map[j][i] = 0.6;
                 }
             }
@@ -967,7 +967,9 @@ function renderTile(i, j){
             map[j][i] += 0.01;
             spikesAnimFrame = 0;
         }
-        ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
+        if(map[j][i] !== 0.6){
+            ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
+        }
     }
 
     else if(map[j][i] === 1){
@@ -1132,9 +1134,11 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6){
-                if(Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6){
+            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6 || Math.floor(map[j][i]*10) === 6){
+                if(Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6 && Math.floor(map[j][i]*10) !== 6){
                     renderTile(i, j);
+                }else if(Math.floor(map[j][i]*10) === 6){
+                    ctx.drawImage(tileMap, textureSize*2, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
                 }else{
                     ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
                 }
@@ -1164,7 +1168,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if((Math.floor(map[j][i]) !== 0) && Math.floor(map[j][i]) !== 5) {
+            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
@@ -1175,14 +1179,14 @@ function game(){
         frameCount++;
 
         //if(frameCount % 10 === 0){
-            for(var i = 0; i < creators.length; i++){
-                if(creators[i].dead === false){
-                    creators[i].update();
-                    creators[i].draw();
-                }else{
-                    creators.splice(i, 1);
-                }
+        for(var i = 0; i < creators.length; i++){
+            if(creators[i].dead === false){
+                creators[i].update();
+                creators[i].draw();
+            }else{
+                creators.splice(i, 1);
             }
+        }
         //}
 
 
@@ -1202,17 +1206,17 @@ function game(){
         player.renderGUI();
 
         /* SPAWNING
-        if(frameCount % spawnRate === 0){
-            addWave();
-        }
-        */
+         if(frameCount % spawnRate === 0){
+         addWave();
+         }
+         */
 
         /* ON LOSS
-        if(Lose condition){
-            gameRunning = false;
-            localStorage.setItem('HighScoreBusiness', HIGHSCORE);
-        }
-        */
+         if(Lose condition){
+         gameRunning = false;
+         localStorage.setItem('HighScoreBusiness', HIGHSCORE);
+         }
+         */
 
     }
     clicked = false;
@@ -1226,8 +1230,8 @@ function Start(){
         frameCount = 0;
 
         /* RESET ARRAYS (EXAMPLE)
-        coins = [];
-        */
+         coins = [];
+         */
 
         //document.getElementById("score").innerHTML = "" + SCORE;
         //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
@@ -1239,12 +1243,12 @@ function Start(){
 }
 
 /* EXAMPLE DIV HIDE
-function ShowInstructions(){
-    document.getElementById("startMenu").setAttribute("hidden", "hidden");
-    document.getElementById("resetMenu").setAttribute("hidden", "hidden");
-    document.getElementById("instructionsMenu").removeAttribute("hidden");
-}
-*/
+ function ShowInstructions(){
+ document.getElementById("startMenu").setAttribute("hidden", "hidden");
+ document.getElementById("resetMenu").setAttribute("hidden", "hidden");
+ document.getElementById("instructionsMenu").removeAttribute("hidden");
+ }
+ */
 
 var keys;
 
