@@ -38,7 +38,7 @@ var playerSpeed = 5*(WIDTH/800); //5
 
 var doorsGenerated = false;
 
-var lootChances = 0.03; //0.03
+var lootChances = 0.04; //0.03
 
 var creators = [];
 //KICKSTART GAME
@@ -86,7 +86,7 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "GOLD", "KEY"];
+var itemNames = ["SWORD", "BREAD", "KEY"];
 var itemSacrificeValues = [];
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -253,7 +253,7 @@ function Player(x, y, width, height){
         }
 
         for(var sl = 0; sl < this.inventory.length; sl++){
-            ctx.drawImage(tileMap, Math.floor(this.inventory[sl]*10)*textureSize, textureSize*5.5, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
+            ctx.drawImage(tileMap, Math.floor(this.inventory[sl])*textureSize, textureSize*5.5, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
         }
 
     };
@@ -269,7 +269,7 @@ function Player(x, y, width, height){
             //ITEM PICK UP
             else if(this.tileY2 < mapheight && this.tileY2 > -1 && Math.floor(map[this.tileY2][this.tileX]) === 4){
                 if(this.inventory.length < 3){
-                    this.inventory.push(map[this.tileY2][this.tileX] - 4);
+                    this.inventory.push(Math.round((map[this.tileY2][this.tileX] - 4)*10));
                     map[this.tileY2][this.tileX] = 0;
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
@@ -503,7 +503,7 @@ function fillRooms(){
             if(map[i-1][j] === 0 && map[i+1][j] === 0 && map[i][j-1] === 0 && map[i][j + 1] === 0 && map[i][j] === 1){
                 var rnd = randomNum();
                 if(rnd < 0.8){
-                    map[i][j] = 4;
+                    rndLoot(i, j);
                 }else{
                     map[i][j] = 0;
                 }
@@ -518,12 +518,23 @@ function generateLoot(){
             if(map[i][j] === 0){
                 var rnd = randomNum();
                 if(rnd < lootChances){
-                    map[i][j] = 4;
+                    rndLoot(i, j);
                 }else{
                     map[i][j] = 0;
                 }
             }
         }
+    }
+}
+
+function rndLoot(i, j){
+    var rnd = randomNum();
+    if(rnd < 0.2){
+        map[i][j] = 4;
+    }else if(rnd < 0.8){
+        map[i][j] = 4.1;
+    }else{
+        map[i][j] = 4.2;
     }
 }
 
@@ -816,8 +827,8 @@ function renderTile(i, j){
             ctx.fillStyle = 'black';
             ctx.fillRect(i*tileSize + offset - cameraX, j*tileSize + offset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
-    }else if(map[j][i] === 4){
-        ctx.drawImage(tileMap, 0, textureSize*5.5, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
+    }else if(Math.floor(map[j][i]) === 4){
+        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY - tileSize/2 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
     }
@@ -839,7 +850,7 @@ function drawMinimap(){
             else if (map[i][j] === 2) {
                 ctx.fillStyle = 'red';
             }//INDESTRUCTABLE WALLS
-            else if (map[i][j] === 4) {
+            else if (Math.floor(map[i][j]) === 4) {
                 ctx.fillStyle = 'yellow';
             } else if (Math.floor(map[i][j]) === 5) {
                 ctx.fillStyle = 'green';
@@ -935,7 +946,7 @@ function game(){
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
             if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6){
-                if(map[j][i] !== 4 && Math.floor(map[j][i]) !== 6){
+                if(Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6){
                     renderTile(i, j);
                 }else{
                     ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset - cameraX, j*tileSize + offset - cameraY, tileSize, tileSize); //NORMAL
@@ -966,7 +977,7 @@ function game(){
 
     for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
         for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 5) {
+            if(Math.floor(map[j][i]) !== 0 && Math.floor(map[j][i]) !== 5) {
                 renderTile(i, j);
             }
         }
