@@ -93,7 +93,10 @@ var itemSacrificeValues = [50, 20, 80, 40];
 
 var spikesAnimFrame = 0;
 
+var GODSATISFACTION = 100;
+var MAXGODSATISFACTION = 200;
 
+var godDecreasePerSecond = 0.4;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -217,6 +220,8 @@ function Player(x, y, width, height){
         if(this.hunger > 45){
             this.health = Math.min(this.health + 0.3, this.maxHealth);
         }
+
+        GODSATISFACTION -= godDecreasePerSecond;
     };
 
     this.countHealth = function(){
@@ -389,14 +394,15 @@ function Player(x, y, width, height){
         }
 
         //HEALTH AND HUNGER
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.maxHealth*2, HEIGHT/20);
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.maxHunger*2, HEIGHT/20);
 
-        ctx.fillStyle = 'rgb(150, 0, 0)';
+        ctx.fillStyle = 'rgba(150, 0, 0, 0.8)';
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.health*2, HEIGHT/20);
 
-        ctx.fillStyle = 'rgb(0, 100, 0)';
+        ctx.fillStyle = 'rgba(0, 100, 0, 0.8)';
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2, HEIGHT/20);
 
 
@@ -405,6 +411,19 @@ function Player(x, y, width, height){
         ctx.fillStyle = 'rgba(200, 200, 200)';
         ctx.fillText("HEALTH", WIDTH/100 + this.maxHealth, this.inventoryY + HEIGHT/17);
         ctx.fillText("HUNGER", WIDTH/100 + this.maxHunger, this.inventoryY + HEIGHT/17 + HEIGHT/20 + HEIGHT/100);
+
+        //GOD SATISFACTION
+
+        ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5, HEIGHT/40, MAXGODSATISFACTION*3, HEIGHT/15);
+
+        ctx.fillStyle = 'rgba(240, 240, 240, 0.8)';
+        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5, HEIGHT/40, GODSATISFACTION*3, HEIGHT/15);
+
+        ctx.font = '45px quickPixel';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(0, 0, 0)';
+        ctx.fillText("GODS' SATISFACTION", WIDTH/2, HEIGHT/13);
 
     };
 
@@ -430,8 +449,9 @@ function Player(x, y, width, height){
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
-                    this.ereleased = false;
+                    GODSATISFACTION += itemSacrificeValues[this.inventory[this.inventorySelected]];
                     this.inventory.splice(this.inventorySelected, 1);
+                    this.ereleased = false;
                 }
             }
         }else{
@@ -445,6 +465,7 @@ function Player(x, y, width, height){
         if(keys && keys[32]){
             if(nutririonValues[this.inventory[this.inventorySelected]] > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
                 this.hunger = Math.min(this.hunger + nutririonValues[this.inventory[this.inventorySelected]], this.maxHunger);
+                this.health = Math.min(this.health + Math.floor(nutririonValues[this.inventory[this.inventorySelected]]/10), this.maxHealth);
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
