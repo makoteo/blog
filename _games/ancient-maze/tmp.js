@@ -87,10 +87,13 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY"];
-var itemSacrificeValues = [];
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN"];
+var nutririonValues = [0, 20, 0, 50];
+var itemSacrificeValues = [50, 20, 80, 40];
 
 var spikesAnimFrame = 0;
+
+
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -212,7 +215,7 @@ function Player(x, y, width, height){
         }
 
         if(this.hunger > 45){
-            this.health = Math.min(this.health + 0.2, this.maxHealth);
+            this.health = Math.min(this.health + 0.3, this.maxHealth);
         }
     };
 
@@ -360,11 +363,11 @@ function Player(x, y, width, height){
             }
         }
 
-        if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.hunger !== this.maxHunger){
+        if(nutririonValues[this.inventory[this.inventorySelected]] > 0 && this.hunger !== this.maxHunger){
             ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.fillText("Press SPACE to EAT BREAD", WIDTH/2, HEIGHT - HEIGHT/10);
+            ctx.fillText("Press SPACE to EAT " + itemNames[this.inventory[this.inventorySelected]], WIDTH/2, HEIGHT - HEIGHT/10);
         }else if(itemNames[this.inventory[this.inventorySelected]] === "SWORD"){
             ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
@@ -440,9 +443,9 @@ function Player(x, y, width, height){
         //EATING FOOD
 
         if(keys && keys[32]){
-            if(itemNames[this.inventory[this.inventorySelected]] === "BREAD" && this.spaceReleased === true && this.hunger !== this.maxHunger){
+            if(nutririonValues[this.inventory[this.inventorySelected]] > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
+                this.hunger = Math.min(this.hunger + nutririonValues[this.inventory[this.inventorySelected]], this.maxHunger);
                 this.inventory.splice(this.inventorySelected, 1);
-                this.hunger = Math.min(this.hunger + 50, this.maxHunger);
                 this.spaceReleased = false;
             }
         }else{
@@ -697,11 +700,13 @@ function generateLoot(){
 function rndLoot(i, j){
     var rnd = randomNum();
     if(rnd < 0.2){
-        map[i][j] = 4;
-    }else if(rnd < 0.8){
-        map[i][j] = 4.1;
+        map[i][j] = 4; //SWORD
+    }else if(rnd < 0.4){
+        map[i][j] = 4.3; //CHICKEN
+    }else if(rnd < 0.95){
+        map[i][j] = 4.1; //BREAD
     }else{
-        map[i][j] = 4.2;
+        map[i][j] = 4.2; //KEY
     }
 }
 
