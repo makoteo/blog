@@ -489,7 +489,7 @@ function Player(x, y, width, height){
             console.log("YOU WIN!");
             this.frozen = true;
         }
-        if(this.health === 0){
+        if(this.health <= 0){
             console.log("YOU LOSE!");
             this.frozen = true;
         }
