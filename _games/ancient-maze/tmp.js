@@ -221,14 +221,10 @@ function Player(x, y, width, height){
                 if(Math.abs(this.weaponAngle) >= 100){
                     this.attacking = false;
                 }
-            }else if(this.dir === 3) {
-                this.weaponAngle -= 15;
-                if(Math.abs(this.weaponAngle) >= 70){
-                    this.attacking = false;
-                }
             }else{
-                this.weaponAngle -= 30;
-                if(Math.abs(this.weaponAngle) >= 130){
+                this.weaponAngle += 5;
+                this.weaponScaleY -= 0.18;
+                if(this.weaponScaleY <= 0){
                     this.attacking = false;
                 }
             }
