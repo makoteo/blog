@@ -508,9 +508,9 @@ function Player(x, y, width, height){
         //EATING FOOD
 
         if(keys && keys[32]){
-            if(this.getItemSelectedNutrition > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
-                this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition, this.maxHunger);
-                this.health = Math.min(this.health + this.getItemSelectedNutrition/10, this.maxHealth);
+            if(this.getItemSelectedNutrition() > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
+                this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition(), this.maxHunger);
+                this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
@@ -774,13 +774,13 @@ function generateLoot(){
 function rndLoot(i, j){
     var rnd = randomNum();
     if(rnd < 0.2){
-        map[i][j] = 4.01; //SWORD
+        map[i][j] = 4.0; //SWORD
     }else if(rnd < 0.4){
-        map[i][j] = 4.31; //CHICKEN
+        map[i][j] = 4.3; //CHICKEN
     }else if(rnd < 0.95){
-        map[i][j] = 4.11; //BREAD
+        map[i][j] = 4.1; //BREAD
     }else{
-        map[i][j] = 4.21; //KEY
+        map[i][j] = 4.2; //KEY
     }
 }
 
