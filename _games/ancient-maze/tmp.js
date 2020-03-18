@@ -902,6 +902,9 @@ function generateLoot(){
             for(var j = mapheight/2 - room2size/2; j < mapheight/2 + room2size/2; j++){
                 if(i === lasti && j === lastj){
                     map[i][j] = 4.2;
+                }
+                if(i > mapwidth/2 - room2size/3 && i < mapwidth/2 + room2size/3 && j > mapheight/2 - room2size/3 && j < mapheight/2 + room2size/3){
+
                 }else if(map[i][j] === 0){
                     var rnd = randomNum();
                     if(rnd > 0.99){
