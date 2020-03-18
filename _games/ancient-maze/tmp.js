@@ -87,9 +87,10 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN"];
-var nutririonValues = [0, 20, 0, 50];
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "", "", "", "", "", "", "Hi", "Lol", "Why", "Not"];
+var nutritionValues = [0, 20, 0, 50];
 var itemSacrificeValues = [50, 20, 80, 40];
+var itemDamageValues = [20, 0, 0, 0];
 
 var spikesAnimFrame = 0;
 
@@ -152,6 +153,10 @@ function Player(x, y, width, height){
 
     this.moveAnimSpeed = 7;
 
+    this.attackAnimation = 0;
+
+    this.weaponOffset = 0;
+    this.weaponOffsetY = 0;
 
     this.update = function(){
         this.winStateCheck();
@@ -331,8 +336,48 @@ function Player(x, y, width, height){
             this.animationFrame = 3;
         }
 
+        if(this.animationFrame === 0){
+            this.weaponOffset = 0;
+            this.weaponOffsetY = 0;
+        }else if(this.animationFrame === 1){
+            this.weaponOffset = -tileSize/30;
+            this.weaponOffsetY = -tileSize/40;
+        }else if(this.animationFrame === 2){
+            this.weaponOffset = 0;
+            this.weaponOffsetY = 0;
+        }else{
+            this.weaponOffset = tileSize/30;
+            this.weaponOffsetY = -tileSize/40;
+        }
+
+        if(this.dir === 3){
+            this.drawWeapon();
+        }
+
         ctx.drawImage(tileMap, textureSize*4+textureSize*0.75*this.animationFrame, textureSize*this.dir, textureSize*0.75, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
 
+        //THIS IS FUNNY AHAH - ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5, textureSize, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
+        if(this.dir !== 3){
+            this.drawWeapon();
+        }
+    };
+
+    this.getItemSelectedName = function(){
+        return itemNames[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
+    };
+    this.getItemSelectedNutrition = function(){
+        return nutritionValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
+    };
+    this.getItemSelectedSacrificeValue = function(){
+        return itemSacrificeValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
+    };
+    this.getItemSelectedDamageValue = function(){
+        return itemDamageValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
+    };
+    this.drawWeapon = function(){
+        if(this.getItemSelectedName() === "SWORD"){
+
+        }
     };
 
     this.renderGUI = function(){
@@ -341,11 +386,11 @@ function Player(x, y, width, height){
                 ctx.font = '60px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
-                ctx.fillText("Press E to SACRIFICE " + itemNames[this.inventory[this.inventorySelected]], WIDTH/2, 350);
+                ctx.fillText("Press E to SACRIFICE " + this.getItemSelectedName(), WIDTH/2, 350);
             }
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
-            if(itemNames[this.inventory[this.inventorySelected]] === "KEY"){
+            if(this.getItemSelectedName() === "KEY"){
                 ctx.font = '40px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
@@ -368,12 +413,12 @@ function Player(x, y, width, height){
             }
         }
 
-        if(nutririonValues[this.inventory[this.inventorySelected]] > 0 && this.hunger !== this.maxHunger){
+        if(this.getItemSelectedNutrition() > 0 && this.hunger !== this.maxHunger){
             ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.fillText("Press SPACE to EAT " + itemNames[this.inventory[this.inventorySelected]], WIDTH/2, HEIGHT - HEIGHT/10);
-        }else if(itemNames[this.inventory[this.inventorySelected]] === "SWORD"){
+            ctx.fillText("Press SPACE to EAT " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
+        }else if(this.getItemSelectedName() === "SWORD"){
             ctx.font = '30px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -383,14 +428,14 @@ function Player(x, y, width, height){
         //INVENTORY
         for(var inv = 0; inv < 3; inv++){
             if(inv === this.inventorySelected){
-                ctx.drawImage(tileMap, textureSize, textureSize*6.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
+                ctx.drawImage(tileMap, textureSize, textureSize*8.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
             }else{
-                ctx.drawImage(tileMap, 0, textureSize*6.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
+                ctx.drawImage(tileMap, 0, textureSize*8.5, textureSize, textureSize, this.inventoryX + this.inventorySize*inv + this.inventoryOffset*inv, this.inventoryY, this.inventorySize, this.inventorySize); //NORMAL
             }
         }
 
         for(var sl = 0; sl < this.inventory.length; sl++){
-            ctx.drawImage(tileMap, Math.floor(this.inventory[sl])*textureSize, textureSize*5.5, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
+            ctx.drawImage(tileMap, Math.floor(this.inventory[sl])*textureSize, textureSize*5.5 + (this.inventory[sl] - Math.floor(this.inventory[sl]))*10*textureSize, textureSize, textureSize, this.inventoryX + this.inventorySize*sl + this.inventoryOffset*sl + this.inventoryItemOffset/2, this.inventoryY + this.inventoryItemOffset/2, this.inventorySize - this.inventoryItemOffset, this.inventorySize - this.inventoryItemOffset); //NORMAL
         }
 
         //HEALTH AND HUNGER
@@ -430,17 +475,17 @@ function Player(x, y, width, height){
     this.actionButtonCheck = function(){
         if(keys && keys[69]){
             //DOORS
-            if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) && itemNames[this.inventory[this.inventorySelected]] === "KEY"){
+            if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) && this.getItemSelectedName() === "KEY"){
                 map[this.tileY][this.tileX] = 6.1;
                 this.inventory.splice(this.inventorySelected, 1);
-            }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2 && itemNames[this.inventory[this.inventorySelected]] === "KEY"){
+            }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2 && this.getItemSelectedName() === "KEY"){
                 map[this.tileY + 2][this.tileX] = 6.1;
                 this.inventory.splice(this.inventorySelected, 1);
             }
             //ITEM PICK UP
             else if(this.tileY4 < mapheight && this.tileY4 > -1 && Math.floor(map[this.tileY4][this.tileX3]) === 4){
                 if(this.inventory.length < 3){
-                    this.inventory.push(Math.round((map[this.tileY4][this.tileX3] - 4)*10));
+                    this.inventory.push(Math.round((map[this.tileY4][this.tileX3] - 4)*100)/10);
                     map[this.tileY4][this.tileX3] = 0;
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
@@ -449,7 +494,7 @@ function Player(x, y, width, height){
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
-                    GODSATISFACTION = Math.min(GODSATISFACTION + itemSacrificeValues[this.inventory[this.inventorySelected]], MAXGODSATISFACTION);
+                    GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue(), MAXGODSATISFACTION);
                     this.inventory.splice(this.inventorySelected, 1);
                     this.ereleased = false;
                 }
@@ -463,9 +508,9 @@ function Player(x, y, width, height){
         //EATING FOOD
 
         if(keys && keys[32]){
-            if(nutririonValues[this.inventory[this.inventorySelected]] > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
-                this.hunger = Math.min(this.hunger + nutririonValues[this.inventory[this.inventorySelected]], this.maxHunger);
-                this.health = Math.min(this.health + Math.floor(nutririonValues[this.inventory[this.inventorySelected]]/10), this.maxHealth);
+            if(this.getItemSelectedNutrition > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
+                this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition, this.maxHunger);
+                this.health = Math.min(this.health + this.getItemSelectedNutrition/10, this.maxHealth);
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
@@ -480,6 +525,14 @@ function Player(x, y, width, height){
                     this.inventorySelected = invs;
                 }
             }
+        }
+
+        if(keys && keys[49]){
+            this.inventorySelected = 0;
+        }else if(keys && keys[50]){
+            this.inventorySelected = 1;
+        }else if(keys && keys[51]){
+            this.inventorySelected = 2;
         }
 
     };
@@ -721,13 +774,13 @@ function generateLoot(){
 function rndLoot(i, j){
     var rnd = randomNum();
     if(rnd < 0.2){
-        map[i][j] = 4; //SWORD
+        map[i][j] = 4.01; //SWORD
     }else if(rnd < 0.4){
-        map[i][j] = 4.3; //CHICKEN
+        map[i][j] = 4.31; //CHICKEN
     }else if(rnd < 0.95){
-        map[i][j] = 4.1; //BREAD
+        map[i][j] = 4.11; //BREAD
     }else{
-        map[i][j] = 4.2; //KEY
+        map[i][j] = 4.21; //KEY
     }
 }
 
@@ -994,7 +1047,7 @@ function renderTile(i, j){
             spikesAnimFrame = 0;
         }
         if(map[j][i] !== 0.6){
-            ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
+            ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
         }
     }
 
@@ -1043,7 +1096,7 @@ function renderTile(i, j){
             ctx.fillRect(i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset  + yCameraOffset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
     }else if(Math.floor(map[j][i]) === 4){
-        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/3 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5 + textureSize*(Math.round((map[j][i]-4)*100-Math.round((map[j][i]-4)*10)*10)/100)*100, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/3 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
     }
@@ -1164,7 +1217,7 @@ function game(){
                 if(Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6 && Math.floor(map[j][i]*10) !== 6){
                     renderTile(i, j);
                 }else if(Math.floor(map[j][i]*10) === 6){
-                    ctx.drawImage(tileMap, textureSize*2, textureSize*6.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
+                    ctx.drawImage(tileMap, textureSize*2, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
                 }else{
                     ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
                 }
