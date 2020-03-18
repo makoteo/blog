@@ -769,6 +769,155 @@ function generateLoot(){
             }
         }
     }
+
+    //FIGURE OUT LAST POSSIBLE KEY POSITION
+    var lasti = 0;
+    var lastj = 0;
+
+    for(var i = mapwidth/2; i < mapwidth; i++){
+        for(var j = mapheight/2; j < mapheight; j++){
+            if(room3 === true){
+                if(i > mapwidth/2 - room3size/2 && i < mapwidth/2 + room3size/2 && j > mapheight/2 - room3size/2 && j < mapheight/2 + room3size/2){
+
+                }else{
+                    if(map[i][j] === 0){
+                        lasti = i;
+                        lastj = j;
+                    }
+                }
+            }else if(room2 === true){
+                if(i > mapwidth/2 - room2size/2 && i < mapwidth/2 + room2size/2 && j > mapheight/2 - room2size/2 && j < mapheight/2 + room2size/2){
+
+                }else{
+                    if(map[i][j] === 0){
+                        lasti = i;
+                        lastj = j;
+                    }
+                }
+            }
+        }
+    }
+
+    //CREATE KEY IN BIG MAZE (MAX 2)
+    var keycount = 0;
+    var maxKeyCount = 1;
+
+    for(var i = 1; i < mapheight; i++){
+        for(var j = 1; j < mapwidth; j++){
+            if(i === lasti && j === lastj){
+                map[i][j] = 4.2;
+            }if(room3 === true){
+                if(i > mapwidth/2 - room3size/2 && i < mapwidth/2 + room3size/2 && j > mapheight/2 - room3size/2 && j < mapheight/2 + room3size/2){
+
+                }else if(map[i][j] === 0){
+                    var rnd = randomNum();
+                    if(rnd > 0.998){
+                        map[i][j] = 4.2;
+                        keycount++;
+                    }
+                }
+            }else if(room2 === true){
+                if(i > mapwidth/2 - room2size/2 && i < mapwidth/2 + room2size/2 && j > mapheight/2 - room2size/2 && j < mapheight/2 + room2size/2){
+
+                }else if(map[i][j] === 0){
+                    var rnd = randomNum();
+                    if(rnd > 0.998){
+                        map[i][j] = 4.2;
+                        keycount++;
+                    }
+                }
+            }
+            if(keycount >= maxKeyCount){
+                break;
+            }
+        }
+        if(keycount >= maxKeyCount){
+            break;
+        }
+    }
+
+    lasti = 0;
+    lastj = 0;
+
+    if(room3 === true){
+        for(var i = mapwidth/2 - room3size/2 + 2; i < mapwidth/2 + room3size/2 - 2; i++){
+            for(var j = mapheight/2 - room3size/2 + 2; j < mapheight/2 + room3size/2 - 2; j++){
+                if(i > mapwidth/2 - room2size/2 && i < mapwidth/2 + room2size/2 && j > mapheight/2 - room2size/2 && j < mapheight/2 + room2size/2){
+
+                }else{
+                    if(map[i][j] === 0){
+                        lasti = i;
+                        lastj = j;
+                    }
+                }
+            }
+        }
+
+        keycount = 0;
+        maxKeyCount = 2;
+
+        for(var i = mapwidth/2 - room3size/2 + 1; i < mapwidth/2 + room3size/2 - 1; i++){
+            for(var j = mapheight/2 - room3size/2 + 1; j < mapheight/2 + room3size/2 - 1; j++){
+                if(i === lasti && j === lastj){
+                    map[i][j] = 4.2;
+                    break;
+                }
+                if(i > mapwidth/2 - room2size/2 && i < mapwidth/2 + room2size/2 && j > mapheight/2 - room2size/2 && j < mapheight/2 + room2size/2){
+
+                }else{
+                    if(map[i][j] === 0){
+                        var rnd = randomNum();
+                        if(rnd > 0.99){
+                            map[i][j] = 4.2;
+                            keycount++;
+                        }
+                    }
+                }
+                if(keycount >= maxKeyCount){
+                    break;
+                }
+            }
+            if(keycount >= maxKeyCount){
+                break;
+            }
+        }
+    }
+
+    lasti = 0;
+    lastj = 0;
+
+    if(room2 === true){
+        for(var i = mapwidth/2 - room2size/2 + 1; i < mapwidth/2 + room2size/2 - 1; i++){
+            for(var j = mapheight/2 - room2size/2 + 1; j < mapheight/2 + room2size/2 - 1; j++){
+                if(map[i][j] === 0){
+                    lasti = i;
+                    lastj = j;
+                }
+            }
+        }
+
+        keycount = 0;
+
+        for(var i = mapwidth/2 - room2size/2; i < mapwidth/2 + room2size/2; i++){
+            for(var j = mapheight/2 - room2size/2; j < mapheight/2 + room2size/2; j++){
+                if(i === lasti && j === lastj){
+                    map[i][j] = 4.2;
+                }else if(map[i][j] === 0){
+                    var rnd = randomNum();
+                    if(rnd > 0.99){
+                        map[i][j] = 4.2;
+                        keycount++;
+                    }
+                }
+                if(keycount > maxKeyCount){
+                    break;
+                }
+            }
+            if(keycount > maxKeyCount){
+                break;
+            }
+        }
+    }
 }
 
 function rndLoot(i, j){
@@ -780,7 +929,7 @@ function rndLoot(i, j){
     }else if(rnd < 0.95){
         map[i][j] = 4.1; //BREAD
     }else{
-        map[i][j] = 4.2; //KEY
+        //map[i][j] = 4.2; //KEY
     }
 }
 
@@ -1118,6 +1267,9 @@ function drawMinimap(){
             else if (map[i][j] === 2) {
                 ctx.fillStyle = 'red';
             }//INDESTRUCTABLE WALLS
+            else if ((map[i][j]) === 4.2) {
+                ctx.fillStyle = 'lime';
+            }
             else if (Math.floor(map[i][j]) === 4) {
                 ctx.fillStyle = 'yellow';
             } else if (Math.floor(map[i][j]) === 5) {
