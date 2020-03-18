@@ -158,6 +158,11 @@ function Player(x, y, width, height){
     this.weaponOffset = 0;
     this.weaponOffsetY = 0;
 
+    this.weaponScaleY = 1;
+
+    this.attackTimer = 0;
+    this.attacking = false;
+
     this.update = function(){
         this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
@@ -189,7 +194,7 @@ function Player(x, y, width, height){
         this.tileX3 = Math.floor((this.gameX+this.width/2*tileSize)/tileSize);
         this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
 
-        if(this.frozen === false){
+        if(this.frozen === false && this.attacking === false){
             this.checkCollisions(1);
             this.actionButtonCheck();
         }
@@ -200,6 +205,76 @@ function Player(x, y, width, height){
             this.countBars();
         }
         this.countHealth();
+
+        if(this.attackTimer > 0){this.attackTimer--;}
+        if(this.attackTimer === 0){
+            this.attacking = false;
+        }
+
+        if(this.attacking === true){
+            if(this.dir === 0 || this.dir === 1){
+                if(this.weaponAngle > 0){
+                    this.weaponAngle += 15;
+                }else if(this.weaponAngle < 0){
+                    this.weaponAngle -= 15;
+                }
+                if(Math.abs(this.weaponAngle) >= 100){
+                    this.attacking = false;
+                }
+            }else if(this.dir === 3) {
+                this.weaponAngle -= 15;
+                if(Math.abs(this.weaponAngle) >= 70){
+                    this.attacking = false;
+                }
+            }else{
+                this.weaponAngle -= 30;
+                if(Math.abs(this.weaponAngle) >= 130){
+                    this.attacking = false;
+                }
+            }
+        }else{
+            this.weaponScaleY = 1;
+            this.handOffset = 0;
+            if(this.dir === 0){
+                this.weaponAngle = -5;
+                this.handOffset = -tileSize*0.56;
+            }else if(this.dir === 1){
+                this.weaponAngle = 5;
+                this.handOffset = -tileSize*0.56;
+            }else if(this.dir === 2){
+                this.weaponAngle = 0;
+                this.handOffset = -tileSize*0.56;
+            }else{
+                this.weaponAngle = 0;
+            }
+
+            if(this.animationFrame === 3){
+                this.weaponOffset = 0;
+                this.weaponOffsetY = 0;
+            }else if(this.animationFrame === 0){
+                if(this.dir === 1){
+                    this.weaponOffset = -tileSize/28;
+                }else if(this.dir === 0){
+                    this.weaponOffset = tileSize/28;
+                }else{
+                    this.weaponOffset = 0;
+                }
+                this.weaponOffsetY = -tileSize/50;
+
+            }else if(this.animationFrame === 1){
+                this.weaponOffset = 0;
+                this.weaponOffsetY = 0;
+            }else{
+                if(this.dir === 1){
+                    this.weaponOffset = tileSize/28;
+                }else if(this.dir === 0){
+                    this.weaponOffset = -tileSize/28;
+                }else{
+                    this.weaponOffset = 0;
+                }
+                this.weaponOffsetY = -tileSize/50;
+            }
+        }
 
     };
 
@@ -336,19 +411,34 @@ function Player(x, y, width, height){
             this.animationFrame = 3;
         }
 
-        if(this.animationFrame === 0){
-            this.weaponOffset = 0;
-            this.weaponOffsetY = 0;
-        }else if(this.animationFrame === 1){
-            this.weaponOffset = -tileSize/30;
-            this.weaponOffsetY = -tileSize/40;
-        }else if(this.animationFrame === 2){
-            this.weaponOffset = 0;
-            this.weaponOffsetY = 0;
-        }else{
-            this.weaponOffset = tileSize/30;
-            this.weaponOffsetY = -tileSize/40;
-        }
+        /* OPPOSITE HANDED
+         if(this.animationFrame === 3){
+         this.weaponOffset = 0;
+         this.weaponOffsetY = 0;
+         }else if(this.animationFrame === 0){
+         if(this.dir === 1){
+         this.weaponOffset = tileSize/28;
+         }else if(this.dir === 0){
+         this.weaponOffset = tileSize/28;
+         }else{
+         this.weaponOffset = 0;
+         }
+         this.weaponOffsetY = -tileSize/50;
+
+         }else if(this.animationFrame === 1){
+         this.weaponOffset = 0;
+         this.weaponOffsetY = 0;
+         }else{
+         if(this.dir === 1){
+         this.weaponOffset = -tileSize/28;
+         }else if(this.dir === 0){
+         this.weaponOffset = -tileSize/28;
+         }else{
+         this.weaponOffset = 0;
+         }
+         this.weaponOffsetY = -tileSize/50;
+         }
+       */
 
         if(this.dir === 3){
             this.drawWeapon();
@@ -376,12 +466,17 @@ function Player(x, y, width, height){
     };
     this.drawWeapon = function(){
         if(this.getItemSelectedName() === "SWORD"){
-
+            ctx.save();
+            ctx.translate(this.x - this.width/7*tileSize + xCameraOffset + this.weaponOffset + tileSize/8*3 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize/4*3 - this.breathCycle/2);
+            ctx.rotate(this.weaponAngle*Math.PI/180);
+            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize/4*3 + (1-this.weaponScaleY)*tileSize/4*3, tileSize/4*3, tileSize/4*3*this.weaponScaleY); //NORMAL
+            //DRAW BODY PORTION OF PLAYER TO COVER SWORD
+            ctx.restore();
         }
     };
 
     this.renderGUI = function(){
-        if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5){
+        if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5){
             if(this.inventory.length > 0 && this.inventorySelected < this.inventory.length){
                 ctx.font = '60px quickPixel';
                 ctx.fillStyle = 'white';
@@ -472,6 +567,11 @@ function Player(x, y, width, height){
 
     };
 
+    this.attack = function(){
+        this.attacking = true;
+        this.attackTimer = 20;
+    };
+
     this.actionButtonCheck = function(){
         if(keys && keys[69]){
             //DOORS
@@ -492,7 +592,7 @@ function Player(x, y, width, height){
                 }
             }
             //SACRIFICE
-            else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX] === 0.5 && this.ereleased === true){
+            else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
                     GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue(), MAXGODSATISFACTION);
                     this.inventory.splice(this.inventorySelected, 1);
@@ -512,6 +612,10 @@ function Player(x, y, width, height){
                 this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition(), this.maxHunger);
                 this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
                 this.inventory.splice(this.inventorySelected, 1);
+                this.spaceReleased = false;
+            }
+            if(this.getItemSelectedName() === "SWORD" && this.spaceReleased === true && this.attackTimer === 0){
+                this.attack();
                 this.spaceReleased = false;
             }
         }else{
