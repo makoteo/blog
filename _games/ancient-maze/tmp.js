@@ -222,9 +222,10 @@ function Player(x, y, width, height){
                     this.attacking = false;
                 }
             }else{
+                this.weaponScaleY -= 0.2;
+
                 this.weaponAngle += 5;
-                this.weaponScaleY -= 0.18;
-                if(this.weaponScaleY <= 0){
+                if(this.weaponScaleY <= 0.2){
                     this.attacking = false;
                 }
             }
@@ -465,7 +466,7 @@ function Player(x, y, width, height){
             ctx.save();
             ctx.translate(this.x - this.width/7*tileSize + xCameraOffset + this.weaponOffset + tileSize/8*3 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize/4*3 - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
-            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize/4*3 + (1-this.weaponScaleY)*tileSize/4*3, tileSize/4*3, tileSize/4*3*this.weaponScaleY); //NORMAL
+            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize/4*3 + (1-this.weaponScaleY)*tileSize/4*3, tileSize/4*3, Math.abs(tileSize/4*3*this.weaponScaleY)); //NORMAL
             //DRAW BODY PORTION OF PLAYER TO COVER SWORD
             ctx.restore();
         }
