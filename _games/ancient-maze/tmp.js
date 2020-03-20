@@ -42,6 +42,7 @@ var doorsGenerated = false;
 var lootChances = 0.042; //0.03
 
 var creators = [];
+var enemies = [];
 //KICKSTART GAME
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -98,6 +99,15 @@ var GODSATISFACTION = 100;
 var MAXGODSATISFACTION = 200;
 
 var godDecreasePerSecond = 0.6;
+
+var mobSpawnChance = 0.04; //0.02
+var mobSpawnRate = 90;
+
+var fontSize1 = WIDTH/20;
+var fontSize2 = WIDTH/13.3;
+var fontSize3 = WIDTH/26.6;
+
+var DEBUG = false;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -163,6 +173,8 @@ function Player(x, y, width, height){
     this.attackTimer = 0;
     this.attacking = false;
 
+    this.moveCycle = 1;
+
     this.update = function(){
         this.winStateCheck();
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
@@ -178,6 +190,10 @@ function Player(x, y, width, height){
             this.movingY = true;
         }else{
             this.movingY = false;
+        }
+
+        if(this.previousGameX !== this.gameX || this.previousGameY !== this.gameY){
+            this.moveCycle++;
         }
 
         this.previousGameX = this.gameX;
@@ -475,7 +491,7 @@ function Player(x, y, width, height){
     this.renderGUI = function(){
         if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5){
             if(this.inventory.length > 0 && this.inventorySelected < this.inventory.length){
-                ctx.font = '60px quickPixel';
+                ctx.font = fontSize2 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
                 ctx.fillText("Press E to SACRIFICE " + this.getItemSelectedName(), WIDTH/2, 350);
@@ -483,19 +499,19 @@ function Player(x, y, width, height){
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
             if(this.getItemSelectedName() === "KEY"){
-                ctx.font = '40px quickPixel';
+                ctx.font = fontSize1 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
                 ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
             }else{
-                ctx.font = '40px quickPixel';
+                ctx.font = fontSize1 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
                 ctx.fillText("You need a KEY to open this door", WIDTH/2, 350);
             }
         }
         if(this.tileY4 < mapheight && this.tileY4 > -1 && Math.floor(map[this.tileY4][this.tileX3]) === 4){
-            ctx.font = '40px quickPixel';
+            ctx.font = fontSize1 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             if(this.inventory.length < 3){
@@ -506,12 +522,12 @@ function Player(x, y, width, height){
         }
 
         if(this.getItemSelectedNutrition() > 0 && this.hunger !== this.maxHunger){
-            ctx.font = '30px quickPixel';
+            ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press SPACE to EAT " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
         }else if(this.getItemSelectedName() === "SWORD"){
-            ctx.font = '30px quickPixel';
+            ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press SPACE to ATTACK", WIDTH/2, HEIGHT - HEIGHT/10);
@@ -543,7 +559,7 @@ function Player(x, y, width, height){
         ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2, HEIGHT/20);
 
 
-        ctx.font = '25px quickPixel';
+        ctx.font = HEIGHT/18 + 'px quickPixel';
         ctx.textAlign = 'center';
         ctx.fillStyle = 'rgba(200, 200, 200)';
         ctx.fillText("HEALTH", WIDTH/100 + this.maxHealth, this.inventoryY + HEIGHT/17);
@@ -557,7 +573,7 @@ function Player(x, y, width, height){
         ctx.fillStyle = 'rgba(240, 240, 240, 0.8)';
         ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5, HEIGHT/40, GODSATISFACTION*3, HEIGHT/15);
 
-        ctx.font = '45px quickPixel';
+        ctx.font = HEIGHT/10 + 'px quickPixel';
         ctx.textAlign = 'center';
         ctx.fillStyle = 'rgba(0, 0, 0)';
         ctx.fillText("GODS' SATISFACTION", WIDTH/2, HEIGHT/13);
@@ -749,6 +765,135 @@ function Creator(x, y, killable){
     }
 }
 
+function Enemy(tileX, tileY, type){
+    this.tileX = tileX;
+    this.tileY = tileY;
+    this.type = type;
+
+    this.size = tileSize;
+
+    this.despawnDistance = 10;
+
+    this.gameX = this.tileX*tileSize - cameraX;
+    this.gameY = this.tileY*tileSize - cameraY;
+
+    this.xOffSet = 0;
+    this.yOffSet = 0;
+
+    this.moveSpeed = 4*(WIDTH/800);
+
+    this.moveDirX = 0;
+    this.moveDirY = 0;
+
+    this.aliveTimer = 0;
+
+    this.dead = false;
+
+    this.path = [];
+    this.followDelay = -1;
+    this.followingPlayer = false;
+
+    this.update = function(){
+        this.aliveTimer++;
+
+        for(var l = 0; l < this.path.length; l++){
+            if(this.path[l][0] !== this.tileY || this.path[l][1] !== this.tileX){
+                if(this.path[l][0] < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
+                    this.moveDirY = -1;
+                }else if(this.path[l][0] > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
+                    this.moveDirY = 1;
+                }else{
+                    this.moveDirY = 0;
+                }
+
+                if(this.path[l][1] < this.tileX && (Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)){
+                    this.moveDirX = -1;
+                }else if(this.path[l][1] > this.tileX && (Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4)){
+                    this.moveDirX = 1;
+                }else{
+                    this.moveDirX = 0;
+                }
+                break;
+            }else{
+                if(this.path[l][0] === this.tileY){
+                    this.moveDirY = 0;
+                }
+                else if(this.path[l][1] === this.tileX){
+                    this.moveDirX = 0;
+                }
+
+                if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
+                    this.path.splice(l, 1);
+                }
+            }
+        }
+
+        this.xOffSet += this.moveDirX*this.moveSpeed;
+        this.yOffSet += this.moveDirY*this.moveSpeed;
+
+        if(Math.abs(this.xOffSet) >= tileSize){
+            this.tileX += this.moveDirX;
+            this.xOffSet = 0;
+        }
+        if(Math.abs(this.yOffSet) >= tileSize){
+            this.tileY += this.moveDirY;
+            this.yOffSet = 0;
+        }
+
+        if(this.followDelay > 0){
+            this.followDelay--;
+        }
+
+        this.gameX = this.tileX*tileSize - cameraX + this.xOffSet + this.size/2;
+        this.gameY = this.tileY*tileSize - cameraY + this.yOffSet + this.size/2;
+
+        if(frameCount % 10 === 0){
+            if(this.followingPlayer === false){
+                this.checkPlayerVisible();
+            }else{
+                this.path.push([player.tileY2, player.tileX2]);
+            }
+            if(this.followingPlayer === true && this.followDelay === 10){
+                this.path.push([player.tileY2, player.tileX2]);
+            }
+        }
+
+        if(Math.abs(player.tileX - this.tileX) > this.despawnDistance || Math.abs(player.tileY - this.tileY) > this.despawnDistance){
+            this.dead = true;
+        }
+    };
+
+    this.draw = function(){
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2, tileSize, tileSize);
+    };
+
+    this.checkPlayerVisible = function() {
+        var theta = 0;
+        rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
+        theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
+        currentLight = 0;
+        this.followingPlayer = true;
+        this.followDelay = 10;
+        for (var k = 0; k < rayseg; k++) {
+            if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
+                this.followingPlayer = false;
+                this.followDelay = -1;
+                break;
+            }
+
+            if(DEBUG === true){
+                ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(player.x + (seglength * (k + 1)) * Math.cos(theta), (player.y + (seglength * (k + 1)) * Math.sin(theta)));
+                ctx.stroke();
+            }
+
+        }
+    };
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 restartGame();
@@ -756,7 +901,7 @@ restartGame();
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
 function loadFont(){
-    ctx.font = "10px quickPixel";
+    ctx.font = HEIGHT/45 + "px quickPixel";
     ctx.fillStyle = 'rgba(0, 0, 0, 0)';
     ctx.fillText("Hey!", 0, 0);
 }
@@ -1409,6 +1554,24 @@ function doLighting(){
                      ctx.lineTo(player.x + (seglength*(k+1))*Math.cos(theta), (player.y + (seglength*(k+1))*Math.sin(theta)));
                      ctx.stroke();*/
                 }
+                if(currentLight >= 1 && player.moveCycle % mobSpawnRate === 0){
+                    var rnd = randomNum();
+                    if(randomNum() < mobSpawnChance){
+                        var spawnMob = true;
+                        for(var tmpcheck = 0; tmpcheck < enemies.length; tmpcheck++){
+                            if(enemies[tmpcheck].tileX === j && enemies[tmpcheck].tileY === i){
+                                spawnMob = false;
+                                break;
+                            }else{
+
+                            }
+                        }
+                        if(spawnMob === true){
+                            enemies.push(new Enemy(j, i, 0));
+                            player.moveCycle+=10;
+                        }
+                    }
+                }
                 tempmap[j-player.tileX+6] = (Math.min(1, currentLight));
             }else if(Math.floor(map[i][j]) === 5){
                 tempmap[j-player.tileX+6] = 0;
@@ -1495,6 +1658,16 @@ function game(){
                 renderTile(i, j);
             }
         }
+    }
+
+    for(var i = 0; i < enemies.length; i++){
+        if(enemies[i].dead === true){
+            enemies.splice(i, 1);
+        }else{
+            enemies[i].update();
+            enemies[i].draw();
+        }
+
     }
 
     if(gameRunning === true){
