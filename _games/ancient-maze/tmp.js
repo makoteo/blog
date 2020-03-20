@@ -102,6 +102,7 @@ var godDecreasePerSecond = 0.6;
 
 var mobSpawnChance = 0.04; //0.02
 var mobSpawnRate = 90;
+var maxMobCount = 3;
 
 var fontSize1 = WIDTH/20;
 var fontSize2 = WIDTH/13.3;
@@ -582,7 +583,7 @@ function Player(x, y, width, height){
 
     this.attack = function(){
         this.attacking = true;
-        this.attackTimer = 20;
+        this.attackTimer = 20; //MUST ALWAYS BE 20
     };
 
     this.actionButtonCheck = function(){
@@ -770,6 +771,8 @@ function Enemy(tileX, tileY, type){
     this.tileY = tileY;
     this.type = type;
 
+    this.health = 100;
+
     this.size = tileSize;
 
     this.despawnDistance = 10;
@@ -793,73 +796,135 @@ function Enemy(tileX, tileY, type){
     this.followDelay = -1;
     this.followingPlayer = false;
 
+    this.paralysisTimer = 0;
+
+    this.paralysisTime = 30;
+
+    this.attackTimer = 0;
+    this.attackSpeed = 40;
+    this.attackDelayer = 5;
+
+    this.damage = 20;
+
     this.update = function(){
         this.aliveTimer++;
 
-        for(var l = 0; l < this.path.length; l++){
-            if(this.path[l][0] !== this.tileY || this.path[l][1] !== this.tileX){
-                if(this.path[l][0] < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
-                    this.moveDirY = -1;
-                }else if(this.path[l][0] > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
-                    this.moveDirY = 1;
-                }else{
-                    this.moveDirY = 0;
-                }
-
-                if(this.path[l][1] < this.tileX && (Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)){
-                    this.moveDirX = -1;
-                }else if(this.path[l][1] > this.tileX && (Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4)){
-                    this.moveDirX = 1;
-                }else{
-                    this.moveDirX = 0;
-                }
-                break;
-            }else{
-                if(this.path[l][0] === this.tileY){
-                    this.moveDirY = 0;
-                }
-                else if(this.path[l][1] === this.tileX){
-                    this.moveDirX = 0;
-                }
-
-                if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
-                    this.path.splice(l, 1);
+        if(this.paralysisTimer === 0){
+            for(var l = 1; l < this.path.length; l++) {
+                if (this.path[l][0] === this.path[0][0] && this.path[l][1] === this.path[0][1]) {
+                    this.path.splice(1, l + 1);
                 }
             }
+            for(var l = 0; l < this.path.length; l++) {
+                if(this.path[l][0] !== this.tileY || this.path[l][1] !== this.tileX){
+                    if(this.path[l][0] < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
+                        this.moveDirY = -1;
+                    }else if(this.path[l][0] > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
+                        this.moveDirY = 1;
+                    }else{
+                        this.moveDirY = 0;
+                    }
+
+                    if(this.path[l][1] < this.tileX && (Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)){
+                        this.moveDirX = -1;
+                    }else if(this.path[l][1] > this.tileX && (Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4)){
+                        this.moveDirX = 1;
+                    }else{
+                        this.moveDirX = 0;
+                    }
+                    break;
+                }else{
+                    if(this.path[l][0] === this.tileY){
+                        this.moveDirY = 0;
+                    }
+                    else if(this.path[l][1] === this.tileX){
+                        this.moveDirX = 0;
+                    }
+
+                    if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
+                        this.path.splice(l, 1);
+                    }
+                }
+            }
+
+            this.xOffSet += this.moveDirX*this.moveSpeed;
+            this.yOffSet += this.moveDirY*this.moveSpeed;
+
+            if(Math.abs(this.xOffSet) >= tileSize){
+                this.tileX += this.moveDirX;
+                this.xOffSet = 0;
+            }
+            if(Math.abs(this.yOffSet) >= tileSize){
+                this.tileY += this.moveDirY;
+                this.yOffSet = 0;
+            }
+
+            if(this.followDelay > 0){
+                this.followDelay--;
+            }
+        }else{
+            this.paralysisTimer--;
         }
 
-        this.xOffSet += this.moveDirX*this.moveSpeed;
-        this.yOffSet += this.moveDirY*this.moveSpeed;
-
-        if(Math.abs(this.xOffSet) >= tileSize){
-            this.tileX += this.moveDirX;
-            this.xOffSet = 0;
-        }
-        if(Math.abs(this.yOffSet) >= tileSize){
-            this.tileY += this.moveDirY;
-            this.yOffSet = 0;
+        if(this.attackTimer > 0){
+            this.attackTimer--;
         }
 
-        if(this.followDelay > 0){
-            this.followDelay--;
+        if(this.attackTimer === 1){
+            this.dealDamage();
         }
 
         this.gameX = this.tileX*tileSize - cameraX + this.xOffSet + this.size/2;
         this.gameY = this.tileY*tileSize - cameraY + this.yOffSet + this.size/2;
 
-        if(frameCount % 10 === 0){
-            if(this.followingPlayer === false){
+        if(this.health === 0){
+            this.dead = true;
+        }
+
+        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1 && this.attackTimer === 0){
+            this.startAttack();
+        }
+
+
+        if(frameCount % 10 === 0) {
+            if (this.followingPlayer === false) {
                 this.checkPlayerVisible();
-            }else{
+            } else {
                 this.path.push([player.tileY2, player.tileX2]);
             }
             if(this.followingPlayer === true && this.followDelay === 10){
-                this.path.push([player.tileY2, player.tileX2]);
+                this.path.push([player.tileY2, player.tileX3]);
             }
         }
 
         if(Math.abs(player.tileX - this.tileX) > this.despawnDistance || Math.abs(player.tileY - this.tileY) > this.despawnDistance){
             this.dead = true;
+        }
+
+        this.checkDamage();
+
+    };
+
+    this.checkDamage = function(){
+        if(player.attackTimer === 19){
+            if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1){
+                this.paralysisTimer = this.paralysisTime;
+                this.health -= player.getItemSelectedDamageValue();
+                if(this.attackTimer > 0){
+                    this.attackTimer += this.attackDelayer;
+                }
+            }
+        }
+    };
+
+    this.startAttack = function(){
+        this.attackTimer = this.attackSpeed;
+        this.paralysisTimer = this.attackSpeed;
+    };
+
+    this.dealDamage = function(){
+        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1) {
+            player.health = Math.max(0, player.health - this.damage);
         }
     };
 
@@ -1554,7 +1619,7 @@ function doLighting(){
                      ctx.lineTo(player.x + (seglength*(k+1))*Math.cos(theta), (player.y + (seglength*(k+1))*Math.sin(theta)));
                      ctx.stroke();*/
                 }
-                if(currentLight >= 1 && player.moveCycle % mobSpawnRate === 0){
+                if(currentLight >= 1 && player.moveCycle % mobSpawnRate === 0 && enemies.length < maxMobCount){
                     var rnd = randomNum();
                     if(randomNum() < mobSpawnChance){
                         var spawnMob = true;
