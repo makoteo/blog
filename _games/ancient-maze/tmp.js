@@ -783,7 +783,7 @@ function Enemy(tileX, tileY, type){
     this.xOffSet = 0;
     this.yOffSet = 0;
 
-    this.moveSpeed = 4*(WIDTH/800);
+    this.moveSpeed = 3*(WIDTH/800);
 
     this.moveDirX = 0;
     this.moveDirY = 0;
@@ -804,7 +804,11 @@ function Enemy(tileX, tileY, type){
     this.attackSpeed = 40;
     this.attackDelayer = 5;
 
-    this.damage = 20;
+    this.damage = 15;
+
+    this.animationFrame = 0;
+
+    this.animationDir = 1;
 
     this.update = function(){
         this.aliveTimer++;
@@ -812,7 +816,7 @@ function Enemy(tileX, tileY, type){
         if(this.paralysisTimer === 0){
             for(var l = 1; l < this.path.length; l++) {
                 if (this.path[l][0] === this.path[0][0] && this.path[l][1] === this.path[0][1]) {
-                    this.path.splice(1, l + 1);
+                    this.path.splice(1, l);
                 }
             }
             for(var l = 0; l < this.path.length; l++) {
@@ -834,13 +838,6 @@ function Enemy(tileX, tileY, type){
                     }
                     break;
                 }else{
-                    if(this.path[l][0] === this.tileY){
-                        this.moveDirY = 0;
-                    }
-                    else if(this.path[l][1] === this.tileX){
-                        this.moveDirX = 0;
-                    }
-
                     if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
                         this.path.splice(l, 1);
                     }
@@ -881,7 +878,7 @@ function Enemy(tileX, tileY, type){
             this.dead = true;
         }
 
-        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1 && this.attackTimer === 0){
+        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1 && this.attackTimer === 0 && this.followingPlayer === true){
             this.startAttack();
         }
 
@@ -892,9 +889,9 @@ function Enemy(tileX, tileY, type){
             } else {
                 this.path.push([player.tileY2, player.tileX2]);
             }
-            if(this.followingPlayer === true && this.followDelay === 10){
-                this.path.push([player.tileY2, player.tileX3]);
-            }
+        }
+        if(this.followingPlayer === true && this.followDelay === 10){
+            this.path.push([player.tileY2, player.tileX3]);
         }
 
         if(Math.abs(player.tileX - this.tileX) > this.despawnDistance || Math.abs(player.tileY - this.tileY) > this.despawnDistance){
@@ -910,6 +907,7 @@ function Enemy(tileX, tileY, type){
             if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1){
                 this.paralysisTimer = this.paralysisTime;
                 this.health -= player.getItemSelectedDamageValue();
+                ctx.fillStyle = 'red';
                 if(this.attackTimer > 0){
                     this.attackTimer += this.attackDelayer;
                 }
@@ -925,37 +923,49 @@ function Enemy(tileX, tileY, type){
     this.dealDamage = function(){
         if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1) {
             player.health = Math.max(0, player.health - this.damage);
+            ctx.fillStyle = 'green';
         }
     };
 
     this.draw = function(){
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2, tileSize, tileSize);
+        if(this.aliveTimer % 7 === 0){
+            this.animationFrame+=this.animationDir;
+        }
+        if(this.animationFrame === 2){
+            this.animationDir = -1;
+        }else if(this.animationFrame === 0){
+            this.animationDir = 1;
+        }
+        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2, tileSize, tileSize); //NORMAL
+        ctx.fillStyle = 'yellow';
     };
 
     this.checkPlayerVisible = function() {
         var theta = 0;
-        rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
-        theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
-        currentLight = 0;
-        this.followingPlayer = true;
-        this.followDelay = 10;
-        for (var k = 0; k < rayseg; k++) {
-            if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
-                this.followingPlayer = false;
-                this.followDelay = -1;
-                break;
-            }
+        if(this.tileX === player.tileX || this.tileY === player.tileY){
+            rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
+            theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
+            currentLight = 0;
+            this.followingPlayer = true;
+            this.followDelay = 10;
+            for (var k = 0; k < rayseg; k++) {
+                if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
+                    this.followingPlayer = false;
+                    this.followDelay = -1;
+                    break;
+                }
 
-            if(DEBUG === true){
-                ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
-                ctx.beginPath();
-                ctx.moveTo(player.x, player.y);
-                ctx.lineTo(player.x + (seglength * (k + 1)) * Math.cos(theta), (player.y + (seglength * (k + 1)) * Math.sin(theta)));
-                ctx.stroke();
-            }
+                if(DEBUG === true){
+                    ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+                    ctx.beginPath();
+                    ctx.moveTo(player.x, player.y);
+                    ctx.lineTo(player.x + (seglength * (k + 1)) * Math.cos(theta), (player.y + (seglength * (k + 1)) * Math.sin(theta)));
+                    ctx.stroke();
+                }
 
+            }
         }
+
     };
 }
 
