@@ -387,6 +387,22 @@ function Player(x, y, width, height){
             if (keys && keys[40] || keys && keys[83]) {cameraY+=playerSpeed; this.dir = 2;}
         }
 
+        this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
+        this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
+
+        this.tileX = Math.floor(this.gameX/tileSize);
+        this.tileY = Math.floor(this.gameY/tileSize);
+
+        this.tileY3 = Math.floor((this.gameY+this.height*this.topMargin*tileSize)/tileSize);
+
+        this.tileX2 = Math.floor((this.gameX+this.width*tileSize)/tileSize);
+        this.tileY2 = Math.floor((this.gameY+this.height*tileSize)/tileSize);
+
+        this.tileX3 = Math.floor((this.gameX+this.width/2*tileSize)/tileSize);
+        this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
+
+        //THIS SOLVES THE ISSUE WITH COLLISIONS NOT WORKING ON CORNERS
+
         if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
             if(Math.floor(map[this.tileY3][this.tileX - 1]) === block || Math.floor(map[this.tileY2][this.tileX - 1]) === block){
                 if (keys && keys[65] || keys && keys[37]) {cameraX+=(this.tileX)*tileSize+1-(this.gameX); this.dir = 0;}
@@ -936,7 +952,7 @@ function Enemy(tileX, tileY, type){
         }else if(this.animationFrame === 0){
             this.animationDir = 1;
         }
-        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2 - this.size/2, tileSize, tileSize); //NORMAL
         ctx.fillStyle = 'yellow';
     };
 
