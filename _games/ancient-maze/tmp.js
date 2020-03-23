@@ -972,8 +972,8 @@ function Enemy(tileX, tileY, type){
             this.animationDir = 1;
         }
         ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2 - this.size/2, tileSize, tileSize); //NORMAL
-        ctx.fillStyle = 'red';
-        ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
+        //ctx.fillStyle = 'red';
+        //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
     };
 
     this.checkPlayerVisible = function() {
