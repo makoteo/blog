@@ -401,7 +401,7 @@ function Player(x, y, width, height){
         this.tileX3 = Math.floor((this.gameX+this.width/2*tileSize)/tileSize);
         this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
 
-        //THIS SOLVES THE ISSUE WITH COLLISIONS NOT WORKING ON CORNERS
+        //THE ABOVE SOLVES THE ISSUE WITH COLLISIONS NOT WORKING ON CORNERS
 
         if(Math.floor((this.gameX - playerSpeed)/tileSize) !== this.tileX){
             if(Math.floor(map[this.tileY3][this.tileX - 1]) === block || Math.floor(map[this.tileY2][this.tileX - 1]) === block){
@@ -542,7 +542,7 @@ function Player(x, y, width, height){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
-            ctx.fillText("Press SPACE to EAT " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
+            ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
         }else if(this.getItemSelectedName() === "SWORD"){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
@@ -820,7 +820,7 @@ function Enemy(tileX, tileY, type){
     this.attackSpeed = 40;
     this.attackDelayer = 5;
 
-    this.damage = 15;
+    this.damage = 10;
 
     this.animationFrame = 0;
 
@@ -843,6 +843,13 @@ function Enemy(tileX, tileY, type){
                         this.moveDirY = 1;
                     }else{
                         this.moveDirY = 0;
+                        this.yOffset = 0;
+                    }
+
+                    this.yOffSet += this.moveDirY*this.moveSpeed;
+                    if(Math.abs(this.yOffSet) >= tileSize){
+                        this.tileY += this.moveDirY;
+                        this.yOffSet = 0;
                     }
 
                     if(this.path[l][1] < this.tileX && (Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)){
@@ -851,7 +858,16 @@ function Enemy(tileX, tileY, type){
                         this.moveDirX = 1;
                     }else{
                         this.moveDirX = 0;
+                        this.xOffset = 0;
                     }
+
+                    this.xOffSet += this.moveDirX*this.moveSpeed;
+
+                    if(Math.abs(this.xOffSet) >= tileSize){
+                        this.tileX += this.moveDirX;
+                        this.xOffSet = 0;
+                    }
+
                     break;
                 }else{
                     if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
@@ -860,16 +876,8 @@ function Enemy(tileX, tileY, type){
                 }
             }
 
-            this.xOffSet += this.moveDirX*this.moveSpeed;
-            this.yOffSet += this.moveDirY*this.moveSpeed;
-
-            if(Math.abs(this.xOffSet) >= tileSize){
-                this.tileX += this.moveDirX;
-                this.xOffSet = 0;
-            }
-            if(Math.abs(this.yOffSet) >= tileSize){
-                this.tileY += this.moveDirY;
-                this.yOffSet = 0;
+            if(Math.floor(map[this.tileY][this.tileX]) === 1){
+                this.dead = true;
             }
 
             if(this.followDelay > 0){
@@ -894,12 +902,12 @@ function Enemy(tileX, tileY, type){
             this.dead = true;
         }
 
-        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1 && this.attackTimer === 0 && this.followingPlayer === true){
+        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5 && this.attackTimer === 0 && this.followingPlayer === true){
             this.startAttack();
         }
 
 
-        if(frameCount % 10 === 0) {
+        if(frameCount % 2 === 0) {
             if (this.followingPlayer === false) {
                 this.checkPlayerVisible();
             } else {
@@ -920,7 +928,7 @@ function Enemy(tileX, tileY, type){
 
     this.checkDamage = function(){
         if(player.attackTimer === 19){
-            if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1){
+            if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5){
                 this.paralysisTimer = this.paralysisTime;
                 this.health -= player.getItemSelectedDamageValue();
                 ctx.fillStyle = 'red';
@@ -937,7 +945,7 @@ function Enemy(tileX, tileY, type){
     };
 
     this.dealDamage = function(){
-        if(Math.abs(player.tileX - this.tileX) <= 1 && Math.abs(player.tileY - this.tileY) <= 1) {
+        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
             player.health = Math.max(0, player.health - this.damage);
             ctx.fillStyle = 'green';
         }
@@ -953,12 +961,11 @@ function Enemy(tileX, tileY, type){
             this.animationDir = 1;
         }
         ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2 - this.size/2, tileSize, tileSize); //NORMAL
-        ctx.fillStyle = 'yellow';
     };
 
     this.checkPlayerVisible = function() {
         var theta = 0;
-        if(this.tileX === player.tileX || this.tileY === player.tileY){
+        if(this.tileX === player.tileX2 || this.tileY === player.tileY4){
             rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
             theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
             currentLight = 0;
