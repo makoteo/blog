@@ -102,7 +102,7 @@ var godDecreasePerSecond = 0.6;
 
 var mobSpawnChance = 0.04; //0.02
 var mobSpawnRate = 90;
-var maxMobCount = 3;
+var maxMobCount = 2;
 
 var fontSize1 = WIDTH/20;
 var fontSize2 = WIDTH/13.3;
@@ -900,9 +900,15 @@ function Enemy(tileX, tileY, type){
 
         if(this.health === 0){
             this.dead = true;
+            if(Math.floor(map[this.tileY][this.tileX]) === 0){
+                var rnd = randomNum();
+                if(rnd < 1){
+                    map[this.tileY][this.tileX] = 4.3;
+                }
+            }
         }
 
-        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5 && this.attackTimer === 0 && this.followingPlayer === true){
+        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize && this.attackTimer === 0 && this.followingPlayer === true){
             this.startAttack();
         }
 
@@ -928,13 +934,18 @@ function Enemy(tileX, tileY, type){
 
     this.checkDamage = function(){
         if(player.attackTimer === 19){
-            if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5){
-                this.paralysisTimer = this.paralysisTime;
-                this.health -= player.getItemSelectedDamageValue();
-                ctx.fillStyle = 'red';
-                if(this.attackTimer > 0){
-                    this.attackTimer += this.attackDelayer;
+            if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize){
+                if((this.tileX === player.tileX3 && this.tileY === player.tileY4) || (this.tileY > player.tileY4 && player.dir === 2) || (this.tileY < player.tileY4 && player.dir === 3) ||
+                    (this.tileX < player.tileX3 && player.dir === 0) || (this.tileX > player.tileX3 && player.dir === 1)){
+                    this.paralysisTimer = this.paralysisTime;
+                    this.health -= player.getItemSelectedDamageValue();
+                    ctx.fillStyle = 'red';
+                    if(this.attackTimer > 0){
+                        this.attackTimer += this.attackDelayer;
+                    }
+                    console.log("HIT!");
                 }
+
             }
         }
     };
@@ -945,7 +956,7 @@ function Enemy(tileX, tileY, type){
     };
 
     this.dealDamage = function(){
-        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX - this.size/2 + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
+        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
             player.health = Math.max(0, player.health - this.damage);
             ctx.fillStyle = 'green';
         }
@@ -961,6 +972,8 @@ function Enemy(tileX, tileY, type){
             this.animationDir = 1;
         }
         ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2 - this.size/2, tileSize, tileSize); //NORMAL
+        ctx.fillStyle = 'red';
+        ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
     };
 
     this.checkPlayerVisible = function() {
@@ -971,10 +984,12 @@ function Enemy(tileX, tileY, type){
             currentLight = 0;
             this.followingPlayer = true;
             this.followDelay = 10;
+            this.path.push([player.tileY2, player.tileX3]);
             for (var k = 0; k < rayseg; k++) {
                 if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
                     this.followingPlayer = false;
                     this.followDelay = -1;
+                    this.path = [];
                     break;
                 }
 
@@ -1657,7 +1672,7 @@ function doLighting(){
                     if(randomNum() < mobSpawnChance){
                         var spawnMob = true;
                         for(var tmpcheck = 0; tmpcheck < enemies.length; tmpcheck++){
-                            if(enemies[tmpcheck].tileX === j && enemies[tmpcheck].tileY === i){
+                            if(enemies[tmpcheck].tileX === j && enemies[tmpcheck].tileY === i && Math.floor(map[j][i]) === 0){
                                 spawnMob = false;
                                 break;
                             }else{
