@@ -88,11 +88,12 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "", "", "", "", "", "", "Hi", "Lol", "Why", "Not"];
-var nutritionValues = [0, 20, 0, 50];
-var itemSacrificeValues = [50, 20, 80, 40];
-var itemDamageValues = [20, 0, 0, 0];
-var itemSpawnRate = [0, 0, 0, 0];
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "", "", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
+var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
+var nutritionValues = [0, 20, 0, 50, 0];
+var itemSacrificeValues = [50, 20, 80, 30, 40];
+var itemDamageValues = [20, 0, 0, 0, 10];
+var itemSpawnRate = [5, 25, 1, 10, 8];
 
 var spikesAnimFrame = 0;
 
@@ -496,7 +497,7 @@ function Player(x, y, width, height){
         return itemDamageValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
     };
     this.drawWeapon = function(){
-        if(this.getItemSelectedName() === "SWORD"){
+        if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"){
             ctx.save();
             ctx.translate(this.x - this.width/7*tileSize + xCameraOffset + this.weaponOffset + tileSize/8*3 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize/4*3 - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
@@ -544,7 +545,7 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
-        }else if(this.getItemSelectedName() === "SWORD"){
+        }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -645,7 +646,7 @@ function Player(x, y, width, height){
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
-            if(this.getItemSelectedName() === "SWORD" && this.spaceReleased === true && this.attackTimer === 0){
+            if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB") && this.spaceReleased === true && this.attackTimer === 0){
                 this.attack();
                 this.spaceReleased = false;
             }
@@ -788,7 +789,7 @@ function Enemy(tileX, tileY, type){
     this.tileY = tileY;
     this.type = type;
 
-    this.health = 100;
+    this.health = 50;
 
     this.size = tileSize;
 
@@ -1287,15 +1288,18 @@ function generateLoot(){
 }
 
 function rndLoot(i, j){
-    var rnd = randomNum();
-    if(rnd < 0.2){
-        map[i][j] = 4.0; //SWORD
-    }else if(rnd < 0.4){
-        map[i][j] = 4.3; //CHICKEN
-    }else if(rnd < 0.95){
-        map[i][j] = 4.1; //BREAD
-    }else{
-        //map[i][j] = 4.2; //KEY
+    var total = 0;
+    for(var n = 0; n < itemSpawnRate.length; n++){
+        total+=itemSpawnRate[n];
+    }
+    var rnd = Math.floor(randomNum()*total);
+    for(var n = 0; n < itemSpawnRate.length; n++){
+        rnd-=itemSpawnRate[n];
+        if(rnd <= 0){
+            map[i][j] = itemIDs[n];
+            console.log(itemIDs[n]);
+            break;
+        }
     }
 }
 
@@ -1777,6 +1781,18 @@ function game(){
         }
     }
 
+    if(gameRunning === true){
+        player.draw();
+    }
+
+    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+        for (var j = Math.max(player.tileY + 2, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
+                renderTile(i, j);
+            }
+        }
+    }
+
     for(var i = 0; i < enemies.length; i++){
         if(enemies[i].dead === true){
             enemies.splice(i, 1);
@@ -1785,18 +1801,6 @@ function game(){
             enemies[i].draw();
         }
 
-    }
-
-    if(gameRunning === true){
-        player.draw();
-    }
-
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY + 1, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
-                renderTile(i, j);
-            }
-        }
     }
 
     if(gameRunning === true) {
