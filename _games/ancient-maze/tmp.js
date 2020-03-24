@@ -106,7 +106,7 @@ var mobSpawnChance = 0.04; //0.02
 var mobSpawnRate = 90;
 var maxMobCount = 2;
 
-var fontSize1 = WIDTH/20;
+var fontSize1 = WIDTH/23;
 var fontSize2 = WIDTH/13.3;
 var fontSize3 = WIDTH/26.6;
 
@@ -543,8 +543,8 @@ function Player(x, y, width, height){
         if(this.getItemSelectedNutrition() > 0 && this.hunger !== this.maxHunger){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2, HEIGHT - HEIGHT/10);
+            ctx.textAlign = 'right';
+            ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2 + WIDTH/7, HEIGHT - HEIGHT/10);
         }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
@@ -1297,7 +1297,6 @@ function rndLoot(i, j){
         rnd-=itemSpawnRate[n];
         if(rnd <= 0){
             map[i][j] = itemIDs[n];
-            console.log(itemIDs[n]);
             break;
         }
     }
