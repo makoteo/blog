@@ -92,6 +92,7 @@ var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "", "", "", "", "", "", "Hi
 var nutritionValues = [0, 20, 0, 50];
 var itemSacrificeValues = [50, 20, 80, 40];
 var itemDamageValues = [20, 0, 0, 0];
+var itemSpawnRate = [0, 0, 0, 0];
 
 var spikesAnimFrame = 0;
 
@@ -826,6 +827,9 @@ function Enemy(tileX, tileY, type){
 
     this.animationDir = 1;
 
+    this.attackOffsetX = 0;
+    this.attackOffsetY = 0;
+
     this.update = function(){
         this.aliveTimer++;
 
@@ -939,11 +943,11 @@ function Enemy(tileX, tileY, type){
                     (this.tileX < player.tileX3 && player.dir === 0) || (this.tileX > player.tileX3 && player.dir === 1)){
                     this.paralysisTimer = this.paralysisTime;
                     this.health -= player.getItemSelectedDamageValue();
-                    ctx.fillStyle = 'red';
+                    this.animationFrame = 4;
+                    this.aliveTimer -= this.aliveTimer%7 + 1;
                     if(this.attackTimer > 0){
                         this.attackTimer += this.attackDelayer;
                     }
-                    console.log("HIT!");
                 }
 
             }
@@ -966,7 +970,7 @@ function Enemy(tileX, tileY, type){
         if(this.aliveTimer % 7 === 0){
             this.animationFrame+=this.animationDir;
         }
-        if(this.animationFrame === 2){
+        if(this.animationFrame >= 2){
             this.animationDir = -1;
         }else if(this.animationFrame === 0){
             this.animationDir = 1;
