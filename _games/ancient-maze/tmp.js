@@ -88,12 +88,13 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "", "", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT MEAT", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
-var nutritionValues = [0, 20, 0, 50, 0];
-var itemSacrificeValues = [50, 20, 80, 30, 40];
-var itemDamageValues = [20, 0, 0, 0, 10];
-var itemSpawnRate = [5, 25, 1, 10, 8];
+var nutritionValues = [0, 20, 0, 50, 0, 0, 15];
+var itemSacrificeValues = [60, 20, 80, 30, 40, 50, 25];
+var itemDamageValues = [20, 0, 0, 0, 10, 18, 0];
+
+var itemSpawnRate = [5, 20, 1, 10, 8, 4, 0];
 
 var spikesAnimFrame = 0;
 
@@ -497,7 +498,7 @@ function Player(x, y, width, height){
         return itemDamageValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
     };
     this.drawWeapon = function(){
-        if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"){
+        if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB" || this.getItemSelectedName() === "SPIKY CLUB"){
             ctx.save();
             ctx.translate(this.x - this.width/7*tileSize + xCameraOffset + this.weaponOffset + tileSize/8*3 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize/4*3 - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
@@ -545,7 +546,7 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'right';
             ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2 + WIDTH/7, HEIGHT - HEIGHT/10);
-        }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"){
+        }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB"){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -646,7 +647,7 @@ function Player(x, y, width, height){
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
-            if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB") && this.spaceReleased === true && this.attackTimer === 0){
+            if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB") && this.spaceReleased === true && this.attackTimer === 0){
                 this.attack();
                 this.spaceReleased = false;
             }
@@ -903,12 +904,12 @@ function Enemy(tileX, tileY, type){
         this.gameX = this.tileX*tileSize - cameraX + this.xOffSet + this.size/2;
         this.gameY = this.tileY*tileSize - cameraY + this.yOffSet + this.size/2;
 
-        if(this.health === 0){
+        if(this.health <= 0){
             this.dead = true;
             if(Math.floor(map[this.tileY][this.tileX]) === 0){
                 var rnd = randomNum();
                 if(rnd < 1){
-                    map[this.tileY][this.tileX] = 4.3;
+                    map[this.tileY][this.tileX] = 4.6;
                 }
             }
         }
