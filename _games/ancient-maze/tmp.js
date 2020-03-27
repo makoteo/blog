@@ -10,14 +10,14 @@ var map = [];
 
 // 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom, 6 = lockedDoor
 
-var mapdimensions = 70; //70, 90, 110
+var mapdimensions = 90; //70, 90, 110
 
 var mapwidth = mapdimensions;
 var mapheight = mapdimensions;
 
 var roomsize = 8; //8
 
-var room2size = 36; //36, 40, 40
+var room2size = 40; //36, 40, 40
 var room2 = true; //true, true, true
 
 var room3size = 72; //null, null, 72
@@ -73,7 +73,8 @@ var xCameraOffset = 0;
 var yCameraOffset = 0;
 
 var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
-//8468407084;
+//8468407084; - Dunno, I think this one takes long to generate and has a path that's too long so it regenerates again
+//2936916693; - Checking that mobs can't go through walls
 var SEED = ORIGINALSEED;
 
 var showMap = false;
@@ -91,10 +92,10 @@ var clicked = false;
 var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT MEAT", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
 var nutritionValues = [0, 20, 0, 50, 0, 0, 15];
-var itemSacrificeValues = [60, 20, 80, 30, 40, 50, 25];
+var itemSacrificeValues = [35, 15, 60, 25, 25, 30, 20];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0];
 
-var itemSpawnRate = [5, 20, 1, 10, 8, 4, 0];
+var itemSpawnRate = [3, 15, 1, 10, 6, 2, 0];
 
 var spikesAnimFrame = 0;
 
@@ -433,7 +434,7 @@ function Player(x, y, width, height){
 
         if(this.movingX === true || this.movingY === true){
             this.animationTimer++;
-            if(this.animationTimer === this.moveAnimSpeed){
+            if(this.animationTimer >= this.moveAnimSpeed){
                 this.animationFrame++;
                 this.animationTimer = 0;
             }
@@ -819,6 +820,7 @@ function Enemy(tileX, tileY, type){
 
     this.paralysisTime = 30;
 
+    this.attacking = false;
     this.attackTimer = 0;
     this.attackSpeed = 40;
     this.attackDelayer = 5;
@@ -831,6 +833,8 @@ function Enemy(tileX, tileY, type){
 
     this.attackOffsetX = 0;
     this.attackOffsetY = 0;
+
+    this.dir = 0;
 
     this.update = function(){
         this.aliveTimer++;
@@ -845,8 +849,10 @@ function Enemy(tileX, tileY, type){
                 if(this.path[l][0] !== this.tileY || this.path[l][1] !== this.tileX){
                     if(this.path[l][0] < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
                         this.moveDirY = -1;
+                        this.dir = 1;
                     }else if(this.path[l][0] > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
                         this.moveDirY = 1;
+                        this.dir = 3;
                     }else{
                         this.moveDirY = 0;
                         this.yOffset = 0;
@@ -858,10 +864,16 @@ function Enemy(tileX, tileY, type){
                         this.yOffSet = 0;
                     }
 
-                    if(this.path[l][1] < this.tileX && (Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)){
+                    if(this.path[l][1] < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
+                        ((Math.floor(map[this.tileY + 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX - 1]) === 4) && this.moveDirY === 1) ||
+                        ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
                         this.moveDirX = -1;
-                    }else if(this.path[l][1] > this.tileX && (Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4)){
+                        this.dir = 4;
+                    }else if(this.path[l][1] > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
+                        ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
+                        ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
                         this.moveDirX = 1;
+                        this.dir = 2;
                     }else{
                         this.moveDirX = 0;
                         this.xOffset = 0;
@@ -895,6 +907,11 @@ function Enemy(tileX, tileY, type){
 
         if(this.attackTimer > 0){
             this.attackTimer--;
+        }
+        if(this.attackTimer < 10 && this.attackTimer > 0){
+            this.attacking = true;
+        }else{
+            this.attacking = false;
         }
 
         if(this.attackTimer === 1){
@@ -950,6 +967,7 @@ function Enemy(tileX, tileY, type){
                     if(this.attackTimer > 0){
                         this.attackTimer += this.attackDelayer;
                     }
+                    this.path = [];
                 }
 
             }
@@ -964,7 +982,7 @@ function Enemy(tileX, tileY, type){
     this.dealDamage = function(){
         if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
             player.health = Math.max(0, player.health - this.damage);
-            ctx.fillStyle = 'green';
+            this.attacking = false;
         }
     };
 
@@ -977,7 +995,7 @@ function Enemy(tileX, tileY, type){
         }else if(this.animationFrame === 0){
             this.animationDir = 1;
         }
-        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2, this.gameY + yCameraOffset - this.size/2 - this.size/2, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
         //ctx.fillStyle = 'red';
         //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
     };
@@ -1828,11 +1846,11 @@ function game(){
 
         doLighting();
 
+        player.renderGUI();
+
         if(showMap === true){
             drawMinimap();
         }
-
-        player.renderGUI();
 
         /* SPAWNING
          if(frameCount % spawnRate === 0){
