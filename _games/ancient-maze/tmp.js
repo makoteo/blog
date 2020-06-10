@@ -1,3 +1,5 @@
+//Copyright (c) Martin Feranec - 2020
+
 var versionCode = "Alpha 0.92  Lighting Update 2.0";
 var WIDTH = 800;//800
 var HEIGHT = 450;//450
@@ -26,7 +28,7 @@ var room3 = false; //false, false, true
 var tileSize = Math.floor(72*(WIDTH/800)); //100
 var offset = 0;
 
-var textureSize = 16*5;
+var textureSize = 16*5; //Scale factor is 5 for whatever reason, but it's not 16 lol... Messes up the game haha
 
 var cameraX = tileSize*(mapwidth-10)/2;
 var cameraY = tileSize*(mapheight-6)/2;
@@ -838,9 +840,12 @@ function Enemy(tileX, tileY, type){
 
     this.dir = 0;
 
+    this.animDir = 0;
+
     this.update = function(){
         this.aliveTimer++;
 
+        //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
             for(var l = 1; l < this.path.length; l++) {
                 if (this.path[l][0] === this.path[0][0] && this.path[l][1] === this.path[0][1]) {
@@ -865,27 +870,33 @@ function Enemy(tileX, tileY, type){
                         this.tileY += this.moveDirY;
                         this.yOffSet = 0;
                     }
+                    if(this.moveDirY === 0){
+                        if(this.path[l][1] < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
+                            ((Math.floor(map[this.tileY + 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX - 1]) === 4) && this.moveDirY === 1) ||
+                            ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
+                            this.moveDirX = -1;
+                            this.animDir = -1;
+                            this.dir = 4;
+                        }else if(this.path[l][1] > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
+                            ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
+                            ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
+                            this.moveDirX = 1;
+                            this.animDir = 1;
+                            this.dir = 2;
+                        }else{
+                            this.moveDirX = 0;
+                            this.xOffset = 0;
+                        }
 
-                    if(this.path[l][1] < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
-                        ((Math.floor(map[this.tileY + 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX - 1]) === 4) && this.moveDirY === 1) ||
-                        ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
-                        this.moveDirX = -1;
-                        this.dir = 4;
-                    }else if(this.path[l][1] > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
-                        ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
-                        ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
-                        this.moveDirX = 1;
-                        this.dir = 2;
+                        this.xOffSet += this.moveDirX*this.moveSpeed;
+
+                        if(Math.abs(this.xOffSet) >= tileSize){
+                            this.tileX += this.moveDirX;
+                            this.xOffSet = 0;
+                        }
                     }else{
                         this.moveDirX = 0;
                         this.xOffset = 0;
-                    }
-
-                    this.xOffSet += this.moveDirX*this.moveSpeed;
-
-                    if(Math.abs(this.xOffSet) >= tileSize){
-                        this.tileX += this.moveDirX;
-                        this.xOffSet = 0;
                     }
 
                     break;
@@ -914,6 +925,13 @@ function Enemy(tileX, tileY, type){
             this.attacking = true;
         }else{
             this.attacking = false;
+        }
+
+        if(this.attackOffsetX !== 0){
+            this.attackOffsetX -= this.attackOffsetX/Math.abs(this.attackOffsetX);
+        }
+        if(this.attackOffsetY !== 0){
+            this.attackOffsetY -= this.attackOffsetY/Math.abs(this.attackOffsetY);
         }
 
         if(this.attackTimer === 1){
@@ -984,6 +1002,8 @@ function Enemy(tileX, tileY, type){
     this.dealDamage = function(){
         if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
             player.health = Math.max(0, player.health - this.damage);
+            this.attackOffsetX+=20*this.moveDirX;
+            this.attackOffsetY+=20*this.moveDirY;
             this.attacking = false;
         }
     };
@@ -997,7 +1017,11 @@ function Enemy(tileX, tileY, type){
         }else if(this.animationFrame === 0){
             this.animationDir = 1;
         }
-        ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+        if(this.animDir === 1){
+            ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+        }else{
+            ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+        }
         //ctx.fillStyle = 'red';
         //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
     };
@@ -1490,10 +1514,18 @@ function generateTextureMap(){
                     rndgtm = randomNum();
                     if(rndgtm < 0.9){
                         map[j][i] = 1.05;
-                    }else if(rndgtm < 0.93){
+                    }else if(rndgtm < 0.91){
                         map[j][i] = 1.25;
-                    }else{
+                    }else if(rndgtm < 0.96){
                         map[j][i] = 1.35;
+                    }else if(rndgtm < 0.97){
+                        map[j][i] = 1.45;
+                    }else if(rndgtm < 0.98){
+                        map[j][i] = 1.55;
+                    }else if(rndgtm < 0.99){
+                        map[j][i] = 1.65;
+                    }else{
+                        map[j][i] = 1.75;
                     }
                 }else{
                     rndgtm = randomNum();
@@ -1604,6 +1636,17 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize*2, 0, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
     }
 
+    //DECORATED WALLS, ONLY APPEAR ON WHOLE FACE, THUS WE DON'T NEED 1.40 ONLY 1.45 etc.
+    else if(map[j][i] === 1.45){
+        ctx.drawImage(tileMap, textureSize*6, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.55){
+        ctx.drawImage(tileMap, textureSize*7, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.65){
+        ctx.drawImage(tileMap, textureSize*8, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.75){
+        ctx.drawImage(tileMap, textureSize*9, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }
+
     else if(map[j][i] === 1.97){ //LIGHTS
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
@@ -1617,10 +1660,14 @@ function renderTile(i, j){
 
     else if(map[j][i] === 6.1){//DOOR WALL
         ctx.drawImage(tileMap, textureSize*2, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
-        map[j][i] = 6.2;
+        if(frameCount % 3 === 0) {
+            map[j][i] = 6.2;
+        }
     }else if(map[j][i] === 6.2){//DOOR WALL
         ctx.drawImage(tileMap, textureSize*3, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
-        map[j][i] = 6.3;
+        if(frameCount % 3 === 0) {
+            map[j][i] = 6.3;
+        }
     }else if(map[j][i] === 6.3){//DOOR WALL
         ctx.drawImage(tileMap, textureSize*4, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
     }
@@ -1869,6 +1916,21 @@ function game(){
 
     }
     clicked = false;
+}
+
+// ---------------------------------------------------------- SIDE FUNCTIONS ------------------------------------------------------------------------ //
+
+function player_give(name){
+    var give_go = true;
+    for(var item = 0; item < itemNames.length; item++){
+        if(itemNames[item] === name.toUpperCase()){
+            break;
+        }
+        if(item === itemNames.length-1){
+            give_go = false;
+        }
+    }
+    if(give_go === true){player.inventory.push(item)};
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
