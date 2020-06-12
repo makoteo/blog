@@ -807,7 +807,11 @@ function Enemy(tileX, tileY, type){
     this.xOffSet = 0;
     this.yOffSet = 0;
 
-    this.moveSpeed = 3*(WIDTH/800);
+    if(this.type === 0) {
+        this.moveSpeed = 3*(WIDTH/800);
+    }else if(this.type === 1) {
+        this.moveSpeed = 4*(WIDTH/800);
+    }
 
     this.moveDirX = 0;
     this.moveDirY = 0;
@@ -842,8 +846,12 @@ function Enemy(tileX, tileY, type){
 
     this.animDir = 0;
 
+    this.animationRunning = true;
+
     this.update = function(){
         this.aliveTimer++;
+
+        if(this.type === 1){if(this.path === []){this.animationRunning = false;}else{this.animationRunning = true;}}
 
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
@@ -1009,21 +1017,40 @@ function Enemy(tileX, tileY, type){
     };
 
     this.draw = function(){
-        if(this.aliveTimer % 7 === 0){
-            this.animationFrame+=this.animationDir;
+        if(this.type === 0) {
+            if(this.aliveTimer % 7 === 0) {
+                this.animationFrame += this.animationDir;
+            }
+            if(this.animationFrame >= 2){//2
+                this.animationDir = -1;
+            }else if(this.animationFrame === 0){
+                this.animationDir = 1;
+            }
+            if(this.animDir === 1){
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }else{
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }
+            //ctx.fillStyle = 'red';
+            //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
+        }else if(this.type === 1){
+            if(this.aliveTimer % 9 === 0 && this.animationRunning === true) {
+                this.animationFrame += this.animationDir;
+            }
+            if(this.animationFrame >= 3){//2
+                //this.animationDir = -1;
+                this.animationFrame = 0;
+            }else if(this.animationFrame === 0){
+                this.animationDir = 1;
+            }
+            if(this.animDir === 1){
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*2, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }else{
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*3, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }
+            //ctx.fillStyle = 'red';
+            //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
         }
-        if(this.animationFrame >= 2){
-            this.animationDir = -1;
-        }else if(this.animationFrame === 0){
-            this.animationDir = 1;
-        }
-        if(this.animDir === 1){
-            ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
-        }else{
-            ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
-        }
-        //ctx.fillStyle = 'red';
-        //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
     };
 
     this.checkPlayerVisible = function() {
@@ -1755,7 +1782,8 @@ function doLighting(){
                             }
                         }
                         if(spawnMob === true){
-                            enemies.push(new Enemy(j, i, 0));
+                            //enemies.push(new Enemy(j, i, 0));
+                            enemies.push(new Enemy(j, i, 1));
                             player.moveCycle+=10;
                         }
                     }
