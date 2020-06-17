@@ -807,10 +807,18 @@ function Enemy(tileX, tileY, type){
     this.xOffSet = 0;
     this.yOffSet = 0;
 
-    if(this.type === 0) {
+    if(this.type === 0) {// BAT
         this.moveSpeed = 3*(WIDTH/800);
-    }else if(this.type === 1) {
+        this.attackSpeed = 40;
+        this.paralysisTime = 30;
+        this.damage = 10;
+        this.attackDelayer = 5;
+    }else if(this.type === 1) { //RAT
         this.moveSpeed = 4*(WIDTH/800);
+        this.attackSpeed = 30;
+        this.paralysisTime = 25;
+        this.damage = 15;
+        this.attackDelayer = 4;
     }
 
     this.moveDirX = 0;
@@ -826,14 +834,8 @@ function Enemy(tileX, tileY, type){
 
     this.paralysisTimer = 0;
 
-    this.paralysisTime = 30;
-
     this.attacking = false;
     this.attackTimer = 0;
-    this.attackSpeed = 40;
-    this.attackDelayer = 5;
-
-    this.damage = 10;
 
     this.animationFrame = 0;
 
@@ -844,14 +846,14 @@ function Enemy(tileX, tileY, type){
 
     this.dir = 0;
 
-    this.animDir = 0;
+    this.animDir = 0; //I think this is which direction it's is pointing
 
     this.animationRunning = true;
 
     this.update = function(){
         this.aliveTimer++;
 
-        if(this.type === 1){if(this.path === []){this.animationRunning = false;}else{this.animationRunning = true;}}
+        if(this.type === 1){if(this.path.length === 0){this.animationRunning = false;}else{this.animationRunning = true;}}
 
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
@@ -1034,19 +1036,21 @@ function Enemy(tileX, tileY, type){
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
         }else if(this.type === 1){
-            if(this.aliveTimer % 9 === 0 && this.animationRunning === true) {
+            if(this.aliveTimer % 9 === 0 && this.animationRunning === true && this.attackTimer < 15) {
                 this.animationFrame += this.animationDir;
+            }else if(this.attackTimer > 15){
+                this.animationFrame = 3;
+            }
+            if(this.animDir === 1){
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*2, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }else{
+                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*3, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
             }
             if(this.animationFrame >= 3){//2
                 //this.animationDir = -1;
                 this.animationFrame = 0;
             }else if(this.animationFrame === 0){
                 this.animationDir = 1;
-            }
-            if(this.animDir === 1){
-                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*2, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
-            }else{
-                ctx.drawImage(tileMap, textureSize*7 + textureSize*this.animationFrame, textureSize*3, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
             }
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
@@ -1876,6 +1880,16 @@ function game(){
         }
     }
 
+    for(var i = 0; i < enemies.length; i++){
+        if(enemies[i].dead === true){
+            enemies.splice(i, 1);
+        }else{
+            enemies[i].update();
+            enemies[i].draw();
+        }
+
+    }
+
     if(gameRunning === true){
         player.draw();
     }
@@ -1886,16 +1900,6 @@ function game(){
                 renderTile(i, j);
             }
         }
-    }
-
-    for(var i = 0; i < enemies.length; i++){
-        if(enemies[i].dead === true){
-            enemies.splice(i, 1);
-        }else{
-            enemies[i].update();
-            enemies[i].draw();
-        }
-
     }
 
     if(gameRunning === true) {
