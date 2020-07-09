@@ -70,6 +70,7 @@ for(var i = 0; i < 9; i++){
 }
 
 var currentLight = 0;
+var lightConstant = 0.1;
 
 var xCameraOffset = 0;
 var yCameraOffset = 0;
@@ -91,7 +92,7 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT MEAT", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
 var nutritionValues = [0, 20, 0, 50, 0, 0, 15];
 var itemSacrificeValues = [35, 15, 60, 25, 25, 30, 20];
@@ -181,11 +182,21 @@ function Player(x, y, width, height){
 
     this.attackTimer = 0;
     this.attacking = false;
+    this.stunTimer = 0;
+    this.stunY = 0;
 
     this.moveCycle = 1;
 
     this.update = function(){
         this.winStateCheck();
+
+        if(this.stunTimer > 0){
+            this.stunTimer--;
+        }
+        if(this.stunY < 0){
+            this.stunY+=2;
+        }
+
         this.gameX = cameraX - this.width/2*tileSize + WIDTH/2;
         this.gameY = cameraY - this.height/2*tileSize + HEIGHT/2;
 
@@ -219,7 +230,7 @@ function Player(x, y, width, height){
         this.tileX3 = Math.floor((this.gameX+this.width/2*tileSize)/tileSize);
         this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
 
-        if(this.frozen === false && this.attacking === false){
+        if(this.frozen === false && this.attacking === false && this.stunTimer === 0){
             this.checkCollisions(1);
             this.actionButtonCheck();
         }
@@ -482,7 +493,7 @@ function Player(x, y, width, height){
             this.drawWeapon();
         }
 
-        ctx.drawImage(tileMap, textureSize*4+textureSize*0.75*this.animationFrame, textureSize*this.dir, textureSize*0.75, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
+        ctx.drawImage(tileMap, textureSize*4+textureSize*0.75*this.animationFrame, textureSize*this.dir, textureSize*0.75, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle + this.stunY, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
 
         //THIS IS FUNNY AHAH - ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5, textureSize, textureSize, this.x - this.width/2*tileSize + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle, this.width*tileSize, this.height*tileSize + this.breathCycle); //NORMAL
         if(this.dir !== 3){
@@ -507,7 +518,7 @@ function Player(x, y, width, height){
             ctx.save();
             ctx.translate(this.x - this.width/7*tileSize + xCameraOffset + this.weaponOffset + tileSize/8*3 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize/4*3 - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
-            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize/4*3 + (1-this.weaponScaleY)*tileSize/4*3, tileSize/4*3, Math.abs(tileSize/4*3*this.weaponScaleY)); //NORMAL
+            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize/4*3 + (1-this.weaponScaleY)*tileSize/4*3 + this.stunY, tileSize/4*3, Math.abs(tileSize/4*3*this.weaponScaleY)); //NORMAL
             //DRAW BODY PORTION OF PLAYER TO COVER SWORD
             ctx.restore();
         }
@@ -648,7 +659,11 @@ function Player(x, y, width, height){
         if(keys && keys[32]){
             if(this.getItemSelectedNutrition() > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
                 this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition(), this.maxHunger);
-                this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
+                if(this.getItemSelectedName() !== "BAT WING"){
+                    this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
+                }else{
+                    this.health = Math.min(this.health + this.getItemSelectedNutrition()*1.5, this.maxHealth);
+                }
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
@@ -1015,6 +1030,8 @@ function Enemy(tileX, tileY, type){
             this.attackOffsetX+=20*this.moveDirX;
             this.attackOffsetY+=20*this.moveDirY;
             this.attacking = false;
+            player.stunTimer = 8;
+            player.stunY = -8;
         }
     };
 
@@ -1637,15 +1654,16 @@ function renderTile(i, j){
     }//WALLS
 
     else if(Math.floor(map[j][i]*10) === 6){
-        if(map[j][i] !== 0.6 && map[j][i] !== 0.63 && spikesAnimFrame === 0){
+        if(map[j][i] !== 0.63 && spikesAnimFrame === 0){
             map[j][i] += 0.01;
-        }else if(map[j][i] !== 0.6 && map[j][i] !== 0.63 && spikesAnimFrame === 1){
+        }else if(map[j][i] !== 0.6 && spikesAnimFrame === 1){
             map[j][i] -= 0.01;
-        }else if(map[j][i] === 0.63 && frameCount % 120 === 0){
-            map[j][i] -= 0.01;
+        }
+        if(map[j][i] === 0.63 && frameCount % 120 === 0){
+            //map[j][i] -= 0.01;
             spikesAnimFrame = 1;
         }else if(map[j][i] === 0.6 && frameCount % 120 === 0){
-            map[j][i] += 0.01;
+            //map[j][i] += 0.01;
             spikesAnimFrame = 0;
         }
         if(map[j][i] !== 0.6){
@@ -1764,7 +1782,7 @@ function doLighting(){
                 currentLight = 0;
                 for(var k = 0; k < rayseg; k++){
                     if(Math.floor(map[Math.floor((cameraY + player.y + (seglength*(k+1))*Math.sin(theta))/tileSize)][Math.floor((cameraX + player.x + (seglength*(k+1))*Math.cos(theta))/tileSize)]) === 1){
-                        currentLight += 0.10;
+                        currentLight += lightConstant;
                     }
 
                     /*ctx.strokeStyle = 'rgba(0, 0, 0, ' + Math.min(1, currentLight) + ')';
