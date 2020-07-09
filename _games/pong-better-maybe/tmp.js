@@ -11,7 +11,7 @@ var HIGHSCORE = 0;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", whiteblue: "#B6C9E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
+var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
 var CONTROLS = {a: [87, 83], b: [38, 40]};
 
 var objects = [];
@@ -27,19 +27,24 @@ function Object(x, y, width, height, controls){
     this.length = this.height;
     this.controls = controls;
 
-    this.angle = Math.PI/4+Math.PI/2;
+    this.angle = Math.PI/2;
 
-    this.speed = 7;
+    this.speed = 8;
 
     this.update = function(){
         if(this.controls.length > 0) {
             if (keys && keys[controls[0]]) {
-                this.y -= this.speed;
+                if(this.y > 0){
+                    this.y -= this.speed;
+                }
             }
             if (keys && keys[controls[1]]) {
-                this.y += this.speed;
+                if(this.y+this.height < HEIGHT){
+                    this.y += this.speed;
+                }
             }
         }
+        //this.angle+=0.08;
     };
 
     this.draw = function(){
@@ -65,8 +70,8 @@ function Projectile(x, y, angle){
 
     this.radius = 5;
 
-    this.angle = 0;
-    this.speed = 6;
+    this.angle = angle;
+    this.speed = Math.round(Math.random()*6)+3;
 
     this.velX = this.speed*Math.cos(this.angle);
     this.velY = this.speed*Math.sin(this.angle);
@@ -76,16 +81,14 @@ function Projectile(x, y, angle){
             this.angle = (2*Math.PI - this.angle);
             this.velX = this.speed*Math.cos(this.angle);
             this.velY = this.speed*Math.sin(this.angle);
-            console.log("Ey");
         }
         for(var o in objects){
-            var t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX, y: this.y+this.velY}],[{x: objects[o].x, y: objects[o].y}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle), y: objects[o].y + objects[o].length*Math.sin(objects[o].angle)}]);
+            var t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.1, y: this.y+this.velY*1.1}],[{x: objects[o].x, y: objects[o].y}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle), y: objects[o].y + objects[o].length*Math.sin(objects[o].angle)}]);
             if(t === 'collinear') {continue;}
             if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2; // + (Math.random() * (1) - 0.5)
+                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 + (Math.random() * (0.8) - 0.4); // + (Math.random() * (1) - 0.5)
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
-                console.log("OOF")
             }
         }
         this.x += this.velX;
@@ -102,10 +105,11 @@ function Projectile(x, y, angle){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-objects.push(new Object(10, 10, 10, 100, CONTROLS.a));
-objects.push(new Object(WIDTH-20, 10, 10, 100, CONTROLS.b));
+objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a));
+objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b));
 
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
+projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -125,6 +129,16 @@ function intersect(s1, s2){
 function game(){
     ctx.fillStyle = COLORS.bg;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.strokeStyle = COLORS.lightblue;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([12, 8]);
+    ctx.beginPath();
+    ctx.moveTo(WIDTH/2, 0);
+    ctx.lineTo(WIDTH/2, HEIGHT);
+    ctx.stroke();
+    ctx.setLineDash([0, 0]);
+    ctx.lineWidth = 1;
 
     if(gameRunning === true) {
 
