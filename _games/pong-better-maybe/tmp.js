@@ -12,10 +12,15 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
-var CONTROLS = {a: [87, 83], b: [38, 40]};
+var CONTROLS = {a: [87, 83], b: [38, 40], c:[69, 68], d: [100, 97]};
+var FONTSIZES = {large: 70};
 
 var objects = [];
 var projectiles = [];
+
+var players = [];
+
+var maxProjectiles = 2;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -31,15 +36,17 @@ function Object(x, y, width, height, controls){
 
     this.speed = 8;
 
+    this.boundsY = [0, HEIGHT];
+
     this.update = function(){
         if(this.controls.length > 0) {
             if (keys && keys[controls[0]]) {
-                if(this.y > 0){
+                if(this.y > this.boundsY[0]){
                     this.y -= this.speed;
                 }
             }
             if (keys && keys[controls[1]]) {
-                if(this.y+this.height < HEIGHT){
+                if(this.y+this.height < this.boundsY[1]){
                     this.y += this.speed;
                 }
             }
@@ -70,27 +77,36 @@ function Projectile(x, y, angle){
 
     this.radius = 5;
 
+    this.type = 0;
+
     this.angle = angle;
-    this.speed = Math.round(Math.random()*6)+3;
+    this.speed = Math.round(Math.random()*5)+4;
 
     this.velX = this.speed*Math.cos(this.angle);
     this.velY = this.speed*Math.sin(this.angle);
 
     this.update = function(){
+        //BOUNCES OFF SIDES
         if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
             this.angle = (2*Math.PI - this.angle);
             this.velX = this.speed*Math.cos(this.angle);
             this.velY = this.speed*Math.sin(this.angle);
         }
+        //BOUNCES OFF PADDLES
         for(var o in objects){
             var t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.1, y: this.y+this.velY*1.1}],[{x: objects[o].x, y: objects[o].y}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle), y: objects[o].y + objects[o].length*Math.sin(objects[o].angle)}]);
             if(t === 'collinear') {continue;}
             if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 + (Math.random() * (0.8) - 0.4); // + (Math.random() * (1) - 0.5)
+                var rndOff = 0;
+                if(this.type === 0){
+                    rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
+                }
+                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
             }
         }
+        //UPDATE POSITION
         this.x += this.velX;
         this.y += this.velY;
     };
@@ -103,10 +119,21 @@ function Projectile(x, y, angle){
     };
 }
 
+function Player(id){
+    this.id = id;
+    this.points = 0;
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
+
+players.push(new Player(0));
+players.push(new Player(1));
 
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b));
+
+objects.push(new Object(200, HEIGHT/2-50, 10, 100, CONTROLS.c));
+objects.push(new Object(WIDTH-200, HEIGHT/2-50, 10, 100, CONTROLS.d));
 
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
@@ -152,7 +179,37 @@ function game(){
         for(var i = 0; i < projectiles.length; i++){
             projectiles[i].update();
             projectiles[i].draw();
+
+            if( projectiles[i].x < 0){
+                players[1].points++;
+                projectiles.splice(i, 1);
+                if(players[1].points % 10 === 0){
+                    maxProjectiles++;
+                }
+            }else if( projectiles[i].x > WIDTH){
+                players[0].points++;
+                projectiles.splice(i, 1);
+                if(players[0].points % 10 === 0){
+                    maxProjectiles++;
+                }
+            }
         }
+
+        if(projectiles.length < maxProjectiles){
+            var rnd = Math.random();
+            if(rnd < 0.5){
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
+            }else{
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
+            }
+        }
+
+        ctx.font = FONTSIZES.large + 'px quickPixel';
+        ctx.fillStyle = COLORS.lightblue;
+        ctx.textAlign = 'left';
+        ctx.fillText(players[0].points, 10, 40);
+        ctx.textAlign = 'right';
+        ctx.fillText(players[1].points, WIDTH - 10, 40);
 
     }
 }
