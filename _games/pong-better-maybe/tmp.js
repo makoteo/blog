@@ -35,7 +35,7 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.angle = Math.PI/2;
     this.omega = 0;
-    this.maxRot = 0.04;
+    this.maxRot = 0.025;
     this.angleAccel = 0.002;
 
     this.speed = 8;
@@ -93,12 +93,14 @@ function Object(x, y, width, height, controls, type, bounds){
     };
 
     this.draw = function(){
-        ctx.fillStyle = COLORS.white;
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle-Math.PI/2);
-        ctx.fillRect(-this.width/2, 0, this.width, this.height);
-        ctx.restore();
+        if(this.type === 0 || this.type === 1) {
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width / 2, 0, this.width, this.height);
+            ctx.restore();
+        }
 
         if(this.type === 1){
             ctx.strokeStyle = COLORS.yellow;
@@ -109,14 +111,35 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.strokeRect(this.x-this.width/2, this.boundsY[0] + 2*this.height + 2*this.dividerSize, this.width, this.height);
             ctx.globalAlpha = 1;
             ctx.setLineDash([0, 0]);
+        }else if(this.type === 2){
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width*0.5, 0, this.width, this.height);
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI, false);
+            ctx.fillStyle = COLORS.white;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            ctx.setLineDash([this.width/2, this.width/2]);
+            ctx.arc(this.x, this.y, this.height, 0, 2 * Math.PI, false);
+            ctx.strokeStyle = COLORS.yellow;
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.globalAlpha = 1;
         }
 
-        ctx.strokeStyle = COLORS.red;
+        /*ctx.strokeStyle = COLORS.red;
         ctx.beginPath();
         ctx.moveTo(this.x + this.width/2*Math.cos(this.angle+Math.PI/2), this.y + this.width/2*Math.sin(this.angle+Math.PI/2));
         ctx.lineTo(this.x + this.width/2*Math.cos(this.angle+Math.PI/2) + this.length*Math.cos(this.angle), this.y + this.width/2*Math.sin(this.angle+Math.PI/2) + this.length*Math.sin(this.angle));
         ctx.stroke();
-        ctx.strokeStyle = COLORS.white;
+        ctx.strokeStyle = COLORS.white;*/
     };
 }
 
@@ -143,56 +166,29 @@ function Projectile(x, y, angle){
         }
         //BOUNCES OFF PADDLES
         for(var o in objects){
-            /*var t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.2, y: this.y+this.velY*1.2}],[{x: objects[o].x + objects[o].width/2*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width/2*Math.sin(objects[o].angle+Math.PI/2)}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width/2*Math.cos(objects[o].angle-Math.PI/2), y: objects[o].y + objects[o].width/2*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}]);
-            if(t === 'collinear') {continue;}
-            if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                var rndOff = 0;
-                if(this.type === 0){
-                    rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                }
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-                this.velX = this.speed*Math.cos(this.angle);
-                this.velY = this.speed*Math.sin(this.angle);
-                objects[o].omega*=0.8;
-            }else{
-                t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.2, y: this.y+this.velY*1.2}],[{x: objects[o].x + objects[o].width/2*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width/2*Math.sin(objects[o].angle+Math.PI/2)}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width/2*Math.cos(objects[o].angle-Math.PI/2), y: objects[o].y + objects[o].width/2*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}]);
-                if(t === 'collinear') {continue;}
-                if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                    var rndOff = 0;
-                    if(this.type === 0){
-                        rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                    }
-                    this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-                    this.velX = this.speed*Math.cos(this.angle);
-                    this.velY = this.speed*Math.sin(this.angle);
-                    objects[o].omega*=0.8;
-                }
-            }*/
-            var t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.2, y: this.y+this.velY*1.2}],[{x: objects[o].x, y: objects[o].y}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle), y: objects[o].y + objects[o].length*Math.sin(objects[o].angle)}]);
-            if(t === 'collinear') {continue;}
-            if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                var rndOff = 0;
-                if(this.type === 0){
-                    rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                }
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-                this.velX = this.speed*Math.cos(this.angle);
-                this.velY = this.speed*Math.sin(this.angle);
-                objects[o].omega*=0.8;
-            }else if(this.type === 2){
-                t = intersect([{x: this.x, y: this.y}, {x: this.x+this.velX*1.2, y: this.y+this.velY*1.2}],[{x: objects[o].x, y: objects[o].y}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle+objects[o].omega/2), y: objects[o].y + objects[o].length*Math.sin(objects[o].angle+objects[o].omega/2)}]);
-                if(t === 'collinear') {continue;}
-                if(t[0] <= 1 && t[0] >= 0 && t[1] <= 1 && t[1] >= 0) {
-                    var rndOff = 0;
-                    if(this.type === 0){
-                        rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                    }
-                    this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-                    this.velX = this.speed*Math.cos(this.angle);
-                    this.velY = this.speed*Math.sin(this.angle);
-                    objects[o].omega*=0.8;
-                }
+            //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
+            var collision = false;
+            if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+                collision = true;
+            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+                collision = true;
+            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2)) === true){
+                collision = true;
+            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+                collision = true;
             }
+
+            if(collision === true){
+                var rndOff = 0;
+                if(this.type === 0){
+                    rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
+                }
+                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
+                this.velX = this.speed*Math.cos(this.angle);
+                this.velY = this.speed*Math.sin(this.angle);
+                objects[o].omega*=0.8;
+            }
+
         }
         //UPDATE POSITION
         this.x += this.velX;
@@ -224,23 +220,36 @@ players.push(new Player(1));
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
-objects.push(new Object(200, HEIGHT/2-50, 10, 100, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(WIDTH-200, HEIGHT/2-50, 10, 100, CONTROLS.d, 1, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+//objects.push(new Object(200, HEIGHT/2-50, 10, 100, CONTROLS.c, 1, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(200, HEIGHT/2, 5, 80, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 80, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-function intersect(s1, s2){
-    if(((s2[1].x - s2[0].x)*(s1[0].y - s1[1].y) - (s1[0].x - s1[1].x)*(s2[1].y - s2[0].y)) === 0) {
-        return 'collinear';
+function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+
+    // calculate the direction of the lines
+    var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+    var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+
+    // if uA and uB are between 0-1, lines are colliding
+    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+
+        // optionally, draw a circle where the lines meet
+        var intersectionX = x1 + (uA * (x2-x1));
+        var intersectionY = y1 + (uA * (y2-y1));
+
+        /*ctx.beginPath();
+        ctx.arc(intersectionX, intersectionY, 5, 0, 2 * Math.PI, false);
+        ctx.fillStyle = COLORS.red;
+        ctx.fill();*/
+
+        return true;
     }
-    var tA =  ((s2[0].y - s2[1].y)*(s1[0].x - s2[0].x) + (s2[1].x - s2[0].x)*(s1[0].y - s2[0].y))/
-        ((s2[1].x - s2[0].x)*(s1[0].y - s1[1].y) - (s1[0].x - s1[1].x)*(s2[1].y - s2[0].y)),
-        tB =  ((s1[0].y - s1[1].y)*(s1[0].x - s2[0].x) + (s1[1].x - s1[0].x)*(s1[0].y - s2[0].y))/
-            ((s2[1].x - s2[0].x)*(s1[0].y - s1[1].y) - (s1[0].x - s1[1].x)*(s2[1].y - s2[0].y));
-    return [tA, tB];
+    return false;
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
@@ -292,9 +301,9 @@ function game(){
         if(projectiles.length < maxProjectiles){
             var rnd = Math.random();
             if(rnd < 0.5){
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, 0));
             }else{
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, Math.PI));
             }
         }
 
