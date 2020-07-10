@@ -29,7 +29,7 @@ function Object(x, y, width, height, controls, type, bounds){
     this.y = y;
     this.width = width;
     this.height = height;
-    this.length = this.height;
+    this.length = this.height*0.8;
     this.controls = controls;
     this.type = type;
 
@@ -168,13 +168,15 @@ function Projectile(x, y, angle){
         for(var o in objects){
             //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
             var collision = false;
-            if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            var tmpoff = 0.6;
+            var mult = 1;
+            if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*1.2, this.y+this.velY*1.2, objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
             }
 
@@ -183,10 +185,13 @@ function Projectile(x, y, angle){
                 if(this.type === 0){
                     rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
                 }
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
+                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2.2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
                 objects[o].omega*=0.8;
+
+                this.x += this.velX;
+                this.y += this.velY;
             }
 
         }
@@ -221,8 +226,8 @@ objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
 //objects.push(new Object(200, HEIGHT/2-50, 10, 100, CONTROLS.c, 1, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(200, HEIGHT/2, 5, 80, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 80, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(200, HEIGHT/2, 6, 80, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(WIDTH-200, HEIGHT/2, 6, 80, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
