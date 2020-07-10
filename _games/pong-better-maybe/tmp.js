@@ -170,13 +170,13 @@ function Projectile(x, y, angle){
             var collision = false;
             var tmpoff = 0.5;
             var mult = 1.2;
-            if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*0.8*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*0.8*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*tmpoff*0.8*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*0.8*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2)) === true){
                 collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*0.8*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*0.8*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*tmpoff*0.8*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*0.4*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
+            }else if(lineLine(this.x, this.y, this.x+this.velX*mult, this.y+this.velY*mult, objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
                 collision = true;
             }
 
@@ -185,7 +185,7 @@ function Projectile(x, y, angle){
                 if(this.type === 0){
                     rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
                 }
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2.2 - rndOff*Math.sign(this.velX); // + (Math.random() * (1) - 0.5)
+                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2)*2.2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
                 objects[o].omega*=0.8;
