@@ -188,6 +188,24 @@ function Projectile(x, y, angle){
             var objL = objects[o].length*Math.cos(objects[o].angle);
             var objLS = objects[o].length*Math.sin(objects[o].angle);
 
+            var coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objW, y: objY + objWS}, {x: this.x + this.velX, y: this.y + this.velY}, this.radius*1.8);
+            if(coltmp.col && collision === false){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+                rottop = 1;
+                this.y += objects[o].velY;
+                //console.log(objects[o].velY, coltmp.distY);
+            }
+            coltmp = lineCircle({x: objX + objWN + objL, y: objY + objWNS + objLS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x + this.velX, y: this.y + this.velY}, this.radius*1.8);
+            if(coltmp.col && collision === false){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+                rottop = 1;
+                this.y += objects[o].velY;
+            }
+
             var coltmp = lineCircle({x: objX + objW, y: objY + objWS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
             if(coltmp.col && collision === false){
                 collision = true;
@@ -200,20 +218,10 @@ function Projectile(x, y, angle){
                 this.x -= coltmp.distX;
                 this.y -= coltmp.distY;
             }
-            coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objW, y: objY + objWS}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                rottop = 1;
-            }
-            coltmp = lineCircle({x: objX + objWN + objL, y: objY + objWNS + objLS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                rottop = 1;
-            }
+
+            //DIAGONALS SHOVE BALL OUT OF WAY
+
+
             if(collision === true){
                 var rndOff = 0;
                 if(objects[o].type === 0 || objects[o].type === 1){
@@ -370,6 +378,7 @@ function game(){
             if(rnd < 0.5){
                 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, 0));
             }else{
+                //projectiles.push(new Projectile(10, 0, Math.PI/2));
                 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, Math.PI));
             }
         }
