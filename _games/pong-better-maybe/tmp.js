@@ -175,50 +175,45 @@ function Projectile(x, y, angle){
             //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
             var collision = false;
             var rottop = 0;
-            var tmpoff = 0.55;
-            var mult = 0.6;
 
-            //CHECK NOT FOR VELX VELY BUT FOR RADIUS AT ANGLE + VELX, VELY?
+            var objX = objects[o].x;
+            var objW = objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2);
+            var objWN = objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2);
 
-            /*if(lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
-                collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
-                collision = true;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*0.8*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2)) === true){
-                collision = true;
-                rottop = 1;
-            }else if(lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true){
-                collision = true;
-                rottop = 1;
-            }*/
+            var objWS = objects[o].width*0.5*Math.sin(objects[o].angle+Math.PI/2);
+            var objWNS = objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2);
 
-            /*if((lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true) ||
-            (lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true) ||
-            (lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*0.8*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2)) === true) ||
-            (lineLine(this.x, this.y, this.x+this.velX*mult+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true) ||
-            (lineLine(this.x, this.y, this.x+this.radius*Math.cos(this.angle), this.y+this.velY*mult+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true) ||
-            (lineLine(this.x, this.y, this.x+this.radius*Math.cos(this.angle), this.y+this.radius*Math.sin(this.angle), objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2), objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)) === true)){
-                this.x-=Math.cos(this.angle)*this.speed;
-                this.y-=Math.sin(this.angle)*this.speed;
-                collision = true;
-            }*/
+            var objY = objects[o].y;
 
-            while(lineCircle({x: objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2)}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}, {x: this.x+this.velX*mult, y: this.y+this.velY*mult}, this.radius) ||
-            lineCircle({x: objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2)}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}, {x: this.x+this.velX*mult, y: this.y+this.velY*mult}, this.radius)){
-                this.x-=Math.cos(this.angle);
-                this.y-=Math.sin(this.angle);
+            var objL = objects[o].length*Math.cos(objects[o].angle);
+            var objLS = objects[o].length*Math.sin(objects[o].angle);
+
+            var coltmp = lineCircle({x: objX + objW, y: objY + objWS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col && collision === false){
                 collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
             }
-
-            if(lineCircle({x: objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2)}, {x: objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2)}, {x: this.x+this.velX*mult, y: this.y+this.velY*mult}, this.radius) ||
-            lineCircle({x: objects[o].x + objects[o].width*tmpoff*Math.cos(objects[o].angle-Math.PI/2) + objects[o].length*Math.cos(objects[o].angle), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle-Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}, {x: objects[o].x + objects[o].length*Math.cos(objects[o].angle) + objects[o].width*tmpoff*Math.cos(objects[o].angle+Math.PI/2), y: objects[o].y + objects[o].width*tmpoff*Math.sin(objects[o].angle+Math.PI/2) + objects[o].length*Math.sin(objects[o].angle)}, {x: this.x, y: this.y}, this.radius)){
-                //this.x-=Math.cos(this.angle);
-                //this.y-=Math.sin(this.angle);
+            coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objL + objWN, y: objY + objLS + objWNS}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col && collision === false){
                 collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+            }
+            coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objW, y: objY + objWS}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col && collision === false){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
                 rottop = 1;
             }
-
-
+            coltmp = lineCircle({x: objX + objWN + objL, y: objY + objWNS + objLS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col && collision === false){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+                rottop = 1;
+            }
             if(collision === true){
                 var rndOff = 0;
                 if(objects[o].type === 0 || objects[o].type === 1){
@@ -312,7 +307,7 @@ function lineCircle(A, B, C, radius) {
     // if the point is on the line segment get the distance squared
     // from that point to the circle center
     if(u >= 0 && u <= 1){
-        dist  = (A.x + v1x * u - C.x) ** 2 + (A.y + v1y * u - C.y) ** 2;
+        dist  = (A.x + v1x * u - C.x) * (A.x + v1x * u - C.x) + (A.y + v1y * u - C.y) * (A.y + v1y * u - C.y);
     } else {
         // if closest point not on the line segment
         // use the unit distance to determine which end is closest
@@ -321,7 +316,7 @@ function lineCircle(A, B, C, radius) {
             (A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y) :
             (B.x - C.x) * (A.x - C.x) + (B.y - C.y) * (A.y - C.y);
     }
-    return dist < radius * radius;
+    return {col:dist < radius * radius, u: u, distX: (A.x + v1x * u - C.x), distY: (A.y + v1y * u - C.y)};
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
