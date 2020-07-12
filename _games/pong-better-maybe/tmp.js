@@ -188,25 +188,8 @@ function Projectile(x, y, angle){
             var objL = objects[o].length*Math.cos(objects[o].angle);
             var objLS = objects[o].length*Math.sin(objects[o].angle);
 
-            var coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objW, y: objY + objWS}, {x: this.x, y: this.y}, this.radius*1.8);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                rottop = 1;
-                this.y += objects[o].velY;
-                //console.log(objects[o].velY, coltmp.distY);
-            }
-            coltmp = lineCircle({x: objX + objWN + objL, y: objY + objWNS + objLS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius*1.8);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                rottop = 1;
-                this.y += objects[o].velY;
-            }
 
-            coltmp = lineCircle({x: objX + objW, y: objY + objWS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
+            /*var coltmp = lineCircle({x: objX + objW, y: objY + objWS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
             if(coltmp.col && collision === false){
                 collision = true;
                 this.x -= coltmp.distX;
@@ -218,6 +201,57 @@ function Projectile(x, y, angle){
                 this.x -= coltmp.distX;
                 this.y -= coltmp.distY;
             }
+            coltmp = lineCircle({x: objX + objWN*0.8, y: objY + objWNS*0.8}, {x: objX + objW*0.8, y: objY + objWS*0.8}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+                this.y += objects[o].velY;
+                rottop = 1;
+            }
+            coltmp = lineCircle({x: objX + objWN*0.8 + objL, y: objY + objWNS*0.8 + objLS}, {x: objX + objL + objW*0.8, y: objY + objLS + objWS*0.8}, {x: this.x, y: this.y}, this.radius);
+            if(coltmp.col){
+                collision = true;
+                this.x -= coltmp.distX;
+                this.y -= coltmp.distY;
+                this.y += objects[o].velY;
+                rottop = 1;
+            }*/
+
+            /*var coltemp = lineLine(objX + objW, objY + objWS, objX + objL + objW, objY + objLS + objWS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+            if(coltemp.col){
+                collision = true;
+            }
+            if(collision === false){
+                coltemp = lineLine(objX + objWN, objY + objWNS, objX + objL + objWN, objY + objLS + objWNS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+                if(coltemp.col){
+                    collision = true;
+                }
+            }
+            if(collision === false){
+                coltemp = lineLine(objX + objWN, objY + objWNS, objX + objW, objY + objWS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+                if(coltemp.col){
+                    collision = true;
+                    rottop = 1;
+                }
+                coltemp = lineLine(objX + objWN, objY + objWNS + objects[o].velY, objX + objW, objY + objWS + objects[o].velY, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+                if(coltemp.col){
+                    collision = true;
+                    rottop = 1;
+                }
+            }
+            if(collision === false){
+                coltemp = lineLine(objX + objWN + objL, objY + objWNS + objLS, objX + objW + objL, objY + objWS + objLS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+                if(coltemp.col){
+                    collision = true;
+                    rottop = 1;
+                }
+                coltemp = lineLine(objX + objWN + objL, objY + objWNS + objLS + objects[o].velY, objX + objW + objL, objY + objWS + objLS + objects[o].velY, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
+                if(coltemp.col){
+                    collision = true;
+                    rottop = 1;
+                }
+            }*/
 
             if(collision === true){
                 var rndOff = 0;
@@ -225,6 +259,10 @@ function Projectile(x, y, angle){
                     rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
                 }
                 this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
+
+                //this.x = coltemp.intX + Math.cos(this.angle)*this.radius;
+                //this.y = coltemp.intY + Math.sin(this.angle)*this.radius;
+
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
                 objects[o].omega*=0.8;
@@ -288,9 +326,9 @@ function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
         ctx.fillStyle = COLORS.red;
         ctx.fill();*/
 
-        return true;
+        return {col: true, intX: intersectionX, intY: intersectionY};
     }
-    return false;
+    return {col:false};
 }
 
 // Function to check intercept of line seg and circle
@@ -312,7 +350,7 @@ function lineCircle(A, B, C, radius) {
     // if the point is on the line segment get the distance squared
     // from that point to the circle center
     if(u >= 0 && u <= 1){
-        dist  = (A.x + v1x * u - C.x) * (A.x + v1x * u - C.x) + (A.y + v1y * u - C.y) * (A.y + v1y * u - C.y);
+        dist  = ((A.x + v1x * u - C.x) * (A.x + v1x * u - C.x) + (A.y + v1y * u - C.y) * (A.y + v1y * u - C.y));
     } else {
         // if closest point not on the line segment
         // use the unit distance to determine which end is closest
