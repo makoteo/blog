@@ -174,94 +174,20 @@ function Projectile(x, y, angle){
         for(var o in objects){
             //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
             var collision = false;
-            var rottop = 0;
 
-            var objX = objects[o].x;
-            var objW = objects[o].width*0.5*Math.cos(objects[o].angle+Math.PI/2);
-            var objWN = objects[o].width*0.5*Math.cos(objects[o].angle-Math.PI/2);
+            var coltemp = colCircleRectangle(this, objects[o]);
+            var rottop = coltemp.rt;
 
-            var objWS = objects[o].width*0.5*Math.sin(objects[o].angle+Math.PI/2);
-            var objWNS = objects[o].width*0.5*Math.sin(objects[o].angle-Math.PI/2);
-
-            var objY = objects[o].y;
-
-            var objL = objects[o].length*Math.cos(objects[o].angle);
-            var objLS = objects[o].length*Math.sin(objects[o].angle);
-
-
-            /*var coltmp = lineCircle({x: objX + objW, y: objY + objWS}, {x: objX + objL + objW, y: objY + objLS + objWS}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-            }
-            coltmp = lineCircle({x: objX + objWN, y: objY + objWNS}, {x: objX + objL + objWN, y: objY + objLS + objWNS}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col && collision === false){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-            }
-            coltmp = lineCircle({x: objX + objWN*0.8, y: objY + objWNS*0.8}, {x: objX + objW*0.8, y: objY + objWS*0.8}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                this.y += objects[o].velY;
-                rottop = 1;
-            }
-            coltmp = lineCircle({x: objX + objWN*0.8 + objL, y: objY + objWNS*0.8 + objLS}, {x: objX + objL + objW*0.8, y: objY + objLS + objWS*0.8}, {x: this.x, y: this.y}, this.radius);
-            if(coltmp.col){
-                collision = true;
-                this.x -= coltmp.distX;
-                this.y -= coltmp.distY;
-                this.y += objects[o].velY;
-                rottop = 1;
-            }*/
-
-            /*var coltemp = lineLine(objX + objW, objY + objWS, objX + objL + objW, objY + objLS + objWS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
             if(coltemp.col){
-                collision = true;
-            }
-            if(collision === false){
-                coltemp = lineLine(objX + objWN, objY + objWNS, objX + objL + objWN, objY + objLS + objWNS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
-                if(coltemp.col){
-                    collision = true;
-                }
-            }
-            if(collision === false){
-                coltemp = lineLine(objX + objWN, objY + objWNS, objX + objW, objY + objWS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
-                if(coltemp.col){
-                    collision = true;
-                    rottop = 1;
-                }
-                coltemp = lineLine(objX + objWN, objY + objWNS + objects[o].velY, objX + objW, objY + objWS + objects[o].velY, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
-                if(coltemp.col){
-                    collision = true;
-                    rottop = 1;
-                }
-            }
-            if(collision === false){
-                coltemp = lineLine(objX + objWN + objL, objY + objWNS + objLS, objX + objW + objL, objY + objWS + objLS, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
-                if(coltemp.col){
-                    collision = true;
-                    rottop = 1;
-                }
-                coltemp = lineLine(objX + objWN + objL, objY + objWNS + objLS + objects[o].velY, objX + objW + objL, objY + objWS + objLS + objects[o].velY, this.x, this.y, this.x + Math.cos(this.angle)*this.radius + this.velX, this.y + Math.sin(this.angle)*this.radius + this.velY);
-                if(coltemp.col){
-                    collision = true;
-                    rottop = 1;
-                }
-            }*/
-
-            if(collision === true){
                 var rndOff = 0;
                 if(objects[o].type === 0 || objects[o].type === 1){
                     rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
                 }
                 this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
 
-                //this.x = coltemp.intX + Math.cos(this.angle)*this.radius;
-                //this.y = coltemp.intY + Math.sin(this.angle)*this.radius;
+                //this.x = coltemp.colX + Math.cos(this.angle)*this.radius*2;
+                //this.y = coltemp.colY + Math.sin(this.angle)*this.radius*2;
+                this.y += objects[o].velY;
 
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
@@ -308,58 +234,82 @@ projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
-function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+function colCircleRectangle ( circle, rect ) {
 
-    // calculate the direction of the lines
-    var uA = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
-    var uB = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1));
+    var rectCenterX = rect.x + rect.length/2*Math.cos(rect.angle - Math.PI / 2 );
+    var rectCenterY = rect.y + rect.length/2*Math.sin(rect.angle - Math.PI / 2 );
 
-    // if uA and uB are between 0-1, lines are colliding
-    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+    var rectX = rect.x - rect.width/2*Math.cos(rect.angle - Math.PI / 2 );
+    var rectY = rect.y - rect.width/2*Math.cos(rect.angle - Math.PI / 2 );
 
-        // optionally, draw a circle where the lines meet
-        var intersectionX = x1 + (uA * (x2-x1));
-        var intersectionY = y1 + (uA * (y2-y1));
+    var rectReferenceX = rectX;
+    var rectReferenceY = rectY;
 
-        /*ctx.beginPath();
-        ctx.arc(intersectionX, intersectionY, 5, 0, 2 * Math.PI, false);
-        ctx.fillStyle = COLORS.red;
-        ctx.fill();*/
 
-        return {col: true, intX: intersectionX, intY: intersectionY};
+
+    // Rotate circle's center point back
+    var unrotatedCircleX = Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x + circle.velX - rectX ) - Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y + circle.velY - rectY ) + rectX;
+    var unrotatedCircleY = Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x + circle.velX - rectX ) + Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y + circle.velY - rectY ) + rectY;
+
+    /*ctx.beginPath();
+    ctx.arc(unrotatedCircleX, unrotatedCircleY, 5, 0, 2 * Math.PI, false);
+    ctx.fillStyle = COLORS.yellow;
+    ctx.fill();*/
+
+    //ctx.fillRect(rect.x - rect.width/2, rect.y, rect.width, rect.height);
+
+    // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
+    var closestX, closestY;
+
+    var rottop = 0;
+
+    // Find the unrotated closest x point from center of unrotated circle
+    if ( unrotatedCircleX < rectReferenceX ) {
+        closestX = rectReferenceX;
+    } else if ( unrotatedCircleX > rectReferenceX + rect.width ) {
+        closestX = rectReferenceX + rect.width;
+    } else {
+        closestX = unrotatedCircleX;
     }
-    return {col:false};
+
+    // Find the unrotated closest y point from center of unrotated circle
+    if ( unrotatedCircleY < rectReferenceY ) {
+        closestY = rectReferenceY;
+        rottop = 1;
+    } else if ( unrotatedCircleY > rectReferenceY + rect.height ) {
+        closestY = rectReferenceY + rect.height;
+        rottop = 1;
+    } else {
+        closestY = unrotatedCircleY;
+    }
+
+    // Determine collision
+    var collision = false;
+    var distance = getDistance( unrotatedCircleX, unrotatedCircleY, closestX, closestY );
+
+
+
+    /*ctx.beginPath();
+    ctx.moveTo(unrotatedCircleX, unrotatedCircleY);
+    ctx.lineTo(closestX, closestY);
+    ctx.strokeStyle = COLORS.yellow;
+    ctx.stroke();*/
+
+    if ( distance < circle.radius ) {
+        collision = true;
+    }
+    else {
+        collision = false;
+    }
+
+    return {col: collision, colX: closestX, colY: closestY, rt: rottop};
 }
 
-// Function to check intercept of line seg and circle
-// A,B end points of line segment
-// C center of circle
-// radius of circle
-// returns true if touching or crossing else false
-function lineCircle(A, B, C, radius) {
-    var dist;
-    var v1x = B.x - A.x;
-    var v1y = B.y - A.y;
-    var v2x = C.x - A.x;
-    var v2y = C.y - A.y;
-    // get the unit distance along the line of the closest point to
-    // circle center
-    var u = (v2x * v1x + v2y * v1y) / (v1y * v1y + v1x * v1x);
+function getDistance( fromX, fromY, toX, toY ) {
+    var dX = Math.abs( fromX - toX );
+    var dY = Math.abs( fromY - toY );
 
-
-    // if the point is on the line segment get the distance squared
-    // from that point to the circle center
-    if(u >= 0 && u <= 1){
-        dist  = ((A.x + v1x * u - C.x) * (A.x + v1x * u - C.x) + (A.y + v1y * u - C.y) * (A.y + v1y * u - C.y));
-    } else {
-        // if closest point not on the line segment
-        // use the unit distance to determine which end is closest
-        // and get dist square to circle
-        dist = u < 0 ?
-            (A.x - C.x) * (A.x - C.x) + (A.y - C.y) * (A.y - C.y) :
-            (B.x - C.x) * (A.x - C.x) + (B.y - C.y) * (A.y - C.y);
-    }
-    return {col:dist < radius * radius, u: u, distX: (A.x + v1x * u - C.x), distY: (A.y + v1y * u - C.y)};
+    return Math.sqrt( ( dX * dX ) + ( dY * dY ) );
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
