@@ -185,8 +185,8 @@ function Projectile(x, y, angle){
                 }
                 this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
 
-                //this.x = coltemp.colX + Math.cos(this.angle)*this.radius*2;
-                //this.y = coltemp.colY + Math.sin(this.angle)*this.radius*2;
+                //this.x = coltemp.colX + this.radius*Math.cos(this.angle)*1.5;
+                //this.y = coltemp.colY + this.radius*Math.sin(this.angle)*1.5;
                 this.y += objects[o].velY;
 
                 this.velX = this.speed*Math.cos(this.angle);
@@ -236,16 +236,11 @@ projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
 
 function colCircleRectangle ( circle, rect ) {
 
-    var rectCenterX = rect.x + rect.length/2*Math.cos(rect.angle - Math.PI / 2 );
-    var rectCenterY = rect.y + rect.length/2*Math.sin(rect.angle - Math.PI / 2 );
-
     var rectX = rect.x - rect.width/2*Math.cos(rect.angle - Math.PI / 2 );
-    var rectY = rect.y - rect.width/2*Math.cos(rect.angle - Math.PI / 2 );
+    var rectY = rect.y - rect.width/2*Math.sin(rect.angle - Math.PI / 2 );
 
     var rectReferenceX = rectX;
     var rectReferenceY = rectY;
-
-
 
     // Rotate circle's center point back
     var unrotatedCircleX = Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x + circle.velX - rectX ) - Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y + circle.velY - rectY ) + rectX;
@@ -287,11 +282,14 @@ function colCircleRectangle ( circle, rect ) {
     var collision = false;
     var distance = getDistance( unrotatedCircleX, unrotatedCircleY, closestX, closestY );
 
+    var rotClosestX, rotClosestY;
 
+    rotClosestX = Math.cos(rect.angle - Math.PI / 2) * (closestX - rectX ) - Math.sin(rect.angle - Math.PI / 2) * (closestY - rectY) + rectX;
+    rotClosestY = Math.sin(rect.angle - Math.PI / 2) * (closestX - rectX ) + Math.cos(rect.angle - Math.PI / 2) * (closestY - rectY) + rectY;
 
     /*ctx.beginPath();
-    ctx.moveTo(unrotatedCircleX, unrotatedCircleY);
-    ctx.lineTo(closestX, closestY);
+    ctx.moveTo(circle.x, circle.y);
+    ctx.lineTo(rotClosestX, rotClosestY);
     ctx.strokeStyle = COLORS.yellow;
     ctx.stroke();*/
 
@@ -302,7 +300,7 @@ function colCircleRectangle ( circle, rect ) {
         collision = false;
     }
 
-    return {col: collision, colX: closestX, colY: closestY, rt: rottop};
+    return {col: collision, colX: rotClosestX, colY: rotClosestY, rt: rottop};
 }
 
 function getDistance( fromX, fromY, toX, toY ) {
@@ -363,8 +361,8 @@ function game(){
             if(rnd < 0.5){
                 projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, 0));
             }else{
-                projectiles.push(new Projectile(10, 0, Math.PI/2));
-                //projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, Math.PI));
+                //projectiles.push(new Projectile(10, 0, Math.PI/2));
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, Math.PI));
             }
         }
 
