@@ -185,13 +185,15 @@ function Projectile(x, y, angle){
                 }
                 this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
 
-                //this.x = coltemp.colX + this.radius*Math.cos(this.angle)*1.5;
-                //this.y = coltemp.colY + this.radius*Math.sin(this.angle)*1.5;
+                this.x = coltemp.colX;
+                this.y = coltemp.colY;
                 this.y += objects[o].velY;
 
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
-                objects[o].omega*=0.8;
+                //this.velX = 0;
+                //this.velY = 0;
+                objects[o].omega*=(1+0.5*coltemp.rs);
             }
 
         }
@@ -246,6 +248,9 @@ function colCircleRectangle ( circle, rect ) {
     var unrotatedCircleX = Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x + circle.velX - rectX ) - Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y + circle.velY - rectY ) + rectX;
     var unrotatedCircleY = Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x + circle.velX - rectX ) + Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y + circle.velY - rectY ) + rectY;
 
+    var unrotatedCircleXB = Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x - rectX ) - Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y - rectY ) + rectX;
+    var unrotatedCircleYB = Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x - rectX ) + Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y - rectY ) + rectY;
+
     /*ctx.beginPath();
     ctx.arc(unrotatedCircleX, unrotatedCircleY, 5, 0, 2 * Math.PI, false);
     ctx.fillStyle = COLORS.yellow;
@@ -256,7 +261,11 @@ function colCircleRectangle ( circle, rect ) {
     // Closest point in the rectangle to the center of circle rotated backwards(unrotated)
     var closestX, closestY;
 
+    var offSetXCol = 0;
+    var offSetYCol = 0;
+
     var rottop = 0;
+    var rotspd = 0;
 
     // Find the unrotated closest x point from center of unrotated circle
     if ( unrotatedCircleX < rectReferenceX ) {
@@ -278,29 +287,57 @@ function colCircleRectangle ( circle, rect ) {
         closestY = unrotatedCircleY;
     }
 
+    var closestPoint = getNearestPointInPerimeter(rectReferenceX, rectReferenceY, rect.width, rect.length, unrotatedCircleXB, unrotatedCircleYB);
+
+    if(closestPoint[0] === rectReferenceX && closestPoint[1] === rectReferenceY){
+        closestPoint[0] -= circle.radius*0.35;
+        closestPoint[1] -= circle.radius*0.35;
+    }else if(closestPoint[0] === rectReferenceX + rect.width && closestPoint[1] === rectReferenceY){
+        closestPoint[0] += circle.radius*0.35;
+        closestPoint[1] -= circle.radius*0.35;
+    }else if(closestPoint[0] === rectReferenceX && closestPoint[1] === rectReferenceY + rect.length){
+        closestPoint[0] -= circle.radius*0.35;
+        closestPoint[1] += circle.radius*0.35;
+    }else if(closestPoint[0] === rectReferenceX + rect.width && closestPoint[1] === rectReferenceY + rect.length){
+        closestPoint[0] += circle.radius*0.35;
+        closestPoint[1] += circle.radius*0.35;
+    }else{
+        if(closestPoint[0] === rectReferenceX){
+            closestPoint[0] -= circle.radius*1;
+        }else if(closestPoint[0] === rectReferenceX + rect.width){
+            closestPoint[0] += circle.radius*1;
+        }
+
+        if(closestPoint[1] === rectReferenceY){
+            closestPoint[1] -= circle.radius*1;
+        }else if(closestPoint[1] === rectReferenceY + rect.length){
+            closestPoint[1] += circle.radius*1;
+        }
+    }
+
     // Determine collision
     var collision = false;
     var distance = getDistance( unrotatedCircleX, unrotatedCircleY, closestX, closestY );
 
     var rotClosestX, rotClosestY;
 
-    rotClosestX = Math.cos(rect.angle - Math.PI / 2) * (closestX - rectX ) - Math.sin(rect.angle - Math.PI / 2) * (closestY - rectY) + rectX;
-    rotClosestY = Math.sin(rect.angle - Math.PI / 2) * (closestX - rectX ) + Math.cos(rect.angle - Math.PI / 2) * (closestY - rectY) + rectY;
+    rotClosestX = Math.cos(rect.angle - Math.PI / 2) * (closestPoint[0] - rectX) - Math.sin(rect.angle - Math.PI / 2) * (closestPoint[1] - rectY) + rectX;
+    rotClosestY = Math.sin(rect.angle - Math.PI / 2) * (closestPoint[0] - rectX) + Math.cos(rect.angle - Math.PI / 2) * (closestPoint[1] - rectY) + rectY;
 
     /*ctx.beginPath();
-    ctx.moveTo(circle.x, circle.y);
-    ctx.lineTo(rotClosestX, rotClosestY);
-    ctx.strokeStyle = COLORS.yellow;
-    ctx.stroke();*/
+    ctx.arc(rotClosestX, rotClosestY, 5, 0, 2 * Math.PI, false);
+    ctx.fillStyle = COLORS.yellow;
+    ctx.fill();*/
 
     if ( distance < circle.radius ) {
         collision = true;
+        //console.log(closestPoint);
     }
     else {
         collision = false;
     }
 
-    return {col: collision, colX: rotClosestX, colY: rotClosestY, rt: rottop};
+    return {col: collision, colX: rotClosestX, colY: rotClosestY, rt: rottop, rs:rotspd};
 }
 
 function getDistance( fromX, fromY, toX, toY ) {
@@ -308,6 +345,29 @@ function getDistance( fromX, fromY, toX, toY ) {
     var dY = Math.abs( fromY - toY );
 
     return Math.sqrt( ( dX * dX ) + ( dY * dY ) );
+}
+
+function clamp(n,lower,upper) {
+    return Math.max(lower, Math.min(upper, n));
+}
+
+function getNearestPointInPerimeter(l,t,w,h,xp,yp) {
+    var r = l+w,
+        b = t+h;
+
+    var x = clamp(xp,l,r),
+        y = clamp(yp,t,b);
+
+    var dl = Math.abs(x-l),
+        dr = Math.abs(x-r),
+        dt = Math.abs(y-t),
+        db = Math.abs(y-b);
+
+    var m = Math.min(dl,dr,dt,db);
+
+    return (m===dt) ? [x,t] :
+        (m===db) ? [x,b] :
+            (m===dl) ? [l,y] : [r,y];
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
@@ -359,10 +419,10 @@ function game(){
         if(projectiles.length < maxProjectiles){
             var rnd = Math.random();
             if(rnd < 0.5){
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, 0));
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
             }else{
-                //projectiles.push(new Projectile(10, 0, Math.PI/2));
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2-20, Math.PI));
+                //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
+                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
             }
         }
 
