@@ -23,10 +23,12 @@ var placers = [];
 
 var maxProjectiles = 2;
 
-var GAMESTATE = "GAME";
+var GAMESTATE = "PLACE";
 
 var mousePosX = 0;
 var mousePosY = 0;
+
+var CONST = {dividerSize: 10, hingeWidth:5};
 
 var clicked = false;
 
@@ -52,11 +54,12 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.ctrlReleased = [true, true];
 
-    this.dividerSize = 10;
+    this.dividerSize = CONST.dividerSize;
 
     this.velY = 0;
+    this.velY = 0;
 
-    this.hingeWidth = 5;
+    this.hingeWidth = CONST.hingeWidth;
 
     this.opacities = [0, 1];
     this.prevY = this.y;
@@ -132,7 +135,7 @@ function Object(x, y, width, height, controls, type, bounds){
                 this.opacities[1] = 1;
             }
 
-            ctx.strokeStyle = COLORS.yellow;
+            ctx.strokeStyle = COLORS.lightblue;
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width/2, this.width/2]);
             ctx.strokeRect(this.x-this.width/2, this.boundsY[0], this.width, this.height);
@@ -175,7 +178,7 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width, this.width]);
             ctx.arc(this.x, this.y, this.height+5, 0, 2 * Math.PI, false);
-            ctx.strokeStyle = COLORS.yellow;
+            ctx.strokeStyle = COLORS.lightblue;
             ctx.stroke();
             ctx.setLineDash([0, 0]);
             ctx.globalAlpha = 1;
@@ -267,9 +270,11 @@ function Placer(type, width, height, controls){
     this.height = height;
     this.controls = controls;
 
+    this.placeable = true;
+
     //CHANGE FOLLOWING
-    this.dividerSize = 10;
-    this.hingeWidth = 5;
+    this.dividerSize = CONST.dividerSize;
+    this.hingeWidth = CONST.hingeWidth;
 
     this.boundsY = [0, 0];
 
@@ -291,12 +296,34 @@ function Placer(type, width, height, controls){
             }
         }
 
+        this.placeable = true;
+
+        for(var j = 0; j < objects.length; j++){
+            if(this.type === 1){
+                if(objects[j].type === 1){
+                    if(colRect({x: this.x + this.width/2, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize}, {x: objects[j].x - objects[j].width, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4})){
+                        this.placeable = false;
+                    }
+                }else if(objects[j].type === 2){
+                    if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height*1.2, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
+                        this.placeable = false;
+                    }
+                }
+            }else if(this.type === 2){
+                if(objects[j].type === 1){
+                    if(colCircleRectangle({x: this.x, y: this.y, radius: this.height*1.1, velX:0, velY:0}, {x: objects[j].x, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4, length:3*objects[j].height+2*objects[j].dividerSize, angle:Math.PI/2}).col){
+                        this.placeable = false;
+                    }
+                }
+            }
+        }
+
         if(this.type === 1){
             this.boundsY[0] = this.y-this.height*1.5-this.dividerSize;
             this.boundsY[1] = this.y+this.height*0.5+this.dividerSize;
         }
 
-        if(clicked === true && this.anim[0] === 1){
+        if(clicked === true && this.anim[0] === 1 && this.placeable === true){
             this.placed = true;
             this.anim = [0, 0];
         }
@@ -317,9 +344,13 @@ function Placer(type, width, height, controls){
     this.draw = function(){
         if(this.type === 1){
             if(this.placed === false){
-                ctx.strokeStyle = COLORS.lightblue;
+                if(this.placeable === true){
+                    ctx.strokeStyle = COLORS.yellow;
+                }else{
+                    ctx.strokeStyle = COLORS.red;
+                }
             }else{
-                ctx.strokeStyle = COLORS.yellow;
+                ctx.strokeStyle = COLORS.lightblue;
             }
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width/2, this.width/2]);
@@ -329,14 +360,22 @@ function Placer(type, width, height, controls){
             ctx.globalAlpha = 1;
             ctx.setLineDash([0, 0]);
 
-            ctx.fillStyle = COLORS.white;
+            if(this.placeable === true){
+                ctx.fillStyle = COLORS.white;
+            }else{
+                ctx.fillStyle = COLORS.red;
+            }
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle - Math.PI / 2);
             ctx.fillRect(-this.width / 2*this.anim[0], -this.height/2*this.anim[1], this.width*this.anim[0], this.height*this.anim[1]); //0011
             ctx.restore();
         }else if(this.type === 2){
-            ctx.fillStyle = COLORS.white;
+            if(this.placeable === true){
+                ctx.fillStyle = COLORS.white;
+            }else{
+                ctx.fillStyle = COLORS.red;
+            }
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle - Math.PI / 2);
@@ -345,7 +384,11 @@ function Placer(type, width, height, controls){
 
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.hingeWidth*this.anim[0], 0, 2 * Math.PI, false);
-            ctx.fillStyle = COLORS.white;
+            if(this.placeable === true){
+                ctx.fillStyle = COLORS.white;
+            }else{
+                ctx.fillStyle = COLORS.red;
+            }
             ctx.fill();
 
             ctx.beginPath();
@@ -353,9 +396,13 @@ function Placer(type, width, height, controls){
             ctx.setLineDash([this.width, this.width]);
             ctx.arc(this.x, this.y, (this.height+5)*this.anim[1], 0, 2 * Math.PI, false);
             if(this.placed === false){
-                ctx.strokeStyle = COLORS.lightblue;
+                if(this.placeable === true){
+                    ctx.strokeStyle = COLORS.yellow;
+                }else{
+                    ctx.strokeStyle = COLORS.red;
+                }
             }else{
-                ctx.strokeStyle = COLORS.yellow;
+                ctx.strokeStyle = COLORS.lightblue;
             }
             ctx.stroke();
             ctx.setLineDash([0, 0]);
@@ -488,6 +535,15 @@ function colCircleRectangle ( circle, rect ) {
     return {col: collision, colX: rotClosestX, colY: rotClosestY, rt: rottop, rs:rotspd};
 }
 
+function colRect(rect1, rect2){
+    if(rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y) {
+        return true;
+    }
+}
+
 function getDistance( fromX, fromY, toX, toY ) {
     var dX = Math.abs( fromX - toX );
     var dY = Math.abs( fromY - toY );
@@ -540,6 +596,13 @@ function game(){
 
         frameCount++;
 
+        for(var i = 0; i < objects.length; i++){
+            if(GAMESTATE === "GAME"){
+                objects[i].update();
+            }
+            objects[i].draw();
+        }
+
         if(GAMESTATE === "PLACE"){
             if(keys && keys[49]){
                 placers = [];
@@ -556,13 +619,6 @@ function game(){
                     placers = [];
                 }
             }
-        }
-
-        for(var i = 0; i < objects.length; i++){
-            if(GAMESTATE === "GAME"){
-                objects[i].update();
-            }
-            objects[i].draw();
         }
 
         if(GAMESTATE === "GAME"){
