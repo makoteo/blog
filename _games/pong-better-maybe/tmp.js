@@ -12,15 +12,23 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
-var CONTROLS = {a: [87, 83], b: [38, 40], c:[69, 68], d: [100, 97]};
+var CONTROLS = {a: [87, 83], b: [38, 40], c:[69, 68], d: [100, 97], e: [82, 70], f: [101, 98], g: [84, 71], h: [102, 99]};
 var FONTSIZES = {large1: 70, large2: 70};
 
 var objects = [];
 var projectiles = [];
 
 var players = [];
+var placers = [];
 
 var maxProjectiles = 2;
+
+var GAMESTATE = "GAME";
+
+var mousePosX = 0;
+var mousePosY = 0;
+
+var clicked = false;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -48,6 +56,11 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.velY = 0;
 
+    this.hingeWidth = 5;
+
+    this.opacities = [0, 1];
+    this.prevY = this.y;
+
     this.update = function(){
 
         this.velY = 0;
@@ -65,13 +78,13 @@ function Object(x, y, width, height, controls, type, bounds){
                     }
                 }
             }else if(this.type === 1){
-                if (keys && keys[controls[0]] && this.ctrlReleased[0] === true) {
+                if (keys && keys[controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
                     if(this.y > this.boundsY[0]){
                         this.y -= this.height+this.dividerSize;
                         this.ctrlReleased[0] = false;
                     }
                 }
-                if (keys && keys[controls[1]] && this.ctrlReleased[1] === true) {
+                if (keys && keys[controls[1]] && this.ctrlReleased[1] === true && this.opacities[1] === 1) {
                     if(this.y+this.height < this.boundsY[1]){
                         this.y += this.height+this.dividerSize;
                         this.ctrlReleased[1] = false;
@@ -99,16 +112,26 @@ function Object(x, y, width, height, controls, type, bounds){
     };
 
     this.draw = function(){
-        if(this.type === 0 || this.type === 1) {
+        if(this.type === 0) {
             ctx.fillStyle = COLORS.white;
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle - Math.PI / 2);
             ctx.fillRect(-this.width / 2, 0, this.width, this.height);
             ctx.restore();
-        }
+        }else if(this.type === 1){
 
-        if(this.type === 1){
+            if(this.prevY !== this.y){
+                this.opacities[1] -= 0.15;
+                this.opacities[0] += 0.15;
+            }
+
+            if(this.opacities[0] >= 1){
+                this.prevY = this.y;
+                this.opacities[0] = 0;
+                this.opacities[1] = 1;
+            }
+
             ctx.strokeStyle = COLORS.yellow;
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width/2, this.width/2]);
@@ -117,6 +140,24 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.strokeRect(this.x-this.width/2, this.boundsY[0] + 2*this.height + 2*this.dividerSize, this.width, this.height);
             ctx.globalAlpha = 1;
             ctx.setLineDash([0, 0]);
+
+            ctx.globalAlpha = Math.sqrt(this.opacities[0]);
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width / 2 * this.opacities[0], this.height/2*(1-this.opacities[0]), this.width*this.opacities[0], this.height*this.opacities[0]);
+            ctx.restore();
+
+            ctx.globalAlpha = Math.sqrt(this.opacities[1]);
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.prevY);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width / 2 * this.opacities[1], this.height/2*(1-this.opacities[1]), this.width*this.opacities[1], this.height*this.opacities[1]);
+            ctx.restore();
+
+            ctx.globalAlpha = 1;
         }else if(this.type === 2){
             ctx.fillStyle = COLORS.white;
             ctx.save();
@@ -126,14 +167,14 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.restore();
 
             ctx.beginPath();
-            ctx.arc(this.x, this.y, 5, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.hingeWidth, 0, 2 * Math.PI, false);
             ctx.fillStyle = COLORS.white;
             ctx.fill();
 
             ctx.beginPath();
             ctx.globalAlpha = 0.5;
-            ctx.setLineDash([this.width/2, this.width/2]);
-            ctx.arc(this.x, this.y, this.height, 0, 2 * Math.PI, false);
+            ctx.setLineDash([this.width, this.width]);
+            ctx.arc(this.x, this.y, this.height+5, 0, 2 * Math.PI, false);
             ctx.strokeStyle = COLORS.yellow;
             ctx.stroke();
             ctx.setLineDash([0, 0]);
@@ -153,7 +194,7 @@ function Projectile(x, y, angle){
     this.x = x;
     this.y = y;
 
-    this.radius = 5;
+    this.radius = 4;
 
     this.type = 0;
 
@@ -187,7 +228,9 @@ function Projectile(x, y, angle){
 
                 this.x = coltemp.colX;
                 this.y = coltemp.colY;
-                this.y += objects[o].velY;
+                if(rottop === 1){
+                    this.y += objects[o].velY;
+                }
 
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
@@ -214,6 +257,113 @@ function Projectile(x, y, angle){
     };
 }
 
+function Placer(type, width, height, controls){
+    this.type = type;
+    this.placed = false;
+    this.finished = false;
+    this.x = mousePosX;
+    this.y = mousePosY;
+    this.width = width;
+    this.height = height;
+    this.controls = controls;
+
+    //CHANGE FOLLOWING
+    this.dividerSize = 10;
+    this.hingeWidth = 5;
+
+    this.boundsY = [0, 0];
+
+    this.anim = [1, 1];
+
+    if(this.type === 1){
+        this.boundsY[0] = this.y-this.height*1.5-this.dividerSize;
+        this.boundsY[1] = this.y+this.height*0.5+this.dividerSize;
+    }
+
+    this.update = function(){
+        if(this.placed === false){
+            if(this.type === 1){
+                this.x = mousePosX - 35;
+                this.y = mousePosY - 30;
+            }else if(this.type === 2){
+                this.x = mousePosX - 35;
+                this.y = mousePosY - 30;
+            }
+        }
+
+        if(this.type === 1){
+            this.boundsY[0] = this.y-this.height*1.5-this.dividerSize;
+            this.boundsY[1] = this.y+this.height*0.5+this.dividerSize;
+        }
+
+        if(clicked === true && this.anim[0] === 1){
+            this.placed = true;
+            this.anim = [0, 0];
+        }
+
+        if(this.anim[0] <= 1 && this.placed){
+            this.anim[0]+=0.15;
+        }else if(this.anim[1] <= 1 && this.placed) {
+            this.anim[1]+=0.15;
+        }else if(this.anim[1] > 1){
+            this.finished = true;
+            if(this.type === 1){
+                objects.push(new Object(this.x, this.y-this.height/2, this.width, this.height, this.controls, this.type, this.boundsY));
+            }else if(this.type === 2){
+                objects.push(new Object(this.x, this.y, this.width, this.height, this.controls, this.type, this.boundsY));
+            }
+        }
+    };
+    this.draw = function(){
+        if(this.type === 1){
+            if(this.placed === false){
+                ctx.strokeStyle = COLORS.lightblue;
+            }else{
+                ctx.strokeStyle = COLORS.yellow;
+            }
+            ctx.globalAlpha = 0.5;
+            ctx.setLineDash([this.width/2, this.width/2]);
+            ctx.strokeRect(this.x-this.width/2*this.anim[0], this.boundsY[0] + this.height/2*(1-this.anim[1]), this.width*this.anim[0], this.height*this.anim[1]);
+            ctx.strokeRect(this.x-this.width/2*this.anim[0], this.boundsY[0] + this.height + this.dividerSize + this.height/2*(1-this.anim[1]), this.width*this.anim[0], this.height*this.anim[1]);
+            ctx.strokeRect(this.x-this.width/2*this.anim[0], this.boundsY[0] + 2*this.height + 2*this.dividerSize + this.height/2*(1-this.anim[1]), this.width*this.anim[0], this.height*this.anim[1]);
+            ctx.globalAlpha = 1;
+            ctx.setLineDash([0, 0]);
+
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width / 2*this.anim[0], -this.height/2*this.anim[1], this.width*this.anim[0], this.height*this.anim[1]); //0011
+            ctx.restore();
+        }else if(this.type === 2){
+            ctx.fillStyle = COLORS.white;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width*0.5*this.anim[0], 0, this.width*this.anim[0], this.height*this.anim[1]);
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.hingeWidth*this.anim[0], 0, 2 * Math.PI, false);
+            ctx.fillStyle = COLORS.white;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            ctx.setLineDash([this.width, this.width]);
+            ctx.arc(this.x, this.y, (this.height+5)*this.anim[1], 0, 2 * Math.PI, false);
+            if(this.placed === false){
+                ctx.strokeStyle = COLORS.lightblue;
+            }else{
+                ctx.strokeStyle = COLORS.yellow;
+            }
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.globalAlpha = 1;
+        }
+    };
+}
+
 function Player(id){
     this.id = id;
     this.points = 0;
@@ -227,12 +377,10 @@ players.push(new Player(1));
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
-//objects.push(new Object(200, HEIGHT/2-50, 10, 100, CONTROLS.c, 1, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(200, HEIGHT/2, 6, 80, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(WIDTH-200, HEIGHT/2, 6, 80, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(200, HEIGHT/2, 5, 60, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 60, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 
-projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
-projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
+objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -321,8 +469,8 @@ function colCircleRectangle ( circle, rect ) {
 
     var rotClosestX, rotClosestY;
 
-    rotClosestX = Math.cos(rect.angle - Math.PI / 2) * (closestPoint[0] - rectX) - Math.sin(rect.angle - Math.PI / 2) * (closestPoint[1] - rectY) + rectX;
-    rotClosestY = Math.sin(rect.angle - Math.PI / 2) * (closestPoint[0] - rectX) + Math.cos(rect.angle - Math.PI / 2) * (closestPoint[1] - rectY) + rectY;
+    rotClosestX = Math.cos(rect.angle + rect.omega - Math.PI / 2) * (closestPoint[0] - rectX) - Math.sin(rect.angle + rect.omega - Math.PI / 2) * (closestPoint[1] - rectY) + rectX;
+    rotClosestY = Math.sin(rect.angle + rect.omega - Math.PI / 2) * (closestPoint[0] - rectX) + Math.cos(rect.angle + rect.omega - Math.PI / 2) * (closestPoint[1] - rectY) + rectY;
 
     /*ctx.beginPath();
     ctx.arc(rotClosestX, rotClosestY, 5, 0, 2 * Math.PI, false);
@@ -373,6 +521,8 @@ function getNearestPointInPerimeter(l,t,w,h,xp,yp) {
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
+    window.onmousemove = logMouseMove;
+
     ctx.fillStyle = COLORS.bg;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -390,39 +540,60 @@ function game(){
 
         frameCount++;
 
-        for(var i = 0; i < objects.length; i++){
-            objects[i].update();
-            objects[i].draw();
-        }
+        if(GAMESTATE === "PLACE"){
+            if(keys && keys[49]){
+                placers = [];
+                placers.push(new Placer(1, 10, 60, CONTROLS.a));
+            }else if(keys && keys[50]){
+                placers = [];
+                placers.push(new Placer(2, 5, 60, CONTROLS.a));
+            }
 
-        for(var i = 0; i < projectiles.length; i++){
-            projectiles[i].update();
-            projectiles[i].draw();
-
-            if( projectiles[i].x < 0){
-                players[1].points++;
-                FONTSIZES.large2 = 90;
-                projectiles.splice(i, 1);
-                if(players[1].points % 10 === 0){
-                    maxProjectiles++;
-                }
-            }else if( projectiles[i].x > WIDTH){
-                players[0].points++;
-                FONTSIZES.large1 = 90;
-                projectiles.splice(i, 1);
-                if(players[0].points % 10 === 0){
-                    maxProjectiles++;
+            if(placers.length > 0){
+                placers[0].update();
+                placers[0].draw();
+                if(placers[0].finished === true){
+                    placers = [];
                 }
             }
         }
 
-        if(projectiles.length < maxProjectiles){
-            var rnd = Math.random();
-            if(rnd < 0.5){
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, 0));
-            }else{
-                //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
-                projectiles.push(new Projectile(WIDTH/2, HEIGHT/2, Math.PI));
+        for(var i = 0; i < objects.length; i++){
+            if(GAMESTATE === "GAME"){
+                objects[i].update();
+            }
+            objects[i].draw();
+        }
+
+        if(GAMESTATE === "GAME"){
+            for(var i = 0; i < projectiles.length; i++){
+                projectiles[i].update();
+                projectiles[i].draw();
+
+                if( projectiles[i].x < 0){
+                    players[1].points++;
+                    FONTSIZES.large2 = 90;
+                    projectiles.splice(i, 1);
+                    if(players[1].points % 10 === 0){
+                        maxProjectiles++;
+                    }
+                }else if( projectiles[i].x > WIDTH){
+                    players[0].points++;
+                    FONTSIZES.large1 = 90;
+                    projectiles.splice(i, 1);
+                    if(players[0].points % 10 === 0){
+                        maxProjectiles++;
+                    }
+                }
+            }
+            if(projectiles.length < maxProjectiles){
+                var rnd = Math.random();
+                if(rnd < 0.5){
+                    projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0));
+                }else{
+                    //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
+                    projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI));
+                }
             }
         }
 
@@ -442,6 +613,8 @@ function game(){
         ctx.textAlign = 'right';
         ctx.font = FONTSIZES.large2 + 'px quickPixel';
         ctx.fillText(players[1].points, WIDTH - 10, 40);
+
+        clicked = false;
 
     }
 }
@@ -473,6 +646,18 @@ window.addEventListener('keydown', function (e) {
 window.addEventListener('keyup', function (e) {
     keys[e.keyCode] = (e.type == "keydown");
 }, false);
+
+function logMouseMove(e) {
+    e = event || window.event;
+
+    var rect = canvas.getBoundingClientRect();
+
+    mousePosX = e.clientX - rect.left + WIDTH/30;
+    mousePosY = e.clientY - rect.top + WIDTH/30;
+    //console.log(mousePosX + ", " + mousePosY);
+}
+
+canvas.onmouseup = function(){clicked = true;}
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
 
