@@ -12,8 +12,8 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
-var CONTROLS = {a: [87, 83], b: [38, 40], c:[69, 68], d: [100, 97], e: [82, 70], f: [101, 98], g: [84, 71], h: [102, 99]};
-var FONTSIZES = {large1: 70, large2: 70};
+var CONTROLS = {a: [87, 83, "W", "A"], b: [38, 40, "\u2B06", "\u2B07"], c:[69, 68, "E", "D"], d: [100, 97, "1", "4"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
+var FONTSIZES = {large1: 70, large2: 70, medium: 30};
 
 var objects = [];
 var projectiles = [];
@@ -28,7 +28,7 @@ var GAMESTATE = "PLACE";
 var mousePosX = 0;
 var mousePosY = 0;
 
-var CONST = {dividerSize: 10, hingeWidth:5};
+var CONST = {dividerSize: 10, hingeWidth:5, bound: 5, nonplwid: WIDTH/30};
 
 var clicked = false;
 
@@ -45,8 +45,8 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.angle = Math.PI/2;
     this.omega = 0;
-    this.maxRot = 0.025;
-    this.angleAccel = 0.002;
+    this.maxRot = 0.03;
+    this.angleAccel = 0.003;
 
     this.speed = 8;
 
@@ -55,9 +55,6 @@ function Object(x, y, width, height, controls, type, bounds){
     this.ctrlReleased = [true, true];
 
     this.dividerSize = CONST.dividerSize;
-
-    this.velY = 0;
-    this.velY = 0;
 
     this.hingeWidth = CONST.hingeWidth;
 
@@ -177,11 +174,24 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.beginPath();
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width, this.width]);
-            ctx.arc(this.x, this.y, this.height+5, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.height+CONST.bound, 0, 2 * Math.PI, false);
             ctx.strokeStyle = COLORS.lightblue;
             ctx.stroke();
             ctx.setLineDash([0, 0]);
             ctx.globalAlpha = 1;
+        }
+
+        if(GAMESTATE === "PLACE"){
+            ctx.font = FONTSIZES.medium + 'px quickPixel';
+            if(this.x < WIDTH/2){
+                ctx.textAlign = 'center';
+                ctx.fillText(this.controls[2], this.x + this.width*2, this.y + this.height*0.4);
+                ctx.fillText(this.controls[3], this.x + this.width*2, this.y + this.height*0.8);
+            }else{
+                ctx.textAlign = 'center';
+                ctx.fillText(this.controls[2], this.x - this.width*2, this.y + this.height*0.4);
+                ctx.fillText(this.controls[3], this.x - this.width*2, this.y + this.height*0.8);
+            }
         }
 
         /*ctx.strokeStyle = COLORS.red;
@@ -298,21 +308,39 @@ function Placer(type, width, height, controls){
 
         this.placeable = true;
 
-        for(var j = 0; j < objects.length; j++){
-            if(this.type === 1){
-                if(objects[j].type === 1){
-                    if(colRect({x: this.x + this.width/2, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize}, {x: objects[j].x - objects[j].width, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4})){
-                        this.placeable = false;
+        //TODO Centerline check
+
+        if(this.type === 1){
+            if(this.boundsY[0] < 0 || this.boundsY[1]+this.height > HEIGHT || this.x < CONST.nonplwid || this.x > WIDTH - CONST.nonplwid || (this.x > WIDTH/2-CONST.nonplwid && this.x < WIDTH/2+CONST.nonplwid)){
+                this.placeable = false;
+            }
+        }else if(this.type === 2){
+            if(this.y - this.height - CONST.bound < 0 || this.y + this.height + CONST.bound > HEIGHT || this.x - this.height - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.height - CONST.bound || (this.x + this.height > WIDTH/2-CONST.nonplwid && this.x - this.height < WIDTH/2+CONST.nonplwid)){
+                this.placeable = false;
+            }
+        }
+
+        if(this.placeable === true){
+            for(var j = 0; j < objects.length; j++){
+                if(this.type === 1){
+                    if(objects[j].type === 1){
+                        if(colRect({x: this.x + this.width/2, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize}, {x: objects[j].x - objects[j].width, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4})){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 2){
+                        if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
                     }
-                }else if(objects[j].type === 2){
-                    if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height*1.2, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
-                        this.placeable = false;
-                    }
-                }
-            }else if(this.type === 2){
-                if(objects[j].type === 1){
-                    if(colCircleRectangle({x: this.x, y: this.y, radius: this.height*1.1, velX:0, velY:0}, {x: objects[j].x, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4, length:3*objects[j].height+2*objects[j].dividerSize, angle:Math.PI/2}).col){
-                        this.placeable = false;
+                }else if(this.type === 2){
+                    if(objects[j].type === 1){
+                        if(colCircleRectangle({x: this.x, y: this.y, radius: this.height+CONST.bound, velX:0, velY:0}, {x: objects[j].x, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4, length:3*objects[j].height+2*objects[j].dividerSize, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 2){
+                        if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (this.height + objects[j].length + 2*CONST.bound)){
+                            this.placeable = false;
+                        }
                     }
                 }
             }
@@ -334,6 +362,13 @@ function Placer(type, width, height, controls){
             this.anim[1]+=0.15;
         }else if(this.anim[1] > 1){
             this.finished = true;
+
+            if(this.x < WIDTH/2){
+                this.controls = CONTROLS.c;
+            }else{
+                this.controls = CONTROLS.d;
+            }
+
             if(this.type === 1){
                 objects.push(new Object(this.x, this.y-this.height/2, this.width, this.height, this.controls, this.type, this.boundsY));
             }else if(this.type === 2){
@@ -414,6 +449,7 @@ function Placer(type, width, height, controls){
 function Player(id){
     this.id = id;
     this.points = 0;
+    this.paddles = 0;
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
@@ -604,12 +640,14 @@ function game(){
         }
 
         if(GAMESTATE === "PLACE"){
-            if(keys && keys[49]){
-                placers = [];
-                placers.push(new Placer(1, 10, 60, CONTROLS.a));
-            }else if(keys && keys[50]){
-                placers = [];
-                placers.push(new Placer(2, 5, 60, CONTROLS.a));
+            if(placers.length === 0 || placers[0].placed === false){
+                if(keys && keys[49]){
+                    placers = [];
+                    placers.push(new Placer(1, 10, 60, CONTROLS.a));
+                }else if(keys && keys[50]){
+                    placers = [];
+                    placers.push(new Placer(2, 5, 60, CONTROLS.a));
+                }
             }
 
             if(placers.length > 0){
