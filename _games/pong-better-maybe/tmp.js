@@ -12,7 +12,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
-var CONTROLS = {a: [87, 83, "W", "A"], b: [38, 40, "\u2B06", "\u2B07"], c:[69, 68, "E", "D"], d: [100, 97, "1", "4"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
+var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "1", "4"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
 var FONTSIZES = {large1: 70, large2: 70, medium: 30};
 
 var objects = [];
@@ -20,6 +20,7 @@ var projectiles = [];
 
 var players = [];
 var placers = [];
+var buttons = [];
 
 var maxProjectiles = 2;
 
@@ -67,41 +68,41 @@ function Object(x, y, width, height, controls, type, bounds){
 
         if(this.controls.length > 0) {
             if(this.type === 0){
-                if (keys && keys[controls[0]]) {
+                if (keys && keys[this.controls[0]]) {
                     if(this.y > this.boundsY[0]){
                         this.velY = -this.speed;
                     }
                 }
-                if (keys && keys[controls[1]]) {
+                if (keys && keys[this.controls[1]]) {
                     if(this.y+this.height < this.boundsY[1]){
                         this.velY = this.speed;
                     }
                 }
             }else if(this.type === 1){
-                if (keys && keys[controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
+                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
                     if(this.y > this.boundsY[0]){
                         this.y -= this.height+this.dividerSize;
                         this.ctrlReleased[0] = false;
                     }
                 }
-                if (keys && keys[controls[1]] && this.ctrlReleased[1] === true && this.opacities[1] === 1) {
+                if (keys && keys[this.controls[1]] && this.ctrlReleased[1] === true && this.opacities[1] === 1) {
                     if(this.y+this.height < this.boundsY[1]){
                         this.y += this.height+this.dividerSize;
                         this.ctrlReleased[1] = false;
                     }
                 }
 
-                if (keys && !keys[controls[0]]) {
+                if (keys && !keys[this.controls[0]]) {
                     this.ctrlReleased[0] = true;
                 }
-                if (keys && !keys[controls[1]]) {
+                if (keys && !keys[this.controls[1]]) {
                     this.ctrlReleased[1] = true;
                 }
             }else if(this.type === 2){
-                if (keys && keys[controls[0]] && this.omega < this.maxRot) {
+                if (keys && keys[this.controls[0]] && this.omega < this.maxRot) {
                     this.omega+=this.angleAccel;
                 }
-                if (keys && keys[controls[1]] && this.omega > -this.maxRot) {
+                if (keys && keys[this.controls[1]] && this.omega > -this.maxRot) {
                     this.omega-=this.angleAccel;
                 }
             }
@@ -109,6 +110,7 @@ function Object(x, y, width, height, controls, type, bounds){
         this.angle+=this.omega;
         this.omega*=0.95;
         this.y+=this.velY;
+
     };
 
     this.draw = function(){
@@ -182,16 +184,39 @@ function Object(x, y, width, height, controls, type, bounds){
         }
 
         if(GAMESTATE === "PLACE"){
-            ctx.font = FONTSIZES.medium + 'px quickPixel';
-            if(this.x < WIDTH/2){
-                ctx.textAlign = 'center';
-                ctx.fillText(this.controls[2], this.x + this.width*2, this.y + this.height*0.4);
-                ctx.fillText(this.controls[3], this.x + this.width*2, this.y + this.height*0.8);
-            }else{
-                ctx.textAlign = 'center';
-                ctx.fillText(this.controls[2], this.x - this.width*2, this.y + this.height*0.4);
-                ctx.fillText(this.controls[3], this.x - this.width*2, this.y + this.height*0.8);
+            //MOUSE CLICKS
+            if(this.type === 1){
+                if(mousePosX > this.x-this.width && mousePosX < this.x + this.width && mousePosY > this.boundsY[0] && mousePosY < this.boundsY[0] + this.height*3 + this.dividerSize*2){
+                    ctx.fillStyle = COLORS.yellow;
+                    if(clicked === true){
+                        this.switchControls();
+                    }
+                }else{
+                    ctx.fillStyle = COLORS.lightblue;
+                }
+            }else if(this.type === 2){
+                if(getDistance(this.x, this.y, mousePosX, mousePosY) < this.length){
+                    ctx.fillStyle = COLORS.yellow;
+                    if(clicked === true){
+                        this.switchControls();
+                    }
+                }else{
+                    ctx.fillStyle = COLORS.lightblue;
+                }
             }
+
+            this.textYOff = 0;
+            this.textXOff = -1;
+            if(this.x < WIDTH/2){
+                this.textXOff = 1;
+            }
+
+            ctx.font = FONTSIZES.medium + 'px quickPixel';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
+            ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
+            ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
+
         }
 
         /*ctx.strokeStyle = COLORS.red;
@@ -201,6 +226,20 @@ function Object(x, y, width, height, controls, type, bounds){
         ctx.stroke();
         ctx.strokeStyle = COLORS.white;*/
     };
+
+    this.switchControls = function(){
+        switch(this.controls) {
+            case CONTROLS.a: this.controls = CONTROLS.c; break;
+            case CONTROLS.b: this.controls = CONTROLS.d; break;
+            case CONTROLS.c: this.controls = CONTROLS.e; break;
+            case CONTROLS.d: this.controls = CONTROLS.f; break;
+            case CONTROLS.e: this.controls = CONTROLS.g; break;
+            case CONTROLS.f: this.controls = CONTROLS.h; break;
+            case CONTROLS.g: this.controls = CONTROLS.a; break;
+            case CONTROLS.h: this.controls = CONTROLS.b; break;
+            default: break;
+        }
+    }
 }
 
 function Projectile(x, y, angle){
@@ -297,13 +336,8 @@ function Placer(type, width, height, controls){
 
     this.update = function(){
         if(this.placed === false){
-            if(this.type === 1){
-                this.x = mousePosX - 35;
-                this.y = mousePosY - 30;
-            }else if(this.type === 2){
-                this.x = mousePosX - 35;
-                this.y = mousePosY - 30;
-            }
+            this.x = mousePosX;
+            this.y = mousePosY;
         }
 
         this.placeable = true;
@@ -446,6 +480,73 @@ function Placer(type, width, height, controls){
     };
 }
 
+function Button(x, y, width, height, use, text){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.use = use;
+    this.text = text;
+
+    this.hover = false;
+
+    this.angle = 0;
+    this.textScale = 0;
+    this.yOff = 0;
+    this.xOff = 0;
+
+    this.maxAng = 0.1;
+
+    this.update = function(){
+        this.hover = false;
+        if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height/2 && mousePosY < this.y + this.height/2){
+            this.hover = true;
+            if(this.angle < this.maxAng){
+                this.angle+=0.03;
+                this.textScale += 1;
+                this.yOff+=0.5;
+                this.xOff-=0.5;
+            }
+            if(clicked){
+                if(this.use === "play"){
+                    GAMESTATE = "GAME";
+                    placers = [];
+                    buttons = [];
+                }
+            }
+        }else{
+            if(this.angle > 0){
+                this.angle-=0.03;
+                this.textScale-=1;
+                this.xOff+=0.5;
+                this.yOff-=0.5;
+            }else{
+                this.angle = 0;
+                this.textScale = 0;
+                this.xOff = 0;
+                this.yOff = 0;
+            }
+        }
+    };
+
+    this.draw = function(){
+        ctx.textAlign = 'center';
+        if(this.hover === true){
+            ctx.fillStyle = COLORS.white;
+        }else{
+            ctx.fillStyle = COLORS.lightblue;
+        }
+
+        ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
+
+        ctx.save();
+        ctx.translate(this.x + this.xOff, this.y + this.yOff);
+        ctx.rotate(this.angle);
+        ctx.fillText(text, 0, 0, this.width+this.textScale);
+        ctx.restore();
+    };
+}
+
 function Player(id){
     this.id = id;
     this.points = 0;
@@ -464,6 +565,8 @@ objects.push(new Object(200, HEIGHT/2, 5, 60, CONTROLS.c, 2, [HEIGHT/2-50-100-10
 objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 60, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 
 objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
+
+buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY"));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -632,6 +735,13 @@ function game(){
 
         frameCount++;
 
+        for(var i = 0; i < buttons.length; i++){
+            buttons[i].update();
+            if(buttons.length !== 0){
+                buttons[i].draw();
+            }
+        }
+
         for(var i = 0; i < objects.length; i++){
             if(GAMESTATE === "GAME"){
                 objects[i].update();
@@ -746,8 +856,8 @@ function logMouseMove(e) {
 
     var rect = canvas.getBoundingClientRect();
 
-    mousePosX = e.clientX - rect.left + WIDTH/30;
-    mousePosY = e.clientY - rect.top + WIDTH/30;
+    mousePosX = e.clientX - rect.left;
+    mousePosY = e.clientY - rect.top;
     //console.log(mousePosX + ", " + mousePosY);
 }
 
