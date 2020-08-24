@@ -45,8 +45,12 @@ function Object(x, y, width, height, controls, type, bounds){
     this.type = type;
 
     this.angle = Math.PI/2;
-    this.omega = 0;
     this.maxRot = 0.03;
+    if(this.type === 2 || this.type === 3){
+        this.omega = this.maxRot;
+    }else{
+        this.omega = 0;
+    }
     this.angleAccel = 0.003;
 
     this.speed = 8;
@@ -62,9 +66,27 @@ function Object(x, y, width, height, controls, type, bounds){
     this.opacities = [0, 1];
     this.prevY = this.y;
 
+    this.expRad = 0;
+    this.expCoolDown = 0;
+
     this.update = function(){
 
         this.velY = 0;
+
+        if(this.expRad > 0){
+            this.expRad += 0.25;
+            if(this.expRad > 3.75){
+                this.expRad = 0;
+            }
+        }
+
+        if(this.type === 3){
+            if(this.expCoolDown > 0){
+                this.omega = 0;
+            }else{
+                this.omega = this.maxRot;
+            }
+        }
 
         if(this.controls.length > 0) {
             if(this.type === 0){
@@ -79,7 +101,7 @@ function Object(x, y, width, height, controls, type, bounds){
                     }
                 }
             }else if(this.type === 1){
-                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
+                /*if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
                     if(this.y > this.boundsY[0]){
                         this.y -= this.height+this.dividerSize;
                         this.ctrlReleased[0] = false;
@@ -90,27 +112,46 @@ function Object(x, y, width, height, controls, type, bounds){
                         this.y += this.height+this.dividerSize;
                         this.ctrlReleased[1] = false;
                     }
-                }
+                }*/
 
-                if (keys && !keys[this.controls[0]]) {
-                    this.ctrlReleased[0] = true;
-                }
-                if (keys && !keys[this.controls[1]]) {
-                    this.ctrlReleased[1] = true;
+                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
+                    if(this.y > this.boundsY[0]){
+                        this.y -= this.height+this.dividerSize;
+                        this.ctrlReleased[0] = false;
+                    }else{
+                        this.y = this.boundsY[1];
+                    }
                 }
             }else if(this.type === 2){
-                if (keys && keys[this.controls[0]] && this.omega < this.maxRot) {
-                    this.omega+=this.angleAccel;
+                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true) {
+                    this.omega = -this.omega;
+                    this.ctrlReleased[0] = false;
                 }
-                if (keys && keys[this.controls[1]] && this.omega > -this.maxRot) {
-                    this.omega-=this.angleAccel;
+                /*if (keys && keys[this.controls[1]] && this.omega > -this.maxRot) {
+                    this.omega = -this.maxRot;
+                }*/
+            }else if(this.type === 3){
+                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
+                    this.expRad = 0.5;
+                    this.expCoolDown = 100;
+                    this.ctrlReleased[0] = false;
                 }
             }
-        }
-        this.angle+=this.omega;
-        this.omega*=0.95;
-        this.y+=this.velY;
 
+            if (keys && !keys[this.controls[0]]) {
+                this.ctrlReleased[0] = true;
+            }
+            if (keys && !keys[this.controls[1]]) {
+                this.ctrlReleased[1] = true;
+            }
+        }
+
+        if(this.expCoolDown > 0){
+            this.expCoolDown--;
+        }
+
+        this.angle+=this.omega;
+        this.y+=this.velY;
     };
 
     this.draw = function(){
@@ -172,7 +213,6 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.arc(this.x, this.y, this.hingeWidth, 0, 2 * Math.PI, false);
             ctx.fillStyle = COLORS.white;
             ctx.fill();
-
             ctx.beginPath();
             ctx.globalAlpha = 0.5;
             ctx.setLineDash([this.width, this.width]);
@@ -181,6 +221,42 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.stroke();
             ctx.setLineDash([0, 0]);
             ctx.globalAlpha = 1;
+        }else if(this.type === 3){
+            ctx.strokeStyle = COLORS.lightblue;
+            ctx.fillStyle = COLORS.lightblue;
+
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width*0.5, -this.height*0.5, this.width, this.height);
+            ctx.restore();
+
+            ctx.beginPath();
+            //ctx.setLineDash([this.width, this.width]);
+            ctx.lineWidth = 3;
+            ctx.arc(this.x, this.y, (this.width*0.8), 0, 2 * Math.PI, false);
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.lineWidth = 1;
+
+            ctx.strokeStyle = COLORS.lightblue;
+
+            ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            ctx.setLineDash([this.width*0.5, this.width*0.5]);
+            ctx.arc(this.x, this.y, (this.width)*4, 0, 2 * Math.PI, false);
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.globalAlpha = 1;
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 1/(this.expRad+1)+0.15;
+            //ctx.setLineDash([this.width, this.width]);
+            ctx.arc(this.x, this.y, (this.width*this.expRad), 0, 2 * Math.PI, false);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            ctx.lineWidth = 1;
         }
 
         if(GAMESTATE === "PLACE"){
@@ -203,6 +279,15 @@ function Object(x, y, width, height, controls, type, bounds){
                 }else{
                     ctx.fillStyle = COLORS.lightblue;
                 }
+            }else if(this.type === 3){
+                if(getDistance(this.x, this.y, mousePosX, mousePosY) < this.width*2){
+                    ctx.fillStyle = COLORS.yellow;
+                    if(clicked === true){
+                        this.switchControls();
+                    }
+                }else{
+                    ctx.fillStyle = COLORS.lightblue;
+                }
             }
 
             this.textYOff = 0;
@@ -213,9 +298,15 @@ function Object(x, y, width, height, controls, type, bounds){
 
             ctx.font = FONTSIZES.medium + 'px quickPixel';
             ctx.textAlign = 'center';
-            ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
-            ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
-            ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
+            if(this.type === 0){
+                ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
+                ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
+                ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
+            }else if(this.type === 3){
+                ctx.fillText(this.controls[2], this.x + WIDTH/40*this.textXOff, this.y + this.height*0.3 + this.textYOff);
+            }else{
+                ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.6 + this.textYOff);
+            }
 
         }
 
@@ -251,7 +342,7 @@ function Projectile(x, y, angle){
     this.type = 0;
 
     this.angle = angle;
-    this.speed = Math.round(Math.random()*5)+4;
+    this.speed = Math.round(Math.random()*4)+3;
 
     this.velX = this.speed*Math.cos(this.angle);
     this.velY = this.speed*Math.sin(this.angle);
@@ -265,11 +356,18 @@ function Projectile(x, y, angle){
         }
         //BOUNCES OFF PADDLES
         for(var o in objects){
-            //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
-            var collision = false;
 
-            var coltemp = colCircleRectangle(this, objects[o]);
-            var rottop = coltemp.rt;
+            //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
+            //Wait, I'm reading this later... And I don't get what I could've done through ors? Am I missing something?
+
+            //var collision = false;
+
+            var coltemp = false;
+
+            if(objects[o].type === 0 || objects[o].type === 1 || objects[o].type === 2 ){
+                coltemp = colCircleRectangle(this, objects[o]);
+                var rottop = coltemp.rt;
+            }
 
             if(coltemp.col){
                 var rndOff = 0;
@@ -289,6 +387,16 @@ function Projectile(x, y, angle){
                 //this.velX = 0;
                 //this.velY = 0;
                 objects[o].omega*=(1+0.5*coltemp.rs);
+            }
+
+            if(objects[o].type === 3){
+                if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
+                    this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
+                }
+
+                this.velX = this.speed*Math.cos(this.angle);
+                this.velY = this.speed*Math.sin(this.angle);
+
             }
 
         }
@@ -352,6 +460,10 @@ function Placer(type, width, height, controls){
             if(this.y - this.height - CONST.bound < 0 || this.y + this.height + CONST.bound > HEIGHT || this.x - this.height - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.height - CONST.bound || (this.x + this.height > WIDTH/2-CONST.nonplwid && this.x - this.height < WIDTH/2+CONST.nonplwid)){
                 this.placeable = false;
             }
+        }else if(this.type === 3){
+            if(this.y - this.height*4 - CONST.bound < 0 || this.y + this.height*4 + CONST.bound > HEIGHT || this.x - this.height*4 - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.height*4 - CONST.bound || (this.x + this.height*4 > WIDTH/2-CONST.nonplwid && this.x - this.height*4 < WIDTH/2+CONST.nonplwid)){
+                this.placeable = false;
+            }
         }
 
         if(this.placeable === true){
@@ -365,6 +477,10 @@ function Placer(type, width, height, controls){
                         if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
                             this.placeable = false;
                         }
+                    }else if(objects[j].type === 3){
+                        if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height*4+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
                     }
                 }else if(this.type === 2){
                     if(objects[j].type === 1){
@@ -373,6 +489,24 @@ function Placer(type, width, height, controls){
                         }
                     }else if(objects[j].type === 2){
                         if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (this.height + objects[j].length + 2*CONST.bound)){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 3){
+                        if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (objects[j].height*8)){
+                            this.placeable = false;
+                        }
+                    }
+                }else if(this.type === 3){
+                    if(objects[j].type === 1){
+                        if(colCircleRectangle({x: this.x, y: this.y, radius: this.height*4+CONST.bound, velX:0, velY:0}, {x: objects[j].x, y:objects[j].boundsY[0]-objects[j].height*0.2, width:objects[j].width*4, height:3*objects[j].height+2*objects[j].dividerSize+objects[j].height*0.4, length:3*objects[j].height+2*objects[j].dividerSize, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 2){
+                        if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (this.height*4 + objects[j].length + 2*CONST.bound)){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 3){
+                        if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (objects[j].height*8)){
                             this.placeable = false;
                         }
                     }
@@ -406,6 +540,8 @@ function Placer(type, width, height, controls){
             if(this.type === 1){
                 objects.push(new Object(this.x, this.y-this.height/2, this.width, this.height, this.controls, this.type, this.boundsY));
             }else if(this.type === 2){
+                objects.push(new Object(this.x, this.y, this.width, this.height, this.controls, this.type, this.boundsY));
+            }else if(this.type === 3){
                 objects.push(new Object(this.x, this.y, this.width, this.height, this.controls, this.type, this.boundsY));
             }
         }
@@ -473,6 +609,45 @@ function Placer(type, width, height, controls){
             }else{
                 ctx.strokeStyle = COLORS.lightblue;
             }
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.globalAlpha = 1;
+        }else if(this.type === 3){
+            if(this.placeable === true){
+                ctx.fillStyle = COLORS.yellow;
+                ctx.strokeStyle = COLORS.yellow;
+            }else{
+                ctx.fillStyle = COLORS.red;
+                ctx.strokeStyle = COLORS.red;
+            }
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillRect(-this.width*0.5*this.anim[0], -this.height*0.5*this.anim[1], this.width*this.anim[0], this.height*this.anim[1]);
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            //ctx.setLineDash([this.width, this.width]);
+            ctx.arc(this.x, this.y, (this.width*0.8)*this.anim[1], 0, 2 * Math.PI, false);
+            ctx.stroke();
+            ctx.setLineDash([0, 0]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = COLORS.white;
+
+            if(this.placed === false){
+                if(this.placeable === true){
+                    ctx.strokeStyle = COLORS.yellow;
+                }else{
+                    ctx.strokeStyle = COLORS.red;
+                }
+            }else{
+                ctx.strokeStyle = COLORS.lightblue;
+            }
+            ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            ctx.setLineDash([this.width*0.5, this.width*0.5]);
+            ctx.arc(this.x, this.y, (this.width)*4*this.anim[0], 0, 2 * Math.PI, false);
             ctx.stroke();
             ctx.setLineDash([0, 0]);
             ctx.globalAlpha = 1;
@@ -561,10 +736,10 @@ players.push(new Player(1));
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
-objects.push(new Object(200, HEIGHT/2, 5, 60, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
-objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 60, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+//objects.push(new Object(200, HEIGHT/2, 5, 60, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
+//objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 60, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 
-objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
+//objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
 buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY"));
 
@@ -575,6 +750,10 @@ function colCircleRectangle ( circle, rect ) {
     var rectX = rect.x - rect.width/2*Math.cos(rect.angle - Math.PI / 2 );
     var rectY = rect.y - rect.width/2*Math.sin(rect.angle - Math.PI / 2 );
 
+    if(rect.type === 3){
+        rectY -= rect.height/2;
+    }
+
     var rectReferenceX = rectX;
     var rectReferenceY = rectY;
 
@@ -584,6 +763,9 @@ function colCircleRectangle ( circle, rect ) {
 
     var unrotatedCircleXB = Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x - rectX ) - Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y - rectY ) + rectX;
     var unrotatedCircleYB = Math.sin(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.x - rectX ) + Math.cos(Math.PI*2 - (rect.angle - Math.PI / 2)) * ( circle.y - rectY ) + rectY;
+
+    //ctx.fillStyle = COLORS.red;
+    //ctx.fillRect(rectX, rectY, rect.width, rect.height);
 
     /*ctx.beginPath();
     ctx.arc(unrotatedCircleX, unrotatedCircleY, 5, 0, 2 * Math.PI, false);
@@ -757,6 +939,9 @@ function game(){
                 }else if(keys && keys[50]){
                     placers = [];
                     placers.push(new Placer(2, 5, 60, CONTROLS.a));
+                }else if(keys && keys[51]){
+                    placers = [];
+                    placers.push(new Placer(3, 20, 20, CONTROLS.a));
                 }
             }
 
