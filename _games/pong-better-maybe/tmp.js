@@ -1,6 +1,6 @@
 var versionCode = "V 0.01";
-var WIDTH = 1024;
-var HEIGHT = 576;
+var WIDTH = 1280;
+var HEIGHT = 720;
 
 var gameRunning = true;
 var frameCount = 0;
@@ -12,7 +12,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
-var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "1", "4"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
+var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "4", "1"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
 var FONTSIZES = {large1: 70, large2: 70, medium: 30};
 
 var objects = [];
@@ -46,7 +46,7 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.angle = Math.PI/2;
     this.maxRot = 0.03;
-    if(this.type === 2 || this.type === 3){
+    if(this.type === 3){
         this.omega = this.maxRot;
     }else{
         this.omega = 0;
@@ -68,6 +68,8 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.expRad = 0;
     this.expCoolDown = 0;
+
+    this.expectedAngle = Math.PI/2;
 
     this.update = function(){
 
@@ -124,7 +126,8 @@ function Object(x, y, width, height, controls, type, bounds){
                 }
             }else if(this.type === 2){
                 if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true) {
-                    this.omega = -this.omega;
+                    //this.omega = -this.omega;
+                    this.expectedAngle += Math.PI/4;
                     this.ctrlReleased[0] = false;
                 }
                 /*if (keys && keys[this.controls[1]] && this.omega > -this.maxRot) {
@@ -150,8 +153,16 @@ function Object(x, y, width, height, controls, type, bounds){
             this.expCoolDown--;
         }
 
-        this.angle+=this.omega;
+        //this.angle+=this.omega;
         this.y+=this.velY;
+
+        if(this.type === 2){
+            if(this.expectedAngle !== this.angle && this.angle + Math.PI/16 < this.expectedAngle){
+                this.angle += Math.PI/16;
+            }else{
+                this.angle = this.expectedAngle;
+            }
+        }
     };
 
     this.draw = function(){
