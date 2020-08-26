@@ -13,7 +13,7 @@ var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
 var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "4", "1"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
-var FONTSIZES = {large1: 70, large2: 70, medium: 30};
+var FONTSIZES = {large1: 80, large2: 80, medium: 40};
 
 var objects = [];
 var projectiles = [];
@@ -70,6 +70,8 @@ function Object(x, y, width, height, controls, type, bounds){
     this.expCoolDown = 0;
 
     this.expectedAngle = Math.PI/2;
+
+    this.pads = [1, 1, 1, 1, 1];
 
     this.update = function(){
 
@@ -139,6 +141,16 @@ function Object(x, y, width, height, controls, type, bounds){
                     this.expCoolDown = 100;
                     this.ctrlReleased[0] = false;
                 }
+            }else if(this.type === 4){
+                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
+                    for (var i = 0; i < 5; i++) {
+                        if (this.pads[i] < 1) {
+                            this.pads[i] += 0.2;
+                            break;
+                        }
+                    }
+                    this.expCoolDown = 10;
+                }
             }
 
             if (keys && !keys[this.controls[0]]) {
@@ -162,6 +174,10 @@ function Object(x, y, width, height, controls, type, bounds){
             }else{
                 this.angle = this.expectedAngle;
             }
+        }
+
+        if(this.type === 3){
+            this.angle += this.omega;
         }
     };
 
@@ -268,6 +284,18 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.stroke();
             ctx.globalAlpha = 1;
             ctx.lineWidth = 1;
+        }else if(this.type === 4){
+            ctx.fillStyle = COLORS.white;
+
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            for(var i = 0; i < 5; i++){
+                ctx.globalAlpha = this.pads[i];
+                ctx.fillRect(-this.width*0.5, -this.height*0.5 - this.height*2 - CONST.bound*2 + i*(this.height+CONST.bound), this.width, this.height);
+            }
+            ctx.restore();
+            ctx.globalAlpha = 1;
         }
 
         if(GAMESTATE === "PLACE"){
@@ -292,6 +320,16 @@ function Object(x, y, width, height, controls, type, bounds){
                 }
             }else if(this.type === 3){
                 if(getDistance(this.x, this.y, mousePosX, mousePosY) < this.width*2){
+                    ctx.fillStyle = COLORS.yellow;
+                    if(clicked === true){
+                        this.switchControls();
+                    }
+                }else{
+                    ctx.fillStyle = COLORS.lightblue;
+                }
+            }
+            else if(this.type === 4){
+                if(mousePosX > this.x-this.width && mousePosX < this.x + this.width && mousePosY > this.y - this.height*2.5 - CONST.bound*2 && mousePosY < this.y + this.height*2.5 + CONST.bound*2){
                     ctx.fillStyle = COLORS.yellow;
                     if(clicked === true){
                         this.switchControls();
@@ -353,7 +391,7 @@ function Projectile(x, y, angle){
     this.type = 0;
 
     this.angle = angle;
-    this.speed = Math.round(Math.random()*4)+3;
+    this.speed = Math.round(Math.random()*5)+4;
 
     this.velX = this.speed*Math.cos(this.angle);
     this.velY = this.speed*Math.sin(this.angle);
@@ -366,6 +404,7 @@ function Projectile(x, y, angle){
             this.velY = this.speed*Math.sin(this.angle);
         }
         //BOUNCES OFF PADDLES
+
         for(var o in objects){
 
             //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
@@ -373,41 +412,73 @@ function Projectile(x, y, angle){
 
             //var collision = false;
 
-            var coltemp = false;
+            if(objects[o].type !== 4){
+                var coltemp = false;
 
-            if(objects[o].type === 0 || objects[o].type === 1 || objects[o].type === 2 ){
-                coltemp = colCircleRectangle(this, objects[o]);
-                var rottop = coltemp.rt;
-            }
-
-            if(coltemp.col){
-                var rndOff = 0;
-                if(objects[o].type === 0 || objects[o].type === 1){
-                    rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                }
-                this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-
-                this.x = coltemp.colX;
-                this.y = coltemp.colY;
-                if(rottop === 1){
-                    this.y += objects[o].velY;
+                if(objects[o].type === 0 || objects[o].type === 1 || objects[o].type === 2 ){
+                    coltemp = colCircleRectangle(this, objects[o]);
+                    var rottop = coltemp.rt;
                 }
 
-                this.velX = this.speed*Math.cos(this.angle);
-                this.velY = this.speed*Math.sin(this.angle);
-                //this.velX = 0;
-                //this.velY = 0;
-                objects[o].omega*=(1+0.5*coltemp.rs);
-            }
+                if(coltemp.col){
+                    var rndOff = 0;
+                    if(objects[o].type === 0 || objects[o].type === 1){
+                        rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
+                    }
+                    this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
 
-            if(objects[o].type === 3){
-                if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
-                    this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
+                    this.x = coltemp.colX;
+                    this.y = coltemp.colY;
+                    if(rottop === 1){
+                        this.y += objects[o].velY;
+                    }
+
+                    this.velX = this.speed*Math.cos(this.angle);
+                    this.velY = this.speed*Math.sin(this.angle);
+                    //this.velX = 0;
+                    //this.velY = 0;
+                    objects[o].omega*=(1+0.5*coltemp.rs);
                 }
 
-                this.velX = this.speed*Math.cos(this.angle);
-                this.velY = this.speed*Math.sin(this.angle);
+                if(objects[o].type === 3){
+                    if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
+                        this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
+                    }
 
+                    this.velX = this.speed*Math.cos(this.angle);
+                    this.velY = this.speed*Math.sin(this.angle);
+
+                }
+            }else{
+                for(var i = 0; i < 5; i++) {
+                    if(objects[o].pads[i] === 1){
+                        coltemp = colCircleRectangle(this, {x: objects[o].x - objects[o].width / 2, y: objects[o].y - objects[o].height * 2.5 - CONST.bound * 2 + i * (objects[o].height + CONST.bound), width: objects[o].width, height: objects[o].height, angle: Math.PI / 2, type: objects[o].type, length: objects[o].height, omega: 0});
+                        var rottop = coltemp.rt;
+
+                        //ctx.fillRect(objects[o].x - objects[o].width/2, objects[o].y - objects[o].height*2.5 - CONST.bound*2 + i*(objects[o].height+CONST.bound), objects[o].width, objects[o].height);
+
+                        if (coltemp.col) {
+                            var rndOff = 0;
+                            if (objects[o].type === 0 || objects[o].type === 1) {
+                                rndOff = (this.y - (objects[o].y + objects[o].height / 2)) / 100;
+                            }
+                            this.angle = (Math.PI - this.angle) + (objects[o].angle - Math.PI / 2) * 2 - rndOff * Math.sign(this.velX) + (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
+
+                            this.x = coltemp.colX;
+                            this.y = coltemp.colY;
+
+                            this.velX = this.speed * Math.cos(this.angle);
+                            this.velY = this.speed * Math.sin(this.angle);
+                            //this.velX = 0;
+                            //this.velY = 0;
+                            objects[o].omega *= (1 + 0.5 * coltemp.rs);
+
+                            objects[o].pads[i] = 0;
+
+                            break;
+                        }
+                    }
+                }
             }
 
         }
@@ -472,7 +543,11 @@ function Placer(type, width, height, controls){
                 this.placeable = false;
             }
         }else if(this.type === 3){
-            if(this.y - this.height*4 - CONST.bound < 0 || this.y + this.height*4 + CONST.bound > HEIGHT || this.x - this.height*4 - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.height*4 - CONST.bound || (this.x + this.height*4 > WIDTH/2-CONST.nonplwid && this.x - this.height*4 < WIDTH/2+CONST.nonplwid)){
+            if(this.y - this.height*4 - CONST.bound < 0 || this.y + this.height*4 + CONST.bound > HEIGHT || this.x - this.height*4 - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.height*4 - CONST.bound || (this.x + this.width*4 > WIDTH/2-CONST.nonplwid && this.x - this.width*4 < WIDTH/2+CONST.nonplwid)){
+                this.placeable = false;
+            }
+        }else if(this.type === 4){
+            if(this.y - this.height*2.5 - CONST.bound*3 < 0 || this.y + this.height*2.5 + CONST.bound*3 > HEIGHT || this.x - this.width - CONST.bound < CONST.nonplwid || this.x > WIDTH - this.width - CONST.bound || (this.x + this.width > WIDTH/2-CONST.nonplwid && this.x - this.width < WIDTH/2+CONST.nonplwid)){
                 this.placeable = false;
             }
         }
@@ -492,6 +567,10 @@ function Placer(type, width, height, controls){
                         if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height*4+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize, length:3*this.height+2*this.dividerSize, angle:Math.PI/2}).col){
                             this.placeable = false;
                         }
+                    }else if(objects[j].type === 4){
+                        if(colRect({x: this.x - this.width/2, y:this.boundsY[0], width:this.width, height:3*this.height+2*this.dividerSize}, {x: objects[j].x - objects[j].width*2, y:objects[j].y - objects[j].height*2.5 - CONST.bound*4, width:objects[j].width*4, height:objects[j].height*5 + CONST.bound*8})){
+                            this.placeable = false;
+                        }
                     }
                 }else if(this.type === 2){
                     if(objects[j].type === 1){
@@ -506,6 +585,10 @@ function Placer(type, width, height, controls){
                         if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (objects[j].height*8)){
                             this.placeable = false;
                         }
+                    }else if(objects[j].type === 4){
+                        if(colCircleRectangle({x: this.x, y: this.y, radius: this.height+CONST.bound, velX:0, velY:0}, {x: objects[j].x, y:objects[j].y - objects[j].height*2.5 - CONST.bound*4, width:objects[j].width*4, height:objects[j].height*5 + CONST.bound*8, length:objects[j].height*5 + CONST.bound*8, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
                     }
                 }else if(this.type === 3){
                     if(objects[j].type === 1){
@@ -518,6 +601,28 @@ function Placer(type, width, height, controls){
                         }
                     }else if(objects[j].type === 3){
                         if(getDistance(this.x, this.y, objects[j].x, objects[j].y) < (objects[j].height*8)){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 4){
+                        if(colCircleRectangle({x: this.x, y: this.y, radius: this.height*4+CONST.bound, velX:0, velY:0}, {x: objects[j].x, y:objects[j].y - objects[j].height*2.5 - CONST.bound*4, width:objects[j].width*4, height:objects[j].height*5 + CONST.bound*8, length:objects[j].height*5 + CONST.bound*8, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
+                    }
+                }else if(this.type === 4){
+                    if(objects[j].type === 1){
+                        if(colRect({x: this.x - this.width*2, y:this.y - this.height*2.5 - CONST.bound*4, width:this.width*4, height:this.height*5 + CONST.bound*8}, {x: objects[j].x - objects[j].width/2, y:objects[j].boundsY[0], width:objects[j].width, height:3*objects[j].height+2*objects[j].dividerSize})){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 2){
+                        if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.y - this.height*2.5 - CONST.bound*4, width:this.width*4, height:this.height*5 + CONST.bound*8, length:this.height*5 + CONST.bound*8, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 3){
+                        if(colCircleRectangle({x: objects[j].x, y: objects[j].y, radius: objects[j].height*4+CONST.bound, velX:0, velY:0}, {x: this.x, y:this.y - this.height*2.5 - CONST.bound*4, width:this.width*4, height:this.height*5 + CONST.bound*8, length:this.height*5 + CONST.bound*8, angle:Math.PI/2}).col){
+                            this.placeable = false;
+                        }
+                    }else if(objects[j].type === 4){
+                        if(colRect({x: this.x - this.width/2, y:this.y - this.height*2.5 - CONST.bound*4, width:this.width, height:5*this.height+4*CONST.bound}, {x: objects[j].x - objects[j].width*2, y:objects[j].y - objects[j].height*3 - CONST.bound*4, width:objects[j].width*4, height:objects[j].height*5 + CONST.bound*8})){
                             this.placeable = false;
                         }
                     }
@@ -550,9 +655,7 @@ function Placer(type, width, height, controls){
 
             if(this.type === 1){
                 objects.push(new Object(this.x, this.y-this.height/2, this.width, this.height, this.controls, this.type, this.boundsY));
-            }else if(this.type === 2){
-                objects.push(new Object(this.x, this.y, this.width, this.height, this.controls, this.type, this.boundsY));
-            }else if(this.type === 3){
+            }else if(this.type === 2 || this.type === 3 || this.type === 4){
                 objects.push(new Object(this.x, this.y, this.width, this.height, this.controls, this.type, this.boundsY));
             }
         }
@@ -662,6 +765,19 @@ function Placer(type, width, height, controls){
             ctx.stroke();
             ctx.setLineDash([0, 0]);
             ctx.globalAlpha = 1;
+        }else if(this.type === 4){
+            if(this.placeable === true){
+                ctx.fillStyle = COLORS.lightblue;
+            }else{
+                ctx.fillStyle = COLORS.red;
+            }
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle - Math.PI / 2);
+            for(var i = 0; i < 5; i++){
+                ctx.fillRect(-this.width*0.5*this.anim[0], -this.height*0.5*this.anim[1] - this.height*2 - CONST.bound*2 + i*(this.height+CONST.bound), this.width*this.anim[0], this.height*this.anim[1]);
+            }
+            ctx.restore();
         }
     };
 }
@@ -953,6 +1069,9 @@ function game(){
                 }else if(keys && keys[51]){
                     placers = [];
                     placers.push(new Placer(3, 20, 20, CONTROLS.a));
+                }else if(keys && keys[52]){
+                    placers = [];
+                    placers.push(new Placer(4, 10, 20, CONTROLS.a));
                 }
             }
 
@@ -972,14 +1091,14 @@ function game(){
 
                 if( projectiles[i].x < 0){
                     players[1].points++;
-                    FONTSIZES.large2 = 90;
+                    FONTSIZES.large2 = 100;
                     projectiles.splice(i, 1);
                     if(players[1].points % 10 === 0){
                         maxProjectiles++;
                     }
                 }else if( projectiles[i].x > WIDTH){
                     players[0].points++;
-                    FONTSIZES.large1 = 90;
+                    FONTSIZES.large1 = 100;
                     projectiles.splice(i, 1);
                     if(players[0].points % 10 === 0){
                         maxProjectiles++;
@@ -999,10 +1118,10 @@ function game(){
 
         //TIMERS AND OTHER STUFF
 
-        if(FONTSIZES.large1 > 70){
+        if(FONTSIZES.large1 > 80){
             FONTSIZES.large1-=2;
         }
-        if(FONTSIZES.large2 > 70){
+        if(FONTSIZES.large2 > 80){
             FONTSIZES.large2-=2;
         }
 
