@@ -1040,10 +1040,10 @@ function getNearestPointInPerimeter(l,t,w,h,xp,yp) {
 function game(){
     window.onmousemove = logMouseMove;
 
-    ctx.fillStyle = COLORS.bg;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    /*ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);*/
 
-    //ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     ctx.strokeStyle = COLORS.lightblue;
     ctx.lineWidth = 3;
@@ -1201,11 +1201,11 @@ function game(){
         }
 
         //GRID
-        /*ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
+        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
 
         for(var i = 0; i < HEIGHT; i+=6){
             ctx.fillRect(0, i, WIDTH, 3);
-        }*/
+        }
 
         //GRADIENT
         ctx.rect(0, 0, WIDTH, HEIGHT);
@@ -1233,19 +1233,25 @@ function chromaticAberration(ctx, intensity, phase){
     var imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
     var data = imageData.data;
 
-    var off = 2;
+    var off = 8;
 
-    if(glitchTimer < 4){
-        off = 8;
+    if(glitchTimer < 6){
+        off = 16;
         if(glitchTimer === 0){
-            glitchTimer = Math.floor(Math.random()*100);
+            glitchTimer = Math.floor(Math.random()*1000);
         }
     }
 
-    for (var i = phase % 4; i < data.length; i += 4) {
+    for (var i = 0; i < data.length; i += 4) {
         // Setting the start of the loop to a different integer will change the aberration color, but a start integer of 4n-1 will not work
-
-        data[i] = data[i + off * intensity];
+        if(data[i] !== 0){
+            if(data[i-off] === 0){
+                data[i] = 1;
+            }else if(data[i+off+1] === 0){
+                data[i+1] = 1;
+                data[i+2] = 0;
+            }
+        }
     }
     ctx.putImageData(imageData, 0, 0);
 
