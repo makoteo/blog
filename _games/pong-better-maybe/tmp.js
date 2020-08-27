@@ -42,6 +42,8 @@ image.src = canvas.toDataURL();
 
 var glitchTimer = 0;
 
+var chromAbb = true;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Object(x, y, width, height, controls, type, bounds){
@@ -192,10 +194,10 @@ function Object(x, y, width, height, controls, type, bounds){
 
     this.draw = function(){
         if(this.type === 0) {
-            ctx.fillStyle = COLORS.white;
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle - Math.PI / 2);
+            ctx.fillStyle = COLORS.white;
             ctx.fillRect(-this.width / 2, 0, this.width, this.height);
             ctx.restore();
         }else if(this.type === 1){
@@ -309,7 +311,9 @@ function Object(x, y, width, height, controls, type, bounds){
 
         if(GAMESTATE === "PLACE"){
             //MOUSE CLICKS
-            if(this.type === 1){
+            if(this.type === 0){
+                ctx.fillStyle = COLORS.lightblue;
+            }else if(this.type === 1){
                 if(mousePosX > this.x-this.width && mousePosX < this.x + this.width && mousePosY > this.boundsY[0] && mousePosY < this.boundsY[0] + this.height*3 + this.dividerSize*2){
                     ctx.fillStyle = COLORS.yellow;
                     if(clicked === true){
@@ -1039,6 +1043,8 @@ function game(){
     ctx.fillStyle = COLORS.bg;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
+    //ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
     ctx.strokeStyle = COLORS.lightblue;
     ctx.lineWidth = 3;
     ctx.setLineDash([12, 8]);
@@ -1188,16 +1194,18 @@ function game(){
         }*/
 
         //CHROMATIC ABBERATION
-        ctx.globalCompositeOperation="xor";
-        chromaticAberration(ctx, 5, 0);
-        ctx.globalCompositeOperation="source-over";
+        if(chromAbb === true){
+            ctx.globalCompositeOperation="xor";
+            chromaticAberration(ctx, 5, 0);
+            ctx.globalCompositeOperation="source-over";
+        }
 
         //GRID
-        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
+        /*ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
 
         for(var i = 0; i < HEIGHT; i+=6){
             ctx.fillRect(0, i, WIDTH, 3);
-        }
+        }*/
 
         //GRADIENT
         ctx.rect(0, 0, WIDTH, HEIGHT);
@@ -1225,19 +1233,19 @@ function chromaticAberration(ctx, intensity, phase){
     var imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
     var data = imageData.data;
 
-    var off = -1;
+    var off = 2;
 
     if(glitchTimer < 4){
-        off = -4;
+        off = 8;
         if(glitchTimer === 0){
-            glitchTimer = Math.floor(Math.random()*1000);
+            glitchTimer = Math.floor(Math.random()*100);
         }
     }
 
     for (var i = phase % 4; i < data.length; i += 4) {
         // Setting the start of the loop to a different integer will change the aberration color, but a start integer of 4n-1 will not work
 
-        data[i] = data[i - off * intensity];
+        data[i] = data[i + off * intensity];
     }
     ctx.putImageData(imageData, 0, 0);
 
