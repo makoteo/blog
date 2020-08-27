@@ -456,6 +456,7 @@ function Projectile(x, y, angle){
                 if(objects[o].type === 3){
                     if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
                         this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
+                        this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
                     }
 
                     this.velX = this.speed*Math.cos(this.angle);
@@ -1201,10 +1202,10 @@ function game(){
         }
 
         //GRID
-        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
+        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.25 + 0.1) + ')';
 
-        for(var i = 0; i < HEIGHT; i+=6){
-            ctx.fillRect(0, i, WIDTH, 3);
+        for(var i = 0; i < HEIGHT; i+=8){
+            ctx.fillRect(0, i, WIDTH, 4);
         }
 
         //GRADIENT
@@ -1238,7 +1239,7 @@ function chromaticAberration(ctx, intensity, phase){
     if(glitchTimer < 6){
         off = 16;
         if(glitchTimer === 0){
-            glitchTimer = Math.floor(Math.random()*1000);
+            glitchTimer = Math.floor(Math.random()*750);
         }
     }
 
