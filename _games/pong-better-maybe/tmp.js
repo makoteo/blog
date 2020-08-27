@@ -33,6 +33,15 @@ var CONST = {dividerSize: 10, hingeWidth:5, bound: 5, nonplwid: WIDTH/30};
 
 var clicked = false;
 
+var imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+var pixels = imageData.data;
+
+var image = new Image();
+image.id = "pic";
+image.src = canvas.toDataURL();
+
+var glitchTimer = 0;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Object(x, y, width, height, controls, type, bounds){
@@ -1135,8 +1144,108 @@ function game(){
 
         clicked = false;
 
+        /*imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        pixels = imageData.data;
+
+        for (var y = 0; y < canvas.height; y++) {
+            var xOffset = 20 * Math.sin(y * Math.PI / 20);
+            for (var x = 0; x < canvas.width; x++) {
+                // Clamp the source x between 0 and width
+                var sx = Math.min(Math.max(0, x + xOffset), canvas.width);
+
+                var destIndex = ((y * canvas.width) + x);
+                var sourceIndex = ((y * canvas.width) + sx);
+
+                imageData.data[destIndex] = pixels[sourceIndex];
+                imageData.data[destIndex + 1] = pixels[sourceIndex + 1];
+                imageData.data[destIndex + 2] = pixels[sourceIndex + 2];
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);*/
+
+        /*ctx.setTransform(1,0,0,1,0,0); // reset transform
+
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;           // reset alpha
+        ctx.clearRect(0,0,WIDTH,HEIGHT);
+        if(image.complete){
+            for(var i = 0 ; i < HEIGHT; i ++){
+                var wide = WIDTH - Math.sin(i/250)*WIDTH/8;
+                ctx.scale(0.8, 0.8);
+                ctx.putImageData(imageData, Math.abs(WIDTH/2 - wide/2), 0, 0, i, wide, 1);
+                ctx.scale(1.25, 1.25);
+                //ctx.drawImage(image, 0, i, WIDTH, 1, 0, i, WIDTH, 1);
+            }
+        }*/
+
+        /*if(image.complete){
+        image.src = canvas.toDataURL();
+            for(var i = 0 ; i < HEIGHT/4; i ++){
+                var wide = WIDTH - Math.sin(i/400)*WIDTH/8;
+                ctx.drawImage(image, Math.abs(WIDTH/2 - wide/2), i*4, wide, 8, 0, i*4, WIDTH, 4);
+            }
+        }*/
+
+        //CHROMATIC ABBERATION
+        ctx.globalCompositeOperation="xor";
+        chromaticAberration(ctx, 5, 0);
+        ctx.globalCompositeOperation="source-over";
+
+        //GRID
+        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.4) + ')';
+
+        for(var i = 0; i < HEIGHT; i+=6){
+            ctx.fillRect(0, i, WIDTH, 3);
+        }
+
+        //GRADIENT
+        ctx.rect(0, 0, WIDTH, HEIGHT);
+
+        // create radial gradient
+        var outerRadius = WIDTH * 1;
+        var innerRadius = WIDTH * .3;
+        var grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, innerRadius, WIDTH / 2, HEIGHT / 2, outerRadius);
+        // light blue
+        grd.addColorStop(0, 'rgba(0,0,0,0)');
+        // dark blue
+        grd.addColorStop(1, 'rgba(0,0,0,' + 1 + ')');
+
+        ctx.fillStyle = grd;
+        ctx.fill();
+
     }
 }
+
+function chromaticAberration(ctx, intensity, phase){
+    /* Use canvas to draw the original image, and load pixel data by calling getImageData
+    The ImageData.data is an one-dimentional Uint8Array with all the color elements flattened. The array contains data in the sequence of [r,g,b,a,r,g,b,a...]
+    Because of the cross-origin issue, remember to run the demo in a localhost server or the getImageData call will throw error
+    */
+    var imageData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+    var data = imageData.data;
+
+    var off = -1;
+
+    if(glitchTimer < 4){
+        off = -4;
+        if(glitchTimer === 0){
+            glitchTimer = Math.floor(Math.random()*1000);
+        }
+    }
+
+    for (var i = phase % 4; i < data.length; i += 4) {
+        // Setting the start of the loop to a different integer will change the aberration color, but a start integer of 4n-1 will not work
+
+        data[i] = data[i - off * intensity];
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    if(glitchTimer > 0){
+        glitchTimer--;
+    }
+}
+
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
