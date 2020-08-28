@@ -44,6 +44,10 @@ var glitchTimer = 0;
 
 var chromAbb = true;
 
+var spawnChance = [8, 1, 1, 100, 0];
+var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
+var projPoints = [1, 5, 2, 5, 5];
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 function Object(x, y, width, height, controls, type, bounds){
@@ -405,6 +409,7 @@ function Projectile(x, y, angle, type){
         case 0: this.radius = 4; this.speed = Math.round(Math.random()*5)+4; break;
         case 1: this.radius = 6; this.speed = Math.round(Math.random()*3)+2; break;
         case 2: this.radius = 4; this.speed = Math.round(Math.random()*3)+2; break;
+        case 3: this.radius = 8; this.speed = Math.round(Math.random()*2)+2; break;
     }
 
     this.angle = angle;
@@ -419,6 +424,9 @@ function Projectile(x, y, angle, type){
         this.invisTimer = Math.floor(Math.random()*300) + 100;
         this.opacity = 1;
         this.targetOpacity = 1;
+    }else if(this.type === 3){
+        this.rotAngle = 0;
+        this.spawnTimer = Math.floor(Math.random()*400)+400;
     }
 
     this.update = function(){
@@ -569,6 +577,15 @@ function Projectile(x, y, angle, type){
             ctx.fillStyle = COLORS.lightgreen;
             ctx.fill();
             ctx.globalAlpha = 1;
+        }else if(this.type === 3){
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotAngle);
+            ctx.fillStyle = COLORS.white;
+            ctx.fillRect(-this.radius, -this.radius, this.radius*2, this.radius*2);
+            ctx.restore();
+
+            this.rotAngle+=0.02;
         }
     };
 }
@@ -1168,7 +1185,7 @@ function game(){
 
                 if(projectiles[i].type === 1){
                     if(projectiles[i].explodeTime <= 0){
-                        for(var ex = 0; ex< 8; ex++){
+                        for(var ex = 0; ex < 8; ex++){
                             projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/8, 0));
                         }
                         projectiles.splice(i, 1);
@@ -1176,24 +1193,24 @@ function game(){
                     }
                 }
 
+                if(projectiles[i].type === 3){
+                    if(frameCount % projectiles[i].spawnTimer === 0){
+                        for(var ex = 0; ex < 4; ex++){
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/2 + projectiles[i].rotAngle, 0));
+                        }
+                    }
+                }
+
                 if(dlt === false){
                     if( projectiles[i].x < 0){
-                        switch(projectiles[i].type){
-                            case 0: players[1].points++; break;
-                            case 1: players[1].points+=5; break;
-                            case 2: players[1].points+=2; break;
-                        }
+                        players[1].points += projPoints[projectiles[i].type];
                         FONTSIZES.large2 = 100;
                         projectiles.splice(i, 1);
                         if(players[1].points % 10 === 0){
                             maxProjectiles++;
                         }
                     }else if( projectiles[i].x > WIDTH){
-                        switch(projectiles[i].type){
-                            case 0: players[0].points++; break;
-                            case 1: players[0].points+=5; break;
-                            case 2: players[0].points+=2; break;
-                        }
+                        players[0].points += projPoints[projectiles[i].type];
                         FONTSIZES.large1 = 100;
                         projectiles.splice(i, 1);
                         if(players[0].points % 10 === 0){
@@ -1208,22 +1225,24 @@ function game(){
                 var rnd = Math.random();
                 if(rnd < 0.5){
                     rnd = Math.random();
-                    if(rnd < 0.8){
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 0));
-                    }else if(rnd < 0.9){
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 1));
-                    }else{
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 2));
+                    var projNum = 0;
+                    for(var p = 0; p < spawnChance.length; p++){
+                        if(rnd < (spawnChance[p]+projNum)/spawnTotal){
+                            projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, p));
+                            break;
+                        }
+                        projNum+=spawnChance[p];
                     }
                 }else{
                     //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
                     rnd = Math.random();
-                    if(rnd < 0.8){
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 0));
-                    }else if(rnd < 0.9){
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 1));
-                    }else{
-                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 2));
+                    var projNum = 0;
+                    for(var p = 0; p < spawnChance.length; p++){
+                        if(rnd < (spawnChance[p]+projNum)/spawnTotal){
+                            projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, p));
+                            break;
+                        }
+                        projNum+=spawnChance[p];
                     }
                 }
             }
