@@ -395,19 +395,31 @@ function Object(x, y, width, height, controls, type, bounds){
     }
 }
 
-function Projectile(x, y, angle){
+function Projectile(x, y, angle, type){
     this.x = x;
     this.y = y;
 
-    this.radius = 4;
+    this.type = type;
 
-    this.type = 0;
+    switch(this.type){
+        case 0: this.radius = 4; this.speed = Math.round(Math.random()*5)+4; break;
+        case 1: this.radius = 6; this.speed = Math.round(Math.random()*3)+2; break;
+        case 2: this.radius = 4; this.speed = Math.round(Math.random()*3)+2; break;
+    }
 
     this.angle = angle;
-    this.speed = Math.round(Math.random()*5)+4;
 
     this.velX = this.speed*Math.cos(this.angle);
     this.velY = this.speed*Math.sin(this.angle);
+
+    if(this.type === 1){
+        this.explodeTime = Math.floor(Math.random()*800) + 700;
+        this.light = true;
+    }else if(this.type === 2){
+        this.invisTimer = Math.floor(Math.random()*300) + 100;
+        this.opacity = 1;
+        this.targetOpacity = 1;
+    }
 
     this.update = function(){
         //BOUNCES OFF SIDES
@@ -502,14 +514,62 @@ function Projectile(x, y, angle){
     };
 
     this.draw = function(){
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = COLORS.white;
-        ctx.fill();
-        /*ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x +this.velX*12, this.y +this.velY*12);
-        ctx.stroke();*/
+
+        if(this.type === 0){
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = COLORS.white;
+            ctx.fill();
+            /*ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x +this.velX*12, this.y +this.velY*12);
+            ctx.stroke();*/
+        }else if(this.type === 1){
+            this.explodeTime--;
+
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = COLORS.white;
+            ctx.fill();
+
+            if(this.explodeTime > 500){
+                ctx.fillStyle = 'green';
+            }else if(this.explodeTime > 200){
+                ctx.fillStyle = 'orange';
+            }else{
+                ctx.fillStyle = 'red';
+                if(frameCount % 20 === 0){
+                    this.light = !this.light;
+                }
+            }
+            if(this.light){
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius*0.5, 0, 2 * Math.PI, false);
+                ctx.fill();
+            }
+        }else if(this.type === 2){
+
+            if(this.x > WIDTH*0.1 && this.x < WIDTH*0.9){
+                if((frameCount + 1) % this.invisTimer === 0){
+                    this.targetOpacity = Math.abs(this.targetOpacity-1);
+                }
+            }else{
+                this.targetOpacity = 1;
+            }
+
+            if(this.opacity < this.targetOpacity){
+                this.opacity = Math.min(1, this.opacity+0.05);
+            }else if(this.opacity > this.targetOpacity){
+                this.opacity = Math.max(0, this.opacity-0.05);
+            }
+
+            ctx.globalAlpha = this.opacity;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = COLORS.lightgreen;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
     };
 }
 
@@ -1102,32 +1162,69 @@ function game(){
 
         if(GAMESTATE === "GAME"){
             for(var i = 0; i < projectiles.length; i++){
+                var dlt = false;
                 projectiles[i].update();
                 projectiles[i].draw();
 
-                if( projectiles[i].x < 0){
-                    players[1].points++;
-                    FONTSIZES.large2 = 100;
-                    projectiles.splice(i, 1);
-                    if(players[1].points % 10 === 0){
-                        maxProjectiles++;
-                    }
-                }else if( projectiles[i].x > WIDTH){
-                    players[0].points++;
-                    FONTSIZES.large1 = 100;
-                    projectiles.splice(i, 1);
-                    if(players[0].points % 10 === 0){
-                        maxProjectiles++;
+                if(projectiles[i].type === 1){
+                    if(projectiles[i].explodeTime <= 0){
+                        for(var ex = 0; ex< 8; ex++){
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/8, 0));
+                        }
+                        projectiles.splice(i, 1);
+                        dlt = true;
                     }
                 }
+
+                if(dlt === false){
+                    if( projectiles[i].x < 0){
+                        switch(projectiles[i].type){
+                            case 0: players[1].points++; break;
+                            case 1: players[1].points+=5; break;
+                            case 2: players[1].points+=2; break;
+                        }
+                        FONTSIZES.large2 = 100;
+                        projectiles.splice(i, 1);
+                        if(players[1].points % 10 === 0){
+                            maxProjectiles++;
+                        }
+                    }else if( projectiles[i].x > WIDTH){
+                        switch(projectiles[i].type){
+                            case 0: players[0].points++; break;
+                            case 1: players[0].points+=5; break;
+                            case 2: players[0].points+=2; break;
+                        }
+                        FONTSIZES.large1 = 100;
+                        projectiles.splice(i, 1);
+                        if(players[0].points % 10 === 0){
+                            maxProjectiles++;
+                        }
+                    }
+                }
+
+
             }
             if(projectiles.length < maxProjectiles){
                 var rnd = Math.random();
                 if(rnd < 0.5){
-                    projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0));
+                    rnd = Math.random();
+                    if(rnd < 0.8){
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 0));
+                    }else if(rnd < 0.9){
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 1));
+                    }else{
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, 2));
+                    }
                 }else{
                     //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
-                    projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI));
+                    rnd = Math.random();
+                    if(rnd < 0.8){
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 0));
+                    }else if(rnd < 0.9){
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 1));
+                    }else{
+                        projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, 2));
+                    }
                 }
             }
         }
