@@ -44,9 +44,9 @@ var glitchTimer = 0;
 
 var chromAbb = true;
 
-var spawnChance = [8, 2, 1, 100, 2];
+var spawnChance = [8, 2, 1, 1, 2];
 var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
-var projPoints = [1, 5, 2, 5, 5];
+var projPoints = [1, 5, 2, 5, 2];
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -57,6 +57,13 @@ function Object(x, y, width, height, controls, type, bounds){
     this.height = height;
     this.length = this.height;
     this.controls = controls;
+
+    if(this.x < WIDTH/2){
+        this.team = 0;
+    }else{
+        this.team = 1;
+    }
+
     this.type = type;
 
     this.angle = Math.PI/2;
@@ -252,7 +259,7 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.restore();
 
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.hingeWidth, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, CONST.hingeWidth, 0, 2 * Math.PI, false);
             ctx.fillStyle = COLORS.white;
             ctx.fill();
             ctx.beginPath();
@@ -543,9 +550,9 @@ function Projectile(x, y, angle, type){
         }else if(this.type === 1){
             this.explodeTime--;
 
+            ctx.fillStyle = COLORS.white;
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            ctx.fillStyle = COLORS.white;
             ctx.fill();
 
             if(this.explodeTime > 500){
@@ -558,6 +565,7 @@ function Projectile(x, y, angle, type){
                     this.light = !this.light;
                 }
             }
+            ctx.globalAlpha = 1;
             if(this.light){
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius*0.5, 0, 2 * Math.PI, false);
@@ -898,13 +906,14 @@ function Placer(type, width, height, controls){
     };
 }
 
-function Button(x, y, width, height, use, text){
+function Button(x, y, width, height, use, text, val){
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.use = use;
     this.text = text;
+    this.val = val;
 
     this.hover = false;
 
@@ -930,6 +939,16 @@ function Button(x, y, width, height, use, text){
                     GAMESTATE = "GAME";
                     placers = [];
                     buttons = [];
+
+                    for(var f = 0; f < players.length; f++){
+                        if(players[f].ai){
+                            for(var objs = 0; objs < objects.length; objs++){
+                                if(objects[objs].team === f){
+                                    players[f].paddles.push(objs);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }else{
@@ -965,16 +984,20 @@ function Button(x, y, width, height, use, text){
     };
 }
 
-function Player(id){
+function Player(id, ai){
     this.id = id;
     this.points = 0;
     this.paddles = 0;
+
+    this.ai = ai;
+
+    this.paddles = [];
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-players.push(new Player(0));
-players.push(new Player(1));
+players.push(new Player(0, 0));
+players.push(new Player(1, 1));
 
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
@@ -984,7 +1007,7 @@ objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGH
 
 //objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
-buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY"));
+buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY", 0));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1176,7 +1199,9 @@ function game(){
             objects[i].draw();
         }
 
-        if(GAMESTATE === "PLACE"){
+        if(GAMESTATE === "MENU"){
+
+        }else if(GAMESTATE === "PLACE"){
             if(placers.length === 0 || placers[0].placed === false){
                 if(keys && keys[49]){
                     placers = [];
@@ -1200,9 +1225,7 @@ function game(){
                     placers = [];
                 }
             }
-        }
-
-        if(GAMESTATE === "GAME"){
+        }else if(GAMESTATE === "GAME"){
             for(var i = 0; i < projectiles.length; i++){
                 var dlt = false;
                 projectiles[i].update();
