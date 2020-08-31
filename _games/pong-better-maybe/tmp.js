@@ -606,11 +606,13 @@ function Projectile(x, y, angle, type){
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle);
+            ctx.beginPath();
             ctx.moveTo(-this.radius, -this.radius);
             ctx.lineTo(this.radius*2,0);
             ctx.lineTo(-this.radius,this.radius);
             ctx.rotate(this.rotAngle);
             ctx.fillStyle = COLORS.white;
+            ctx.closePath();
             ctx.fill();
             ctx.restore();
 
