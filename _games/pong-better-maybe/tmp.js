@@ -11,7 +11,7 @@ var HIGHSCORE = 0;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC"};
+var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC", lightgray: "#5E768C"};
 var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "4", "1"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
 var FONTSIZES = {large1: 80, large2: 80, medium: 40};
 
@@ -44,7 +44,7 @@ var glitchTimer = 0;
 
 var chromAbb = true;
 
-var spawnChance = [8, 1, 1, 100, 0];
+var spawnChance = [8, 2, 1, 100, 2];
 var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
 var projPoints = [1, 5, 2, 5, 5];
 
@@ -153,7 +153,7 @@ function Object(x, y, width, height, controls, type, bounds){
             }else if(this.type === 3){
                 if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
                     this.expRad = 0.5;
-                    this.expCoolDown = 100;
+                    this.expCoolDown = 150;
                     this.ctrlReleased[0] = false;
                 }
             }else if(this.type === 4){
@@ -267,10 +267,15 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.strokeStyle = COLORS.lightblue;
             ctx.fillStyle = COLORS.lightblue;
 
+            if(this.expCoolDown > 0) {
+                ctx.strokeStyle = COLORS.lightgray;
+                ctx.fillStyle = COLORS.lightgray;
+            }
+
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle - Math.PI / 2);
-            ctx.fillRect(-this.width*0.5, -this.height*0.5, this.width, this.height);
+            ctx.fillRect(-this.width * 0.5, -this.height * 0.5, this.width, this.height);
             ctx.restore();
 
             ctx.beginPath();
@@ -409,7 +414,8 @@ function Projectile(x, y, angle, type){
         case 0: this.radius = 4; this.speed = Math.round(Math.random()*5)+4; break;
         case 1: this.radius = 6; this.speed = Math.round(Math.random()*3)+2; break;
         case 2: this.radius = 4; this.speed = Math.round(Math.random()*3)+2; break;
-        case 3: this.radius = 8; this.speed = Math.round(Math.random()*2)+2; break;
+        case 3: this.radius = 4; this.speed = Math.round(Math.random()*2)+2; break;
+        case 4: this.radius = 4; this.speed = Math.round(Math.random()*4)+2; break;
     }
 
     this.angle = angle;
@@ -427,6 +433,8 @@ function Projectile(x, y, angle, type){
     }else if(this.type === 3){
         this.rotAngle = 0;
         this.spawnTimer = Math.floor(Math.random()*400)+400;
+    }else if(this.type === 4){
+        this.spdChgTimer = Math.floor(Math.random()*100) + 100;
     }
 
     this.update = function(){
@@ -582,10 +590,27 @@ function Projectile(x, y, angle, type){
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rotAngle);
             ctx.fillStyle = COLORS.white;
-            ctx.fillRect(-this.radius, -this.radius, this.radius*2, this.radius*2);
+            ctx.fillRect(-this.radius*2, -this.radius*2, this.radius*4, this.radius*4);
             ctx.restore();
 
             this.rotAngle+=0.02;
+        }else if(this.type === 4){
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            ctx.moveTo(-this.radius, -this.radius);
+            ctx.lineTo(this.radius*2,0);
+            ctx.lineTo(-this.radius,this.radius);
+            ctx.rotate(this.rotAngle);
+            ctx.fillStyle = COLORS.white;
+            ctx.fill();
+            ctx.restore();
+
+            if((frameCount + 1) % this.spdChgTimer === 0){
+                this.speed = Math.round(Math.random()*8)+2;
+                this.velX = this.speed * Math.cos(this.angle);
+                this.velY = this.speed * Math.sin(this.angle);
+            }
         }
     };
 }
