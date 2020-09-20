@@ -12,8 +12,10 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC", lightgray: "#5E768C"};
-var CONTROLS = {a: [87, 83, "W", "S"], b: [38, 40, "Up", "Dwn"], c:[69, 68, "E", "D"], d: [100, 97, "4", "1"], e: [82, 70, "R", "F"], f: [101, 98, "5", "2"], g: [84, 71, "T", "G"], h: [102, 99, "6", "3"]};
+var CONTROLS = {a: [87, 83, "W", "S", 0], b: [38, 40, "Up", "Dwn", 1], c:[69, 68, "E", "D", 2], d: [100, 97, "4", "1", 3], e: [82, 70, "R", "F", 4], f: [101, 98, "5", "2", 5], g: [84, 71, "T", "G", 6], h: [102, 99, "6", "3", 7]};
 var FONTSIZES = {large1: 80, large2: 80, medium: 40};
+
+var AICONTROLS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 var objects = [];
 var projectiles = [];
@@ -21,6 +23,8 @@ var projectiles = [];
 var players = [];
 var placers = [];
 var buttons = [];
+
+var bots = [];
 
 var maxProjectiles = 2;
 
@@ -116,12 +120,12 @@ function Object(x, y, width, height, controls, type, bounds){
 
         if(this.controls.length > 0) {
             if(this.type === 0){
-                if (keys && keys[this.controls[0]]) {
+                if ((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]*2])) {
                     if(this.y > this.boundsY[0]){
                         this.velY = -this.speed;
                     }
                 }
-                if (keys && keys[this.controls[1]]) {
+                if ((keys && keys[this.controls[1]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]*2+1])) {
                     if(this.y+this.height < this.boundsY[1]){
                         this.velY = this.speed;
                     }
@@ -140,7 +144,7 @@ function Object(x, y, width, height, controls, type, bounds){
                     }
                 }*/
 
-                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
+                if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
                     if(this.y > this.boundsY[0]){
                         this.y -= this.height+this.dividerSize;
                         this.ctrlReleased[0] = false;
@@ -149,7 +153,7 @@ function Object(x, y, width, height, controls, type, bounds){
                     }
                 }
             }else if(this.type === 2){
-                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true) {
+                if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true) {
                     //this.omega = -this.omega;
                     this.expectedAngle += Math.PI/4;
                     this.ctrlReleased[0] = false;
@@ -158,13 +162,13 @@ function Object(x, y, width, height, controls, type, bounds){
                     this.omega = -this.maxRot;
                 }*/
             }else if(this.type === 3){
-                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
+                if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
                     this.expRad = 0.5;
                     this.expCoolDown = 150;
                     this.ctrlReleased[0] = false;
                 }
             }else if(this.type === 4){
-                if (keys && keys[this.controls[0]] && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
+                if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
                     for (var i = 0; i < 5; i++) {
                         if (this.pads[i] < 1) {
                             this.pads[i] += 0.2;
@@ -175,11 +179,18 @@ function Object(x, y, width, height, controls, type, bounds){
                 }
             }
 
-            if (keys && !keys[this.controls[0]]) {
-                this.ctrlReleased[0] = true;
-            }
-            if (keys && !keys[this.controls[1]]) {
-                this.ctrlReleased[1] = true;
+            if(!players[this.team].ai){
+                if (keys && !keys[this.controls[0]]){
+                    this.ctrlReleased[0] = true;
+                }
+                if (keys && !keys[this.controls[1]]){
+                    this.ctrlReleased[1] = true;
+                }
+            }else{
+                if(frameCount % 6 === 0){
+                    this.ctrlReleased[0] = true;
+                    this.ctrlReleased[1] = true;
+                }
             }
         }
 
@@ -994,6 +1005,103 @@ function Player(id, ai){
     this.ai = ai;
 
     this.paddles = [];
+
+    if(this.ai){
+        bots.push(new AI(this.id));
+    }
+}
+
+function AI(id){
+    this.id = id;
+    this.update = function(){
+
+        this.projDis = [];
+        for(var st = 0; st < objects.length; st++){
+            if(objects[st].team === 1){
+                var tmpArrProj = [];
+                tmpArrProj.push(st);
+                for(var pr = 0; pr < projectiles.length; pr++){
+                    if(projectiles[pr].velX > 0 && (projectiles[pr].x*1.2 + projectiles[pr].velX*20 > objects[st].x) && (projectiles[pr].x < objects[st].x)){
+                        tmpArrProj.push([(objects[st].x - projectiles[pr].x), pr]);
+                    }
+                }
+                tmpArrProj.sort(sortFunction);
+                this.projDis.push(tmpArrProj);
+            }
+        }
+
+        for(var o = 0; o < this.projDis.length; o++){
+            if(this.projDis[o].length > 1) {
+                if(objects[this.projDis[o][0]].team === this.id){
+                    if(objects[this.projDis[o][0]].type === 0){
+                        //console.log(this.projDis);
+                        if((projectiles[this.projDis[o][1][1]].y - (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height/2)) < 0){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]*2] = 1;
+                        }else if((projectiles[this.projDis[o][1][1]].y - (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height/2)) > CONST.bound*4){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]*2 + 1] = 1;
+                        }
+                    }else if(objects[this.projDis[o][0]].type === 1){
+                        //console.log(this.projDis);
+                        if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[0])){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height/2)) && (projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[1] + objects[this.projDis[o][0]].height))){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }
+
+                        if(objects[this.projDis[o][0]].y < projectiles[this.projDis[o][1][1]].y && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height)){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 0;
+                        }
+                    }else if(objects[this.projDis[o][0]].type === 2){
+                        if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y - objects[this.projDis[o][0]].length*1.5)){
+                            if(objects[this.projDis[o][0]].angle < Math.PI/2*3){
+                                AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                            }
+                        }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].length)){
+                            if(objects[this.projDis[o][0]].angle < Math.PI/2){
+                                AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                            }
+                        }
+                    }else if(objects[this.projDis[o][0]].type === 3){
+                        if(projectiles[this.projDis[o][1][1]].x < (objects[this.projDis[o][0]].x) && getDistance(projectiles[this.projDis[o][1][1]].x, projectiles[this.projDis[o][1][1]].y, objects[this.projDis[o][0]].x, objects[this.projDis[o][0]].y) < objects[this.projDis[o][0]].height*2.5){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }
+                    }else if(objects[this.projDis[o][0]].type === 4){
+                        if(Math.random() > 0.8){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }
+                    }
+                }
+            }
+        }
+        /*
+        if(this.projDis[0].length > 1){
+            this.paddles = [];
+            for(var o = 0; o < objects.length; o++){
+                if(objects[o].team === 1){
+                    this.paddles.push(o);
+                }
+            }
+
+            for(var pad = 0; pad < this.paddles.length; pad++){
+                if(objects[this.paddles[pad]].team === this.id){
+                    if(objects[this.paddles[pad]].type === 0){
+                        if((projectiles[this.projDis[0][1]].y - (objects[this.paddles[pad]].y + objects[this.paddles[pad]].height/2)) < 0){
+                            if(objects[this.paddles[pad]].y - objects[this.paddles[pad]].speed > 0){
+                                objects[this.paddles[pad]].y -= objects[this.paddles[pad]].speed;
+                            }else{
+                                objects[this.paddles[pad]].y = 0;
+                            }
+                        }else if((projectiles[this.projDis[0][1]].y - (objects[this.paddles[pad]].y + objects[this.paddles[pad]].height/2)) > CONST.bound*4){
+                            if(objects[this.paddles[pad]].y + objects[this.paddles[pad]].height + objects[this.paddles[pad]].speed < HEIGHT){
+                                objects[this.paddles[pad]].y += objects[this.paddles[pad]].speed;
+                            }else{
+                                objects[this.paddles[pad]].y = HEIGHT - objects[this.paddles[pad]].height;
+                            }
+                        }
+                    }
+                }
+            }*/
+    }
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
@@ -1012,6 +1120,15 @@ objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGH
 buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY", 0));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
+
+function sortFunction(a, b) {
+    if (a[0] === b[0]) {
+        return 0;
+    }
+    else {
+        return (a[0] < b[0]) ? -1 : 1;
+    }
+}
 
 function colCircleRectangle ( circle, rect ) {
 
@@ -1194,6 +1311,12 @@ function game(){
             }
         }
 
+        if(GAMESTATE === "GAME") {
+            for (var i = 0; i < bots.length; i++) {
+                bots[i].update();
+            }
+        }
+
         for(var i = 0; i < objects.length; i++){
             if(GAMESTATE === "GAME"){
                 objects[i].update();
@@ -1228,6 +1351,11 @@ function game(){
                 }
             }
         }else if(GAMESTATE === "GAME"){
+
+            for(var z = 0; z < AICONTROLS.length; z++){
+                AICONTROLS[z] = 0;
+            }
+
             for(var i = 0; i < projectiles.length; i++){
                 var dlt = false;
                 projectiles[i].update();
@@ -1269,8 +1397,8 @@ function game(){
                     }
                 }
 
-
             }
+
             if(projectiles.length < maxProjectiles){
                 var rnd = Math.random();
                 if(rnd < 0.5){
@@ -1378,7 +1506,7 @@ function game(){
         ctx.rect(0, 0, WIDTH, HEIGHT);
 
         // create radial gradient
-        var outerRadius = WIDTH * 1;
+        var outerRadius = WIDTH * 0.8;
         var innerRadius = WIDTH * .3;
         var grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, innerRadius, WIDTH / 2, HEIGHT / 2, outerRadius);
         // light blue
