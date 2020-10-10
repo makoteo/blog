@@ -422,7 +422,7 @@ function Object(x, y, width, height, controls, type, bounds){
     }
 }
 
-function Projectile(x, y, angle, type){
+function Projectile(x, y, angle, type, spwTimer){
     this.x = x;
     this.y = y;
 
@@ -431,10 +431,13 @@ function Projectile(x, y, angle, type){
     switch(this.type){
         case 0: this.radius = 4; this.speed = Math.round(Math.random()*5)+4; break;
         case 1: this.radius = 6; this.speed = Math.round(Math.random()*3)+2; break;
-        case 2: this.radius = 4; this.speed = Math.round(Math.random()*3)+2; break;
+        case 2: this.radius = 5; this.speed = Math.round(Math.random()*3)+2; break;
         case 3: this.radius = 4; this.speed = Math.round(Math.random()*2)+2; break;
         case 4: this.radius = 4; this.speed = Math.round(Math.random()*4)+2; break;
     }
+
+    this.startTimer = 100*spwTimer;
+    this.animWd = 1-spwTimer;
 
     this.angle = angle;
 
@@ -456,102 +459,111 @@ function Projectile(x, y, angle, type){
     }
 
     this.update = function(){
-        //BOUNCES OFF SIDES
-        if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
-            this.angle = (2*Math.PI - this.angle);
-            this.velX = this.speed*Math.cos(this.angle);
-            this.velY = this.speed*Math.sin(this.angle);
-        }
-        //BOUNCES OFF PADDLES
+        if(this.startTimer === 0){
+            //BOUNCES OFF SIDES
+            if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
+                this.angle = (2*Math.PI - this.angle);
+                this.velX = this.speed*Math.cos(this.angle);
+                this.velY = this.speed*Math.sin(this.angle);
+            }
+            //BOUNCES OFF PADDLES
 
-        for(var o in objects){
+            for(var o in objects){
 
-            //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
-            //Wait, I'm reading this later... And I don't get what I could've done through ors? Am I missing something?
+                //COULD HAVE DONE THIS THROUGH ORS BUT I'M TOO LAZY TO REDO IT
+                //Wait, I'm reading this later... And I don't get what I could've done through ors? Am I missing something?
 
-            //var collision = false;
+                //var collision = false;
 
-            if(objects[o].type !== 4){
-                var coltemp = false;
+                if(objects[o].type !== 4){
+                    var coltemp = false;
 
-                if(objects[o].type === 0 || objects[o].type === 1 || objects[o].type === 2 ){
-                    coltemp = colCircleRectangle(this, objects[o]);
-                    var rottop = coltemp.rt;
-                }
-
-                if(coltemp.col){
-                    var rndOff = 0;
-                    if(objects[o].type === 0 || objects[o].type === 1){
-                        rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
-                    }
-                    this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-
-                    this.x = coltemp.colX;
-                    this.y = coltemp.colY;
-                    if(rottop === 1){
-                        this.y += objects[o].velY;
-                    }
-
-                    this.velX = this.speed*Math.cos(this.angle);
-                    this.velY = this.speed*Math.sin(this.angle);
-                    //this.velX = 0;
-                    //this.velY = 0;
-                    objects[o].omega*=(1+0.5*coltemp.rs);
-                }
-
-                if(objects[o].type === 3){
-                    if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
-                        this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
-                        this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
-                    }
-
-                    this.velX = this.speed*Math.cos(this.angle);
-                    this.velY = this.speed*Math.sin(this.angle);
-
-                }
-            }else{
-                for(var i = 0; i < 5; i++) {
-                    if(objects[o].pads[i] === 1){
-                        coltemp = colCircleRectangle(this, {x: objects[o].x - objects[o].width / 2, y: objects[o].y - objects[o].height * 2.5 - CONST.bound * 2 + i * (objects[o].height + CONST.bound), width: objects[o].width, height: objects[o].height, angle: Math.PI / 2, type: objects[o].type, length: objects[o].height, omega: 0});
+                    if(objects[o].type === 0 || objects[o].type === 1 || objects[o].type === 2 ){
+                        coltemp = colCircleRectangle(this, objects[o]);
                         var rottop = coltemp.rt;
+                    }
 
-                        //ctx.fillRect(objects[o].x - objects[o].width/2, objects[o].y - objects[o].height*2.5 - CONST.bound*2 + i*(objects[o].height+CONST.bound), objects[o].width, objects[o].height);
+                    if(coltemp.col){
+                        var rndOff = 0;
+                        if(objects[o].type === 0 || objects[o].type === 1){
+                            rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
+                        }
+                        this.angle = (Math.PI - this.angle) + (objects[o].angle-Math.PI/2+(rottop*Math.PI/2))*2 - rndOff*Math.sign(this.velX)+ (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
 
-                        if (coltemp.col) {
-                            var rndOff = 0;
-                            if (objects[o].type === 0 || objects[o].type === 1) {
-                                rndOff = (this.y - (objects[o].y + objects[o].height / 2)) / 100;
+                        this.x = coltemp.colX;
+                        this.y = coltemp.colY;
+                        if(rottop === 1){
+                            this.y += objects[o].velY;
+                        }
+
+                        this.velX = this.speed*Math.cos(this.angle);
+                        this.velY = this.speed*Math.sin(this.angle);
+                        //this.velX = 0;
+                        //this.velY = 0;
+                        objects[o].omega*=(1+0.5*coltemp.rs);
+                    }
+
+                    if(objects[o].type === 3){
+                        if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
+                            this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
+                            this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
+                        }
+
+                        this.velX = this.speed*Math.cos(this.angle);
+                        this.velY = this.speed*Math.sin(this.angle);
+
+                    }
+                }else{
+                    for(var i = 0; i < 5; i++) {
+                        if(objects[o].pads[i] === 1){
+                            coltemp = colCircleRectangle(this, {x: objects[o].x - objects[o].width / 2, y: objects[o].y - objects[o].height * 2.5 - CONST.bound * 2 + i * (objects[o].height + CONST.bound), width: objects[o].width, height: objects[o].height, angle: Math.PI / 2, type: objects[o].type, length: objects[o].height, omega: 0});
+                            var rottop = coltemp.rt;
+
+                            //ctx.fillRect(objects[o].x - objects[o].width/2, objects[o].y - objects[o].height*2.5 - CONST.bound*2 + i*(objects[o].height+CONST.bound), objects[o].width, objects[o].height);
+
+                            if (coltemp.col) {
+                                var rndOff = 0;
+                                if (objects[o].type === 0 || objects[o].type === 1) {
+                                    rndOff = (this.y - (objects[o].y + objects[o].height / 2)) / 100;
+                                }
+                                this.angle = (Math.PI - this.angle) + (objects[o].angle - Math.PI / 2) * 2 - rndOff * Math.sign(this.velX) + (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
+
+                                this.x = coltemp.colX;
+                                this.y = coltemp.colY;
+
+                                this.velX = this.speed * Math.cos(this.angle);
+                                this.velY = this.speed * Math.sin(this.angle);
+                                //this.velX = 0;
+                                //this.velY = 0;
+                                objects[o].omega *= (1 + 0.5 * coltemp.rs);
+
+                                objects[o].pads[i] = 0;
+
+                                break;
                             }
-                            this.angle = (Math.PI - this.angle) + (objects[o].angle - Math.PI / 2) * 2 - rndOff * Math.sign(this.velX) + (Math.random() * (0.4) - 0.2); // + (Math.random() * (1) - 0.5)
-
-                            this.x = coltemp.colX;
-                            this.y = coltemp.colY;
-
-                            this.velX = this.speed * Math.cos(this.angle);
-                            this.velY = this.speed * Math.sin(this.angle);
-                            //this.velX = 0;
-                            //this.velY = 0;
-                            objects[o].omega *= (1 + 0.5 * coltemp.rs);
-
-                            objects[o].pads[i] = 0;
-
-                            break;
                         }
                     }
                 }
+
             }
 
+            //UPDATE POSITION
+            this.x += this.velX;
+            this.y += this.velY;
+
+        }else{
+            this.startTimer--;
+            if(this.animWd < 1){
+                this.animWd+=0.02;
+            }
         }
-        //UPDATE POSITION
-        this.x += this.velX;
-        this.y += this.velY;
     };
 
     this.draw = function(){
 
         if(this.type === 0){
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.radius*this.animWd, 0, 2 * Math.PI, false);
             ctx.fillStyle = COLORS.white;
             ctx.fill();
             /*ctx.beginPath();
@@ -563,7 +575,7 @@ function Projectile(x, y, angle, type){
 
             ctx.fillStyle = COLORS.white;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.radius*this.animWd, 0, 2 * Math.PI, false);
             ctx.fill();
 
             if(this.explodeTime > 500){
@@ -579,7 +591,7 @@ function Projectile(x, y, angle, type){
             ctx.globalAlpha = 1;
             if(this.light){
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius*0.5, 0, 2 * Math.PI, false);
+                ctx.arc(this.x, this.y, this.radius*0.5*this.animWd, 0, 2 * Math.PI, false);
                 ctx.fill();
             }
         }else if(this.type === 2){
@@ -600,7 +612,7 @@ function Projectile(x, y, angle, type){
 
             ctx.globalAlpha = this.opacity;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.radius*this.animWd, 0, 2 * Math.PI, false);
             ctx.fillStyle = COLORS.lightgreen;
             ctx.fill();
             ctx.globalAlpha = 1;
@@ -609,7 +621,7 @@ function Projectile(x, y, angle, type){
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rotAngle);
             ctx.fillStyle = COLORS.white;
-            ctx.fillRect(-this.radius*2, -this.radius*2, this.radius*4, this.radius*4);
+            ctx.fillRect(-this.radius*2*this.animWd, -this.radius*2*this.animWd, this.radius*4*this.animWd, this.radius*4*this.animWd);
             ctx.restore();
 
             this.rotAngle+=0.02;
@@ -618,9 +630,9 @@ function Projectile(x, y, angle, type){
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle);
             ctx.beginPath();
-            ctx.moveTo(-this.radius, -this.radius);
-            ctx.lineTo(this.radius*2,0);
-            ctx.lineTo(-this.radius,this.radius);
+            ctx.moveTo(-this.radius*this.animWd, -this.radius*this.animWd);
+            ctx.lineTo(this.radius*2*this.animWd,0);
+            ctx.lineTo(-this.radius*this.animWd,this.radius*this.animWd);
             ctx.rotate(this.rotAngle);
             ctx.fillStyle = COLORS.white;
             ctx.closePath();
@@ -636,12 +648,18 @@ function Projectile(x, y, angle, type){
     };
 }
 
-function Placer(type, width, height, controls){
+function Placer(type, width, height, controls, pos){
     this.type = type;
     this.placed = false;
     this.finished = false;
-    this.x = mousePosX;
-    this.y = mousePosY;
+    this.pos = pos;
+    if(this.pos.length === 0){
+        this.x = mousePosX;
+        this.y = mousePosY;
+    }else{
+        this.x = pos[0];
+        this.y = pos[1];
+    }
     this.width = width;
     this.height = height;
     this.controls = controls;
@@ -662,7 +680,7 @@ function Placer(type, width, height, controls){
     }
 
     this.update = function(){
-        if(this.placed === false){
+        if(this.placed === false && this.pos.length === 0){
             this.x = mousePosX;
             this.y = mousePosY;
         }
@@ -1051,13 +1069,16 @@ function AI(id){
                         if(objects[this.projDis[o][0]].y < projectiles[this.projDis[o][1][1]].y && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height)){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 0;
                         }
-                    }else if(objects[this.projDis[o][0]].type === 2){
+                    }else if(objects[this.projDis[o][0]].type === 2 && objects[this.projDis[o][0]].ctrlReleased[0] === true){
                         if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y - objects[this.projDis[o][0]].length*1.5)){
-                            if(objects[this.projDis[o][0]].angle < Math.PI/2*3){
+
+                            console.log((objects[this.projDis[o][0]].angle + Math.PI/2) % Math.PI*4);
+
+                            if((objects[this.projDis[o][0]].angle + Math.PI/2) % Math.PI*4 !== 0){
                                 AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                             }
                         }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].length)){
-                            if(objects[this.projDis[o][0]].angle < Math.PI/2){
+                            if((objects[this.projDis[o][0]].angle - Math.PI/2) % Math.PI*4 !== 0){
                                 AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                             }
                         }
@@ -1104,6 +1125,32 @@ function AI(id){
     }
 }
 
+function WaveSpawner(){
+    this.update = function(){
+        if(frameCount % 1800 === 0){
+            var tmpfrcount = frameCount/1800;
+            spawnChance[0] = Math.round(Math.pow(tmpfrcount, 0.9)+8+Math.sin(tmpfrcount)*0.5);
+            spawnChance[1] = Math.round(Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);
+            spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));
+            spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);
+            spawnChance[4] = Math.round(Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);
+            spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
+            //console.log(spawnChance);
+        }
+        if(projectiles.length < maxProjectiles){
+            var projNum = 0;
+            var rnd = Math.random();
+            for(var p = 0; p < spawnChance.length; p++){
+                if(rnd < (spawnChance[p]+projNum)/spawnTotal){
+                    projectiles.push(new Projectile(WIDTH/2, Math.random()*HEIGHT/2+HEIGHT/4, Math.PI*Math.round(Math.random()), p, 1));
+                    break;
+                }
+                projNum+=spawnChance[p];
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 players.push(new Player(0, 0));
@@ -1111,6 +1158,8 @@ players.push(new Player(1, 1));
 
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
+
+var spawner = new WaveSpawner();
 
 //objects.push(new Object(200, HEIGHT/2, 5, 60, CONTROLS.c, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
 //objects.push(new Object(WIDTH-200, HEIGHT/2, 5, 60, CONTROLS.d, 2, [HEIGHT/2-50-100-10, HEIGHT/2-50+100+10]));
@@ -1280,6 +1329,24 @@ function getNearestPointInPerimeter(l,t,w,h,xp,yp) {
             (m===dl) ? [l,y] : [r,y];
 }
 
+function buildPaddles(){
+    var z = 0;
+    while(z < 100){
+        placers = [];
+        placers.push(new Placer(1, 10, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH/2)+WIDTH/2, Math.round(Math.random()*HEIGHT)]));
+        placers[placers.length-1].update();
+        if(placers[placers.length-1].placeable === true){
+            placers[placers.length-1].placed = true;
+            break;
+        }
+        z++;
+    }
+    if(z === 100){
+        placers = [];
+        console.log("FAILED TO PLACE");
+    }
+}
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
@@ -1312,6 +1379,7 @@ function game(){
         }
 
         if(GAMESTATE === "GAME") {
+            spawner.update();
             for (var i = 0; i < bots.length; i++) {
                 bots[i].update();
             }
@@ -1330,16 +1398,16 @@ function game(){
             if(placers.length === 0 || placers[0].placed === false){
                 if(keys && keys[49]){
                     placers = [];
-                    placers.push(new Placer(1, 10, 60, CONTROLS.a));
+                    placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
                 }else if(keys && keys[50]){
                     placers = [];
-                    placers.push(new Placer(2, 5, 60, CONTROLS.a));
+                    placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
                 }else if(keys && keys[51]){
                     placers = [];
-                    placers.push(new Placer(3, 20, 20, CONTROLS.a));
+                    placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
                 }else if(keys && keys[52]){
                     placers = [];
-                    placers.push(new Placer(4, 10, 20, CONTROLS.a));
+                    placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
                 }
             }
 
@@ -1364,7 +1432,7 @@ function game(){
                 if(projectiles[i].type === 1){
                     if(projectiles[i].explodeTime <= 0){
                         for(var ex = 0; ex < 8; ex++){
-                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/8, 0));
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/8, 0, 0));
                         }
                         projectiles.splice(i, 1);
                         dlt = true;
@@ -1374,7 +1442,7 @@ function game(){
                 if(projectiles[i].type === 3){
                     if(frameCount % projectiles[i].spawnTimer === 0){
                         for(var ex = 0; ex < 4; ex++){
-                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/2 + projectiles[i].rotAngle, 0));
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/2 + projectiles[i].rotAngle, 0, 0));
                         }
                     }
                 }
@@ -1397,32 +1465,6 @@ function game(){
                     }
                 }
 
-            }
-
-            if(projectiles.length < maxProjectiles){
-                var rnd = Math.random();
-                if(rnd < 0.5){
-                    rnd = Math.random();
-                    var projNum = 0;
-                    for(var p = 0; p < spawnChance.length; p++){
-                        if(rnd < (spawnChance[p]+projNum)/spawnTotal){
-                            projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, 0, p));
-                            break;
-                        }
-                        projNum+=spawnChance[p];
-                    }
-                }else{
-                    //projectiles.push(new Projectile(10, HEIGHT, Math.PI/2*3));
-                    rnd = Math.random();
-                    var projNum = 0;
-                    for(var p = 0; p < spawnChance.length; p++){
-                        if(rnd < (spawnChance[p]+projNum)/spawnTotal){
-                            projectiles.push(new Projectile(WIDTH/2, HEIGHT/2 - 10, Math.PI, p));
-                            break;
-                        }
-                        projNum+=spawnChance[p];
-                    }
-                }
             }
         }
 
