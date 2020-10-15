@@ -1329,11 +1329,17 @@ function getNearestPointInPerimeter(l,t,w,h,xp,yp) {
             (m===dl) ? [l,y] : [r,y];
 }
 
-function buildPaddles(){
+function buildPaddles(type){
     var z = 0;
-    while(z < 100){
+    var spawnIter = 100;
+    while(z < spawnIter){
         placers = [];
-        placers.push(new Placer(1, 10, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH/2)+WIDTH/2, Math.round(Math.random()*HEIGHT)]));
+        switch(type){
+            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5)])); break;
+            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
+            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.5, Math.round(Math.random()*HEIGHT)])); break;
+            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
+        }
         placers[placers.length-1].update();
         if(placers[placers.length-1].placeable === true){
             placers[placers.length-1].placed = true;
