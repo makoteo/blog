@@ -28,7 +28,7 @@ var bots = [];
 
 var maxProjectiles = 2;
 
-var GAMESTATE = "PLACE";
+var GAMESTATE = "MENU";
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -338,44 +338,46 @@ function Object(x, y, width, height, controls, type, bounds){
 
         if(GAMESTATE === "PLACE"){
             //MOUSE CLICKS
-            if(this.type === 0){
-                ctx.fillStyle = COLORS.lightblue;
-            }else if(this.type === 1){
-                if(mousePosX > this.x-this.width && mousePosX < this.x + this.width && mousePosY > this.boundsY[0] && mousePosY < this.boundsY[0] + this.height*3 + this.dividerSize*2){
-                    ctx.fillStyle = COLORS.yellow;
-                    if(clicked === true){
-                        this.switchControls();
-                    }
-                }else{
+            if(bots.length === 0) {
+                if (this.type === 0) {
                     ctx.fillStyle = COLORS.lightblue;
+                } else if (this.type === 1) {
+                    if (mousePosX > this.x - this.width && mousePosX < this.x + this.width && mousePosY > this.boundsY[0] && mousePosY < this.boundsY[0] + this.height * 3 + this.dividerSize * 2) {
+                        ctx.fillStyle = COLORS.yellow;
+                        if (clicked === true) {
+                            this.switchControls();
+                        }
+                    } else {
+                        ctx.fillStyle = COLORS.lightblue;
+                    }
+                } else if (this.type === 2) {
+                    if (getDistance(this.x, this.y, mousePosX, mousePosY) < this.length) {
+                        ctx.fillStyle = COLORS.yellow;
+                        if (clicked === true) {
+                            this.switchControls();
+                        }
+                    } else {
+                        ctx.fillStyle = COLORS.lightblue;
+                    }
+                } else if (this.type === 3) {
+                    if (getDistance(this.x, this.y, mousePosX, mousePosY) < this.width * 2) {
+                        ctx.fillStyle = COLORS.yellow;
+                        if (clicked === true) {
+                            this.switchControls();
+                        }
+                    } else {
+                        ctx.fillStyle = COLORS.lightblue;
+                    }
                 }
-            }else if(this.type === 2){
-                if(getDistance(this.x, this.y, mousePosX, mousePosY) < this.length){
-                    ctx.fillStyle = COLORS.yellow;
-                    if(clicked === true){
-                        this.switchControls();
+                else if (this.type === 4) {
+                    if (mousePosX > this.x - this.width && mousePosX < this.x + this.width && mousePosY > this.y - this.height * 2.5 - CONST.bound * 2 && mousePosY < this.y + this.height * 2.5 + CONST.bound * 2) {
+                        ctx.fillStyle = COLORS.yellow;
+                        if (clicked === true) {
+                            this.switchControls();
+                        }
+                    } else {
+                        ctx.fillStyle = COLORS.lightblue;
                     }
-                }else{
-                    ctx.fillStyle = COLORS.lightblue;
-                }
-            }else if(this.type === 3){
-                if(getDistance(this.x, this.y, mousePosX, mousePosY) < this.width*2){
-                    ctx.fillStyle = COLORS.yellow;
-                    if(clicked === true){
-                        this.switchControls();
-                    }
-                }else{
-                    ctx.fillStyle = COLORS.lightblue;
-                }
-            }
-            else if(this.type === 4){
-                if(mousePosX > this.x-this.width && mousePosX < this.x + this.width && mousePosY > this.y - this.height*2.5 - CONST.bound*2 && mousePosY < this.y + this.height*2.5 + CONST.bound*2){
-                    ctx.fillStyle = COLORS.yellow;
-                    if(clicked === true){
-                        this.switchControls();
-                    }
-                }else{
-                    ctx.fillStyle = COLORS.lightblue;
                 }
             }
 
@@ -385,16 +387,18 @@ function Object(x, y, width, height, controls, type, bounds){
                 this.textXOff = 1;
             }
 
-            ctx.font = FONTSIZES.medium + 'px quickPixel';
-            ctx.textAlign = 'center';
-            if(this.type === 0){
-                ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
-                ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
-                ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
-            }else if(this.type === 3){
-                ctx.fillText(this.controls[2], this.x + WIDTH/40*this.textXOff, this.y + this.height*0.3 + this.textYOff);
-            }else{
-                ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.6 + this.textYOff);
+            if((this.team === 0 && bots.length > 0) || bots.length === 0){
+                ctx.font = FONTSIZES.medium + 'px quickPixel';
+                ctx.textAlign = 'center';
+                if(this.type === 0){
+                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
+                    ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
+                    ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
+                }else if(this.type === 3){
+                    ctx.fillText(this.controls[2], this.x + WIDTH/40*this.textXOff, this.y + this.height*0.3 + this.textYOff);
+                }else{
+                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.6 + this.textYOff);
+                }
             }
 
         }
@@ -687,6 +691,13 @@ function Placer(type, width, height, controls, pos){
 
         this.placeable = true;
 
+        //If AI, can't place on it's side
+        if(bots.length > 0 && this.pos.length === 0){
+            if(mousePosX > WIDTH*0.5){
+                this.placeable = false;
+            }
+        }
+
         //TODO Centerline check
 
         if(this.type === 1){
@@ -804,7 +815,7 @@ function Placer(type, width, height, controls, pos){
 
             if(this.x < WIDTH/2){
                 this.controls = CONTROLS.c;
-            }else{
+            }else if(bots.length === 0){
                 this.controls = CONTROLS.d;
             }
 
@@ -940,18 +951,16 @@ function Placer(type, width, height, controls, pos){
 function Button(x, y, width, height, use, text, val){
     this.x = x;
     this.y = y;
-    this.width = width;
-    this.height = height;
     this.use = use;
     this.text = text;
+    this.width = this.text.length*0.25*WIDTH*0.1;
+    this.height = height;
     this.val = val;
 
     this.hover = false;
 
     this.angle = 0;
     this.textScale = 0;
-    this.yOff = 0;
-    this.xOff = 0;
 
     this.maxAng = 0.1;
 
@@ -962,37 +971,37 @@ function Button(x, y, width, height, use, text, val){
             if(this.angle < this.maxAng){
                 this.angle+=0.03;
                 this.textScale += 1;
-                this.yOff+=0.5;
-                this.xOff-=0.5;
             }
             if(clicked){
                 if(this.use === "play"){
                     GAMESTATE = "GAME";
                     placers = [];
                     buttons = [];
+                }else if(this.use === "1player"){
+                    GAMESTATE = "PLACE";
+                    buttons = [];
 
-                    for(var f = 0; f < players.length; f++){
-                        if(players[f].ai){
-                            for(var objs = 0; objs < objects.length; objs++){
-                                if(objects[objs].team === f){
-                                    players[f].paddles.push(objs);
-                                }
-                            }
-                        }
-                    }
+                    players.push(new Player(0, 0));
+                    players.push(new Player(1, 1));
+
+                    buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT - HEIGHT/15, WIDTH*0.1, HEIGHT/15, "play", "PLAY", 0));
+                }else if(this.use === "2player"){
+                    GAMESTATE = "PLACE";
+                    buttons = [];
+
+                    players.push(new Player(0, 0));
+                    players.push(new Player(1, 0));
+
+                    buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT - HEIGHT/15, WIDTH*0.1, HEIGHT/15, "play", "PLAY", 0));
                 }
             }
         }else{
             if(this.angle > 0){
                 this.angle-=0.03;
                 this.textScale-=1;
-                this.xOff+=0.5;
-                this.yOff-=0.5;
             }else{
                 this.angle = 0;
                 this.textScale = 0;
-                this.xOff = 0;
-                this.yOff = 0;
             }
         }
     };
@@ -1000,15 +1009,15 @@ function Button(x, y, width, height, use, text, val){
     this.draw = function(){
         ctx.textAlign = 'center';
         if(this.hover === true){
-            ctx.fillStyle = COLORS.white;
+            ctx.fillStyle = COLORS.yellow;
         }else{
-            ctx.fillStyle = COLORS.lightblue;
+            ctx.fillStyle = COLORS.white;
         }
 
         ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
 
         ctx.save();
-        ctx.translate(this.x + this.xOff, this.y + this.yOff);
+        ctx.translate(this.x, this.y + this.height/2);
         ctx.rotate(this.angle);
         ctx.fillText(text, 0, 0, this.width+this.textScale);
         ctx.restore();
@@ -1018,12 +1027,8 @@ function Button(x, y, width, height, use, text, val){
 function Player(id, ai){
     this.id = id;
     this.points = 0;
-    this.paddles = 0;
 
     this.ai = ai;
-
-    this.paddles = [];
-
     if(this.ai){
         bots.push(new AI(this.id));
     }
@@ -1153,9 +1158,6 @@ function WaveSpawner(){
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-players.push(new Player(0, 0));
-players.push(new Player(1, 1));
-
 objects.push(new Object(10, HEIGHT/2-50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
 objects.push(new Object(WIDTH-10, HEIGHT/2-50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
@@ -1166,7 +1168,9 @@ var spawner = new WaveSpawner();
 
 //objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
-buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT- HEIGHT/30, WIDTH/10, HEIGHT/15, "play", "PLAY", 0));
+buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0));
+buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0));
+buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS FGHFGHGF", 0));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1335,10 +1339,10 @@ function buildPaddles(type){
     while(z < spawnIter){
         placers = [];
         switch(type){
-            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5)])); break;
-            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
-            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.5, Math.round(Math.random()*HEIGHT)])); break;
-            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.b, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
+            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5)])); break;
+            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
+            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.5, Math.round(Math.random()*HEIGHT)])); break;
+            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, Math.round(Math.random()*HEIGHT)])); break;
         }
         placers[placers.length-1].update();
         if(placers[placers.length-1].placeable === true){
@@ -1378,10 +1382,10 @@ function game(){
         frameCount++;
 
         for(var i = 0; i < buttons.length; i++){
-            buttons[i].update();
             if(buttons.length !== 0){
                 buttons[i].draw();
             }
+            buttons[i].update();
         }
 
         if(GAMESTATE === "GAME") {
@@ -1472,24 +1476,24 @@ function game(){
                 }
 
             }
-        }
 
-        //TIMERS AND OTHER STUFF
+            //TIMERS AND OTHER STUFF
 
-        if(FONTSIZES.large1 > 80){
-            FONTSIZES.large1-=2;
-        }
-        if(FONTSIZES.large2 > 80){
-            FONTSIZES.large2-=2;
-        }
+            if(FONTSIZES.large1 > 80){
+                FONTSIZES.large1-=2;
+            }
+            if(FONTSIZES.large2 > 80){
+                FONTSIZES.large2-=2;
+            }
 
-        ctx.fillStyle = COLORS.lightblue;
-        ctx.textAlign = 'left';
-        ctx.font = FONTSIZES.large1 + 'px quickPixel';
-        ctx.fillText(players[0].points, 10, 40);
-        ctx.textAlign = 'right';
-        ctx.font = FONTSIZES.large2 + 'px quickPixel';
-        ctx.fillText(players[1].points, WIDTH - 10, 40);
+            ctx.fillStyle = COLORS.lightblue;
+            ctx.textAlign = 'left';
+            ctx.font = FONTSIZES.large1 + 'px quickPixel';
+            ctx.fillText(players[0].points, 10, 40);
+            ctx.textAlign = 'right';
+            ctx.font = FONTSIZES.large2 + 'px quickPixel';
+            ctx.fillText(players[1].points, WIDTH - 10, 40);
+        }
 
         clicked = false;
 
