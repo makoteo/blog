@@ -957,7 +957,7 @@ function Button(x, y, width, height, use, text, val){
     this.angle = 0;
     this.textScale = 0;
 
-    this.maxAng = 0.1;
+    this.maxAng = 0.06;
 
     this.wasclicked = false;
 
@@ -969,13 +969,13 @@ function Button(x, y, width, height, use, text, val){
             }
             this.hover = true;
             if(this.angle < this.maxAng){
-                this.angle+=0.03;
-                this.textScale += 1;
+                this.angle+=0.01;
+                this.textScale += 1.5;
             }
         }else{
             if(this.angle > 0){
-                this.angle-=0.03;
-                this.textScale-=1;
+                this.angle-=0.01;
+                this.textScale-=1.5;
             }else{
                 this.angle = 0;
                 this.textScale = 0;
