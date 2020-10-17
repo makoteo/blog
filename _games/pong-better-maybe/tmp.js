@@ -29,6 +29,8 @@ var bots = [];
 var maxProjectiles = 2;
 
 var GAMESTATE = "MENU";
+var transitionValue = 1;
+var transitionSpeed = 0.1;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -59,45 +61,37 @@ function Object(x, y, width, height, controls, type, bounds){
     this.y = y;
     this.width = width;
     this.height = height;
-    this.length = this.height;
-    this.controls = controls;
+    this.length = this.height; //Used for rotating paddles
+    this.controls = controls; //Comes from CONTROLS array, basically gives the keybinds
 
-    if(this.x < WIDTH/2){
-        this.team = 0;
-    }else{
-        this.team = 1;
-    }
+    if(this.x < WIDTH/2){this.team = 0;}else{this.team = 1;} //if on left half, team is 0; if of right, team is 1
 
     this.type = type;
 
     this.angle = Math.PI/2;
     this.maxRot = 0.03;
-    if(this.type === 3){
-        this.omega = this.maxRot;
-    }else{
-        this.omega = 0;
-    }
+    if(this.type === 3){this.omega = this.maxRot;}else{this.omega = 0;}
     this.angleAccel = 0.003;
 
     this.speed = 8;
 
     this.boundsY = bounds;
 
-    this.ctrlReleased = [true, true];
+    this.ctrlReleased = [true, true]; //Check for release of controls
 
-    this.dividerSize = CONST.dividerSize;
+    this.dividerSize = CONST.dividerSize; //Width of aread around paddle where nothing can be placed
 
     this.hingeWidth = CONST.hingeWidth;
 
     this.opacities = [0, 1];
     this.prevY = this.y;
 
-    this.expRad = 0;
+    this.expRad = 0; //explosion radius for type 3
     this.expCoolDown = 0;
 
     this.expectedAngle = Math.PI/2;
 
-    this.pads = [1, 1, 1, 1, 1];
+    this.pads = [1, 1, 1, 1, 1]; //for type 4
 
     this.update = function(){
 
@@ -118,6 +112,7 @@ function Object(x, y, width, height, controls, type, bounds){
             }
         }
 
+        //CONTROLS
         if(this.controls.length > 0) {
             if(this.type === 0){
                 if ((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]*2])) {
@@ -338,7 +333,7 @@ function Object(x, y, width, height, controls, type, bounds){
 
         if(GAMESTATE === "PLACE"){
             //MOUSE CLICKS
-            if(bots.length === 0) {
+            if(bots.length === 0 || (bots.length !== 0 && this.x < WIDTH/2)) {
                 if (this.type === 0) {
                     ctx.fillStyle = COLORS.lightblue;
                 } else if (this.type === 1) {
@@ -391,13 +386,13 @@ function Object(x, y, width, height, controls, type, bounds){
                 ctx.font = FONTSIZES.medium + 'px quickPixel';
                 ctx.textAlign = 'center';
                 if(this.type === 0){
-                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff);
+                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.4 + this.textYOff, FONTSIZES.medium*transitionValue);
                     ctx.fillText("-", this.x + WIDTH/50*this.textXOff, this.y + this.height*0.61 + this.textYOff);
-                    ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff);
+                    ctx.fillText(this.controls[3], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.8 + this.textYOff, FONTSIZES.medium*transitionValue);
                 }else if(this.type === 3){
-                    ctx.fillText(this.controls[2], this.x + WIDTH/40*this.textXOff, this.y + this.height*0.3 + this.textYOff);
+                    ctx.fillText(this.controls[2], this.x + WIDTH/40*this.textXOff, this.y + this.height*0.3 + this.textYOff, FONTSIZES.medium*transitionValue);
                 }else{
-                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.6 + this.textYOff);
+                    ctx.fillText(this.controls[2], this.x + WIDTH/50*this.textXOff, this.y + this.height*0.6 + this.textYOff, FONTSIZES.medium*transitionValue);
                 }
             }
 
@@ -441,7 +436,7 @@ function Projectile(x, y, angle, type, spwTimer){
     }
 
     this.startTimer = 100*spwTimer;
-    this.animWd = 1-spwTimer;
+    this.animWd = 1-spwTimer; //For spawning
 
     this.angle = angle;
 
@@ -964,36 +959,18 @@ function Button(x, y, width, height, use, text, val){
 
     this.maxAng = 0.1;
 
+    this.wasclicked = false;
+
     this.update = function(){
         this.hover = false;
-        if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height/2 && mousePosY < this.y + this.height/2){
+        if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height*0.5 && mousePosY < this.y + this.height*0.4){
+            if(clicked){
+                this.wasclicked = true;
+            }
             this.hover = true;
             if(this.angle < this.maxAng){
                 this.angle+=0.03;
                 this.textScale += 1;
-            }
-            if(clicked){
-                if(this.use === "play"){
-                    GAMESTATE = "GAME";
-                    placers = [];
-                    buttons = [];
-                }else if(this.use === "1player"){
-                    GAMESTATE = "PLACE";
-                    buttons = [];
-
-                    players.push(new Player(0, 0));
-                    players.push(new Player(1, 1));
-
-                    buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT - HEIGHT/15, WIDTH*0.1, HEIGHT/15, "play", "PLAY", 0));
-                }else if(this.use === "2player"){
-                    GAMESTATE = "PLACE";
-                    buttons = [];
-
-                    players.push(new Player(0, 0));
-                    players.push(new Player(1, 0));
-
-                    buttons.push(new Button(WIDTH - WIDTH/20, HEIGHT - HEIGHT/15, WIDTH*0.1, HEIGHT/15, "play", "PLAY", 0));
-                }
             }
         }else{
             if(this.angle > 0){
@@ -1004,6 +981,39 @@ function Button(x, y, width, height, use, text, val){
                 this.textScale = 0;
             }
         }
+
+        if(this.wasclicked){
+            //if(clicked){
+                if(this.use === "play"){
+                    GAMESTATE = "TRANSITIONGAME";
+                    if(transitionValue === 0){
+                        placers = [];
+                        buttons = [];
+                    }
+                }else if(this.use === "1player"){
+                    GAMESTATE = "TRANSITIONPLACE";
+                    if(transitionValue === 0) {
+                        buttons = [];
+
+                        players.push(new Player(0, 0));
+                        players.push(new Player(1, 1));
+
+                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0));
+                    }
+                }else if(this.use === "2player"){
+                    GAMESTATE = "TRANSITIONPLACE";
+                    if(transitionValue === 0) {
+                        buttons = [];
+
+                        players.push(new Player(0, 0));
+                        players.push(new Player(1, 0));
+
+                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0));
+                    }
+                }
+            //}
+        }
+
     };
 
     this.draw = function(){
@@ -1017,9 +1027,9 @@ function Button(x, y, width, height, use, text, val){
         ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
 
         ctx.save();
-        ctx.translate(this.x, this.y + this.height/2);
+        ctx.translate(this.x, this.y + this.height/2 - this.height/4);
         ctx.rotate(this.angle);
-        ctx.fillText(text, 0, 0, this.width+this.textScale);
+        ctx.fillText(text, 0, 0, (this.width+this.textScale)*transitionValue);
         ctx.restore();
     };
 }
@@ -1168,9 +1178,10 @@ var spawner = new WaveSpawner();
 
 //objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
+//SETUP MENU
 buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0));
 buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0));
-buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS FGHFGHGF", 0));
+buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0));
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1381,13 +1392,6 @@ function game(){
 
         frameCount++;
 
-        for(var i = 0; i < buttons.length; i++){
-            if(buttons.length !== 0){
-                buttons[i].draw();
-            }
-            buttons[i].update();
-        }
-
         if(GAMESTATE === "GAME") {
             spawner.update();
             for (var i = 0; i < bots.length; i++) {
@@ -1402,9 +1406,54 @@ function game(){
             objects[i].draw();
         }
 
-        if(GAMESTATE === "MENU"){
+        if(GAMESTATE === "PLACE" || GAMESTATE === "TRANSITIONGAME"){
+            for(var l = 0; l < 10; l++){
+                ctx.strokeStyle = COLORS.lightgray;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(0, l*HEIGHT/10);
+                ctx.lineTo(WIDTH, l*HEIGHT/10);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
 
+            for(var l = 0; l < 15; l++){
+                ctx.strokeStyle = COLORS.lightgray;
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(l*WIDTH/15, 0);
+                ctx.lineTo(l*WIDTH/15, HEIGHT);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
+        }
+
+        if(GAMESTATE === "MENU" || GAMESTATE === "TRANSITIONPLACE"){
+            ctx.clearRect(WIDTH/2-WIDTH/6, HEIGHT/2-HEIGHT/6, WIDTH/3, HEIGHT/3);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6);
+            ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6+HEIGHT/80);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6+HEIGHT/80);
+            ctx.stroke();
+
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6);
+            ctx.stroke();
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6-HEIGHT/80);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6-HEIGHT/80);
+            ctx.stroke();
+            ctx.lineWidth = 1;
         }else if(GAMESTATE === "PLACE"){
+
             if(placers.length === 0 || placers[0].placed === false){
                 if(keys && keys[49]){
                     placers = [];
@@ -1418,6 +1467,8 @@ function game(){
                 }else if(keys && keys[52]){
                     placers = [];
                     placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
+                }else if(keys && keys[27]){
+                    placers = [];
                 }
             }
 
@@ -1489,10 +1540,39 @@ function game(){
             ctx.fillStyle = COLORS.lightblue;
             ctx.textAlign = 'left';
             ctx.font = FONTSIZES.large1 + 'px quickPixel';
-            ctx.fillText(players[0].points, 10, 40);
+            ctx.fillText(players[0].points, 10, 40, FONTSIZES.large1*transitionValue);
             ctx.textAlign = 'right';
             ctx.font = FONTSIZES.large2 + 'px quickPixel';
-            ctx.fillText(players[1].points, WIDTH - 10, 40);
+            ctx.fillText(players[1].points, WIDTH - 10, 40, FONTSIZES.large1*transitionValue);
+        }
+
+        if(GAMESTATE.includes("TRANSITION")){
+            transitionValue -= transitionSpeed;
+            if(transitionValue <= 0){
+                transitionValue = 0;
+                GAMESTATE = GAMESTATE.replace('TRANSITION', '');
+            }
+        }else if(transitionValue < 1){
+            transitionValue += transitionSpeed;
+            if(transitionValue > 1){
+                transitionValue = 1;
+            }
+        }
+
+        //TRANSITION BARS?
+        /*ctx.fillStyle = 'rgba(0, 12, 15, 0.5)';
+        ctx.fillRect(0, 0, WIDTH/2*(1-transitionValue), HEIGHT);
+        ctx.fillRect(WIDTH - WIDTH/2*(1-transitionValue), 0, WIDTH/2*(1-transitionValue), HEIGHT);*/
+
+        //TRANSITION BLACK
+        ctx.fillStyle = 'rgba(0, 10, 12,' + (1-transitionValue) + ')';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        for(var i = 0; i < buttons.length; i++){
+            if(buttons.length !== 0){
+                buttons[i].draw();
+            }
+            buttons[i].update();
         }
 
         clicked = false;
