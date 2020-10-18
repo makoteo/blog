@@ -30,7 +30,7 @@ var maxProjectiles = 2;
 
 var GAMESTATE = "MENU";
 var transitionValue = 1;
-var transitionSpeed = 0.1;
+var transitionSpeed = 0.12;
 
 var mousePosX = 0;
 var mousePosY = 0;
@@ -53,6 +53,12 @@ var chromAbb = true;
 var spawnChance = [8, 2, 1, 1, 2];
 var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
 var projPoints = [1, 5, 2, 5, 2];
+
+var MENUSCALE = 1; //Distance of Menu top and bottom bar
+var MENUTARGETSCALE = 1;
+var MENUSPEED = 0.1;
+
+var horizLines = true;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -331,7 +337,7 @@ function Object(x, y, width, height, controls, type, bounds){
             ctx.globalAlpha = 1;
         }
 
-        if(GAMESTATE === "PLACE"){
+        if(GAMESTATE === "PLACE" || GAMESTATE === "TRANSITIONGAME"){
             //MOUSE CLICKS
             if(bots.length === 0 || (bots.length !== 0 && this.x < WIDTH/2)) {
                 if (this.type === 0) {
@@ -943,14 +949,17 @@ function Placer(type, width, height, controls, pos){
     };
 }
 
-function Button(x, y, width, height, use, text, val){
+function Button(x, y, width, height, use, text, type){
+    //0 - normal button
+    //1 - plain text
+    //2 - toggle
     this.x = x;
     this.y = y;
     this.use = use;
     this.text = text;
     this.width = this.text.length*0.25*WIDTH*0.1;
     this.height = height;
-    this.val = val;
+    this.type = type;
 
     this.hover = false;
 
@@ -961,29 +970,35 @@ function Button(x, y, width, height, use, text, val){
 
     this.wasclicked = false;
 
+    this.toggled = true;
+
     this.update = function(){
         this.hover = false;
-        if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height*0.5 && mousePosY < this.y + this.height*0.4){
-            if(clicked){
-                this.wasclicked = true;
-            }
-            this.hover = true;
-            if(this.angle < this.maxAng){
-                this.angle+=0.01;
-                this.textScale += 1.5;
-            }
-        }else{
-            if(this.angle > 0){
-                this.angle-=0.01;
-                this.textScale-=1.5;
+        if(this.type !== 1){
+            if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height*0.5 && mousePosY < this.y + this.height*0.4){
+                if(clicked){
+                    this.wasclicked = true;
+                    if(this.type === 2) this.toggled = !this.toggled;
+                }
+                this.hover = true;
+                if(this.angle < this.maxAng){
+                    this.angle+=0.01;
+                    this.textScale += 1.5;
+                }
             }else{
-                this.angle = 0;
-                this.textScale = 0;
+                if(this.angle > 0){
+                    this.angle-=0.01;
+                    this.textScale-=1.5;
+                }else{
+                    this.angle = 0;
+                    this.textScale = 0;
+                }
             }
         }
 
+
         if(this.wasclicked){
-            //if(clicked){
+            if(this.type === 0){
                 if(this.use === "play"){
                     GAMESTATE = "TRANSITIONGAME";
                     if(transitionValue === 0){
@@ -1010,21 +1025,56 @@ function Button(x, y, width, height, use, text, val){
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0));
                     }
+                }else if(this.use === "options"){
+                    GAMESTATE = "TRANSITIONMENU";
+                    MENUTARGETSCALE = 2;
+                    if(transitionValue === 0) {
+                        buttons = [];
+
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "OPTIONS", 1));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "sound", "SOUND", 2));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "chromabb", "CRT EFFECT", 2));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "idk", "IDK", 2));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "backoptions", "BACK", 0));
+
+                    }
+                }else if(this.use === "backoptions"){
+                    GAMESTATE = "TRANSITIONMENU";
+                    MENUTARGETSCALE = 1;
+                    if(transitionValue === 0) {
+                        loadMenuButtons();
+                    }
                 }
-            //}
+            }else if(this.type === 2){
+                if(this.use === "chromabb"){
+                    chromAbb = !chromAbb;
+                    horizLines = !horizLines;
+                }
+
+                this.wasclicked = false;
+            }
         }
 
     };
 
     this.draw = function(){
         ctx.textAlign = 'center';
-        if(this.hover === true){
-            ctx.fillStyle = COLORS.yellow;
+        if(this.type !== 1){
+            if(this.hover === true && this.type !== 2){
+                ctx.fillStyle = COLORS.yellow;
+            }else{
+                if(this.type === 2){
+                    if(this.toggled) ctx.fillStyle = COLORS.lightgreen;
+                    else ctx.fillStyle = COLORS.lightgray;
+                }else{
+                    ctx.fillStyle = COLORS.white;
+                }
+            }
+            ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
         }else{
-            ctx.fillStyle = COLORS.white;
+            ctx.fillStyle = COLORS.lightblue;
+            ctx.font = (FONTSIZES.large1*1.2) + 'px quickPixel';
         }
-
-        ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
 
         ctx.save();
         ctx.translate(this.x, this.y + this.height/2 - this.height/4);
@@ -1179,9 +1229,14 @@ var spawner = new WaveSpawner();
 //objects.push(new Object(300, HEIGHT/2-30, 10, 60, CONTROLS.e, 1, [HEIGHT/2-30-60-10, HEIGHT/2-30+60+10]));
 
 //SETUP MENU
-buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0));
-buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0));
-buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0));
+
+function loadMenuButtons(){
+    buttons = [];
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0));
+}
+loadMenuButtons();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1428,30 +1483,44 @@ function game(){
             }
         }
 
-        if(GAMESTATE === "MENU" || GAMESTATE === "TRANSITIONPLACE"){
-            ctx.clearRect(WIDTH/2-WIDTH/6, HEIGHT/2-HEIGHT/6, WIDTH/3, HEIGHT/3);
+        if(GAMESTATE === "MENU" || GAMESTATE === "TRANSITIONPLACE" || GAMESTATE === "TRANSITIONMENU"){
+            var saveTransitionValue = transitionValue;
+            //So that when clicking on options, menu merely expands
+            if(GAMESTATE !== "TRANSITIONPLACE"){
+                transitionValue = 1;
+            }
+            ctx.clearRect(WIDTH/2-WIDTH/6, HEIGHT/2-HEIGHT/6*MENUSCALE, WIDTH/3, HEIGHT/3*MENUSCALE);
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6);
-            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6);
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6*MENUSCALE);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6*MENUSCALE);
             ctx.stroke();
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6+HEIGHT/80);
-            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6+HEIGHT/80);
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6*MENUSCALE+HEIGHT/80);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/6*MENUSCALE+HEIGHT/80);
             ctx.stroke();
 
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6);
-            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6);
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6*MENUSCALE);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6*MENUSCALE);
             ctx.stroke();
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6-HEIGHT/80);
-            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6-HEIGHT/80);
+            ctx.moveTo(WIDTH/2-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6*MENUSCALE-HEIGHT/80);
+            ctx.lineTo(WIDTH/2+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/6*MENUSCALE-HEIGHT/80);
             ctx.stroke();
             ctx.lineWidth = 1;
+
+            transitionValue = saveTransitionValue;
+
+            if(Math.abs(MENUSCALE - MENUTARGETSCALE) > MENUSPEED){
+                if(MENUTARGETSCALE < MENUSCALE) MENUSCALE-=MENUSPEED;
+                else MENUSCALE+=MENUSPEED;
+            }else{
+                MENUSCALE = MENUTARGETSCALE;
+            }
         }else if(GAMESTATE === "PLACE"){
 
             if(placers.length === 0 || placers[0].placed === false){
@@ -1551,6 +1620,7 @@ function game(){
             if(transitionValue <= 0){
                 transitionValue = 0;
                 GAMESTATE = GAMESTATE.replace('TRANSITION', '');
+                console.log("Bwwrrhh");
             }
         }else if(transitionValue < 1){
             transitionValue += transitionSpeed;
@@ -1565,8 +1635,10 @@ function game(){
         ctx.fillRect(WIDTH - WIDTH/2*(1-transitionValue), 0, WIDTH/2*(1-transitionValue), HEIGHT);*/
 
         //TRANSITION BLACK
-        ctx.fillStyle = 'rgba(0, 10, 12,' + (1-transitionValue) + ')';
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        if(!GAMESTATE.includes("MENU")) {
+            ctx.fillStyle = 'rgba(0, 10, 12,' + (1 - transitionValue) + ')';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        }
 
         for(var i = 0; i < buttons.length; i++){
             if(buttons.length !== 0){
@@ -1628,10 +1700,11 @@ function game(){
         }
 
         //GRID
-        ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.25 + 0.1) + ')';
-
-        for(var i = 0; i < HEIGHT; i+=8){
-            ctx.fillRect(0, i, WIDTH, 4);
+        if(horizLines){
+            ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.25 + 0.1) + ')';
+            for(var i = 0; i < HEIGHT; i+=8){
+                ctx.fillRect(0, i, WIDTH, 4);
+            }
         }
 
         //GRADIENT
