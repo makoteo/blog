@@ -61,7 +61,7 @@ var MENUSPEED = 0.1;
 
 var horizLines = true;
 
-var GAMECONFIG = {winscore: 100, paddles: 2, rounds: 1};
+var GAMECONFIG = {winscore: 100, paddles: 2, rounds: 1, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true]};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -988,6 +988,14 @@ function Button(x, y, width, height, use, text, type, val){
     //Bleh why does js not have pointers, could've just passed in the toggle variable and changed it I think
     switch(this.use){
         case "chromabb": this.toggled = chromAbb; break;
+        case "tripletoggle": this.toggled = GAMECONFIG.paddlesToggle[0]; break;
+        case "rotatingtoggle": this.toggled = GAMECONFIG.paddlesToggle[1]; break;
+        case "bouncetoggle": this.toggled = GAMECONFIG.paddlesToggle[2]; break;
+        case "walltoggle": this.toggled = GAMECONFIG.paddlesToggle[3]; break;
+        case "explodingtoggle": this.toggled = GAMECONFIG.ballsToggle[0]; break;
+        case "squaretoggle": this.toggled = GAMECONFIG.ballsToggle[1]; break;
+        case "invisibletoggle": this.toggled = GAMECONFIG.ballsToggle[2]; break;
+        case "triangletoggle": this.toggled = GAMECONFIG.ballsToggle[3]; break;
         default: this.toggled = true;
     }
 
@@ -1112,6 +1120,7 @@ function Button(x, y, width, height, use, text, type, val){
                         players.push(new Player(1, 1));
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
+                        spawner.update(true);
                     }
                 }else if(this.use === "2playerplay"){
                     GAMESTATE = "TRANSITIONPLACE";
@@ -1123,6 +1132,7 @@ function Button(x, y, width, height, use, text, type, val){
                         players.push(new Player(1, 0));
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
+                        spawner.update(true);
                     }
                 }else if(this.use === "advanced1" || this.use === "advanced2"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1160,6 +1170,22 @@ function Button(x, y, width, height, use, text, type, val){
                 if(this.use === "chromabb"){
                     chromAbb = !chromAbb;
                     horizLines = !horizLines;
+                }else if(this.use === "tripletoggle"){
+                    GAMECONFIG.paddlesToggle[0] = !GAMECONFIG.paddlesToggle[0];
+                }else if(this.use === "rotatingtoggle"){
+                    GAMECONFIG.paddlesToggle[1] = !GAMECONFIG.paddlesToggle[1];
+                }else if(this.use === "bouncetoggle"){
+                    GAMECONFIG.paddlesToggle[2] = !GAMECONFIG.paddlesToggle[2];
+                }else if(this.use === "walltoggle"){
+                    GAMECONFIG.paddlesToggle[3] = !GAMECONFIG.paddlesToggle[3];
+                }else if(this.use === "explodingtoggle"){
+                    GAMECONFIG.ballsToggle[0] = !GAMECONFIG.ballsToggle[0];
+                }else if(this.use === "squaretoggle"){
+                    GAMECONFIG.ballsToggle[1] = !GAMECONFIG.ballsToggle[1];
+                }else if(this.use === "invisibletoggle"){
+                    GAMECONFIG.ballsToggle[2] = !GAMECONFIG.ballsToggle[2];
+                }else if(this.use === "triangletoggle"){
+                    GAMECONFIG.ballsToggle[3] = !GAMECONFIG.ballsToggle[3];
                 }
 
                 this.wasclicked = false;
@@ -1353,14 +1379,15 @@ function AI(id){
 }
 
 function WaveSpawner(){
-    this.update = function(){
-        if(frameCount % 1800 === 0){
+    this.update = function(override){
+        if(frameCount % 1800 === 0 || override === true){
+            spawnChance = [0, 0, 0, 0, 0];
             var tmpfrcount = frameCount/1800;
             spawnChance[0] = Math.round(Math.pow(tmpfrcount, 0.9)+8+Math.sin(tmpfrcount)*0.5);
-            spawnChance[1] = Math.round(Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);
-            spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));
-            spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);
-            spawnChance[4] = Math.round(Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);
+            if(GAMECONFIG.ballsToggle[0] === true){spawnChance[1] = Math.round(Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);}else{spawnChance[1] = 0;}
+            if(GAMECONFIG.ballsToggle[1] === true){spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));}else{spawnChance[2] = 0;}
+            if(GAMECONFIG.ballsToggle[2] === true){spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);}else{spawnChance[3] = 0;}
+            if(GAMECONFIG.ballsToggle[3] === true){spawnChance[4] = Math.round(Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);}else{spawnChance[4] = 0;}
             spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
             //console.log(spawnChance);
         }
@@ -1629,7 +1656,7 @@ function game(){
         }
 
         if(GAMESTATE === "GAME") {
-            spawner.update();
+            spawner.update(false);
             for (var i = 0; i < bots.length; i++) {
                 bots[i].update();
             }
