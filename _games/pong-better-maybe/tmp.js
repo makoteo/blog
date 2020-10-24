@@ -151,10 +151,10 @@ function Object(x, y, width, height, controls, type, bounds){
                 if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true && this.opacities[1] === 1) {
                     if(this.y > this.boundsY[0]){
                         this.y -= this.height+this.dividerSize;
-                        this.ctrlReleased[0] = false;
                     }else{
                         this.y = this.boundsY[1];
                     }
+                    this.ctrlReleased[0] = false;
                 }
             }else if(this.type === 2){
                 if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true) {
@@ -967,6 +967,12 @@ function Button(x, y, width, height, use, text, type, val){
     this.type = type;
     this.val = val;
 
+    if(val.fontsize){
+        this.fontsize = val.fontsize;
+    }else{
+        this.fontsize = FONTSIZES.large1;
+    }
+
     this.numVal = 1000;
 
     this.hover = false;
@@ -1054,30 +1060,27 @@ function Button(x, y, width, height, use, text, type, val){
                         buttons = [];
                         texts = [];
                     }
-                }else if(this.use === "1player"){
+                }else if(this.use === "1player" || this.use === "2player"){
                     GAMESTATE = "TRANSITIONMENU";
-                    MENUTARGETSCALE = 2;
+                    MENUTARGETSCALE = 2.4;
+
                     if(transitionValue === 0) {
                         buttons = [];
                         texts = [];
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 50, max: 1500, by:25}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 5, by:1}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/20, "rounds", "ROUNDS", 3, {min: 1, max:10, by:1}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 50, max: 1500, by:25}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 5, by:1}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "rounds", "ROUNDS", 3, {min: 1, max:10, by:1}));
+                        if(this.use === "1player"){
+                            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "advanced1", "ADVANCED", 0, {}));
+                            buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
+                        }else{
+                            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "advanced2", "ADVANCED", 0, {}));
+                            buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "2playerplay", "PLAY", 0, {}));
+                        }
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "backoptions", "BACK", 0, {}));
 
-                    }
-                }else if(this.use === "2player"){
-                    GAMESTATE = "TRANSITIONPLACE";
-                    if(transitionValue === 0) {
-                        buttons = [];
-                        texts = [];
-
-                        players.push(new Player(0, 0));
-                        players.push(new Player(1, 0));
-
-                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
                     }
                 }else if(this.use === "options"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1110,6 +1113,48 @@ function Button(x, y, width, height, use, text, type, val){
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
                     }
+                }else if(this.use === "2playerplay"){
+                    GAMESTATE = "TRANSITIONPLACE";
+                    if(transitionValue === 0) {
+                        buttons = [];
+                        texts = [];
+
+                        players.push(new Player(0, 0));
+                        players.push(new Player(1, 0));
+
+                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
+                    }
+                }else if(this.use === "advanced1" || this.use === "advanced2"){
+                    GAMESTATE = "TRANSITIONMENU";
+                    MENUTARGETSCALE = 2.4;
+
+                    if(transitionValue === 0) {
+                        buttons = [];
+                        texts = [];
+
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*3, WIDTH*0.2, HEIGHT/18, "", "ADVANCED SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
+
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "PADDLES", 1, {}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "tripletoggle", "TRIPLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "rotatingtoggle", "ROTATING", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/25, "bouncetoggle", "BOUNCE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "walltoggle", "WALL", 2, {fontsize: FONTSIZES.large1*0.8}));
+
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "BALLS", 1, {}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "explodingtoggle", "EXPLODING", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "squaretoggle", "SQUARE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/25, "invisibletoggle", "INVISIBLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "triangletoggle", "TRIANGLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+
+                        if(this.use === "advanced1"){
+                            buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
+                            buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "1player", "BACK", 0, {}));
+                        }else{
+                            buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "2playerplay", "PLAY", 0, {}));
+                            buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "2player", "BACK", 0, {}));
+                        }
+
+                    }
                 }
             }else if(this.type === 2){
                 if(this.use === "chromabb"){
@@ -1136,7 +1181,7 @@ function Button(x, y, width, height, use, text, type, val){
                     ctx.fillStyle = COLORS.white;
                 }
             }
-            ctx.font = (FONTSIZES.large1 + this.textScale) + 'px quickPixel';
+            ctx.font = (this.fontsize + this.textScale) + 'px quickPixel';
 
             ctx.save();
             ctx.translate(this.x, this.y + this.height/2 - this.height/4);
@@ -1145,7 +1190,7 @@ function Button(x, y, width, height, use, text, type, val){
             ctx.restore();
         }else if(this.type === 1){
             ctx.fillStyle = COLORS.lightblue;
-            ctx.font = (FONTSIZES.large1*1.2) + 'px quickPixel';
+            ctx.font = (this.fontsize) + 'px quickPixel';
 
             ctx.save();
             ctx.translate(this.x, this.y + this.height/2 - this.height/4);
@@ -1154,7 +1199,7 @@ function Button(x, y, width, height, use, text, type, val){
             ctx.restore();
         }else if(this.type === 3){
             ctx.fillStyle = COLORS.lightgray;
-            ctx.font = (FONTSIZES.large1) + 'px quickPixel';
+            ctx.font = (this.fontsize) + 'px quickPixel';
 
             ctx.save();
             ctx.translate(this.x - WIDTH/40, this.y + this.height/2 - this.height/4);
@@ -1620,6 +1665,8 @@ function game(){
         }
 
         if(GAMESTATE === "MENU" || GAMESTATE === "TRANSITIONPLACE" || GAMESTATE === "TRANSITIONMENU"){
+            ctx.strokeStyle = COLORS.white;
+
             var saveTransitionValue = transitionValue;
             //So that when clicking on options, menu merely expands
             if(GAMESTATE !== "TRANSITIONPLACE"){
@@ -1721,12 +1768,18 @@ function game(){
                         if(players[1].points % 10 === 0){
                             maxProjectiles++;
                         }
+                        if(players[1].points >= GAMECONFIG.winscore){
+                            console.log("PLAYER 2 WINS!");
+                        }
                     }else if( projectiles[i].x > WIDTH){
                         players[0].points += projPoints[projectiles[i].type];
                         FONTSIZES.large1 = 100;
                         projectiles.splice(i, 1);
                         if(players[0].points % 10 === 0){
                             maxProjectiles++;
+                        }
+                        if(players[0].points >= GAMECONFIG.winscore){
+                            console.log("PLAYER 1 WINS!");
                         }
                     }
                 }
