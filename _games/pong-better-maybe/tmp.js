@@ -1068,6 +1068,7 @@ function Button(x, y, width, height, use, text, type, val){
             if(this.type === 0){
                 if(this.use === "play"){
                     GAMESTATE = "TRANSITIONGAME";
+                    spawner.update(true);
                     if(transitionValue === 0){
                         placers = [];
                         buttons = [];
@@ -1083,7 +1084,7 @@ function Button(x, y, width, height, use, text, type, val){
 
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 50, max: 1500, by:25}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 5, by:1}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 7, by:1}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "rounds", "ROUNDS", 3, {min: 1, max:10, by:1}));
                         if(this.use === "1player"){
                             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "advanced1", "ADVANCED", 0, {}));
@@ -1125,7 +1126,6 @@ function Button(x, y, width, height, use, text, type, val){
                         players.push(new Player(1, 1));
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
-                        spawner.update(true);
                     }
                 }else if(this.use === "2playerplay"){
                     GAMESTATE = "TRANSITIONPLACE";
@@ -1137,7 +1137,6 @@ function Button(x, y, width, height, use, text, type, val){
                         players.push(new Player(1, 0));
 
                         buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
-                        spawner.update(true);
                     }
                 }else if(this.use === "advanced1" || this.use === "advanced2"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1395,8 +1394,8 @@ function WaveSpawner(){
             var tmpfrcount = frameCount/1800;
             spawnChance[0] = Math.round(Math.pow(tmpfrcount, 0.9)+8+Math.sin(tmpfrcount)*0.5);
             if(GAMECONFIG.ballsToggle[0] === true){spawnChance[1] = Math.round(Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);}else{spawnChance[1] = 0;}
-            if(GAMECONFIG.ballsToggle[1] === true){spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));}else{spawnChance[2] = 0;}
-            if(GAMECONFIG.ballsToggle[2] === true){spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);}else{spawnChance[3] = 0;}
+            if(GAMECONFIG.ballsToggle[2] === true){spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));}else{spawnChance[2] = 0;}
+            if(GAMECONFIG.ballsToggle[1] === true){spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);}else{spawnChance[3] = 0;}
             if(GAMECONFIG.ballsToggle[3] === true){spawnChance[4] = Math.round(Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);}else{spawnChance[4] = 0;}
             spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
             //console.log(spawnChance);
@@ -1405,7 +1404,7 @@ function WaveSpawner(){
             var projNum = 0;
             var rnd = Math.random();
             for(var p = 0; p < spawnChance.length; p++){
-                if(rnd < (spawnChance[p]+projNum)/spawnTotal){
+                if(rnd <= (spawnChance[p]+projNum)/spawnTotal){
                     projectiles.push(new Projectile(WIDTH/2, Math.random()*HEIGHT/2+HEIGHT/4, Math.PI*Math.round(Math.random()), p, 1));
                     break;
                 }
@@ -1777,7 +1776,7 @@ function game(){
                         for (var tm = 0; tm < GAMECONFIG.paddlesToggle.length; tm++) {
                             if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
                         }
-                        GAMECONFIG.currentlyPlacing = Math.floor(Math.random() * tmpArr.length)+1;
+                        GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
 
                     }
                     switch(GAMECONFIG.currentlyPlacing){
