@@ -61,7 +61,7 @@ var MENUSPEED = 0.1;
 
 var horizLines = true;
 
-var GAMECONFIG = {winscore: 100, paddles: 2, rounds: 1, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true]};
+var GAMECONFIG = {winscore: 100, paddles: 2, rounds: 1, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -702,6 +702,10 @@ function Placer(type, width, height, controls, pos){
             }
         }
 
+        if(this.x < GAMECONFIG.placing*WIDTH/2 || this.x > GAMECONFIG.placing*WIDTH/2 + WIDTH/2){
+            this.placeable = false;
+        }
+
         //TODO Centerline check
 
         if(this.type === 1){
@@ -988,6 +992,7 @@ function Button(x, y, width, height, use, text, type, val){
     //Bleh why does js not have pointers, could've just passed in the toggle variable and changed it I think
     switch(this.use){
         case "chromabb": this.toggled = chromAbb; break;
+        case "randompaddles": this.toggled = GAMECONFIG.randomPaddles; break;
         case "tripletoggle": this.toggled = GAMECONFIG.paddlesToggle[0]; break;
         case "rotatingtoggle": this.toggled = GAMECONFIG.paddlesToggle[1]; break;
         case "bouncetoggle": this.toggled = GAMECONFIG.paddlesToggle[2]; break;
@@ -1144,17 +1149,19 @@ function Button(x, y, width, height, use, text, type, val){
 
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*3, WIDTH*0.2, HEIGHT/18, "", "ADVANCED SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
 
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "PADDLES", 1, {}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/20, "", "PADDLES", 1, {}));
                         buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "tripletoggle", "TRIPLE", 2, {fontsize: FONTSIZES.large1*0.8}));
                         buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "rotatingtoggle", "ROTATING", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/25, "bouncetoggle", "BOUNCE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "bouncetoggle", "BOUNCE", 2, {fontsize: FONTSIZES.large1*0.8}));
                         buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "walltoggle", "WALL", 2, {fontsize: FONTSIZES.large1*0.8}));
 
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "BALLS", 1, {}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/20, "", "BALLS", 1, {}));
                         buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "explodingtoggle", "EXPLODING", 2, {fontsize: FONTSIZES.large1*0.8}));
                         buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "squaretoggle", "SQUARE", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/25, "invisibletoggle", "INVISIBLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "invisibletoggle", "INVISIBLE", 2, {fontsize: FONTSIZES.large1*0.8}));
                         buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "triangletoggle", "TRIANGLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.6, WIDTH*0.2, HEIGHT/20, "randompaddles", "RANDOM PADDLES", 2, {fontsize: FONTSIZES.large1*0.8}));
 
                         if(this.use === "advanced1"){
                             buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
@@ -1170,7 +1177,10 @@ function Button(x, y, width, height, use, text, type, val){
                 if(this.use === "chromabb"){
                     chromAbb = !chromAbb;
                     horizLines = !horizLines;
-                }else if(this.use === "tripletoggle"){
+                }else if(this.use === "randompaddles"){
+                    GAMECONFIG.randomPaddles = !GAMECONFIG.randomPaddles;
+                }
+                else if(this.use === "tripletoggle"){
                     GAMECONFIG.paddlesToggle[0] = !GAMECONFIG.paddlesToggle[0];
                 }else if(this.use === "rotatingtoggle"){
                     GAMECONFIG.paddlesToggle[1] = !GAMECONFIG.paddlesToggle[1];
@@ -1617,6 +1627,7 @@ function buildPaddles(type){
         placers[placers.length-1].update();
         if(placers[placers.length-1].placeable === true){
             placers[placers.length-1].placed = true;
+            placers[placers.length-1].anim = [0, 0];
             break;
         }
         z++;
@@ -1733,21 +1744,49 @@ function game(){
             }
         }else if(GAMESTATE === "PLACE"){
 
-            if(placers.length === 0 || placers[0].placed === false){
-                if(keys && keys[49]){
-                    placers = [];
-                    placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
-                }else if(keys && keys[50]){
-                    placers = [];
-                    placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
-                }else if(keys && keys[51]){
-                    placers = [];
-                    placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
-                }else if(keys && keys[52]){
-                    placers = [];
-                    placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
-                }else if(keys && keys[27]){
-                    placers = [];
+            if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1){
+                if(GAMECONFIG.randomPaddles === true){
+                    buildPaddles(GAMECONFIG.currentlyPlacing);
+                }else{
+                    buildPaddles(Math.floor(Math.random()*4)+1);
+                }
+            }
+
+            if(GAMECONFIG.randomPaddles === false) {
+                if (placers.length === 0 || placers[0].placed === false) {
+                    if (keys && keys[49]) {
+                        placers = [];
+                        placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
+                    } else if (keys && keys[50]) {
+                        placers = [];
+                        placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
+                    } else if (keys && keys[51]) {
+                        placers = [];
+                        placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
+                    } else if (keys && keys[52]) {
+                        placers = [];
+                        placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
+                    } else if (keys && keys[27]) {
+                        placers = [];
+                    }
+                }
+            }else{
+                if(placers.length === 0 && objects.length < GAMECONFIG.paddles*2 + 2){
+                    if(GAMECONFIG.placing === 0) {
+                        var tmpArr = [];
+                        for (var tm = 0; tm < GAMECONFIG.paddlesToggle.length; tm++) {
+                            if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
+                        }
+                        GAMECONFIG.currentlyPlacing = Math.floor(Math.random() * tmpArr.length)+1;
+
+                    }
+                    switch(GAMECONFIG.currentlyPlacing){
+                        case 1: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
+                        case 2: placers.push(new Placer(2, 5, 60, CONTROLS.a, [])); break;
+                        case 3: placers.push(new Placer(3, 20, 20, CONTROLS.a, [])); break;
+                        case 4: placers.push(new Placer(4, 10, 20, CONTROLS.a, [])); break;
+                        default: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
+                    }
                 }
             }
 
@@ -1756,6 +1795,7 @@ function game(){
                 placers[0].draw();
                 if(placers[0].finished === true){
                     placers = [];
+                    GAMECONFIG.placing = Math.abs(GAMECONFIG.placing-1); //Just Flips the value
                 }
             }
         }else if(GAMESTATE === "GAME"){
