@@ -1125,7 +1125,15 @@ function Button(x, y, width, height, use, text, type, val){
                         players.push(new Player(0, 0));
                         players.push(new Player(1, 1));
 
-                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.3*FONTSIZES.large1}));
+
+                        texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 1, PLACE YOUR PADDLE", -WIDTH/8, true));
+                        texts.push(new Text(WIDTH/2+WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 2, PLACE YOUR PADDLE", -WIDTH/8, true));
+                        texts[1].manualNum = 1;
+                        texts.push(new Text(WIDTH/2, -HEIGHT*0.01, HEIGHT/5, GAMECONFIG.paddles, -WIDTH/10, false));
+                        texts.push(new Text(WIDTH/2, HEIGHT/9, HEIGHT/20, "PADDLES", -WIDTH/20, false));
+                        texts.push(new Text(WIDTH/2, HEIGHT/7, HEIGHT/20, "REMAINING", -WIDTH/20, false));
+                        texts.push(new Text())
                     }
                 }else if(this.use === "2playerplay"){
                     GAMESTATE = "TRANSITIONPLACE";
@@ -1263,18 +1271,25 @@ function Button(x, y, width, height, use, text, type, val){
     };
 }
 
-function Text(x, y, fontsize, text, offset){
+function Text(x, y, fontsize, text, offset, manualOffset){
     this.x = x;
     this.y = y;
     this.fontsize = fontsize;
     this.text = text;
     this.offset = offset;
 
+    this.manualOffset = manualOffset;
+    this.manualNum = 0;
+
     this.draw = function(){
         ctx.textAlign = 'center';
         ctx.fillStyle = COLORS.white;
         ctx.save();
-        ctx.translate(this.x, this.y + this.fontsize/2 + this.offset*(1-transitionValue));
+        if(this.manualOffset){
+            ctx.translate(this.x, this.y + this.fontsize/2 + this.offset*(1-this.manualNum));
+        }else{
+            ctx.translate(this.x, this.y + this.fontsize/2 + this.offset*(1-transitionValue));
+        }
         ctx.font = this.fontsize + 'px quickPixel';
         ctx.fillText(this.text, 0, 0);
         ctx.restore();
@@ -1431,7 +1446,7 @@ var spawner = new WaveSpawner();
 
 function loadMenuButtons(){
     texts = [];
-    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/8, "PONG II", -WIDTH/10));
+    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/8, "PONG II", -WIDTH/10, false));
     buttons = [];
     buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
     buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
@@ -1743,7 +1758,7 @@ function game(){
             }
         }else if(GAMESTATE === "PLACE"){
 
-            if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1){
+            if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1 && GAMECONFIG.currentlyPlacing > 0){
                 if(GAMECONFIG.randomPaddles === true){
                     buildPaddles(GAMECONFIG.currentlyPlacing);
                 }else{
@@ -1751,18 +1766,45 @@ function game(){
                 }
             }
 
+            if(objects.length < GAMECONFIG.paddles*2 + 2){
+                texts[2].text = Math.ceil((GAMECONFIG.paddles*2 + 2 - objects.length)/2);
+                if(GAMECONFIG.placing === 1){
+                    if(texts[0].manualNum < 1){
+                        texts[0].manualNum=Math.min(texts[0].manualNum+0.1, 1);
+                    }
+                    if(texts[1].manualNum > 0){
+                        texts[1].manualNum=Math.max(texts[1].manualNum-0.1, 0);
+                    }
+                }else{
+                    if(texts[1].manualNum < 1){
+                        texts[1].manualNum=Math.min(texts[1].manualNum+0.1, 1);
+                    }
+                    if(texts[0].manualNum > 0){
+                        texts[0].manualNum=Math.max(texts[0].manualNum-0.1, 0);
+                    }
+                }
+            }else{
+                texts[0].manualNum = 1;
+                texts[1].manualNum = 1;
+                texts[2].text = "ADJUST YOUR CONTROLS BY CLICKING ON THE PADDLES";
+                texts[2].fontsize = WIDTH/30;
+                texts[2].y = WIDTH/80;
+                texts[3].text = "";
+                texts[4].text = "";
+            }
+
             if(GAMECONFIG.randomPaddles === false) {
-                if (placers.length === 0 || placers[0].placed === false) {
-                    if (keys && keys[49]) {
+                if ((placers.length === 0 || placers[0].placed === false) && (objects.length < GAMECONFIG.paddles*2 + 2)) {
+                    if (keys && keys[49] && GAMECONFIG.paddlesToggle[0] === true) {
                         placers = [];
                         placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
-                    } else if (keys && keys[50]) {
+                    } else if (keys && keys[50] && GAMECONFIG.paddlesToggle[1] === true) {
                         placers = [];
                         placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
-                    } else if (keys && keys[51]) {
+                    } else if (keys && keys[51] && GAMECONFIG.paddlesToggle[2] === true) {
                         placers = [];
                         placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
-                    } else if (keys && keys[52]) {
+                    } else if (keys && keys[52] && GAMECONFIG.paddlesToggle[3] === true) {
                         placers = [];
                         placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
                     } else if (keys && keys[27]) {
@@ -1777,14 +1819,15 @@ function game(){
                             if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
                         }
                         GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
-
                     }
-                    switch(GAMECONFIG.currentlyPlacing){
-                        case 1: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
-                        case 2: placers.push(new Placer(2, 5, 60, CONTROLS.a, [])); break;
-                        case 3: placers.push(new Placer(3, 20, 20, CONTROLS.a, [])); break;
-                        case 4: placers.push(new Placer(4, 10, 20, CONTROLS.a, [])); break;
-                        default: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
+                    if(GAMECONFIG.currentlyPlacing > 0){
+                        switch(GAMECONFIG.currentlyPlacing){
+                            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
+                            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.a, [])); break;
+                            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.a, [])); break;
+                            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.a, [])); break;
+                            default: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
+                        }
                     }
                 }
             }
