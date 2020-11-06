@@ -1116,35 +1116,33 @@ function Button(x, y, width, height, use, text, type, val){
                     if(transitionValue === 0) {
                         loadMenuButtons();
                     }
-                }else if(this.use === "1playerplay"){
+                }else if(this.use === "1playerplay" || this.use === "2playerplay"){
                     GAMESTATE = "TRANSITIONPLACE";
                     if(transitionValue === 0) {
                         buttons = [];
                         texts = [];
 
                         players.push(new Player(0, 0));
-                        players.push(new Player(1, 1));
+                        if(this.use === "1playerplay"){
+                            players.push(new Player(1, 1));
+                        }else{
+                            players.push(new Player(1, 0));
+                        }
 
                         buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.3*FONTSIZES.large1}));
 
-                        texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 1, PLACE YOUR PADDLE", -WIDTH/8, true));
-                        texts.push(new Text(WIDTH/2+WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 2, PLACE YOUR PADDLE", -WIDTH/8, true));
+                        if(GAMECONFIG.randomPaddles === true){
+                            texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 1, PLACE YOUR PADDLE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2+WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 2, PLACE YOUR PADDLE", -WIDTH/8, true));
+                        }else{
+                            texts.push(new Text(WIDTH/2-WIDTH/3.8, +HEIGHT*1.125, HEIGHT/22.5, "PLAYER 1, USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2+WIDTH/3.8, +HEIGHT*1.125, HEIGHT/22.5, "PLAYER 2, USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
+                        }
                         texts[1].manualNum = 1;
                         texts.push(new Text(WIDTH/2, -HEIGHT*0.01, HEIGHT/5, GAMECONFIG.paddles, -WIDTH/10, false));
                         texts.push(new Text(WIDTH/2, HEIGHT/9, HEIGHT/20, "PADDLES", -WIDTH/20, false));
                         texts.push(new Text(WIDTH/2, HEIGHT/7, HEIGHT/20, "REMAINING", -WIDTH/20, false));
                         texts.push(new Text())
-                    }
-                }else if(this.use === "2playerplay"){
-                    GAMESTATE = "TRANSITIONPLACE";
-                    if(transitionValue === 0) {
-                        buttons = [];
-                        texts = [];
-
-                        players.push(new Player(0, 0));
-                        players.push(new Player(1, 0));
-
-                        buttons.push(new Button(WIDTH - WIDTH / 20, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {}));
                     }
                 }else if(this.use === "advanced1" || this.use === "advanced2"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1758,12 +1756,15 @@ function game(){
             }
         }else if(GAMESTATE === "PLACE"){
 
-            if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1 && GAMECONFIG.currentlyPlacing > 0){
-                if(GAMECONFIG.randomPaddles === true){
-                    buildPaddles(GAMECONFIG.currentlyPlacing);
-                }else{
-                    buildPaddles(Math.floor(Math.random()*4)+1);
+            if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1){
+                if(GAMECONFIG.randomPaddles === false){
+                    var tmpArr = [];
+                    for (var tm = 0; tm < GAMECONFIG.paddlesToggle.length; tm++) {
+                        if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
+                    }
+                    GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
                 }
+                buildPaddles(GAMECONFIG.currentlyPlacing);
             }
 
             if(objects.length < GAMECONFIG.paddles*2 + 2){
@@ -1795,16 +1796,16 @@ function game(){
 
             if(GAMECONFIG.randomPaddles === false) {
                 if ((placers.length === 0 || placers[0].placed === false) && (objects.length < GAMECONFIG.paddles*2 + 2)) {
-                    if (keys && keys[49] && GAMECONFIG.paddlesToggle[0] === true) {
+                    if (((keys && keys[49]) || (keys && keys[97])) && GAMECONFIG.paddlesToggle[0] === true) {
                         placers = [];
                         placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
-                    } else if (keys && keys[50] && GAMECONFIG.paddlesToggle[1] === true) {
+                    } else if (((keys && keys[50]) || (keys && keys[98])) && GAMECONFIG.paddlesToggle[1] === true) {
                         placers = [];
                         placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
-                    } else if (keys && keys[51] && GAMECONFIG.paddlesToggle[2] === true) {
+                    } else if (((keys && keys[51]) || (keys && keys[99])) && GAMECONFIG.paddlesToggle[2] === true) {
                         placers = [];
                         placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
-                    } else if (keys && keys[52] && GAMECONFIG.paddlesToggle[3] === true) {
+                    } else if (((keys && keys[52]) || (keys && keys[100])) && GAMECONFIG.paddlesToggle[3] === true) {
                         placers = [];
                         placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
                     } else if (keys && keys[27]) {
