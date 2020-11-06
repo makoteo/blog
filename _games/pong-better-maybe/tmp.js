@@ -1129,7 +1129,7 @@ function Button(x, y, width, height, use, text, type, val){
                             players.push(new Player(1, 0));
                         }
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.3*FONTSIZES.large1}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.large1}));
 
                         if(GAMECONFIG.randomPaddles === true){
                             texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 1, PLACE YOUR PADDLE", -WIDTH/8, true));
@@ -1142,7 +1142,6 @@ function Button(x, y, width, height, use, text, type, val){
                         texts.push(new Text(WIDTH/2, -HEIGHT*0.01, HEIGHT/5, GAMECONFIG.paddles, -WIDTH/10, false));
                         texts.push(new Text(WIDTH/2, HEIGHT/9, HEIGHT/20, "PADDLES", -WIDTH/20, false));
                         texts.push(new Text(WIDTH/2, HEIGHT/7, HEIGHT/20, "REMAINING", -WIDTH/20, false));
-                        texts.push(new Text())
                     }
                 }else if(this.use === "advanced1" || this.use === "advanced2"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1289,7 +1288,7 @@ function Text(x, y, fontsize, text, offset, manualOffset){
             ctx.translate(this.x, this.y + this.fontsize/2 + this.offset*(1-transitionValue));
         }
         ctx.font = this.fontsize + 'px quickPixel';
-        ctx.fillText(this.text, 0, 0);
+        ctx.fillText(this.text, 0, 0, transitionValue*this.fontsize*this.text.length);
         ctx.restore();
     }
 }
@@ -1674,10 +1673,6 @@ function game(){
 
         frameCount++;
 
-        for(var i in texts){
-            texts[i].draw();
-        }
-
         if(GAMESTATE === "GAME") {
             spawner.update(false);
             for (var i = 0; i < bots.length; i++) {
@@ -1768,7 +1763,7 @@ function game(){
             }
 
             if(objects.length < GAMECONFIG.paddles*2 + 2){
-                texts[2].text = Math.ceil((GAMECONFIG.paddles*2 + 2 - objects.length)/2);
+                texts[2].text = Math.ceil((GAMECONFIG.paddles*2 + 2 - objects.length)/2).toString(10);
                 if(GAMECONFIG.placing === 1){
                     if(texts[0].manualNum < 1){
                         texts[0].manualNum=Math.min(texts[0].manualNum+0.1, 1);
@@ -1776,6 +1771,10 @@ function game(){
                     if(texts[1].manualNum > 0){
                         texts[1].manualNum=Math.max(texts[1].manualNum-0.1, 0);
                     }
+                    ctx.fillStyle='black';
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillRect(0, 0, WIDTH/2, HEIGHT);
+                    ctx.globalAlpha = 1;
                 }else{
                     if(texts[1].manualNum < 1){
                         texts[1].manualNum=Math.min(texts[1].manualNum+0.1, 1);
@@ -1783,6 +1782,10 @@ function game(){
                     if(texts[0].manualNum > 0){
                         texts[0].manualNum=Math.max(texts[0].manualNum-0.1, 0);
                     }
+                    ctx.fillStyle='black';
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillRect(WIDTH/2, 0, WIDTH/2, HEIGHT);
+                    ctx.globalAlpha = 1;
                 }
             }else{
                 texts[0].manualNum = 1;
@@ -1944,6 +1947,10 @@ function game(){
                 buttons[i].draw();
             }
             buttons[i].update();
+        }
+
+        for(var i in texts){
+            texts[i].draw();
         }
 
         clicked = false;
