@@ -1186,6 +1186,10 @@ function Button(x, y, width, height, use, text, type, val){
                         buttons = [];
                         projectiles = [];
 
+                        bots = [];
+                        players = [];
+                        maxProjectiles = 2;
+
                         objects.push(new Object(10, HEIGHT / 2 - 50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
                         objects.push(new Object(WIDTH - 10, HEIGHT / 2 - 50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
 
