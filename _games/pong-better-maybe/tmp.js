@@ -1129,14 +1129,12 @@ function Button(x, y, width, height, use, text, type, val){
                             players.push(new Player(1, 0));
                         }
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.large1}));
-
                         if(GAMECONFIG.randomPaddles === true){
-                            texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 1, PLACE YOUR PADDLE", -WIDTH/8, true));
-                            texts.push(new Text(WIDTH/2+WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLAYER 2, PLACE YOUR PADDLE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2-WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLACE YOUR PADDLE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2+WIDTH/4, +HEIGHT*1.125, HEIGHT/15, "PLACE YOUR PADDLE", -WIDTH/8, true));
                         }else{
-                            texts.push(new Text(WIDTH/2-WIDTH/3.8, +HEIGHT*1.125, HEIGHT/22.5, "PLAYER 1, USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
-                            texts.push(new Text(WIDTH/2+WIDTH/3.8, +HEIGHT*1.125, HEIGHT/22.5, "PLAYER 2, USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2-WIDTH/3.8, +HEIGHT*1.125, HEIGHT/20, "USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
+                            texts.push(new Text(WIDTH/2+WIDTH/3.8, +HEIGHT*1.125, HEIGHT/20, "USE NUMBERS 1-4 TO SELECT A PADDLE TO PLACE", -WIDTH/8, true));
                         }
                         texts[1].manualNum = 1;
                         texts.push(new Text(WIDTH/2, -HEIGHT*0.01, HEIGHT/5, GAMECONFIG.paddles, -WIDTH/10, false));
@@ -1340,19 +1338,17 @@ function AI(id){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                         }
 
-                        if(objects[this.projDis[o][0]].y < projectiles[this.projDis[o][1][1]].y && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height)){
+                        if(objects[this.projDis[o][0]].y > projectiles[this.projDis[o][1][1]].y && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height)){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 0;
                         }
                     }else if(objects[this.projDis[o][0]].type === 2 && objects[this.projDis[o][0]].ctrlReleased[0] === true){
                         if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y - objects[this.projDis[o][0]].length*1.5)){
 
-                            //console.log((objects[this.projDis[o][0]].angle + Math.PI/2) % Math.PI*4);
-
-                            if((objects[this.projDis[o][0]].angle + Math.PI/2) % Math.PI*4 !== 0){
+                            if((objects[this.projDis[o][0]].expectedAngle) % (Math.PI*2) !== Math.PI/2*3){
                                 AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                             }
                         }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].length)){
-                            if((objects[this.projDis[o][0]].angle - Math.PI/2) % Math.PI*4 !== 0){
+                            if((objects[this.projDis[o][0]].expectedAngle) % (Math.PI*2) !== Math.PI/2){
                                 AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                             }
                         }
@@ -1361,7 +1357,7 @@ function AI(id){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                         }
                     }else if(objects[this.projDis[o][0]].type === 4){
-                        if(Math.random() > 0.8){
+                        if(Math.random() > 0.95){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                         }
                     }
@@ -1625,15 +1621,24 @@ function buildPaddles(type){
             numofpad1++;
         }
     }
-    averagePos = HEIGHT - averagePos/numofpad1;
+
+    if(numofpad1 === 0){
+        averagePos = HEIGHT/2;
+    }else{
+        if(numofpad1 % 2 === 0){
+            averagePos = HEIGHT - averagePos/numofpad1 - HEIGHT/3;
+        }else{
+            averagePos = HEIGHT - averagePos/numofpad1 + HEIGHT/3;
+        }
+    }
 
     while(z < spawnIter){
         placers = [];
         switch(type){
-            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, (HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5)*2 + averagePos)/3])); break;
-            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, (Math.round(Math.random()*HEIGHT)*2+averagePos)/3])); break;
-            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.5, (Math.round(Math.random()*HEIGHT)*2+averagePos)/3])); break;
-            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6, (Math.round(Math.random()*HEIGHT)*2+averagePos)/3])); break;
+            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [5*Math.round(Math.round(Math.random()*WIDTH*0.35)+WIDTH*0.55)/5, (HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5) + averagePos)/2])); break;
+            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [5*Math.round(Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.6)/5, (Math.round(Math.random()*HEIGHT)*5+averagePos)/6])); break;
+            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [5*Math.round(Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.55)/5, (HEIGHT*0.2 + Math.round(Math.random()*HEIGHT*0.6)*2+averagePos)/3])); break;
+            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [5*Math.round(Math.round(Math.random()*WIDTH*0.25)+WIDTH*0.6)/5, (Math.round(Math.random()*HEIGHT)*3+averagePos)/4])); break;
         }
         placers[placers.length-1].update();
         if(placers[placers.length-1].placeable === true){
@@ -1751,6 +1756,10 @@ function game(){
             }
         }else if(GAMESTATE === "PLACE"){
 
+            if(placers.length === 0 && buttons.length === 0 && objects.length === GAMECONFIG.paddles*2 + 2){
+                buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.large1}));
+            }
+
             if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1){
                 if(GAMECONFIG.randomPaddles === false){
                     var tmpArr = [];
@@ -1866,7 +1875,7 @@ function game(){
                 }
 
                 if(projectiles[i].type === 3){
-                    if(frameCount % projectiles[i].spawnTimer === 0){
+                    if(frameCount % projectiles[i].spawnTimer === 0 && projectiles[i].startTimer === 0){
                         for(var ex = 0; ex < 4; ex++){
                             projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/2 + projectiles[i].rotAngle, 0, 0));
                         }
