@@ -49,7 +49,7 @@ image.src = canvas.toDataURL();
 
 var glitchTimer = 0;
 
-var chromAbb = true;
+var chromAbb = false;
 
 var spawnChance = [8, 2, 1, 1, 2];
 var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
@@ -59,9 +59,9 @@ var MENUSCALE = 1; //Distance of Menu top and bottom bar
 var MENUTARGETSCALE = 1;
 var MENUSPEED = 0.1;
 
-var horizLines = true;
+var horizLines = false;
 
-var GAMECONFIG = {winscore: 100, paddles: 2, rounds: 1, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
+var GAMECONFIG = {winscore: 100, paddles: 2, difficulty: 4, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -1085,7 +1085,7 @@ function Button(x, y, width, height, use, text, type, val){
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 50, max: 1500, by:25}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 7, by:1}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "rounds", "ROUNDS", 3, {min: 1, max:10, by:1}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "difficulty", "DIFFICULTY", 3, {min: 1, max:10, by:1}));
                         if(this.use === "1player"){
                             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "advanced1", "ADVANCED", 0, {}));
                             buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
@@ -1173,6 +1173,23 @@ function Button(x, y, width, height, use, text, type, val){
                             buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "2player", "BACK", 0, {}));
                         }
 
+                    }
+                }else if(this.use === "BackToMenu"){
+                    GAMESTATE = "TRANSITIONMENUFGAME";
+
+                    if(transitionValue === 0) {
+                        GAMESTATE = "MENU";
+                        MENUTARGETSCALE = 1;
+                        MENUSCALE = 1;
+                        objects = [];
+                        texts = [];
+                        buttons = [];
+                        projectiles = [];
+
+                        objects.push(new Object(10, HEIGHT / 2 - 50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
+                        objects.push(new Object(WIDTH - 10, HEIGHT / 2 - 50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
+
+                        loadMenuButtons();
                     }
                 }
             }else if(this.type === 2){
@@ -1799,7 +1816,9 @@ function game(){
             }else{
                 texts[0].manualNum = 1;
                 texts[1].manualNum = 1;
-                texts[2].text = "ADJUST YOUR CONTROLS BY CLICKING ON THE PADDLES";
+                if(objects.length !== 2){
+                    texts[2].text = "ADJUST YOUR CONTROLS BY CLICKING ON THE PADDLES";
+                }
                 texts[2].fontsize = WIDTH/30;
                 texts[2].y = WIDTH/80;
                 texts[3].text = "";
@@ -1892,6 +1911,7 @@ function game(){
                         }
                         if(players[1].points >= GAMECONFIG.winscore){
                             console.log("PLAYER 2 WINS!");
+                            GAMESTATE = "TRANSITIONVICTORY2";
                         }
                     }else if( projectiles[i].x > WIDTH){
                         players[0].points += projPoints[projectiles[i].type];
@@ -1902,6 +1922,7 @@ function game(){
                         }
                         if(players[0].points >= GAMECONFIG.winscore){
                             console.log("PLAYER 1 WINS!");
+                            GAMESTATE = "TRANSITIONVICTORY1";
                         }
                     }
                 }
@@ -1924,6 +1945,77 @@ function game(){
             ctx.textAlign = 'right';
             ctx.font = FONTSIZES.large2 + 'px quickPixel';
             ctx.fillText(players[1].points, WIDTH - 10, 40, FONTSIZES.large1*transitionValue);
+        }else if(GAMESTATE === "TRANSITIONVICTORY1" || GAMESTATE === "TRANSITIONVICTORY2"){
+            for(var i in projectiles){
+                projectiles[i].draw();
+            }
+
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + transitionValue*0.5 + ')';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        }else if(GAMESTATE === "VICTORY1" || GAMESTATE === "VICTORY2" || GAMESTATE === "TRANSITIONMENUFGAME"){
+            if(buttons.length === 0){
+                buttons.push(new Button(WIDTH/2, HEIGHT-HEIGHT/10, WIDTH/10, HEIGHT/20, "BackToMenu", "BACK", 0, {}));
+            }
+
+            for(var i in projectiles){
+                projectiles[i].draw();
+            }
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = COLORS.white;
+            ctx.font = FONTSIZES.large1*1.5 + 'px quickPixel';
+            ctx.textAlign = 'center';
+            if(GAMESTATE === "VICTORY1"){
+                ctx.fillText("VICTORY", WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
+                ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
+                ctx.stroke();
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
+                ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
+                ctx.stroke();
+
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16);
+                ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16);
+                ctx.stroke();
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16-HEIGHT/80);
+                ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16-HEIGHT/80);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }else{
+                ctx.fillText("VICTORY", WIDTH-WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH-WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
+                ctx.lineTo(WIDTH-WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
+                ctx.stroke();
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH-WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
+                ctx.lineTo(WIDTH-WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
+                ctx.stroke();
+
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH-WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16);
+                ctx.lineTo(WIDTH-WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16);
+                ctx.stroke();
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(WIDTH-WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16-HEIGHT/80);
+                ctx.lineTo(WIDTH-WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16-HEIGHT/80);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
         }
 
         if(GAMESTATE.includes("TRANSITION")){
@@ -1946,7 +2038,7 @@ function game(){
         ctx.fillRect(WIDTH - WIDTH/2*(1-transitionValue), 0, WIDTH/2*(1-transitionValue), HEIGHT);*/
 
         //TRANSITION BLACK
-        if(!GAMESTATE.includes("MENU")) {
+        if((!GAMESTATE.includes("MENU") || GAMESTATE === "TRANSITIONMENUFGAME") && !GAMESTATE.includes("VICTORY")) {
             ctx.fillStyle = 'rgba(0, 10, 12,' + (1 - transitionValue) + ')';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
         }
