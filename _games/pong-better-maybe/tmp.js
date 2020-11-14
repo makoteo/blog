@@ -181,6 +181,7 @@ function Object(x, y, width, height, controls, type, bounds){
                         }
                     }
                     this.expCoolDown = 10;
+                    this.ctrlReleased[0] = false;
                 }
             }
 
