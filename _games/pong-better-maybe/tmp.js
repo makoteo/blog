@@ -13,7 +13,7 @@ var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC", lightgray: "#5E768C"};
 var CONTROLS = {a: [87, 83, "W", "S", 0], b: [38, 40, "Up", "Dwn", 1], c:[69, 68, "E", "D", 2], d: [100, 97, "4", "1", 3], e: [82, 70, "R", "F", 4], f: [101, 98, "5", "2", 5], g: [84, 71, "T", "G", 6], h: [102, 99, "6", "3", 7]};
-var FONTSIZES = {large1: 80, large2: 80, medium: 40};
+var FONTSIZES = {large1: 80, large2: 80, medium: 40, defaultLarge: 80};
 
 var AICONTROLS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -61,7 +61,9 @@ var MENUSPEED = 0.1;
 
 var horizLines = false;
 
-var GAMECONFIG = {winscore: 100, paddles: 2, difficulty: 4, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
+var GAMECONFIG = {winscore: 100, paddles: 2, difficulty: 5, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
+
+var blackScreen = true;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -87,8 +89,7 @@ function Object(x, y, width, height, controls, type, bounds){
     this.boundsY = bounds;
 
     this.ctrlReleased = [true, true]; //Check for release of controls
-
-    this.dividerSize = CONST.dividerSize; //Width of aread around paddle where nothing can be placed
+    this.dividerSize = CONST.dividerSize; //Width of area  around paddle where nothing can be placed
 
     this.hingeWidth = CONST.hingeWidth;
 
@@ -974,7 +975,7 @@ function Button(x, y, width, height, use, text, type, val){
     if(val.fontsize){
         this.fontsize = val.fontsize;
     }else{
-        this.fontsize = FONTSIZES.large1;
+        this.fontsize = FONTSIZES.defaultLarge;
     }
 
     this.numVal = 1000;
@@ -1073,6 +1074,7 @@ function Button(x, y, width, height, use, text, type, val){
                         placers = [];
                         buttons = [];
                         texts = [];
+                        frameCount = 0;
                     }
                 }else if(this.use === "1player" || this.use === "2player"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1082,8 +1084,8 @@ function Button(x, y, width, height, use, text, type, val){
                         buttons = [];
                         texts = [];
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 50, max: 1500, by:25}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.defaultLarge*1.2}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 25, max: 1000, by:25}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 7, by:1}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "difficulty", "DIFFICULTY", 3, {min: 1, max:10, by:1}));
                         if(this.use === "1player"){
@@ -1149,21 +1151,21 @@ function Button(x, y, width, height, use, text, type, val){
                         buttons = [];
                         texts = [];
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*3, WIDTH*0.2, HEIGHT/18, "", "ADVANCED SETTINGS", 1, {fontsize: FONTSIZES.large1*1.2}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*3, WIDTH*0.2, HEIGHT/18, "", "ADVANCED SETTINGS", 1, {fontsize: FONTSIZES.defaultLarge*1.2}));
 
                         buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/20, "", "PADDLES", 1, {}));
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "tripletoggle", "TRIPLE", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "rotatingtoggle", "ROTATING", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "bouncetoggle", "BOUNCE", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "walltoggle", "WALL", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "tripletoggle", "TRIPLE", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "rotatingtoggle", "ROTATING", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "bouncetoggle", "BOUNCE", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "walltoggle", "WALL", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
 
                         buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/20, "", "BALLS", 1, {}));
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "explodingtoggle", "EXPLODING", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "squaretoggle", "SQUARE", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "invisibletoggle", "INVISIBLE", 2, {fontsize: FONTSIZES.large1*0.8}));
-                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "triangletoggle", "TRIANGLE", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*1, WIDTH*0.2, HEIGHT/20, "explodingtoggle", "EXPLODING", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 - HEIGHT/10*0.4, WIDTH*0.2, HEIGHT/20, "squaretoggle", "SQUARE", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.2, WIDTH*0.2, HEIGHT/20, "invisibletoggle", "INVISIBLE", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
+                        buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*0.8, WIDTH*0.2, HEIGHT/20, "triangletoggle", "TRIANGLE", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
 
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.6, WIDTH*0.2, HEIGHT/20, "randompaddles", "RANDOM PADDLES", 2, {fontsize: FONTSIZES.large1*0.8}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.6, WIDTH*0.2, HEIGHT/20, "randompaddles", "RANDOM PADDLES", 2, {fontsize: FONTSIZES.defaultLarge*0.8}));
 
                         if(this.use === "advanced1"){
                             buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/10*3, WIDTH*0.2, HEIGHT/15, "1playerplay", "PLAY", 0, {}));
@@ -1422,10 +1424,10 @@ function WaveSpawner(){
             spawnChance = [0, 0, 0, 0, 0];
             var tmpfrcount = frameCount/1800;
             spawnChance[0] = Math.round(Math.pow(tmpfrcount, 0.9)+8+Math.sin(tmpfrcount)*0.5);
-            if(GAMECONFIG.ballsToggle[0] === true){spawnChance[1] = Math.round(Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);}else{spawnChance[1] = 0;}
-            if(GAMECONFIG.ballsToggle[2] === true){spawnChance[2] = Math.round(Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));}else{spawnChance[2] = 0;}
-            if(GAMECONFIG.ballsToggle[1] === true){spawnChance[3] = Math.round(Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);}else{spawnChance[3] = 0;}
-            if(GAMECONFIG.ballsToggle[3] === true){spawnChance[4] = Math.round(Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);}else{spawnChance[4] = 0;}
+            if(GAMECONFIG.ballsToggle[0] === true){spawnChance[1] = Math.round((0.85+GAMECONFIG.difficulty*0.1)*Math.pow(tmpfrcount, 1.1)+2-Math.sin(tmpfrcount)*0.75);}else{spawnChance[1] = 0;}
+            if(GAMECONFIG.ballsToggle[2] === true){spawnChance[2] = Math.round((0.85+GAMECONFIG.difficulty*0.08)*Math.pow(tmpfrcount, 0.98)+1-Math.sin(tmpfrcount));}else{spawnChance[2] = 0;}
+            if(GAMECONFIG.ballsToggle[1] === true){spawnChance[3] = Math.round((0.8+GAMECONFIG.difficulty*0.06)*Math.pow(tmpfrcount, 1.05)+1-Math.sin(tmpfrcount)*1.5);}else{spawnChance[3] = 0;}
+            if(GAMECONFIG.ballsToggle[3] === true){spawnChance[4] = Math.round((0.8+GAMECONFIG.difficulty*0.08)*Math.pow(tmpfrcount, 0.95)+2+Math.sin(tmpfrcount)*0.2);}else{spawnChance[4] = 0;}
             spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
             //console.log(spawnChance);
         }
@@ -1656,10 +1658,10 @@ function buildPaddles(type){
     while(z < spawnIter){
         placers = [];
         switch(type){
-            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [5*Math.round(Math.round(Math.random()*WIDTH*0.35)+WIDTH*0.55)/5, (HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5) + averagePos)/2])); break;
-            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [5*Math.round(Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.6)/5, (Math.round(Math.random()*HEIGHT)*5+averagePos)/6])); break;
-            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [5*Math.round(Math.round(Math.random()*WIDTH*0.4)+WIDTH*0.55)/5, (HEIGHT*0.2 + Math.round(Math.random()*HEIGHT*0.6)*2+averagePos)/3])); break;
-            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [5*Math.round(Math.round(Math.random()*WIDTH*0.25)+WIDTH*0.6)/5, (Math.round(Math.random()*HEIGHT)*3+averagePos)/4])); break;
+            case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [50*Math.round(Math.round(Math.random()*WIDTH*0.35)+WIDTH*0.55)/50, (HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5) + averagePos)/2])); break;
+            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6)/50, (Math.round(Math.random()*HEIGHT)*5+averagePos)/6])); break;
+            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.55)/50, (HEIGHT*0.2 + Math.round(Math.random()*HEIGHT*0.6)*2+averagePos)/3])); break;
+            case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [50*Math.round(Math.round(Math.random()*WIDTH*0.25)+WIDTH*0.6)/50, (Math.round(Math.random()*HEIGHT)*3+averagePos)/4])); break;
         }
         placers[placers.length-1].update();
         if(placers[placers.length-1].placeable === true){
@@ -1778,16 +1780,22 @@ function game(){
         }else if(GAMESTATE === "PLACE"){
 
             if(placers.length === 0 && buttons.length === 0 && objects.length === GAMECONFIG.paddles*2 + 2){
-                buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.large1}));
+                buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.defaultLarge}));
             }
 
             if(players[1].ai && placers.length === 0 && GAMECONFIG.placing === 1){
                 if(GAMECONFIG.randomPaddles === false){
                     var tmpArr = [];
-                    for (var tm = 0; tm < GAMECONFIG.paddlesToggle.length; tm++) {
-                        if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
-                    }
-                    GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
+                    //for (var tm = 0; tm < GAMECONFIG.paddlesToggle.length; tm++) {
+                    //    if (GAMECONFIG.paddlesToggle[tm] === true) tmpArr.push(tm);
+                    //}
+                    if(GAMECONFIG.paddlesToggle[0] === true){for(var a = 0; a < 4; a++){tmpArr.push(1)}}
+                    if(GAMECONFIG.paddlesToggle[1] === true){for(var a = 0; a < 1; a++){tmpArr.push(2)}}
+                    if(GAMECONFIG.paddlesToggle[2] === true){for(var a = 0; a < 3; a++){tmpArr.push(3)}}
+                    if(GAMECONFIG.paddlesToggle[3] === true){for(var a = 0; a < 4; a++){tmpArr.push(4)}}
+                    //GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
+                    console.log(tmpArr);
+                    GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)];
                 }
                 buildPaddles(GAMECONFIG.currentlyPlacing);
             }
@@ -1910,9 +1918,6 @@ function game(){
                         players[1].points += projPoints[projectiles[i].type];
                         FONTSIZES.large2 = 100;
                         projectiles.splice(i, 1);
-                        if(players[1].points % 10 === 0){
-                            maxProjectiles++;
-                        }
                         if(players[1].points >= GAMECONFIG.winscore){
                             console.log("PLAYER 2 WINS!");
                             GAMESTATE = "TRANSITIONVICTORY2";
@@ -1921,9 +1926,6 @@ function game(){
                         players[0].points += projPoints[projectiles[i].type];
                         FONTSIZES.large1 = 100;
                         projectiles.splice(i, 1);
-                        if(players[0].points % 10 === 0){
-                            maxProjectiles++;
-                        }
                         if(players[0].points >= GAMECONFIG.winscore){
                             console.log("PLAYER 1 WINS!");
                             GAMESTATE = "TRANSITIONVICTORY1";
@@ -1931,6 +1933,11 @@ function game(){
                     }
                 }
 
+            }
+
+            if(frameCount % 100 === 0){
+                maxProjectiles = Math.round((players[0].points+players[1].points)/(12-0.4*GAMECONFIG.difficulty))+2;
+                console.log(maxProjectiles + ", " + spawnChance);
             }
 
             //TIMERS AND OTHER STUFF
@@ -1959,7 +1966,7 @@ function game(){
 
         }else if(GAMESTATE === "VICTORY1" || GAMESTATE === "VICTORY2" || GAMESTATE === "TRANSITIONMENUFGAME"){
             if(buttons.length === 0){
-                buttons.push(new Button(WIDTH/2, HEIGHT-HEIGHT/10, WIDTH/10, HEIGHT/20, "BackToMenu", "BACK", 0, {}));
+                buttons.push(new Button(WIDTH/2, HEIGHT-HEIGHT/10, WIDTH/10, HEIGHT/20, "BackToMenu", "MENU", 0, {}));
             }
 
             for(var i in projectiles){
@@ -1969,10 +1976,23 @@ function game(){
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             ctx.fillStyle = COLORS.white;
-            ctx.font = FONTSIZES.large1*1.5 + 'px quickPixel';
             ctx.textAlign = 'center';
-            if(GAMESTATE === "VICTORY1"){
-                ctx.fillText("VICTORY", WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+            if(GAMESTATE === "VICTORY1" || GAMESTATE === "VICTORY2"){
+                if(GAMESTATE === "VICTORY1"){
+                    ctx.fillStyle = COLORS.white;
+                    ctx.strokeStyle = COLORS.white;
+                    ctx.font = FONTSIZES.defaultLarge*1.8 + 'px quickPixel';
+                    ctx.fillText("VICTORY", WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                }else{
+                    ctx.fillStyle = COLORS.lightgray;
+                    ctx.strokeStyle = COLORS.lightgray;
+                    ctx.font = FONTSIZES.defaultLarge*1.2 + 'px quickPixel';
+                    ctx.fillText("LOSS", WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                }
+
+                ctx.font = FONTSIZES.defaultLarge*0.8 + 'px quickPixel';
+                ctx.fillText("SCORE: " + players[0].points, WIDTH/4, HEIGHT*0.65, WIDTH/4*transitionValue);
+
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
@@ -1983,7 +2003,6 @@ function game(){
                 ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
                 ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8+HEIGHT/80);
                 ctx.stroke();
-
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16);
@@ -1995,8 +2014,22 @@ function game(){
                 ctx.lineTo(WIDTH/4+WIDTH/6*transitionValue, HEIGHT/2+HEIGHT/16-HEIGHT/80);
                 ctx.stroke();
                 ctx.lineWidth = 1;
-            }else{
-                ctx.fillText("VICTORY", WIDTH-WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+
+                if(GAMESTATE === "VICTORY1"){
+                    ctx.fillStyle = COLORS.lightgray;
+                    ctx.strokeStyle = COLORS.lightgray;
+                    ctx.font = FONTSIZES.defaultLarge*1.2 + 'px quickPixel';
+                    ctx.fillText("LOSS", WIDTH-WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                }else{
+                    ctx.fillStyle = COLORS.white;
+                    ctx.strokeStyle = COLORS.white;
+                    ctx.font = FONTSIZES.defaultLarge*1.8 + 'px quickPixel';
+                    ctx.fillText("VICTORY", WIDTH-WIDTH/4, HEIGHT/2, WIDTH/4*transitionValue);
+                }
+
+                ctx.font = FONTSIZES.defaultLarge*0.8 + 'px quickPixel';
+                ctx.fillText("SCORE: " + players[1].points, WIDTH-WIDTH/4, HEIGHT*0.65, WIDTH/4*transitionValue);
+
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(WIDTH-WIDTH/4-WIDTH/6*transitionValue, HEIGHT/2-HEIGHT/8);
@@ -2041,8 +2074,18 @@ function game(){
         ctx.fillRect(0, 0, WIDTH/2*(1-transitionValue), HEIGHT);
         ctx.fillRect(WIDTH - WIDTH/2*(1-transitionValue), 0, WIDTH/2*(1-transitionValue), HEIGHT);*/
 
+        if(GAMESTATE === "TRANSITIONMENU" || GAMESTATE.includes("VICTORY")){
+            blackScreen = false;
+        }else if(GAMESTATE === "TRANSITIONPLACE" || GAMESTATE === "TRANSITIONGAME" || GAMESTATE === "TRANSITIONMENUFGAME"){
+            blackScreen = true;
+        }
+
         //TRANSITION BLACK
-        if((!GAMESTATE.includes("MENU") || GAMESTATE === "TRANSITIONMENUFGAME") && !GAMESTATE.includes("VICTORY")) {
+        /*if((!GAMESTATE.includes("MENU") || GAMESTATE === "TRANSITIONMENUFGAME") && !GAMESTATE.includes("VICTORY")) {
+            ctx.fillStyle = 'rgba(0, 10, 12,' + (1 - transitionValue) + ')';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        }*/
+        if(blackScreen) {
             ctx.fillStyle = 'rgba(0, 10, 12,' + (1 - transitionValue) + ')';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
         }
