@@ -27,6 +27,8 @@ var texts = [];
 
 var bots = [];
 
+var sounds = [];
+
 var maxProjectiles = 2;
 
 var GAMESTATE = "MENU";
@@ -472,6 +474,8 @@ function Projectile(x, y, angle, type, spwTimer){
         if(this.startTimer === 0){
             //BOUNCES OFF SIDES
             if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
+                sounds.push(new sound("bump1.wav", true));
+                sounds[sounds.length-1].play();
                 this.angle = (2*Math.PI - this.angle);
                 this.velX = this.speed*Math.cos(this.angle);
                 this.velY = this.speed*Math.sin(this.angle);
@@ -494,6 +498,8 @@ function Projectile(x, y, angle, type, spwTimer){
                     }
 
                     if(coltemp.col){
+                        sounds.push(new sound("bump1.wav", true));
+                        sounds[sounds.length-1].play();
                         var rndOff = 0;
                         if(objects[o].type === 0 || objects[o].type === 1){
                             rndOff = (this.y - (objects[o].y + objects[o].height/2))/100;
@@ -517,6 +523,8 @@ function Projectile(x, y, angle, type, spwTimer){
                         if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
                             this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
                             this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
+                            sounds.push(new sound("bump1.wav", true));
+                            sounds[sounds.length-1].play();
                         }
 
                         this.velX = this.speed*Math.cos(this.angle);
@@ -532,6 +540,8 @@ function Projectile(x, y, angle, type, spwTimer){
                             //ctx.fillRect(objects[o].x - objects[o].width/2, objects[o].y - objects[o].height*2.5 - CONST.bound*2 + i*(objects[o].height+CONST.bound), objects[o].width, objects[o].height);
 
                             if (coltemp.col) {
+                                sounds.push(new sound("bump1.wav", true));
+                                sounds[sounds.length-1].play();
                                 var rndOff = 0;
                                 if (objects[o].type === 0 || objects[o].type === 1) {
                                     rndOff = (this.y - (objects[o].y + objects[o].height / 2)) / 100;
@@ -2102,6 +2112,13 @@ function game(){
             texts[i].draw();
         }
 
+        for(var i in sounds){
+            if(sounds[i].dlt === true && sounds[i].sound.paused){
+                sounds[i].delete();
+                sounds.splice(i, 1);
+            }
+        }
+
         clicked = false;
 
         /*imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -2221,6 +2238,34 @@ function chromaticAberration(ctx, intensity, phase){
     }
 }
 
+// ---------------------------------------------------------- SOUND FUNCTION ------------------------------------------------------------------------ //
+
+function sound(src, dlt) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+
+    this.sound.volume = 1;
+
+    this.dlt = dlt;
+
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        this.sound.play();
+    };
+    this.stop = function(){
+        this.sound.pause();
+    };
+    this.delete = function(){
+        this.sound.parentNode.removeChild(this.sound);
+    };
+    this.changeVolume = function(){
+        this.sound.volume = globalVolume;
+    };
+}
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
 
