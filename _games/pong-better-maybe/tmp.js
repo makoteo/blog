@@ -475,6 +475,7 @@ function Projectile(x, y, angle, type, spwTimer){
             //BOUNCES OFF SIDES
             if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
                 sounds.push(new sound("bump1.wav", true));
+                sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
                 sounds[sounds.length-1].play();
                 this.angle = (2*Math.PI - this.angle);
                 this.velX = this.speed*Math.cos(this.angle);
@@ -499,6 +500,7 @@ function Projectile(x, y, angle, type, spwTimer){
 
                     if(coltemp.col){
                         sounds.push(new sound("bump1.wav", true));
+                        sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
                         sounds[sounds.length-1].play();
                         var rndOff = 0;
                         if(objects[o].type === 0 || objects[o].type === 1){
@@ -524,6 +526,7 @@ function Projectile(x, y, angle, type, spwTimer){
                             this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
                             this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
                             sounds.push(new sound("bump1.wav", true));
+                            sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
                             sounds[sounds.length-1].play();
                         }
 
@@ -1027,6 +1030,8 @@ function Button(x, y, width, height, use, text, type, val){
         if(this.type !== 1 && this.type !== 3){
             if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height*0.5 && mousePosY < this.y + this.height*0.4){
                 if(clicked){
+                    sounds.push(new sound("tsk1.wav", true));
+                    sounds[sounds.length-1].play();
                     this.wasclicked = true;
                     if(this.type === 2) this.toggled = !this.toggled;
                 }
@@ -1050,6 +1055,8 @@ function Button(x, y, width, height, use, text, type, val){
                 this.individHover[0] = 1;
                 console.log("Eyyy");
                 if(clicked){
+                    sounds.push(new sound("tsk1.wav", true));
+                    sounds[sounds.length-1].play();
                     if(this.numVal - this.val.by >= this.val.min){
                         this.numVal -= this.val.by;
                         GAMECONFIG[this.use] = this.numVal;
@@ -1064,6 +1071,8 @@ function Button(x, y, width, height, use, text, type, val){
                 this.individHover[1] = 1;
                 console.log("Eyyy");
                 if(clicked){
+                    sounds.push(new sound("tsk1.wav", true));
+                    sounds[sounds.length-1].play();
                     if(this.numVal + this.val.by <= this.val.max){
                         this.numVal += this.val.by;
                         GAMECONFIG[this.use] = this.numVal;
@@ -1366,17 +1375,24 @@ function AI(id){
                         }
                     }else if(objects[this.projDis[o][0]].type === 1){
                         //console.log(this.projDis);
-                        if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[0])){
+                        /*if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[0]) && (objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[0])){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
-                        }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height/2)) && (projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[1] + objects[this.projDis[o][0]].height))){
+                        }else if((projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height/2)) && (projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[1] + objects[this.projDis[o][0]].height)) && objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[1]){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                         }
 
-                        if(objects[this.projDis[o][0]].y > projectiles[this.projDis[o][1][1]].y && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height)){
+                        if(objects[this.projDis[o][0]].y > (projectiles[this.projDis[o][1][1]].y - objects[this.projDis[o][0]].height*0) && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y + objects[this.projDis[o][0]].height) && objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[0] && objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[1]){
                             AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 0;
+                        }*/
+                        if(objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[0] && (projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[0] + objects[this.projDis[o][0]].height)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[0])){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }else if(objects[this.projDis[o][0]].y !== objects[this.projDis[o][0]].boundsY[1] && (projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[1] + objects[this.projDis[o][0]].height)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[1])){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
+                        }else if((objects[this.projDis[o][0]].y === objects[this.projDis[o][0]].boundsY[0] || objects[this.projDis[o][0]].y === objects[this.projDis[o][0]].boundsY[0]) && (projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].boundsY[0] + objects[this.projDis[o][0]].height)) && projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].boundsY[1])){
+                            AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
                         }
                     }else if(objects[this.projDis[o][0]].type === 2 && objects[this.projDis[o][0]].ctrlReleased[0] === true){
-                        if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y - objects[this.projDis[o][0]].length*1.5)){
+                        if((projectiles[this.projDis[o][1][1]].y < (objects[this.projDis[o][0]].y)) && projectiles[this.projDis[o][1][1]].y > (objects[this.projDis[o][0]].y - objects[this.projDis[o][0]].length)){
 
                             if((objects[this.projDis[o][0]].expectedAngle) % (Math.PI*2) !== Math.PI/2*3){
                                 AICONTROLS[objects[this.projDis[o][0]].controls[4]+2] = 1;
@@ -1789,6 +1805,10 @@ function game(){
                 MENUSCALE = MENUTARGETSCALE;
             }
         }else if(GAMESTATE === "PLACE"){
+
+            if(GAMECONFIG.paddlesToggle[0] === false && GAMECONFIG.paddlesToggle[1] === false && GAMECONFIG.paddlesToggle[2] === false && GAMECONFIG.paddlesToggle[3] === false){
+                GAMECONFIG.paddles = 0;
+            }
 
             if(placers.length === 0 && buttons.length === 0 && objects.length === GAMECONFIG.paddles*2 + 2){
                 buttons.push(new Button(WIDTH/2, HEIGHT - HEIGHT / 15, WIDTH * 0.1, HEIGHT / 15, "play", "PLAY", 0, {fontsize: 1.2*FONTSIZES.defaultLarge}));
@@ -2244,7 +2264,7 @@ function sound(src, dlt) {
     this.sound = document.createElement("audio");
     this.sound.src = src;
 
-    this.sound.volume = 1;
+    //this.sound.volume = 1;
 
     this.dlt = dlt;
 
