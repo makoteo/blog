@@ -1035,6 +1035,11 @@ function Button(x, y, width, height, use, text, type, val){
                     this.wasclicked = true;
                     if(this.type === 2) this.toggled = !this.toggled;
                 }
+                if(this.angle === 0){
+                    sounds.push(new sound("swish1.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].play();
+                }
                 this.hover = true;
                 if(this.angle < this.maxAng){
                     this.angle+=0.01;
@@ -1052,6 +1057,11 @@ function Button(x, y, width, height, use, text, type, val){
         }else if(this.type === 3){
             if(mousePosX > this.x - WIDTH/40 + this.width/2 - this.lngOffset + WIDTH/80 && mousePosX < this.x - WIDTH/40 + this.width/2 + WIDTH/80 - this.lngOffset + WIDTH/80 &&
                 mousePosY > this.y + this.height/2 - this.height/4-this.height/3*2*transitionValue && mousePosY < this.y + this.height/2 - this.height/4){
+                if(this.individHover[0] === 0){
+                    sounds.push(new sound("swish1.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].play();
+                }
                 this.individHover[0] = 1;
                 console.log("Eyyy");
                 if(clicked){
@@ -1068,6 +1078,11 @@ function Button(x, y, width, height, use, text, type, val){
             }
             if(mousePosX > this.x + this.width/2 + this.lngOffset && mousePosX < this.x + this.width/2  + this.lngOffset + WIDTH/80 &&
                 mousePosY > this.y + this.height/2 - this.height/4-this.height/3*2*transitionValue && mousePosY < this.y + this.height/2 - this.height/4){
+                if(this.individHover[1] === 0){
+                    sounds.push(new sound("swish1.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].play();
+                }
                 this.individHover[1] = 1;
                 console.log("Eyyy");
                 if(clicked){
@@ -1091,10 +1106,14 @@ function Button(x, y, width, height, use, text, type, val){
                     GAMESTATE = "TRANSITIONGAME";
                     spawner.update(true);
                     if(transitionValue === 0){
+                        projectiles = [];
                         placers = [];
                         buttons = [];
                         texts = [];
                         frameCount = 0;
+                        players[0].points = 0;
+                        players[1].points = 0;
+                        maxProjectiles = 0;
                     }
                 }else if(this.use === "1player" || this.use === "2player"){
                     GAMESTATE = "TRANSITIONMENU";
@@ -1210,7 +1229,6 @@ function Button(x, y, width, height, use, text, type, val){
 
                         bots = [];
                         players = [];
-                        maxProjectiles = 2;
 
                         objects.push(new Object(10, HEIGHT / 2 - 50, 10, 100, CONTROLS.a, 0, [0, HEIGHT]));
                         objects.push(new Object(WIDTH - 10, HEIGHT / 2 - 50, 10, 100, CONTROLS.b, 0, [0, HEIGHT]));
@@ -1464,6 +1482,8 @@ function WaveSpawner(){
             for(var p = 0; p < spawnChance.length; p++){
                 if(rnd <= (spawnChance[p]+projNum)/spawnTotal){
                     projectiles.push(new Projectile(WIDTH/2, Math.random()*HEIGHT/2+HEIGHT/4, Math.PI*Math.round(Math.random()), p, 1));
+                    //sounds.push(new sound("whistle1.wav", true));
+                    //sounds[sounds.length-1].play();
                     break;
                 }
                 projNum+=spawnChance[p];
@@ -1928,8 +1948,8 @@ function game(){
 
                 if(projectiles[i].type === 1){
                     if(projectiles[i].explodeTime <= 0){
-                        for(var ex = 0; ex < 8; ex++){
-                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/8, 0, 0));
+                        for(var ex = 0; ex < 6; ex++){
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/6, 0, 0));
                         }
                         projectiles.splice(i, 1);
                         dlt = true;
@@ -1938,8 +1958,8 @@ function game(){
 
                 if(projectiles[i].type === 3){
                     if(frameCount % projectiles[i].spawnTimer === 0 && projectiles[i].startTimer === 0){
-                        for(var ex = 0; ex < 4; ex++){
-                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/2 + projectiles[i].rotAngle, 0, 0));
+                        for(var ex = 0; ex < 2; ex++){
+                            projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI + projectiles[i].rotAngle, 0, 0));
                         }
                     }
                 }
@@ -1967,7 +1987,7 @@ function game(){
             }
 
             if(frameCount % 100 === 0){
-                maxProjectiles = Math.round((players[0].points+players[1].points)/(12-0.4*GAMECONFIG.difficulty))+2;
+                maxProjectiles = 0.5*Math.round((players[0].points+players[1].points)/(GAMECONFIG.winscore/4-0.4*GAMECONFIG.difficulty*GAMECONFIG.winscore/25))+(Math.round(objects.length/4)+1)+0.7*Math.round((Math.pow(players[0].points+players[1].points, 1.28))/(1000000/GAMECONFIG.winscore));
                 console.log(maxProjectiles + ", " + spawnChance);
             }
 
