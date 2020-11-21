@@ -1,6 +1,6 @@
 var versionCode = "V 0.01";
-var WIDTH = 1280;
-var HEIGHT = 720;
+var WIDTH = 1024; //1280
+var HEIGHT = 576; //720
 
 var gameRunning = true;
 var frameCount = 0;
@@ -1125,7 +1125,7 @@ function Button(x, y, width, height, use, text, type, val){
 
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.defaultLarge*1.2}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 25, max: 1000, by:25}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 7, by:1}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 5, by:1}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "difficulty", "DIFFICULTY", 3, {min: 1, max:10, by:1}));
                         if(this.use === "1player"){
                             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "advanced1", "ADVANCED", 0, {}));
@@ -1511,9 +1511,9 @@ function loadMenuButtons(){
     texts = [];
     texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/8, "PONG II", -WIDTH/10, false));
     buttons = [];
-    buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
-    buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
-    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0, {}));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0, {}));
 }
 loadMenuButtons();
 
@@ -1706,8 +1706,8 @@ function buildPaddles(type){
         placers = [];
         switch(type){
             case 1: placers.push(new Placer(1, 10, 60, CONTROLS.d, [50*Math.round(Math.round(Math.random()*WIDTH*0.35)+WIDTH*0.55)/50, (HEIGHT*0.25 + Math.round(Math.random()*HEIGHT*0.5) + averagePos)/2])); break;
-            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.f, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6)/50, (Math.round(Math.random()*HEIGHT)*5+averagePos)/6])); break;
-            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.h, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.55)/50, (HEIGHT*0.2 + Math.round(Math.random()*HEIGHT*0.6)*2+averagePos)/3])); break;
+            case 2: placers.push(new Placer(2, 5, 50, CONTROLS.f, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.6)/50, (Math.round(Math.random()*HEIGHT)*5+averagePos)/6])); break;
+            case 3: placers.push(new Placer(3, 18, 18, CONTROLS.h, [50*Math.round(Math.round(Math.random()*WIDTH*0.3)+WIDTH*0.55)/50, (HEIGHT*0.2 + Math.round(Math.random()*HEIGHT*0.6)*2+averagePos)/3])); break;
             case 4: placers.push(new Placer(4, 10, 20, CONTROLS.f, [50*Math.round(Math.round(Math.random()*WIDTH*0.25)+WIDTH*0.6)/50, (Math.round(Math.random()*HEIGHT)*3+averagePos)/4])); break;
         }
         placers[placers.length-1].update();
@@ -1718,7 +1718,7 @@ function buildPaddles(type){
         }
         z++;
     }
-    if(z === 100){
+    if(z === 250){
         placers = [];
         console.log("FAILED TO PLACE");
     }
@@ -1895,10 +1895,10 @@ function game(){
                         placers.push(new Placer(1, 10, 60, CONTROLS.a, []));
                     } else if (((keys && keys[50]) || (keys && keys[98])) && GAMECONFIG.paddlesToggle[1] === true) {
                         placers = [];
-                        placers.push(new Placer(2, 5, 60, CONTROLS.a, []));
+                        placers.push(new Placer(2, 5, 50, CONTROLS.a, []));
                     } else if (((keys && keys[51]) || (keys && keys[99])) && GAMECONFIG.paddlesToggle[2] === true) {
                         placers = [];
-                        placers.push(new Placer(3, 20, 20, CONTROLS.a, []));
+                        placers.push(new Placer(3, 18, 18, CONTROLS.a, []));
                     } else if (((keys && keys[52]) || (keys && keys[100])) && GAMECONFIG.paddlesToggle[3] === true) {
                         placers = [];
                         placers.push(new Placer(4, 10, 20, CONTROLS.a, []));
@@ -1918,8 +1918,8 @@ function game(){
                     if(GAMECONFIG.currentlyPlacing > 0){
                         switch(GAMECONFIG.currentlyPlacing){
                             case 1: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
-                            case 2: placers.push(new Placer(2, 5, 60, CONTROLS.a, [])); break;
-                            case 3: placers.push(new Placer(3, 20, 20, CONTROLS.a, [])); break;
+                            case 2: placers.push(new Placer(2, 5, 50, CONTROLS.a, [])); break;
+                            case 3: placers.push(new Placer(3, 18, 18, CONTROLS.a, [])); break;
                             case 4: placers.push(new Placer(4, 10, 20, CONTROLS.a, [])); break;
                             default: placers.push(new Placer(1, 10, 60, CONTROLS.a, [])); break;
                         }
@@ -2220,8 +2220,8 @@ function game(){
 
         if(horizLines){
             ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.25 + 0.1) + ')';
-            for(var i = 0; i < HEIGHT; i+=8){
-                ctx.fillRect(0, i, WIDTH, 4);
+            for(var i = 0; i < HEIGHT; i+=16){
+                ctx.fillRect(0, i, WIDTH, 8);
             }
         }
 
