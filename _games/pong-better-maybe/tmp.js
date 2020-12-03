@@ -62,6 +62,7 @@ var MENUTARGETSCALE = 1;
 var MENUSPEED = 0.1;
 
 var horizLines = false;
+var soundOn = true;
 
 var GAMECONFIG = {winscore: 100, paddles: 2, difficulty: 5, paddlesToggle: [true, true, true, true], ballsToggle: [true, true, true, true], placing: 0, randomPaddles: true, currentlyPlacing: 0};
 
@@ -474,8 +475,8 @@ function Projectile(x, y, angle, type, spwTimer){
         if(this.startTimer === 0){
             //BOUNCES OFF SIDES
             if(this.y + this.velY < 0 || this.y + this.velY > HEIGHT){
-                sounds.push(new sound("bump1.wav", true));
-                sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
+                sounds.push(new sound("bouncemaybe.wav", true));
+                sounds[sounds.length-1].sound.volume = Math.min(this.speed/20, 1);
                 sounds[sounds.length-1].play();
                 this.angle = (2*Math.PI - this.angle);
                 this.velX = this.speed*Math.cos(this.angle);
@@ -499,8 +500,8 @@ function Projectile(x, y, angle, type, spwTimer){
                     }
 
                     if(coltemp.col){
-                        sounds.push(new sound("bump1.wav", true));
-                        sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
+                        sounds.push(new sound("bouncemaybe.wav", true));
+                        sounds[sounds.length-1].sound.volume = Math.min(this.speed/20, 1);
                         sounds[sounds.length-1].play();
                         var rndOff = 0;
                         if(objects[o].type === 0 || objects[o].type === 1){
@@ -525,8 +526,8 @@ function Projectile(x, y, angle, type, spwTimer){
                         if(getDistance(this.x, this.y, objects[o].x, objects[o].y) < objects[o].width*objects[o].expRad){
                             this.angle = Math.atan2(this.y - objects[o].y, this.x - objects[o].x) + (Math.random() * (0.4) - 0.2);
                             this.speed = Math.min((300/(getDistance(this.x, this.y, objects[o].x, objects[o].y)+1)), 20);
-                            sounds.push(new sound("bump1.wav", true));
-                            sounds[sounds.length-1].sound.volume = Math.min(this.speed/10, 1);
+                            sounds.push(new sound("bouncemaybe.wav", true));
+                            sounds[sounds.length-1].sound.volume = Math.min(this.speed/20, 1);
                             sounds[sounds.length-1].play();
                         }
 
@@ -543,7 +544,8 @@ function Projectile(x, y, angle, type, spwTimer){
                             //ctx.fillRect(objects[o].x - objects[o].width/2, objects[o].y - objects[o].height*2.5 - CONST.bound*2 + i*(objects[o].height+CONST.bound), objects[o].width, objects[o].height);
 
                             if (coltemp.col) {
-                                sounds.push(new sound("bump1.wav", true));
+                                sounds.push(new sound("bouncemaybe.wav", true));
+                                sounds[sounds.length-1].sound.volume = Math.min(this.speed/20, 1);
                                 sounds[sounds.length-1].play();
                                 var rndOff = 0;
                                 if (objects[o].type === 0 || objects[o].type === 1) {
@@ -827,6 +829,9 @@ function Placer(type, width, height, controls, pos){
         if(clicked === true && this.anim[0] === 1 && this.placeable === true){
             this.placed = true;
             this.anim = [0, 0];
+            sounds.push(new sound("popupmaybe.wav", true));
+            sounds[sounds.length-1].play();
+            sounds[sounds.length-1].sound.volume = 0.25;
         }
 
         if(this.anim[0] <= 1 && this.placed){
@@ -1007,6 +1012,7 @@ function Button(x, y, width, height, use, text, type, val){
     //Bleh why does js not have pointers, could've just passed in the toggle variable and changed it I think
     switch(this.use){
         case "chromabb": this.toggled = chromAbb; break;
+        case "sound": this.toggled = soundOn; break;
         case "randompaddles": this.toggled = GAMECONFIG.randomPaddles; break;
         case "tripletoggle": this.toggled = GAMECONFIG.paddlesToggle[0]; break;
         case "rotatingtoggle": this.toggled = GAMECONFIG.paddlesToggle[1]; break;
@@ -1031,13 +1037,14 @@ function Button(x, y, width, height, use, text, type, val){
             if(mousePosX > this.x-this.width/2 && mousePosX < this.x + this.width/2 && mousePosY > this.y - this.height*0.5 && mousePosY < this.y + this.height*0.4){
                 if(clicked){
                     sounds.push(new sound("tsk1.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.6;
                     sounds[sounds.length-1].play();
                     this.wasclicked = true;
                     if(this.type === 2) this.toggled = !this.toggled;
                 }
                 if(this.angle === 0){
                     sounds.push(new sound("swish1.wav", true));
-                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].sound.volume = 0.1;
                     sounds[sounds.length-1].play();
                 }
                 this.hover = true;
@@ -1059,7 +1066,7 @@ function Button(x, y, width, height, use, text, type, val){
                 mousePosY > this.y + this.height/2 - this.height/4-this.height/3*2*transitionValue && mousePosY < this.y + this.height/2 - this.height/4){
                 if(this.individHover[0] === 0){
                     sounds.push(new sound("swish1.wav", true));
-                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].sound.volume = 0.1;
                     sounds[sounds.length-1].play();
                 }
                 this.individHover[0] = 1;
@@ -1067,6 +1074,7 @@ function Button(x, y, width, height, use, text, type, val){
                 if(clicked){
                     sounds.push(new sound("tsk1.wav", true));
                     sounds[sounds.length-1].play();
+                    sounds[sounds.length-1].sound.volume = 0.6;
                     if(this.numVal - this.val.by >= this.val.min){
                         this.numVal -= this.val.by;
                         GAMECONFIG[this.use] = this.numVal;
@@ -1080,7 +1088,7 @@ function Button(x, y, width, height, use, text, type, val){
                 mousePosY > this.y + this.height/2 - this.height/4-this.height/3*2*transitionValue && mousePosY < this.y + this.height/2 - this.height/4){
                 if(this.individHover[1] === 0){
                     sounds.push(new sound("swish1.wav", true));
-                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].sound.volume = 0.1;
                     sounds[sounds.length-1].play();
                 }
                 this.individHover[1] = 1;
@@ -1088,6 +1096,7 @@ function Button(x, y, width, height, use, text, type, val){
                 if(clicked){
                     sounds.push(new sound("tsk1.wav", true));
                     sounds[sounds.length-1].play();
+                    sounds[sounds.length-1].sound.volume = 0.6;
                     if(this.numVal + this.val.by <= this.val.max){
                         this.numVal += this.val.by;
                         GAMECONFIG[this.use] = this.numVal;
@@ -1124,7 +1133,7 @@ function Button(x, y, width, height, use, text, type, val){
                         texts = [];
 
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2.5, WIDTH*0.2, HEIGHT/15, "", "GAME SETTINGS", 1, {fontsize: FONTSIZES.defaultLarge*1.2}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 25, max: 1000, by:25}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*1.5, WIDTH*0.2, HEIGHT/20, "winscore", "WINSCORE", 3, {min: 10, max: 150, by:5}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "paddles", "PADDLES", 3, {min: 0, max: 5, by:1}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*0.5, WIDTH*0.2, HEIGHT/20, "difficulty", "DIFFICULTY", 3, {min: 1, max:10, by:1}));
                         if(this.use === "1player"){
@@ -1240,6 +1249,8 @@ function Button(x, y, width, height, use, text, type, val){
                 if(this.use === "chromabb"){
                     chromAbb = !chromAbb;
                     horizLines = !horizLines;
+                }else if(this.use === "sound"){
+                    soundOn = !soundOn;
                 }else if(this.use === "randompaddles"){
                     GAMECONFIG.randomPaddles = !GAMECONFIG.randomPaddles;
                 }
@@ -1987,7 +1998,7 @@ function game(){
             }
 
             if(frameCount % 100 === 0){
-                maxProjectiles = 0.5*Math.round((players[0].points+players[1].points)/(GAMECONFIG.winscore/4-0.4*GAMECONFIG.difficulty*GAMECONFIG.winscore/25))+(Math.round(objects.length/4)+1)+0.7*Math.round((Math.pow(players[0].points+players[1].points, 1.28))/(1000000/GAMECONFIG.winscore));
+                maxProjectiles = 0.3*Math.round((Math.max(players[0].points, players[1].points))/(GAMECONFIG.winscore/4-0.4*GAMECONFIG.difficulty*GAMECONFIG.winscore/25))+(Math.round(objects.length/4)+1)+0.8*Math.round((Math.pow(Math.max(players[0].points, players[1].points), 1.28))/(1000000/GAMECONFIG.winscore));
                 console.log(maxProjectiles + ", " + spawnChance);
             }
 
@@ -2284,8 +2295,6 @@ function sound(src, dlt) {
     this.sound = document.createElement("audio");
     this.sound.src = src;
 
-    //this.sound.volume = 1;
-
     this.dlt = dlt;
 
     this.sound.setAttribute("preload", "auto");
@@ -2294,7 +2303,7 @@ function sound(src, dlt) {
 
     document.body.appendChild(this.sound);
     this.play = function(){
-        this.sound.play();
+        if(soundOn === true){this.sound.play();}
     };
     this.stop = function(){
         this.sound.pause();
