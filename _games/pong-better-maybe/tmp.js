@@ -52,6 +52,7 @@ image.src = canvas.toDataURL();
 var glitchTimer = 0;
 
 var chromAbb = false;
+var gradient = true;
 
 var spawnChance = [8, 2, 1, 1, 2];
 var spawnTotal = spawnChance.reduce(function(acc, val) { return acc + val; }, 0);
@@ -159,12 +160,18 @@ function Object(x, y, width, height, controls, type, bounds){
                         this.y = this.boundsY[1];
                     }
                     this.ctrlReleased[0] = false;
+                    sounds.push(new sound("movepaddle.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.5;
+                    sounds[sounds.length-1].play();
                 }
             }else if(this.type === 2){
                 if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true) {
                     //this.omega = -this.omega;
                     this.expectedAngle += Math.PI/4;
                     this.ctrlReleased[0] = false;
+                    sounds.push(new sound("rotate.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.05;
+                    sounds[sounds.length-1].play();
                 }
                 /*if (keys && keys[this.controls[1]] && this.omega > -this.maxRot) {
                     this.omega = -this.maxRot;
@@ -174,12 +181,20 @@ function Object(x, y, width, height, controls, type, bounds){
                     this.expRad = 0.5;
                     this.expCoolDown = 150;
                     this.ctrlReleased[0] = false;
+                    sounds.push(new sound("waveblast.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.25;
+                    sounds[sounds.length-1].sound.playbackRate = 1;
+                    sounds[sounds.length-1].play();
                 }
             }else if(this.type === 4){
                 if (((keys && keys[this.controls[0]] && !players[this.team].ai) || (players[this.team].ai && AICONTROLS[this.controls[4]+2])) && this.ctrlReleased[0] === true && this.expCoolDown === 0) {
                     for (var i = 0; i < 5; i++) {
                         if (this.pads[i] < 1) {
                             this.pads[i] += 0.2;
+                            sounds.push(new sound("destroyed.wav", true));
+                            sounds[sounds.length-1].sound.volume = 0.08 + this.pads[i]/10;
+                            sounds[sounds.length-1].sound.playbackRate = 0.8 + this.pads[i];
+                            sounds[sounds.length-1].play();
                             break;
                         }
                     }
@@ -421,6 +436,9 @@ function Object(x, y, width, height, controls, type, bounds){
     };
 
     this.switchControls = function(){
+        sounds.push(new sound("tsk1.wav", true));
+        sounds[sounds.length-1].sound.volume = 0.2;
+        sounds[sounds.length-1].play();
         switch(this.controls) {
             case CONTROLS.a: this.controls = CONTROLS.c; break;
             case CONTROLS.b: this.controls = CONTROLS.d; break;
@@ -1600,17 +1618,17 @@ function colCircleRectangle ( circle, rect ) {
     var closestPoint = getNearestPointInPerimeter(rectReferenceX, rectReferenceY, rect.width, rect.length, unrotatedCircleXB, unrotatedCircleYB);
 
     if(closestPoint[0] === rectReferenceX && closestPoint[1] === rectReferenceY){
-        closestPoint[0] -= circle.radius*0.35;
-        closestPoint[1] -= circle.radius*0.35;
+        closestPoint[0] -= circle.radius*0.4;
+        closestPoint[1] -= circle.radius*0.4;
     }else if(closestPoint[0] === rectReferenceX + rect.width && closestPoint[1] === rectReferenceY){
-        closestPoint[0] += circle.radius*0.35;
-        closestPoint[1] -= circle.radius*0.35;
+        closestPoint[0] += circle.radius*0.4;
+        closestPoint[1] -= circle.radius*0.4;
     }else if(closestPoint[0] === rectReferenceX && closestPoint[1] === rectReferenceY + rect.length){
-        closestPoint[0] -= circle.radius*0.35;
-        closestPoint[1] += circle.radius*0.35;
+        closestPoint[0] -= circle.radius*0.4;
+        closestPoint[1] += circle.radius*0.4;
     }else if(closestPoint[0] === rectReferenceX + rect.width && closestPoint[1] === rectReferenceY + rect.length){
-        closestPoint[0] += circle.radius*0.35;
-        closestPoint[1] += circle.radius*0.35;
+        closestPoint[0] += circle.radius*0.4;
+        closestPoint[1] += circle.radius*0.4;
     }else{
         if(closestPoint[0] === rectReferenceX){
             closestPoint[0] -= circle.radius*1;
@@ -1963,6 +1981,9 @@ function game(){
                             projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI/4 + Math.PI/6, 0, 0));
                         }
                         projectiles.splice(i, 1);
+                        sounds.push(new sound("explode.wav", true));
+                        sounds[sounds.length-1].sound.volume = 0.1;
+                        sounds[sounds.length-1].play();
                         dlt = true;
                     }
                 }
@@ -1972,6 +1993,9 @@ function game(){
                         for(var ex = 0; ex < 2; ex++){
                             projectiles.push(new Projectile(projectiles[i].x, projectiles[i].y, ex*Math.PI + projectiles[i].rotAngle, 0, 0));
                         }
+                        sounds.push(new sound("bump1.wav", true));
+                        sounds[sounds.length-1].sound.volume = 0.3;
+                        sounds[sounds.length-1].play();
                     }
                 }
 
@@ -2230,26 +2254,28 @@ function game(){
         //GRID
 
         if(horizLines){
-            ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.25 + 0.1) + ')';
+            ctx.fillStyle = 'rgba(0, 0, 0,' + (Math.random()*0.1 + 0.05) + ')';
             for(var i = 0; i < HEIGHT; i+=16){
                 ctx.fillRect(0, i, WIDTH, 8);
             }
         }
 
         //GRADIENT
-        ctx.rect(0, 0, WIDTH, HEIGHT);
+        if(gradient === true) {
+            ctx.rect(0, 0, WIDTH, HEIGHT);
 
-        // create radial gradient
-        var outerRadius = WIDTH * 0.8;
-        var innerRadius = WIDTH * .3;
-        var grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, innerRadius, WIDTH / 2, HEIGHT / 2, outerRadius);
-        // light blue
-        grd.addColorStop(0, 'rgba(0,0,0,0)');
-        // dark blue
-        grd.addColorStop(1, 'rgba(0,0,0,' + 1 + ')');
+            // create radial gradient
+            var outerRadius = WIDTH * 0.8;
+            var innerRadius = WIDTH * .3;
+            var grd = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, innerRadius, WIDTH / 2, HEIGHT / 2, outerRadius);
+            // light blue
+            grd.addColorStop(0, 'rgba(0,0,0,0)');
+            // dark blue
+            grd.addColorStop(1, 'rgba(0,0,0,' + 1 + ')');
 
-        ctx.fillStyle = grd;
-        ctx.fill();
+            ctx.fillStyle = grd;
+            ctx.fill();
+        }
 
     }
 }
