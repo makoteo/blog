@@ -597,7 +597,12 @@ function Projectile(x, y, angle, type, spwTimer){
         }else{
             this.startTimer--;
             if(this.animWd < 1){
-                this.animWd+=0.02;
+                this.animWd+=0.03;
+                if(this.animWd === 0.15){
+                    sounds.push(new sound("appear.wav", true));
+                    sounds[sounds.length-1].sound.volume = 0.2;
+                    sounds[sounds.length-1].play();
+                }
             }
         }
     };
@@ -1511,8 +1516,6 @@ function WaveSpawner(){
             for(var p = 0; p < spawnChance.length; p++){
                 if(rnd <= (spawnChance[p]+projNum)/spawnTotal){
                     projectiles.push(new Projectile(WIDTH/2, Math.random()*HEIGHT/2+HEIGHT/4, Math.PI*Math.round(Math.random()), p, 1));
-                    //sounds.push(new sound("whistle1.wav", true));
-                    //sounds[sounds.length-1].play();
                     break;
                 }
                 projNum+=spawnChance[p];
@@ -1538,7 +1541,8 @@ var spawner = new WaveSpawner();
 
 function loadMenuButtons(){
     texts = [];
-    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/8, "PONG II", -WIDTH/10, false));
+    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/7, "PONG", -WIDTH/10, false));
+    texts.push(new Text(WIDTH/2, HEIGHT*0.18, WIDTH/30, "(with more paddles)", -WIDTH/10, false));
     buttons = [];
     buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
