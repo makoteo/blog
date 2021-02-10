@@ -1541,8 +1541,8 @@ var spawner = new WaveSpawner();
 
 function loadMenuButtons(){
     texts = [];
-    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/7, "PONG", -WIDTH/10, false));
-    texts.push(new Text(WIDTH/2, HEIGHT*0.18, WIDTH/30, "(with more paddles)", -WIDTH/10, false));
+    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/7, "OCTE", -WIDTH/10, false));
+    texts.push(new Text(WIDTH/2, HEIGHT*0.18, WIDTH/50, "(overly complicated tennis experience)", -WIDTH/10, false));
     buttons = [];
     buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
