@@ -12,7 +12,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var COLORS = {bg: "#081518", darkgreen: "#102E2F", lightgreen: "#2A7E63", lightblue: "#B6D3E7", yellow:"#CCAF66", red:"#D28A77", white:"#F9EFEC", lightgray: "#5E768C"};
-var CONTROLS = {a: [87, 83, "W", "S", 0], b: [38, 40, "Up", "Dwn", 1], c:[69, 68, "E", "D", 2], d: [100, 97, "4", "1", 3], e: [82, 70, "R", "F", 4], f: [101, 98, "5", "2", 5], g: [84, 71, "T", "G", 6], h: [102, 99, "6", "3", 7]};
+var CONTROLS = {a: [87, 83, "W", "S", 0], b: [38, 40, "Up", "Dwn", 1], c:[69, 68, "E", "D", 2], d: [78, 97, "N", "1", 3], e: [82, 70, "R", "F", 4], f: [77, 98, "M", "2", 5], g: [84, 71, "T", "G", 6], h: [188, 99, ",", "3", 7]};
 var FONTSIZES = {large1: 80, large2: 80, medium: 40, defaultLarge: 80};
 
 var AICONTROLS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -461,7 +461,7 @@ function Projectile(x, y, angle, type, spwTimer){
 
     switch(this.type){
         case 0: this.radius = 4; this.speed = Math.round(Math.random()*5)+4; break;
-        case 1: this.radius = 6; this.speed = Math.round(Math.random()*3)+2; break;
+        case 1: this.radius = 4; this.speed = Math.round(Math.random()*3)+2; break;
         case 2: this.radius = 5; this.speed = Math.round(Math.random()*3)+2; break;
         case 3: this.radius = 4; this.speed = Math.round(Math.random()*2)+2; break;
         case 4: this.radius = 4; this.speed = Math.round(Math.random()*4)+2; break;
@@ -623,7 +623,7 @@ function Projectile(x, y, angle, type, spwTimer){
 
             ctx.fillStyle = COLORS.white;
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius*this.animWd, 0, 2 * Math.PI, false);
+            ctx.arc(this.x, this.y, this.radius*this.animWd*1.5, 0, 2 * Math.PI, false);
             ctx.fill();
 
             if(this.explodeTime > 500){
@@ -639,7 +639,7 @@ function Projectile(x, y, angle, type, spwTimer){
             ctx.globalAlpha = 1;
             if(this.light){
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius*0.5*this.animWd, 0, 2 * Math.PI, false);
+                ctx.arc(this.x, this.y, this.radius*0.5*this.animWd*1.5, 0, 2 * Math.PI, false);
                 ctx.fill();
             }
         }else if(this.type === 2){
@@ -1177,9 +1177,9 @@ function Button(x, y, width, height, use, text, type, val){
                         texts = [];
 
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "", "OPTIONS", 1, {}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10, WIDTH*0.2, HEIGHT/15, "sound", "SOUND", 2, {}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2, WIDTH*0.2, HEIGHT/15, "chromabb", "CRT EFFECT", 2, {}));
-                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "idk", "IDK", 2, {}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/20, WIDTH*0.2, HEIGHT/15, "sound", "SOUND", 2, {}));
+                        buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/20, WIDTH*0.2, HEIGHT/15, "chromabb", "CRT EFFECT", 2, {}));
+                        //buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10, WIDTH*0.2, HEIGHT/15, "idk", "IDK", 2, {}));
                         buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10*2, WIDTH*0.2, HEIGHT/15, "backoptions", "BACK", 0, {}));
 
                     }
@@ -1541,14 +1541,25 @@ var spawner = new WaveSpawner();
 
 function loadMenuButtons(){
     texts = [];
-    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/7, "OCTE", -WIDTH/10, false));
-    texts.push(new Text(WIDTH/2, HEIGHT*0.18, WIDTH/50, "(overly complicated tennis experience)", -WIDTH/10, false));
+    texts.push(new Text(WIDTH/2, HEIGHT/25, WIDTH/6, "OCTE", -WIDTH/10, false));
+    //texts.push(new Text(WIDTH/2, HEIGHT*0.2, WIDTH/50, "(overly complicated tennis experience)", -WIDTH/10, false));
     buttons = [];
     buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "1player", "1 PLAYER", 0, {}));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "2player", "2 PLAYERS", 0, {}));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/10 + HEIGHT/150, WIDTH*0.2, HEIGHT/15, "options", "OPTIONS", 0, {}));
 }
 loadMenuButtons();
+
+function loadSounds(){
+    var soundFiles = ["appear.wav", "bouncemaybe.wav", "bump1.wav", "destroyed.wav", "explode.wav", "movepaddle.wav", "popupmaybe.wav", "rotate.wav", "swish1.wav", "tsk.wav", "waveblast.wav"];
+    for(var i = 0; i < soundFiles.length; i++){
+        sounds.push(new sound(soundFiles[i], true));
+        sounds[sounds.length-1].sound.volume = 0;
+        sounds[sounds.length-1].play();
+    }
+    canvas.removeEventListener("click", loadSounds);
+}
+canvas.addEventListener("click", loadSounds);
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
