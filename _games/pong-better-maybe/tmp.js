@@ -1093,7 +1093,7 @@ function Button(x, y, width, height, use, text, type, val){
                     sounds[sounds.length-1].play();
                 }
                 this.individHover[0] = 1;
-                console.log("Eyyy");
+                //console.log("Eyyy");
                 if(clicked){
                     sounds.push(new sound("tsk1.wav", true));
                     sounds[sounds.length-1].play();
@@ -1115,7 +1115,7 @@ function Button(x, y, width, height, use, text, type, val){
                     sounds[sounds.length-1].play();
                 }
                 this.individHover[1] = 1;
-                console.log("Eyyy");
+                //console.log("Eyyy");
                 if(clicked){
                     sounds.push(new sound("tsk1.wav", true));
                     sounds[sounds.length-1].play();
@@ -1889,7 +1889,7 @@ function game(){
                     if(GAMECONFIG.paddlesToggle[2] === true){for(var a = 0; a < 3; a++){tmpArr.push(3)}}
                     if(GAMECONFIG.paddlesToggle[3] === true){for(var a = 0; a < 4; a++){tmpArr.push(4)}}
                     //GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)]+1;
-                    console.log(tmpArr);
+                    //console.log(tmpArr);
                     GAMECONFIG.currentlyPlacing = tmpArr[Math.floor(Math.random() * tmpArr.length)];
                 }
                 buildPaddles(GAMECONFIG.currentlyPlacing);
@@ -2020,7 +2020,7 @@ function game(){
                         FONTSIZES.large2 = 100;
                         projectiles.splice(i, 1);
                         if(players[1].points >= GAMECONFIG.winscore){
-                            console.log("PLAYER 2 WINS!");
+                            //console.log("PLAYER 2 WINS!");
                             GAMESTATE = "TRANSITIONVICTORY2";
                         }
                     }else if( projectiles[i].x > WIDTH){
@@ -2028,7 +2028,7 @@ function game(){
                         FONTSIZES.large1 = 100;
                         projectiles.splice(i, 1);
                         if(players[0].points >= GAMECONFIG.winscore){
-                            console.log("PLAYER 1 WINS!");
+                            //console.log("PLAYER 1 WINS!");
                             GAMESTATE = "TRANSITIONVICTORY1";
                         }
                     }
@@ -2038,7 +2038,7 @@ function game(){
 
             if(frameCount % 100 === 0){
                 maxProjectiles = 0.3*Math.round((Math.max(players[0].points, players[1].points))/(GAMECONFIG.winscore/4-0.4*GAMECONFIG.difficulty*GAMECONFIG.winscore/25))+(Math.round(objects.length/4)+1)+0.8*Math.round((Math.pow(Math.max(players[0].points, players[1].points), 1.28))/(1000000/GAMECONFIG.winscore));
-                console.log(maxProjectiles + ", " + spawnChance);
+                //console.log(maxProjectiles + ", " + spawnChance);
             }
 
             //TIMERS AND OTHER STUFF
@@ -2161,7 +2161,7 @@ function game(){
             if(transitionValue <= 0){
                 transitionValue = 0;
                 GAMESTATE = GAMESTATE.replace('TRANSITION', '');
-                console.log("Bwwrrhh");
+                //("Bwwrrhh");
             }
         }else if(transitionValue < 1){
             transitionValue += transitionSpeed;
