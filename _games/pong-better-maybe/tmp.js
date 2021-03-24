@@ -1,4 +1,8 @@
-var versionCode = "V 0.01";
+// ----------------------------------
+//   Copyright (c) ZeSardine 2021
+// ----------------------------------
+
+var versionCode = "V 1.0";
 var WIDTH = 1024; //1280
 var HEIGHT = 576; //720
 
