@@ -53,7 +53,7 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var tileMap = new Image();
-tileMap.onload = generateMap();
+//tileMap.onload = generateMap();
 tileMap.src = "TileSetMazeScaled.png";
 
 // EXAMPLE ARRAY coins = [];
@@ -86,6 +86,7 @@ var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YO
 //8468407084; - Dunno, I think this one takes long to generate and has a path that's too long so it regenerates again
 //2936916693; - Checking that mobs can't go through walls
 //955920860; - Walls being weird
+//7899284295 - nothing generates?
 var SEED = ORIGINALSEED;
 
 var showMap = false;
@@ -283,13 +284,13 @@ function Player(x, y, width, height){
             this.handOffset = 0;
             if(this.dir === 0){
                 this.weaponAngle = -5;
-                this.handOffset = -tileSize*0.8;
+                this.handOffset = -tileSize*0.7;
             }else if(this.dir === 1){
                 this.weaponAngle = 5;
-                this.handOffset = -tileSize*0.8;
+                this.handOffset = -tileSize*0.7;
             }else if(this.dir === 2){
                 this.weaponAngle = 0;
-                this.handOffset = -tileSize*0.8;
+                this.handOffset = -tileSize*0.7;
             }else{
                 this.weaponAngle = 0;
             }
@@ -549,7 +550,7 @@ function Player(x, y, width, height){
             ctx.save();
             ctx.translate(this.x - this.width/4*tileSize + xCameraOffset + this.weaponOffset + tileSize/2 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
-            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/8*3, -tileSize + (1-this.weaponScaleY)*tileSize/4*3 + this.stunY, tileSize, Math.abs(tileSize*this.weaponScaleY)); //NORMAL
+            ctx.drawImage(tileMap, Math.floor(this.inventory[this.inventorySelected])*textureSize, textureSize*5.5 + (this.inventory[this.inventorySelected] - Math.floor(this.inventory[this.inventorySelected]))*10*textureSize, textureSize, textureSize, -tileSize/6*3, -tileSize + (1-this.weaponScaleY)*tileSize/4*3 + this.stunY, tileSize, Math.abs(tileSize*this.weaponScaleY)); //NORMAL
             //DRAW BODY PORTION OF PLAYER TO COVER SWORD
             ctx.restore();
         }
@@ -1055,13 +1056,11 @@ function Enemy(tileX, tileY, type){
                     }
                     this.path = [];
                 }
-                if(Math.floor(map[player.tileY][player.tileX]) === 5) { //Reset path if player is on gold thing, so in golden room
-                    this.path = [];
-                }
             }
         }else{
             if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize/2) {
                 playerSpeed = 3; //Slow down player when passing by
+                this.path = [];
             }
         }
     };
@@ -1175,6 +1174,7 @@ function Button(x, y, text, type, action){
             if (mousePosX > this.x - this.width / 2 - this.widener / 2 && mousePosX < this.x + this.width / 2 + this.widener / 2 && mousePosY > this.y - this.height / 2 && mousePosY < this.y + this.height / 2) {
                 this.widener = Math.min(this.widener + 5, 20);
                 if (clicked) {
+                    generateMap();
                     trMaker.nextState = "LOAD";
                     trMaker.transitioning = true;
                 }
@@ -1620,7 +1620,7 @@ function genExitsFromMain(size, room){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
                 tmp = j;
-                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3 || map[tmp][i] === 1.85) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -1637,13 +1637,14 @@ function genExitsFromMain(size, room){
                     }
                 }
                 tmp = j+1;
-                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3 || map[tmp][i] === 1.85) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp++;
                 }
             }
         }
     }
+    console.log(map);
     rnd = Math.floor(randomNum()*(size-2));
     if(room === true){
         var swtchgtd = false;
@@ -1654,7 +1655,7 @@ function genExitsFromMain(size, room){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
                 tmp = j;
-                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3 || map[tmp][i] === 1.85) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -1671,17 +1672,19 @@ function genExitsFromMain(size, room){
                     }
                 }
                 tmp = j-1;
-                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
+                while((map[tmp][i] === 1 || map[tmp][i] === 3 || map[tmp][i] === 1.85) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp--;
                 }
             }
         }
     }
+
     if(incorrectGen === true){
         doorsGenerated = false;
         creators = [];
         generateMap();
+        console.log("Something wrong");
     }
 }
 
@@ -1763,7 +1766,7 @@ function generate(){
     var paths = 0;
     for(var i = 0; i < mapheight; i++){
         for(var j = 0; j < mapwidth; j++){
-            if(map[j][i] === 0){
+            if(map[i][j] === 0){
                 paths++;
             }
         }
@@ -1771,7 +1774,6 @@ function generate(){
     if(paths < 0.43*mapwidth*mapheight){
         generateMap();
     }else{
-        buttons[0].progress = 0.5;
         doorsGenerated = true;
         fillRooms();
         generateDoors();
@@ -1784,7 +1786,6 @@ function generate(){
         }
         generateLoot();
         generateTextureMap();
-        buttons[0].progress = 1;
     }
 }
 
@@ -2027,7 +2028,7 @@ function game(){
             for (var i = 0; i < creators.length; i++) {
                 if (creators[i].dead === false) {
                     creators[i].update();
-                    if( buttons[0].progress < 0.8) {
+                    if( buttons[0].progress < 0.95) {
                         creators[i].draw();
                     }
                 } else {
@@ -2037,11 +2038,14 @@ function game(){
 
             if(creators.length > 0){
                 if(buttons[0].progress === 0){buttons[0].progress = 0.01;}
-                buttons[0].progress = Math.min(buttons[0].progress+0.1/(buttons[0].progress*50), 0.95);
+                buttons[0].progress = Math.min(buttons[0].progress+0.1/(buttons[0].progress*75), 0.95);
             }
 
             if (creators.length === 0 && doorsGenerated === false) {
                 generate();
+                console.log("Ja");
+            }else if(creators.length === 0 && doorsGenerated === true){
+                buttons[0].progress = 1;
             }
         }
         for(var i = 0; i < buttons.length; i++){
