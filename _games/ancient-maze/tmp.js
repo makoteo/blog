@@ -85,6 +85,7 @@ setInterval(function(){tileSize*=0.995; cameraX = player.gameX*0.995-player.x+pl
 var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
 //8468407084; - Dunno, I think this one takes long to generate and has a path that's too long so it regenerates again
 //2936916693; - Checking that mobs can't go through walls
+//955920860; - Walls being weird
 var SEED = ORIGINALSEED;
 
 var showMap = false;
@@ -123,6 +124,11 @@ var fontSize2 = WIDTH/13.3;
 var fontSize3 = WIDTH/26.6;
 
 var DEBUG = false;
+
+var GAMESTATE = "MENU";
+var SWIPEVALUE = 0;
+
+var buttons = [];
 
 //TEST
 
@@ -342,6 +348,8 @@ function Player(x, y, width, height){
         }
 
         GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0);
+        mobSpawnChance = 0.04-0.0003*(GODSATISFACTION - 100);
+        maxMobCount = Math.round(2 - 0.02*(GODSATISFACTION - 100));
     };
 
     this.countHealth = function(){
@@ -505,6 +513,16 @@ function Player(x, y, width, height){
         if(this.dir === 3){
             this.drawWeapon();
         }
+
+        //SHADOW
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+
+        ctx.beginPath();
+        ctx.arc(this.x + xCameraOffset, this.y+this.height*tileSize*0.4 + yCameraOffset, this.width*tileSize*0.4, 0, Math.PI*2, false);
+        ctx.fill();
+
+        //END SHADOW
 
         ctx.drawImage(tileMap, textureSize*4+textureSize*this.animationFrame, textureSize*this.dir, textureSize, textureSize, this.x - tileSize/2 + xCameraOffset, this.y - this.height/2*tileSize + yCameraOffset - this.breathCycle + this.stunY, tileSize, this.height*tileSize + this.breathCycle); //NORMAL
 
@@ -813,8 +831,10 @@ function Creator(x, y, killable){
         }
     };
     this.draw = function(){
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(this.x*tileSize + offset- cameraX, this.y*tileSize + offset - cameraY, tileSize, tileSize);
+        if(this.killable) {
+            ctx.fillStyle = 'rgba(20, 20, 20, 0.3)';
+            ctx.fillRect(this.x * 10, this.y * 10, tileSize * 0.5, tileSize * 0.5);
+        }
     }
 }
 
@@ -881,7 +901,7 @@ function Enemy(tileX, tileY, type){
     this.update = function(){
         this.aliveTimer++;
 
-        if(this.type === 1){if(this.path.length === 0){this.animationRunning = false;}else{this.animationRunning = true;}}
+        if(this.type === 1){if(this.moveDirX === 0 && this.moveDirY === 0){this.animationRunning = false;}else{this.animationRunning = true;}}
 
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
@@ -956,6 +976,12 @@ function Enemy(tileX, tileY, type){
             this.paralysisTimer--;
         }
 
+        //Spikes do damage
+        if(this.type === 1 && map[this.tileY][this.tileX] === 0.63){
+            this.health-=3;
+            this.animationFrame = 3;
+        }
+
         if(this.attackTimer > 0){
             this.attackTimer--;
         }
@@ -979,9 +1005,10 @@ function Enemy(tileX, tileY, type){
         this.gameX = this.tileX*tileSize - cameraX + this.xOffSet + this.size/2;
         this.gameY = this.tileY*tileSize - cameraY + this.yOffSet + this.size/2;
 
+        //Item drops
         if(this.health <= 0){
             this.dead = true;
-            if(Math.floor(map[this.tileY][this.tileX]) === 0){
+            if(Math.floor(map[this.tileY][this.tileX]) === 0 && (map[this.tileY][this.tileX] < 0.6 || map[this.tileY][this.tileX] > 0.65)){
                 var rnd = randomNum();
                 if(rnd < 1){
                     map[this.tileY][this.tileX] = 4.6;
@@ -1016,18 +1043,25 @@ function Enemy(tileX, tileY, type){
     this.checkDamage = function(){
         if(player.attackTimer === 19){
             if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize){
+                //playerSpeed = 1;
                 if((this.tileX === player.tileX3 && this.tileY === player.tileY4) || (this.tileY > player.tileY4 && player.dir === 2) || (this.tileY < player.tileY4 && player.dir === 3) ||
                     (this.tileX < player.tileX3 && player.dir === 0) || (this.tileX > player.tileX3 && player.dir === 1)){
                     this.paralysisTimer = this.paralysisTime;
                     this.health -= player.getItemSelectedDamageValue();
-                    this.animationFrame = 4;
-                    this.aliveTimer -= this.aliveTimer%7 + 1;
+                    this.animationFrame = 3; //Red hit frame
+                    this.aliveTimer -= this.aliveTimer%7 + 1; //Probably resetting frame
                     if(this.attackTimer > 0){
                         this.attackTimer += this.attackDelayer;
                     }
                     this.path = [];
                 }
-
+                if(Math.floor(map[player.tileY][player.tileX]) === 5) { //Reset path if player is on gold thing, so in golden room
+                    this.path = [];
+                }
+            }
+        }else{
+            if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize/2) {
+                playerSpeed = 3; //Slow down player when passing by
             }
         }
     };
@@ -1049,14 +1083,20 @@ function Enemy(tileX, tileY, type){
     };
 
     this.draw = function(){
+        //ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+
+        //ctx.beginPath();
+        //ctx.arc(this.gameX + xCameraOffset, this.gameY - tileSize*0.2 + yCameraOffset, tileSize*0.3, 0, Math.PI*2, false);
+        //ctx.fill();
+
         if(this.type === 0) {
             if(this.aliveTimer % 7 === 0) {
                 this.animationFrame += this.animationDir;
-            }
-            if(this.animationFrame >= 2){//2
-                this.animationDir = -1;
-            }else if(this.animationFrame === 0){
-                this.animationDir = 1;
+                if(this.animationFrame >= 2){//2
+                    this.animationDir = -1;
+                }else if(this.animationFrame === 0){
+                    this.animationDir = 1;
+                }
             }
             if(this.animDir === 1){
                 ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
@@ -1066,21 +1106,21 @@ function Enemy(tileX, tileY, type){
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
         }else if(this.type === 1){
-            if(this.aliveTimer % 9 === 0 && this.animationRunning === true && this.attackTimer < 15) {
+            if(this.aliveTimer % 9 === 0 && this.animationRunning === true && this.attackTimer < 15 && this.paralysisTimer === 0) {
                 this.animationFrame += this.animationDir;
-            }else if(this.attackTimer > 15){
-                this.animationFrame = 3;
+                if(this.animationFrame >= 3){//3
+                    //this.animationDir = -1;
+                    this.animationFrame = 0;
+                }else if(this.animationFrame === 0){
+                    this.animationDir = 1;
+                }
+            }else if(this.aliveTimer % 9 === 0 && this.animationRunning === false){
+                this.animationFrame = 0;
             }
             if(this.animDir === 1){
                 ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*2, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
             }else{
                 ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*3, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
-            }
-            if(this.animationFrame >= 3){//2
-                //this.animationDir = -1;
-                this.animationFrame = 0;
-            }else if(this.animationFrame === 0){
-                this.animationDir = 1;
             }
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
@@ -1118,9 +1158,102 @@ function Enemy(tileX, tileY, type){
     };
 }
 
+function Button(x, y, text, type, action){
+    this.x = x;
+    this.y = y;
+    this.width = WIDTH/6;
+    this.height = HEIGHT/15;
+    this.text = text;
+    this.type = type;
+    this.action = action;
+
+    this.progress = 0;
+
+    this.widener = 0;
+    this.update = function(){
+        if(this.type === 1) {
+            if (mousePosX > this.x - this.width / 2 - this.widener / 2 && mousePosX < this.x + this.width / 2 + this.widener / 2 && mousePosY > this.y - this.height / 2 && mousePosY < this.y + this.height / 2) {
+                this.widener = Math.min(this.widener + 5, 20);
+                if (clicked) {
+                    trMaker.nextState = "LOAD";
+                    trMaker.transitioning = true;
+                }
+            } else {
+                this.widener = Math.max(this.widener - 5, 0);
+            }
+        }else if(this.type === 2) {
+            if(this.progress >= 1){
+                trMaker.nextState = this.action;
+                trMaker.transitioning = true;
+            }
+        }
+    }
+    this.draw = function(){
+        if(this.type === 1) {
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(this.x - this.width / 2 - this.widener / 2 + SWIPEVALUE * WIDTH, this.y - this.height / 2, this.width + this.widener, this.height);
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'center';
+            ctx.font = HEIGHT / 10 + "px quickPixel";
+            ctx.fillText(this.text, this.x + SWIPEVALUE * WIDTH, this.y + this.height / 4);
+        }else if(this.type === 2){
+            ctx.strokeStyle = 'white';
+            ctx.fillStyle = 'white';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(this.x - this.width / 2 - this.widener / 2 + SWIPEVALUE * WIDTH, this.y - this.height / 2, this.width + this.widener, this.height);
+            ctx.fillRect(this.x - this.width / 2 - this.widener / 2 + SWIPEVALUE * WIDTH, this.y - this.height / 2, Math.min(this.progress, 1)*this.width, this.height);
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'center';
+            ctx.font = HEIGHT / 25 + "px quickPixel";
+            ctx.fillText("Generating map...", this.x + SWIPEVALUE * WIDTH, this.y + this.height);
+        }
+    }
+}
+
+function TransitionMaker(){
+    this.nextState = "";
+    this.transitioning = false;
+
+    this.vX = 0;
+    this.update = function(){
+        if(this.transitioning){
+            if(SWIPEVALUE === 0){this.vX = 0;}
+            this.vX-=0.002;
+            SWIPEVALUE += this.vX;
+            if(SWIPEVALUE < -1){
+                SWIPEVALUE = 1;
+                this.transitioning = false;
+                console.log("Da");
+                GAMESTATE = this.nextState;
+                this.activateStates();
+                this.vX = 0;
+            }
+        }else{
+            if(SWIPEVALUE < 0.1){
+                SWIPEVALUE = 0;
+            }else{
+                SWIPEVALUE-=this.vX;
+                this.vX+=0.002;
+            }
+        }
+    }
+
+    this.activateStates = function(){
+        if(this.nextState === "LOAD"){
+            buttons = [];
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "Loading bar", 2, "GAME"))
+        }
+    }
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 restartGame();
+buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "play"));
+buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
+var trMaker = new TransitionMaker();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1221,6 +1354,9 @@ function fillRooms(){ // Put the tall walls into this function
                 }else{
                     map[i][j] = 0;
                 }
+                if(Math.floor(map[i-2][j]) === 1 && Math.floor(map[i-3][j]) !== 0){map[i-2][j] = 1.85;}
+                if(Math.floor(map[i-2][j-1]) === 1 && Math.floor(map[i-3][j-1]) !== 0){map[i-2][j-1] = 1.85;}
+                if(Math.floor(map[i-2][j+1]) === 1 && Math.floor(map[i-3][j+1]) !== 0){map[i-2][j+1] = 1.85;}
             }
         }
     }
@@ -1484,7 +1620,7 @@ function genExitsFromMain(size, room){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 - size/2){
                 tmp = j;
-                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
+                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -1501,7 +1637,7 @@ function genExitsFromMain(size, room){
                     }
                 }
                 tmp = j+1;
-                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
+                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp++;
                 }
@@ -1518,7 +1654,7 @@ function genExitsFromMain(size, room){
         for(var j = 0; j <= mapwidth; j++) {
             if(i === mapheight/2 - size/2 + rnd + 1 && j === mapwidth/2 + size/2){
                 tmp = j;
-                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
+                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp < mapdimensions && map[tmp-1][i-1] !== 0 && map[tmp-1][i+1] !== 0){
                     if(map[tmp][i] === 3 && size !== roomsize){
                         map[tmp][i] = 6;
                     }else{
@@ -1535,7 +1671,7 @@ function genExitsFromMain(size, room){
                     }
                 }
                 tmp = j-1;
-                while((map[tmp][i] === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
+                while((Math.floor(map[tmp][i]) === 1 || map[tmp][i] === 3) && tmp > 0 && map[tmp+1][i-1] !== 0 && map[tmp+1][i+1] !== 0){
                     map[tmp][i] = 0;
                     tmp--;
                 }
@@ -1553,7 +1689,7 @@ function generateTextureMap(){
     var rndgtm = randomNum();
     for(var i = 0; i < map[0].length; i++){
         for(var j = 0; j < map.length; j++){
-            if(map[j][i] === 0){
+            if(map[j][i] === 0){ //Paths
                 rndgtm = randomNum();
                 if(rndgtm < 0.9){
                     map[j][i] = 0;
@@ -1570,8 +1706,8 @@ function generateTextureMap(){
                     map[j][i] = 0.6;
                 }
             }
-            if(map[j][i] === 1 && j < map.length - 1){
-                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4)) || (Math.floor(map[j + 1][i]) === 5)){
+            if(map[j][i] === 1 && j < map.length - 1){ //Walls
+                if(((Math.floor(map[j + 1][i]) === 0) || (Math.floor(map[j + 1][i]) === 4)) || (Math.floor(map[j + 1][i]) === 5)){ //If boi under isn't wall
                     rndgtm = randomNum();
                     if(rndgtm < 0.9){
                         map[j][i] = 1.05;
@@ -1635,6 +1771,7 @@ function generate(){
     if(paths < 0.43*mapwidth*mapheight){
         generateMap();
     }else{
+        buttons[0].progress = 0.5;
         doorsGenerated = true;
         fillRooms();
         generateDoors();
@@ -1647,6 +1784,7 @@ function generate(){
         }
         generateLoot();
         generateTextureMap();
+        buttons[0].progress = 1;
     }
 }
 
@@ -1707,6 +1845,8 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize*8, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
     }else if(map[j][i] === 1.75){
         ctx.drawImage(tileMap, textureSize*9, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/2, tileSize, tileSize*1.5);
+    }else if(map[j][i] === 1.85){
+        ctx.drawImage(tileMap, textureSize*10, textureSize*8, textureSize, textureSize*2, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize, tileSize, tileSize*2);
     }
 
     else if(map[j][i] === 1.97){ //LIGHTS
@@ -1744,6 +1884,11 @@ function renderTile(i, j){
             ctx.fillRect(i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset  + yCameraOffset - cameraY + tileSize/2, tileSize, tileSize/2);
         }
     }else if(Math.floor(map[j][i]) === 4){
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+
+        ctx.beginPath();
+        ctx.arc(i*tileSize+ xCameraOffset + offset - cameraX + tileSize/2, j*tileSize + yCameraOffset + offset - cameraY + tileSize/2, tileSize*0.3, 0, Math.PI*2, false);
+        ctx.fill();
         ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5 + textureSize*(Math.round((map[j][i]-4)*100-Math.round((map[j][i]-4)*10)*10)/100)*100, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/3 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
         ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
@@ -1817,7 +1962,7 @@ function doLighting(){
                             }
                         }
                         if(spawnMob === true){
-                            enemies.push(new Enemy(j, i, 0));
+                            enemies.push(new Enemy(j, i, 1));
                             //enemies.push(new Enemy(j, i, 1));
                             player.moveCycle+=10;
                         }
@@ -1877,109 +2022,130 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    if(gameRunning === true){
-        player.update();
-    }
+    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD"){
+        if(GAMESTATE === "LOAD"){
+            for (var i = 0; i < creators.length; i++) {
+                if (creators[i].dead === false) {
+                    creators[i].update();
+                    if( buttons[0].progress < 0.8) {
+                        creators[i].draw();
+                    }
+                } else {
+                    creators.splice(i, 1);
+                }
+            }
 
-    cameraX = Math.round(cameraX);
-    cameraY = Math.round(cameraY);
+            if(creators.length > 0){
+                if(buttons[0].progress === 0){buttons[0].progress = 0.01;}
+                buttons[0].progress = Math.min(buttons[0].progress+0.1/(buttons[0].progress*50), 0.95);
+            }
 
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6 || Math.floor(map[j][i]*10) === 6){
-                if(Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6 && Math.floor(map[j][i]*10) !== 6){
-                    renderTile(i, j);
-                }else if(Math.floor(map[j][i]*10) === 6){
-                    ctx.drawImage(tileMap, textureSize*2, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
-                }else{
-                    ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
+            if (creators.length === 0 && doorsGenerated === false) {
+                generate();
+            }
+        }
+        for(var i = 0; i < buttons.length; i++){
+            buttons[i].draw();
+            buttons[i].update();
+        }
+        trMaker.update();
+    }else if(GAMESTATE === "GAME") {
+        if (gameRunning === true) {
+            player.update();
+        }
+
+        cameraX = Math.round(cameraX);
+        cameraY = Math.round(cameraY);
+
+        for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+            for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 5, mapheight); j++) {
+                if (Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6 || Math.floor(map[j][i] * 10) === 6) {
+                    if (Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6 && Math.floor(map[j][i] * 10) !== 6) {
+                        renderTile(i, j);
+                    } else if (Math.floor(map[j][i] * 10) === 6) {
+                        ctx.drawImage(tileMap, textureSize * 2, textureSize * 8.5, textureSize, textureSize * 1.5, i * tileSize + xCameraOffset + offset - cameraX, j * tileSize + yCameraOffset + offset - cameraY - tileSize / 2, tileSize, tileSize * 1.5); //NORMAL
+                    } else {
+                        ctx.drawImage(tileMap, 0, textureSize * 2, textureSize, textureSize, i * tileSize + offset + xCameraOffset - cameraX, j * tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
+                    }
                 }
             }
         }
-    }
 
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
-            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
-                renderTile(i, j);
+        for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+            for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
+                if ((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i] * 10) === 6) && Math.floor(map[j][i]) !== 5) {
+                    renderTile(i, j);
+                }
             }
         }
-    }
 
-    for(var i = 0; i < enemies.length; i++){
-        if(enemies[i].dead === true){
-            enemies.splice(i, 1);
-        }else{
-            enemies[i].update();
-            enemies[i].draw();
+        for (var i = 0; i < enemies.length; i++) {
+            if (enemies[i].dead === true) {
+                enemies.splice(i, 1);
+            } else {
+                enemies[i].update();
+                enemies[i].draw();
+            }
+
         }
 
-    }
+        if (gameRunning === true) {
+            player.draw();
+        }
 
-    if(gameRunning === true){
-        player.draw();
-    }
-
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY2, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if(Math.floor(map[j][i]) === 6){
-                renderTile(i, j);
+        for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+            for (var j = Math.max(player.tileY2, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
+                if (Math.floor(map[j][i]) === 6) {
+                    renderTile(i, j);
+                }
             }
         }
-    }
 
-    for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-        for (var j = Math.max(player.tileY + 2, 0); j <= Math.min(player.tileY + 4, mapheight); j++) {
-            if((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i]*10) === 6) && Math.floor(map[j][i]) !== 5) {
-                renderTile(i, j);
+        for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+            for (var j = Math.max(player.tileY + 2, 0); j <= Math.min(player.tileY + 5, mapheight); j++) {
+                if ((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i] * 10) === 6) && Math.floor(map[j][i]) !== 5) {
+                    renderTile(i, j);
+                }
             }
         }
-    }
 
-    if(gameRunning === true) {
+        if (gameRunning === true) {
 
-        frameCount++;
+            frameCount++;
 
-        //if(frameCount % 10 === 0){
-        for(var i = 0; i < creators.length; i++){
-            if(creators[i].dead === false){
-                creators[i].update();
-                creators[i].draw();
-            }else{
-                creators.splice(i, 1);
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            doLighting();
+
+            player.renderGUI();
+
+            //tileSize*=cameraZoom; cameraX = (player.gameX-player.x+player.width*tileSize/2)*cameraZoom; cameraY = (player.gameY-player.y+player.height*tileSize/2)*cameraZoom; seglength = tileSize/10;
+
+            if (showMap === true) {
+                drawMinimap();
             }
+
+            if(SWIPEVALUE !== 0){trMaker.update();}
+
+            //console.log(SWIPEVALUE);
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + SWIPEVALUE + ')';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            /* SPAWNING
+             if(frameCount % spawnRate === 0){
+             addWave();
+             }
+             */
+
+            /* ON LOSS
+             if(Lose condition){
+             gameRunning = false;
+             localStorage.setItem('HighScoreBusiness', HIGHSCORE);
+             }
+             */
+
         }
-        //}
-
-
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-        if(creators.length === 0 && doorsGenerated === false) {
-            generate();
-        }
-
-        doLighting();
-
-        player.renderGUI();
-
-        if(showMap === true){
-            drawMinimap();
-        }
-
-        /* SPAWNING
-         if(frameCount % spawnRate === 0){
-         addWave();
-         }
-         */
-
-        /* ON LOSS
-         if(Lose condition){
-         gameRunning = false;
-         localStorage.setItem('HighScoreBusiness', HIGHSCORE);
-         }
-         */
-
     }
     clicked = false;
 }
