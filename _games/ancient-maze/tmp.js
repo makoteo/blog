@@ -12,14 +12,14 @@ var map = [];
 
 // 0 = empty, 1 = wall, 2 = door, 3 = permawall, 4 = loot, 5 = innerroom, 6 = lockedDoor
 
-var mapdimensions = 90; //70, 90, 110
+var mapdimensions = 70; //70, 90, 110
 
 var mapwidth = mapdimensions;
 var mapheight = mapdimensions;
 
 var roomsize = 8; //8
 
-var room2size = 40; //36, 40, 40
+var room2size = 36; //36, 40, 40
 var room2 = true; //true, true, true
 
 var room3size = 72; //null, null, 72
@@ -86,8 +86,11 @@ var ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YO
 //8468407084; - Dunno, I think this one takes long to generate and has a path that's too long so it regenerates again
 //2936916693; - Checking that mobs can't go through walls
 //955920860; - Walls being weird
-//7899284295 - nothing generates?
+//7899284295; - nothing generates?
+//5459613113; - so much food
+//5214141823; - easy win
 var SEED = ORIGINALSEED;
+SEED = 5214141823;
 
 var showMap = false;
 var mapTileSize = 3;
@@ -104,7 +107,7 @@ var clicked = false;
 var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
 var nutritionValues = [0, 20, 0, 50, 0, 0, 15];
-var itemSacrificeValues = [35, 15, 60, 25, 25, 30, 20];
+var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0];
 
 var itemSpawnRate = [3, 15, 1, 10, 6, 2, 0];
@@ -348,14 +351,15 @@ function Player(x, y, width, height){
             this.health = Math.min(this.health + 0.3, this.maxHealth);
         }
 
-        GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0);
+        GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0.1);
         mobSpawnChance = 0.04-0.0003*(GODSATISFACTION - 100);
-        maxMobCount = Math.round(2 - 0.02*(GODSATISFACTION - 100));
+        maxMobCount = Math.floor(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
+        console.log(maxMobCount);
     };
 
     this.countHealth = function(){
         if(map[this.tileY2][this.tileX3] === 0.63){
-            this.health = Math.max(this.health - 2, 0);
+            this.health = Math.max(this.health - 1, 0);
         }
     }
 
@@ -729,10 +733,14 @@ function Player(x, y, width, height){
     this.winStateCheck = function(){
         if(this.tileY < 0 || this.tileY === mapheight - 1){
             console.log("YOU WIN!");
+            trMaker.nextState = "WIN";
+            trMaker.transitioning = true;
             this.frozen = true;
         }
         if(this.health <= 0){
             console.log("YOU LOSE!");
+            trMaker.nextState = "LOSS";
+            trMaker.transitioning = true;
             this.frozen = true;
         }
     };
@@ -834,7 +842,7 @@ function Creator(x, y, killable){
     this.draw = function(){
         if(this.killable) {
             ctx.fillStyle = 'rgba(20, 20, 20, 0.3)';
-            ctx.fillRect(this.x * 10, this.y * 10, tileSize * 0.5, tileSize * 0.5);
+            ctx.fillRect(this.x * 20, this.y * 20, tileSize * 0.5, tileSize * 0.5);
         }
     }
 }
@@ -860,13 +868,13 @@ function Enemy(tileX, tileY, type){
         this.moveSpeed = 3*(WIDTH/800);
         this.attackSpeed = 40;
         this.paralysisTime = 30;
-        this.damage = 10;
+        this.damage = 5;
         this.attackDelayer = 5;
     }else if(this.type === 1) { //RAT
         this.moveSpeed = 4*(WIDTH/800);
         this.attackSpeed = 30;
         this.paralysisTime = 25;
-        this.damage = 15;
+        this.damage = 10;
         this.attackDelayer = 4;
     }
 
@@ -907,8 +915,8 @@ function Enemy(tileX, tileY, type){
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
             for(var l = 1; l < this.path.length; l++) {
-                if (this.path[l][0] === this.path[0][0] && this.path[l][1] === this.path[0][1]) {
-                    this.path.splice(1, l);
+                if (this.path[l][0] === this.path[l-1][0] && this.path[l][1] === this.path[l-1][1]) {
+                    this.path.splice(l, 1);
                 }
             }
             for(var l = 0; l < this.path.length; l++) {
@@ -979,7 +987,7 @@ function Enemy(tileX, tileY, type){
 
         //Spikes do damage
         if(this.type === 1 && map[this.tileY][this.tileX] === 0.63){
-            this.health-=3;
+            this.health-=2;
             this.animationFrame = 3;
         }
 
@@ -1045,8 +1053,8 @@ function Enemy(tileX, tileY, type){
         if(player.attackTimer === 19){
             if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize){
                 //playerSpeed = 1;
-                if((this.tileX === player.tileX3 && this.tileY === player.tileY4) || (this.tileY > player.tileY4 && player.dir === 2) || (this.tileY < player.tileY4 && player.dir === 3) ||
-                    (this.tileX < player.tileX3 && player.dir === 0) || (this.tileX > player.tileX3 && player.dir === 1)){
+                if((this.tileX === player.tileX3 && this.tileY === player.tileY4) || (this.tileY >= player.tileY4 && player.dir === 2) || (this.tileY <= player.tileY4 && player.dir === 3) ||
+                    (this.tileX <= player.tileX3 && player.dir === 0) || (this.tileX >= player.tileX3 && player.dir === 1)){
                     this.paralysisTimer = this.paralysisTime;
                     this.health -= player.getItemSelectedDamageValue();
                     this.animationFrame = 3; //Red hit frame
@@ -1058,9 +1066,14 @@ function Enemy(tileX, tileY, type){
                 }
             }
         }else{
-            if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize/2) {
+            var distanceTmp = Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY)));
+            if(distanceTmp < tileSize/2) {
                 playerSpeed = 3; //Slow down player when passing by
+            }else if(distanceTmp < tileSize/4){
                 this.path = [];
+                this.xOffSet = 0;
+                this.yOffSet = 0;
+                console.log("Deleted");
             }
         }
     };
@@ -1170,21 +1183,23 @@ function Button(x, y, text, type, action){
 
     this.widener = 0;
     this.update = function(){
-        if(this.type === 1) {
-            if (mousePosX > this.x - this.width / 2 - this.widener / 2 && mousePosX < this.x + this.width / 2 + this.widener / 2 && mousePosY > this.y - this.height / 2 && mousePosY < this.y + this.height / 2) {
-                this.widener = Math.min(this.widener + 5, 20);
-                if (clicked) {
-                    generateMap();
-                    trMaker.nextState = "LOAD";
+        if(SWIPEVALUE === 0) {
+            if (this.type === 1) {
+                if (mousePosX > this.x - this.width / 2 - this.widener / 2 && mousePosX < this.x + this.width / 2 + this.widener / 2 && mousePosY > this.y - this.height / 2 && mousePosY < this.y + this.height / 2) {
+                    this.widener = Math.min(this.widener + 5, 20);
+                    if (clicked) {
+                        generateMap();
+                        trMaker.nextState = "LOAD";
+                        trMaker.transitioning = true;
+                    }
+                } else {
+                    this.widener = Math.max(this.widener - 5, 0);
+                }
+            } else if (this.type === 2) {
+                if (this.progress >= 1) {
+                    trMaker.nextState = this.action;
                     trMaker.transitioning = true;
                 }
-            } else {
-                this.widener = Math.max(this.widener - 5, 0);
-            }
-        }else if(this.type === 2) {
-            if(this.progress >= 1){
-                trMaker.nextState = this.action;
-                trMaker.transitioning = true;
             }
         }
     }
@@ -1220,12 +1235,12 @@ function TransitionMaker(){
     this.update = function(){
         if(this.transitioning){
             if(SWIPEVALUE === 0){this.vX = 0;}
-            this.vX-=0.002;
+            this.vX-=0.003;
             SWIPEVALUE += this.vX;
             if(SWIPEVALUE < -1){
                 SWIPEVALUE = 1;
                 this.transitioning = false;
-                console.log("Da");
+                //console.log("Da");
                 GAMESTATE = this.nextState;
                 this.activateStates();
                 this.vX = 0;
@@ -1244,13 +1259,18 @@ function TransitionMaker(){
         if(this.nextState === "LOAD"){
             buttons = [];
             buttons.push(new Button(WIDTH/2, HEIGHT/2, "Loading bar", 2, "GAME"))
+        }else if(this.nextState === "WIN"){
+            buttons = [];
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "You win!", 1, "GAME"))
+        }else if(this.nextState === "LOSS"){
+            buttons = [];
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "You lose!", 1, "GAME"))
         }
     }
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-restartGame();
 buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "play"));
 buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
 var trMaker = new TransitionMaker();
@@ -1268,10 +1288,24 @@ function randomNum() {
     return x - Math.floor(x);
 }
 
+function resetVars(){
+    xCameraOffset = 0;
+    yCameraOffset = 0;
+    player = new Player(WIDTH/2, HEIGHT/2, 0.9, 1); //Add the Player
+
+    cameraX = tileSize*(mapwidth-10)/2;
+    cameraY = tileSize*(mapheight-6)/2;
+    ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
+    SEED = ORIGINALSEED;
+
+    doorsGenerated = false;
+}
+
 function generateMap(){
     loadFont();
     creators = [];
     map = [];
+    resetVars();
     creators.push(new Creator(1, 1, false));
     creators.push(new Creator(mapwidth-1, mapheight-1, false));
     //creators.push(new Creator(1, mapheight-1, false));
@@ -1644,7 +1678,7 @@ function genExitsFromMain(size, room){
             }
         }
     }
-    console.log(map);
+    //console.log(map);
     rnd = Math.floor(randomNum()*(size-2));
     if(room === true){
         var swtchgtd = false;
@@ -1684,7 +1718,7 @@ function genExitsFromMain(size, room){
         doorsGenerated = false;
         creators = [];
         generateMap();
-        console.log("Something wrong");
+        //console.log("Something wrong");
     }
 }
 
@@ -2007,10 +2041,6 @@ function doLighting(){
     }
 }
 
-function restartGame(){
-    player = new Player(WIDTH/2, HEIGHT/2, 0.9, 1); //Add the Player
-}
-
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
@@ -2023,7 +2053,7 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD"){
+    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD" || GAMESTATE === "WIN" || GAMESTATE === "LOSS"){
         if(GAMESTATE === "LOAD"){
             for (var i = 0; i < creators.length; i++) {
                 if (creators[i].dead === false) {
@@ -2038,12 +2068,12 @@ function game(){
 
             if(creators.length > 0){
                 if(buttons[0].progress === 0){buttons[0].progress = 0.01;}
-                buttons[0].progress = Math.min(buttons[0].progress+0.1/(buttons[0].progress*75), 0.95);
+                buttons[0].progress = Math.min(buttons[0].progress+0.1/(buttons[0].progress*100), 0.95);
             }
 
             if (creators.length === 0 && doorsGenerated === false) {
                 generate();
-                console.log("Ja");
+                //console.log("Ja");
             }else if(creators.length === 0 && doorsGenerated === true){
                 buttons[0].progress = 1;
             }
@@ -2130,10 +2160,10 @@ function game(){
                 drawMinimap();
             }
 
-            if(SWIPEVALUE !== 0){trMaker.update();}
+            if(SWIPEVALUE !== 0 || player.frozen){trMaker.update();}
 
             //console.log(SWIPEVALUE);
-            ctx.fillStyle = 'rgba(0, 0, 0, ' + SWIPEVALUE + ')';
+            ctx.fillStyle = 'rgba(0, 0, 0, ' + Math.abs(SWIPEVALUE) + ')';
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
             /* SPAWNING
