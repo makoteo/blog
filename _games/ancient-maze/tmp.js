@@ -843,7 +843,7 @@ function Creator(x, y, killable){
     };
     this.draw = function(){
         if(this.killable) {
-            ctx.fillStyle = 'rgba(20, 20, 20, 0.3)';
+            ctx.fillStyle = 'rgba(20, 20, 20, 0.8)';
             ctx.fillRect(this.x * 20, this.y * 20, tileSize * 0.5, tileSize * 0.5);
         }
     }
@@ -912,7 +912,8 @@ function Enemy(tileX, tileY, type){
     this.update = function(){
         this.aliveTimer++;
 
-        if(this.type === 1){if(this.moveDirX === 0 && this.moveDirY === 0){this.animationRunning = false;}else{this.animationRunning = true;}}
+        //if(this.type === 1){if(this.moveDirX === 0 && this.moveDirY === 0){this.animationRunning = false;}else{this.animationRunning = true;}}
+        this.animationRunning = !(this.moveDirX === 0 && this.moveDirY === 0);
 
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
@@ -1149,13 +1150,13 @@ function Enemy(tileX, tileY, type){
 
     this.checkPlayerVisible = function() {
         var theta = 0;
-        if(this.tileX === player.tileX2 || this.tileY === player.tileY4){
+        if(this.tileX === player.tileX2 || this.tileY === player.tileY2){
             rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
             theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
             currentLight = 0;
             this.followingPlayer = true;
             this.followDelay = 10;
-            this.path.push([player.tileY2, player.tileX3]);
+            this.path.push([player.tileY2, player.tileX2]);
             for (var k = 0; k < rayseg; k++) {
                 if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
                     this.followingPlayer = false;
@@ -1181,7 +1182,7 @@ function Enemy(tileX, tileY, type){
 function Button(x, y, text, type, action){
     this.x = x;
     this.y = y;
-    this.width = WIDTH/6;
+    this.width = WIDTH/5;
     this.height = HEIGHT/15;
     this.text = text;
     this.type = type;
@@ -1197,7 +1198,7 @@ function Button(x, y, text, type, action){
                     this.widener = Math.min(this.widener + 5, 20);
                     if (clicked) {
                         generateMap();
-                        trMaker.nextState = "LOAD";
+                        trMaker.nextState = this.action;
                         trMaker.transitioning = true;
                     }
                 } else {
@@ -1212,7 +1213,17 @@ function Button(x, y, text, type, action){
         }
     }
     this.draw = function(){
-        if(this.type === 1) {
+        if(this.type === 0) {
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = HEIGHT / 6 + "px quickPixel";
+            ctx.fillText(this.text, this.x + SWIPEVALUE * WIDTH, this.y + this.height / 4);
+        }else if(this.type === 0.5) {
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = HEIGHT / 10 + "px quickPixel";
+            ctx.fillText(this.text, this.x + SWIPEVALUE * WIDTH, this.y + this.height / 4);
+        }else if(this.type === 1) {
             ctx.strokeStyle = 'white';
             ctx.fillStyle = 'white';
             ctx.lineWidth = 5;
@@ -1266,22 +1277,40 @@ function TransitionMaker(){
     this.activateStates = function(){
         if(this.nextState === "LOAD"){
             buttons = [];
-            buttons.push(new Button(WIDTH/2, HEIGHT/2, "Loading bar", 2, "GAME"))
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "Loading bar", 2, "GAME"));
         }else if(this.nextState === "WIN"){
             buttons = [];
-            buttons.push(new Button(WIDTH/2, HEIGHT/2, "You win!", 1, "GAME"))
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/5, "YOU WIN!", 0, "GAME"));
+            var secNumTmp = "";
+            if((TIME%60).toString().length === 1){secNumTmp = "0" + (TIME%60).toString()}else{secNumTmp = (TIME%60).toString();}
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/8, "TIME TAKEN: " + Math.floor(TIME/60)  + ":" + secNumTmp, 0.5, "GAME"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "PLAY AGAIN", 1, "LOAD"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "MENU", 1, "MENU"));
         }else if(this.nextState === "LOSS"){
             buttons = [];
-            buttons.push(new Button(WIDTH/2, HEIGHT/2, "You lose!", 1, "GAME"))
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/5, "YOU LOSE!", 0, "GAME"));
+            var secNumTmp = "";
+            if((TIME%60).toString().length === 1){secNumTmp = "0" + (TIME%60).toString()}else{secNumTmp = (TIME%60).toString();}
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/8, "TIME SURVIVED: " + Math.floor(TIME/60)  + ":" + secNumTmp, 0.5, "GAME"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "PLAY AGAIN", 1, "LOAD"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "MENU", 1, "MENU"));
+        }else if(this.nextState === "MENU"){
+            buttons = [];
+            loadMenu();
+        }else if(this.nextState === "GAME"){
+            TIME = 0;
         }
     }
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
-buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "play"));
-buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
-buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "options"));
+function loadMenu(){
+    buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "LOAD"));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "options"));
+}
+loadMenu();
 var trMaker = new TransitionMaker();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
@@ -1306,6 +1335,8 @@ function resetVars(){
     cameraY = tileSize*(mapheight-6)/2;
     ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
     SEED = ORIGINALSEED;
+
+    GODSATISFACTION = 100;
 
     doorsGenerated = false;
 }
@@ -2156,6 +2187,9 @@ function game(){
 
             frameCount++;
 
+            if(frameCount % 60 === 0){TIME++;}
+            console.log(TIME);
+
             ctx.fillStyle = grd;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -2205,7 +2239,7 @@ function player_give(name){
             give_go = false;
         }
     }
-    if(give_go === true){player.inventory.push(item)};
+    if(give_go === true){player.inventory.push(item%10 + (Math.floor(item/10)*0.1))};
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
