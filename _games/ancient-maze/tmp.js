@@ -104,13 +104,13 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "", "", "", "Hi", "Lol", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
-var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.8, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
-var nutritionValues = [0, 20, 0, 50, 0, 0, 15];
-var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20];
-var itemDamageValues = [20, 0, 0, 0, 10, 18, 0];
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "WIDE SWORD", "DOUBLE AXE", "RAT MEAT", "BERRIES", "HEALTH POTION", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
+var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
+var nutritionValues = [0, 20, 0, 50, 0, 0, 15, 0, 0, 25, 20, 15];
+var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 40];
+var itemDamageValues = [20, 0, 0, 0, 10, 18, 0, 24, 15, 0, 0, 0];
 
-var itemSpawnRate = [3, 15, 1, 10, 6, 2, 0];
+var itemSpawnRate = [3, 15, 1, 12, 6, 4, 0, 2, 3, 0, 18, 2];
 
 var spikesAnimFrame = 0;
 
@@ -352,9 +352,9 @@ function Player(x, y, width, height){
         }
 
         GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0.1);
-        mobSpawnChance = 0.04-0.0003*(GODSATISFACTION - 100);
+        mobSpawnChance = 0.03*(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
         maxMobCount = Math.floor(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
-        console.log(maxMobCount);
+        console.log(maxMobCount, mobSpawnChance);
     };
 
     this.countHealth = function(){
@@ -550,7 +550,7 @@ function Player(x, y, width, height){
         return itemDamageValues[Math.floor(this.inventory[this.inventorySelected]) + 10*(Math.floor(this.inventory[this.inventorySelected]*10)-Math.floor(this.inventory[this.inventorySelected])*10)];
     };
     this.drawWeapon = function(){
-        if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB" || this.getItemSelectedName() === "SPIKY CLUB"){
+        if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB" || this.getItemSelectedName() === "SPIKY CLUB" || this.getItemSelectedName() === "WIDE SWORD" || this.getItemSelectedName() === "DOUBLE AXE"){
             ctx.save();
             ctx.translate(this.x - this.width/4*tileSize + xCameraOffset + this.weaponOffset + tileSize/2 + this.handOffset, this.y - this.height/2*tileSize + yCameraOffset + this.weaponOffsetY + tileSize - this.breathCycle/2);
             ctx.rotate(this.weaponAngle*Math.PI/180);
@@ -598,7 +598,7 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'right';
             ctx.fillText("Press SPACE to CONSUME " + this.getItemSelectedName(), WIDTH/2 + WIDTH/7, HEIGHT - HEIGHT/10);
-        }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB"){
+        }else if(this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB" || this.getItemSelectedName() === "WIDE SWORD" || this.getItemSelectedName() === "DOUBLE AXE"){
             ctx.font = fontSize3 + 'px quickPixel';
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
@@ -695,15 +695,17 @@ function Player(x, y, width, height){
         if(keys && keys[32]){
             if(this.getItemSelectedNutrition() > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
                 this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition(), this.maxHunger);
-                if(this.getItemSelectedName() !== "BAT WING"){
-                    this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
-                }else{
+                if(this.getItemSelectedName() === "BAT WING"){
                     this.health = Math.min(this.health + this.getItemSelectedNutrition()*1.5, this.maxHealth);
+                }else if(this.getItemSelectedName() === "HEALTH POTION"){
+                    this.health = Math.min(this.health + this.getItemSelectedNutrition()*5, this.maxHealth);
+                }else{
+                    this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
                 }
                 this.inventory.splice(this.inventorySelected, 1);
                 this.spaceReleased = false;
             }
-            if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB") && this.spaceReleased === true && this.attackTimer === 0){
+            if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB"  || this.getItemSelectedName() === "WIDE SWORD" || this.getItemSelectedName() === "DOUBLE AXE") && this.spaceReleased === true && this.attackTimer === 0){
                 this.attack();
                 this.spaceReleased = false;
             }
@@ -1019,8 +1021,14 @@ function Enemy(tileX, tileY, type){
             this.dead = true;
             if(Math.floor(map[this.tileY][this.tileX]) === 0 && (map[this.tileY][this.tileX] < 0.6 || map[this.tileY][this.tileX] > 0.65)){
                 var rnd = randomNum();
-                if(rnd < 1){
-                    map[this.tileY][this.tileX] = 4.6;
+                if(this.type === 0){
+                    if(rnd < 1){
+                        map[this.tileY][this.tileX] = 4.6;
+                    }
+                }else if(this.type === 1){
+                    if(rnd < 1){
+                        map[this.tileY][this.tileX] = 4.9;
+                    }
                 }
             }
         }
@@ -1273,6 +1281,7 @@ function TransitionMaker(){
 
 buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "play"));
 buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
+buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "options"));
 var trMaker = new TransitionMaker();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
