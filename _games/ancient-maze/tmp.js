@@ -1,6 +1,6 @@
 //Copyright (c) Martin Feranec - 2020
 
-var versionCode = "Alpha 0.92  Lighting Update 2.0";
+var versionCode = "Alpha 0.96  Item Update";
 var WIDTH = 1024;//800
 var HEIGHT = 576;//450
 var gameRunning = true;
@@ -29,7 +29,7 @@ var tileSize = 72; //Math.floor(72*(WIDTH/1024))
 var defTileSize = 72;
 var offset = 0;
 
-var textureSize = 24*5; //Scale factor is 5 for whatever reason, but it's not 16 lol... Messes up the game haha
+var textureSize = 24*5; //Scale factor is 5 for whatever reason, but it's not 16 lol... Messes up the game haha... Note from later, I think I was drunk while writing this
 
 var cameraX = tileSize*(mapwidth-10)/2;
 var cameraY = tileSize*(mapheight-6)/2;
@@ -878,6 +878,12 @@ function Enemy(tileX, tileY, type){
         this.paralysisTime = 25;
         this.damage = 10;
         this.attackDelayer = 4;
+    }else if(this.type === 2) { //RAT
+        this.moveSpeed = 1*(WIDTH/800);
+        this.attackSpeed = 20;
+        this.paralysisTime = 40;
+        this.damage = 25;
+        this.attackDelayer = 4;
     }
 
     this.moveDirX = 0;
@@ -917,17 +923,12 @@ function Enemy(tileX, tileY, type){
 
         //PATHFINDING, DON'T MESS WITH IT PLS, IT TOOK SO LONG TO DO
         if(this.paralysisTimer === 0){
-            for(var l = 1; l < this.path.length; l++) {
-                if (this.path[l][0] === this.path[l-1][0] && this.path[l][1] === this.path[l-1][1]) {
-                    this.path.splice(l, 1);
-                }
-            }
             for(var l = 0; l < this.path.length; l++) {
-                if(this.path[l][0] !== this.tileY || this.path[l][1] !== this.tileX){
-                    if(this.path[l][0] < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
+                if(this.path[l].y !== this.tileY || this.path[l].x !== this.tileX){
+                    if(this.path[l].y < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
                         this.moveDirY = -1;
                         this.dir = 1;
-                    }else if(this.path[l][0] > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
+                    }else if(this.path[l].y > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
                         this.moveDirY = 1;
                         this.dir = 3;
                     }else{
@@ -941,13 +942,13 @@ function Enemy(tileX, tileY, type){
                         this.yOffSet = 0;
                     }
                     if(this.moveDirY === 0){
-                        if(this.path[l][1] < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
+                        if(this.path[l].x < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
                             ((Math.floor(map[this.tileY + 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX - 1]) === 4) && this.moveDirY === 1) ||
                             ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = -1;
                             this.animDir = -1;
                             this.dir = 4;
-                        }else if(this.path[l][1] > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
+                        }else if(this.path[l].x > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
                             ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
                             ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = 1;
@@ -971,7 +972,7 @@ function Enemy(tileX, tileY, type){
 
                     break;
                 }else{
-                    if(this.path[l][0] === this.tileY && this.path[l][1] === this.tileX){
+                    if(this.path[l].y === this.tileY && this.path[l].x === this.tileX){
                         this.path.splice(l, 1);
                     }
                 }
@@ -1039,15 +1040,13 @@ function Enemy(tileX, tileY, type){
         }
 
 
-        if(frameCount % 2 === 0) {
+        if(frameCount % 30 === 0) {
             if (this.followingPlayer === false) {
                 this.checkPlayerVisible();
             } else {
-                this.path.push([player.tileY2, player.tileX2]);
+                this.path = pathFinding([this.tileX, this.tileY], [player.tileX3, player.tileY2]);
+                console.log(this.path);
             }
-        }
-        if(this.followingPlayer === true && this.followDelay === 10){
-            this.path.push([player.tileY2, player.tileX3]);
         }
 
         if(Math.abs(player.tileX - this.tileX) > this.despawnDistance || Math.abs(player.tileY - this.tileY) > this.despawnDistance){
@@ -1104,11 +1103,9 @@ function Enemy(tileX, tileY, type){
     };
 
     this.draw = function(){
-        //ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        //ctx.fillStyle = 'rgba(200, 0, 0, 0.9)';
 
-        //ctx.beginPath();
-        //ctx.arc(this.gameX + xCameraOffset, this.gameY - tileSize*0.2 + yCameraOffset, tileSize*0.3, 0, Math.PI*2, false);
-        //ctx.fill();
+        //ctx.fillRect(this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize);
 
         if(this.type === 0) {
             if(this.aliveTimer % 7 === 0) {
@@ -1145,6 +1142,25 @@ function Enemy(tileX, tileY, type){
             }
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
+        }else if(this.type === 2){
+            if(this.aliveTimer % 6 === 0 && this.animationRunning === true && this.attackTimer < 15 && this.paralysisTimer === 0) {
+                this.animationFrame += this.animationDir;
+                if(this.animationFrame >= 3){//3
+                    //this.animationDir = -1;
+                    this.animationFrame = 0;
+                }else if(this.animationFrame === 0){
+                    this.animationDir = 1;
+                }
+            }else if(this.aliveTimer % 9 === 0 && this.animationRunning === false){
+                this.animationFrame = 0;
+            }
+            if(this.animDir === 1){
+                ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*4, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }else{
+                ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*4, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+            }
+            //ctx.fillStyle = 'red';
+            //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
         }
     };
 
@@ -1153,10 +1169,22 @@ function Enemy(tileX, tileY, type){
         if(this.tileX === player.tileX2 || this.tileY === player.tileY2){
             rayseg = Math.sqrt((cameraX + player.x - this.tileX * tileSize - tileSize / 2) * (cameraX + player.x - this.tileX * tileSize - tileSize / 2) + (cameraY + player.y - this.tileY * tileSize - tileSize / 2) * (cameraY + player.y - this.tileY * tileSize - tileSize / 2)) / seglength;
             theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
+            ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+
+            ctx.beginPath();
+            ctx.moveTo(0, (this.tileY * tileSize + tileSize / 2) - (cameraY + player.y));
+            ctx.lineTo(WIDTH, (this.tileY * tileSize + tileSize / 2) - (cameraY + player.y));
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo((this.tileX * tileSize + tileSize / 2) - (cameraX + player.x), 0);
+            ctx.lineTo((this.tileX * tileSize + tileSize / 2) - (cameraX + player.x), HEIGHT);
+            ctx.stroke();
+
             currentLight = 0;
             this.followingPlayer = true;
             this.followDelay = 10;
-            this.path.push([player.tileY2, player.tileX2]);
+            //this.path.push([player.tileY2, player.tileX2]);
             for (var k = 0; k < rayseg; k++) {
                 if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
                     this.followingPlayer = false;
@@ -2081,6 +2109,90 @@ function doLighting(){
     }
 }
 
+function pathFinding(start, end){
+    var openList = [];
+    var closedList = [];
+    var currentNode;
+    var moves = [];
+    var DONE = false;
+    var path = [];
+
+    openList.push(new Node(start[0], start[1], 0, 100000, null));
+
+    //console.log(openList[0]);
+
+    while(openList.length > 0 && !DONE){
+        var low = 0;
+        for(var i in openList){
+            if(openList[i].f < openList[low].f){low = i;}
+        }
+        currentNode = openList[low];
+        //console.log(currentNode);
+        openList.splice(low, 1);
+
+        closedList.push(currentNode);
+
+        if(currentNode.x === end[0] && currentNode.y === end[1]){
+            console.log("Done!");
+            var tmpCur = currentNode;
+            path.push(tmpCur);
+            while(tmpCur.parent !== null){
+                path.push(tmpCur.parent);
+                tmpCur = tmpCur.parent;
+            }
+            DONE = true;
+            path.reverse();
+            return path;
+        }
+
+        moves = [];
+        var steppable = [0, 4, 5];
+        for(var s in steppable) {
+            if (Math.floor(map[Math.max(0, currentNode.y - 1)][currentNode.x]) === steppable[s]) {
+                moves.push([currentNode.x, currentNode.y - 1]);
+            }
+            if (Math.floor(map[Math.min(map.length, currentNode.y + 1)][currentNode.x]) === steppable[s]) {
+                moves.push([currentNode.x, currentNode.y + 1]);
+            }
+            if (Math.floor(map[currentNode.y][Math.max(0, currentNode.x - 1)]) === steppable[s]) {
+                moves.push([currentNode.x - 1, currentNode.y]);
+            }
+            if (Math.floor(map[currentNode.y][Math.min(map[0].length, currentNode.x + 1)]) === steppable[s]) {
+                moves.push([currentNode.x + 1, currentNode.y]);
+            }
+        }
+        //console.log(moves);
+
+        for(var j in moves){
+            var leave = false;
+            for(var c in closedList){
+                if(closedList[c].x === moves[j][0] && closedList[c].y === moves[j][1]){leave = true; break;}
+            }
+            if(leave){continue;}
+
+            var dstTmp = (end[0] - moves[j][0])*(end[0] - moves[j][0]) + (end[1] - moves[j][1])*(end[1] - moves[j][1]);
+
+            for(var o in openList){
+                if(openList[o].x === moves[j][0] && openList[o].y === moves[j][1]){
+                    if(currentNode.g + 1 > openList[o].g){leave = true; break;}
+                }
+            }
+            if(leave){continue;}
+            openList.push(new Node(moves[j][0], moves[j][1], currentNode.g + 1, dstTmp, currentNode));
+        }
+    }
+
+    return [];
+}
+
+function Node(x, y, g, h, parent){
+    this.x = x;
+    this.y = y;
+    this.g = g;
+    this.h = h;
+    this.f = this.g + this.h;
+    this.parent = parent;
+}
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
@@ -2188,7 +2300,7 @@ function game(){
             frameCount++;
 
             if(frameCount % 60 === 0){TIME++;}
-            console.log(TIME);
+            //console.log(TIME);
 
             ctx.fillStyle = grd;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
