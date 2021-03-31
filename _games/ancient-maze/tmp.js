@@ -169,6 +169,7 @@ function Player(x, y, width, height){
 
     this.ereleased = true;
     this.spaceReleased = true;
+    this.qreleased = true;
 
     this.inventorySelected = 0;
 
@@ -572,7 +573,7 @@ function Player(x, y, width, height){
                 ctx.font = fontSize2 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
-                ctx.fillText("Press E to SACRIFICE " + this.getItemSelectedName(), WIDTH/2, 350);
+                ctx.fillText("Press E to SACRIFICE " + this.getItemSelectedName(), WIDTH/2, HEIGHT*0.6);
             }
         }
         if((this.tileY < mapheight && this.tileY > -1 && map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) || (this.tileY+2 < mapheight && map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2)){
@@ -580,12 +581,12 @@ function Player(x, y, width, height){
                 ctx.font = fontSize1 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
-                ctx.fillText("Press E to OPEN DOOR", WIDTH/2, 350);
+                ctx.fillText("Press E to OPEN DOOR", WIDTH/2, HEIGHT*0.7);
             }else{
                 ctx.font = fontSize1 + 'px quickPixel';
                 ctx.fillStyle = 'white';
                 ctx.textAlign = 'center';
-                ctx.fillText("You need a KEY to open this door", WIDTH/2, 350);
+                ctx.fillText("You need a KEY to open this door", WIDTH/2, HEIGHT*0.7);
             }
         }
         if(this.tileY4 < mapheight && this.tileY4 > -1 && Math.floor(map[this.tileY4][this.tileX3]) === 4){
@@ -593,9 +594,9 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             if(this.inventory.length < 3){
-                ctx.fillText("Press E to PICK UP", WIDTH/2, 350);
+                ctx.fillText("Press E to PICK UP", WIDTH/2, HEIGHT*0.6);
             }else{
-                ctx.fillText("INVENTORY FULL", WIDTH/2, 350);
+                ctx.fillText("INVENTORY FULL", WIDTH/2, HEIGHT*0.6);
             }
         }
 
@@ -609,6 +610,12 @@ function Player(x, y, width, height){
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.fillText("Press SPACE to ATTACK", WIDTH/2, HEIGHT - HEIGHT/10);
+        }
+
+        if(this.inventory.length > this.inventorySelected && this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0) {
+            ctx.textAlign = 'right';
+            ctx.fillStyle = 'rgb(50, 50, 50)';
+            ctx.fillText("Press Q to DROP ITEM", WIDTH/2 + WIDTH/7, HEIGHT - HEIGHT/25);
         }
 
         //INVENTORY
@@ -692,6 +699,19 @@ function Player(x, y, width, height){
             }
         }else{
             this.ereleased = true;
+        }
+
+        //Q KEY
+        if(keys && keys[81] && this.qreleased === true){
+            if(this.inventory.length > this.inventorySelected && map[this.tileY3][this.tileX3] === 0) {
+                var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
+                console.log(tmpItem);
+                map[player.tileY4][player.tileX3] = itemIDs[tmpItem];
+                this.inventory.splice(this.inventorySelected, 1);
+            }
+            this.qreleased = false;
+        }else{
+            this.qreleased = true;
         }
 
         //SPACE KEY
