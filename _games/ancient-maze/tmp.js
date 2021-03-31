@@ -78,6 +78,8 @@ var lightConstant = 0.1;
 var xCameraOffset = 0;
 var yCameraOffset = 0;
 
+var DIFFICULTY = 0.03;
+
 /*
 setInterval(function(){tileSize*=0.995; cameraX = player.gameX*0.995-player.x+player.width*tileSize/2; cameraY = player.gameY*0.995-player.y+player.height*tileSize/2; seglength = tileSize/10;}, 100);
  */
@@ -111,6 +113,7 @@ var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 40];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0, 24, 15, 0, 0, 0];
 
 var itemSpawnRate = [3, 15, 1, 12, 6, 4, 0, 2, 3, 0, 18, 2];
+var enemyRates = [4, 2, 1];
 
 var spikesAnimFrame = 0;
 
@@ -302,9 +305,9 @@ function Player(x, y, width, height){
                 this.weaponOffset = 0;
                 this.weaponOffsetY = -tileSize/4;
             }else if(this.animationFrame === 0){
-                if(this.dir === 1){
+                if(this.dir === 1 || this.dir === 3){
                     this.weaponOffset = -tileSize/20;
-                }else if(this.dir === 0){
+                }else if(this.dir === 0 || this.dir === 2){
                     this.weaponOffset = tileSize/20;
                 }else{
                     this.weaponOffset = 0;
@@ -315,9 +318,9 @@ function Player(x, y, width, height){
                 this.weaponOffset = 0;
                 this.weaponOffsetY = -tileSize/4;
             }else{
-                if(this.dir === 1){
+                if(this.dir === 1 || this.dir === 3){
                     this.weaponOffset = tileSize/20;
-                }else if(this.dir === 0){
+                }else if(this.dir === 0 || this.dir === 2){
                     this.weaponOffset = -tileSize/20;
                 }else{
                     this.weaponOffset = 0;
@@ -352,7 +355,7 @@ function Player(x, y, width, height){
         }
 
         GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0.1);
-        mobSpawnChance = 0.03*(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
+        mobSpawnChance = DIFFICULTY*(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18)+TIME/200000;
         maxMobCount = Math.floor(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
         console.log(maxMobCount, mobSpawnChance);
     };
@@ -360,6 +363,9 @@ function Player(x, y, width, height){
     this.countHealth = function(){
         if(map[this.tileY2][this.tileX3] === 0.63){
             this.health = Math.max(this.health - 1, 0);
+        }
+        if(map[this.tileY2][this.tileX3] === 0.7){
+            playerSpeed = playerSpeedsList[1]*(WIDTH/1600);
         }
     }
 
@@ -879,9 +885,9 @@ function Enemy(tileX, tileY, type){
         this.damage = 10;
         this.attackDelayer = 4;
     }else if(this.type === 2) { //RAT
-        this.moveSpeed = 1*(WIDTH/800);
-        this.attackSpeed = 20;
-        this.paralysisTime = 40;
+        this.moveSpeed = 2.5*(WIDTH/800);
+        this.attackSpeed = 40;
+        this.paralysisTime = 20;
         this.damage = 25;
         this.attackDelayer = 4;
     }
@@ -990,8 +996,8 @@ function Enemy(tileX, tileY, type){
         }
 
         //Spikes do damage
-        if(this.type === 1 && map[this.tileY][this.tileX] === 0.63){
-            this.health-=2;
+        if((this.type !== 0) && map[this.tileY][this.tileX] === 0.63){
+            this.health-=1;
             this.animationFrame = 3;
         }
 
@@ -1013,6 +1019,11 @@ function Enemy(tileX, tileY, type){
 
         if(this.attackTimer === 1){
             this.dealDamage();
+            if(this.type === 2){
+                if(map[this.tileY][this.tileX] === 0){
+                    map[this.tileY][this.tileX] = 0.7;
+                }
+            }
         }
 
         this.gameX = this.tileX*tileSize - cameraX + this.xOffSet + this.size/2;
@@ -1040,12 +1051,12 @@ function Enemy(tileX, tileY, type){
         }
 
 
-        if(frameCount % 30 === 0) {
+        if(frameCount % 5 === 0) {
             if (this.followingPlayer === false) {
                 this.checkPlayerVisible();
             } else {
                 this.path = pathFinding([this.tileX, this.tileY], [player.tileX3, player.tileY2]);
-                console.log(this.path);
+                //console.log(this.path);
             }
         }
 
@@ -1066,6 +1077,7 @@ function Enemy(tileX, tileY, type){
                     this.paralysisTimer = this.paralysisTime;
                     this.health -= player.getItemSelectedDamageValue();
                     this.animationFrame = 3; //Red hit frame
+                    this.animationDir = 0;
                     this.aliveTimer -= this.aliveTimer%7 + 1; //Probably resetting frame
                     if(this.attackTimer > 0){
                         this.attackTimer += this.attackDelayer;
@@ -1076,7 +1088,7 @@ function Enemy(tileX, tileY, type){
         }else{
             var distanceTmp = Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY)));
             if(distanceTmp < tileSize/2) {
-                playerSpeed = 3; //Slow down player when passing by
+                playerSpeed = playerSpeedsList[1]*(WIDTH/800); //Slow down player when passing by
             }else if(distanceTmp < tileSize/4){
                 this.path = [];
                 this.xOffSet = 0;
@@ -1129,9 +1141,9 @@ function Enemy(tileX, tileY, type){
                 if(this.animationFrame >= 3){//3
                     //this.animationDir = -1;
                     this.animationFrame = 0;
-                }else if(this.animationFrame === 0){
-                    this.animationDir = 1;
                 }
+                this.animationDir = 1;
+
             }else if(this.aliveTimer % 9 === 0 && this.animationRunning === false){
                 this.animationFrame = 0;
             }
@@ -1143,21 +1155,21 @@ function Enemy(tileX, tileY, type){
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
         }else if(this.type === 2){
-            if(this.aliveTimer % 6 === 0 && this.animationRunning === true && this.attackTimer < 15 && this.paralysisTimer === 0) {
+            if(this.aliveTimer % 8 === 0 && this.animationRunning === true && this.attackTimer < 15 && this.paralysisTimer === 0) {
                 this.animationFrame += this.animationDir;
                 if(this.animationFrame >= 3){//3
                     //this.animationDir = -1;
                     this.animationFrame = 0;
-                }else if(this.animationFrame === 0){
-                    this.animationDir = 1;
                 }
+                this.animationDir = 1;
+
             }else if(this.aliveTimer % 9 === 0 && this.animationRunning === false){
                 this.animationFrame = 0;
             }
             if(this.animDir === 1){
-                ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*4, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+                ctx.drawImage(tileMap, textureSize*12 + textureSize*this.animationFrame, 0, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
             }else{
-                ctx.drawImage(tileMap, textureSize*8 + textureSize*this.animationFrame, textureSize*4, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
+                ctx.drawImage(tileMap, textureSize*12 + textureSize*this.animationFrame, textureSize, textureSize, textureSize, this.gameX + xCameraOffset - this.size/2 + this.attackOffsetX, this.gameY + yCameraOffset - this.size/2 - this.size/2 + this.attackOffsetY, tileSize, tileSize); //NORMAL
             }
             //ctx.fillStyle = 'red';
             //ctx.fillRect(this.tileX*tileSize - cameraX, this.tileY*tileSize - cameraY, tileSize, tileSize);
@@ -1171,7 +1183,7 @@ function Enemy(tileX, tileY, type){
             theta = Math.atan2((this.tileY * tileSize + tileSize / 2) - (cameraY + player.y), (this.tileX * tileSize + tileSize / 2) - (cameraX + player.x));
             ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
 
-            ctx.beginPath();
+            /*ctx.beginPath();
             ctx.moveTo(0, (this.tileY * tileSize + tileSize / 2) - (cameraY + player.y));
             ctx.lineTo(WIDTH, (this.tileY * tileSize + tileSize / 2) - (cameraY + player.y));
             ctx.stroke();
@@ -1179,7 +1191,7 @@ function Enemy(tileX, tileY, type){
             ctx.beginPath();
             ctx.moveTo((this.tileX * tileSize + tileSize / 2) - (cameraX + player.x), 0);
             ctx.lineTo((this.tileX * tileSize + tileSize / 2) - (cameraX + player.x), HEIGHT);
-            ctx.stroke();
+            ctx.stroke();*/
 
             currentLight = 0;
             this.followingPlayer = true;
@@ -1365,6 +1377,8 @@ function resetVars(){
     SEED = ORIGINALSEED;
 
     GODSATISFACTION = 100;
+
+    TIME = 0;
 
     doorsGenerated = false;
 }
@@ -1641,6 +1655,21 @@ function rndLoot(i, j){
         rnd-=itemSpawnRate[n];
         if(rnd <= 0){
             map[i][j] = itemIDs[n];
+            break;
+        }
+    }
+}
+
+function spawnEnemy(x, y){
+    var total = 0;
+    for(var n = 0; n < enemyRates.length; n++){
+        total+=(0.1*TIME)/enemyRates[n]+enemyRates[n];
+    }
+    var rnd = Math.floor(randomNum()*total);
+    for(var n = 0; n < enemyRates.length; n++){
+        rnd-=(0.1*TIME)/enemyRates[n]+enemyRates[n];
+        if(rnd <= 0){
+            enemies.push(new Enemy(x, y, n));
             break;
         }
     }
@@ -1923,6 +1952,9 @@ function renderTile(i, j){
         if(map[j][i] !== 0.6){
             ctx.drawImage(tileMap, textureSize*2 + textureSize*(map[j][i]*10 - 6)*10, textureSize*8.5, textureSize, textureSize*1.5, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY - tileSize/2, tileSize, tileSize*1.5); //NORMAL
         }
+    }else if(map[j][i] === 0.7){ //cobweb
+        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
+        ctx.drawImage(tileMap, textureSize*5, textureSize*4, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //CARPET
     }
 
     else if(map[j][i] === 1){
@@ -2065,7 +2097,8 @@ function doLighting(){
                             }
                         }
                         if(spawnMob === true){
-                            enemies.push(new Enemy(j, i, 1));
+                            //enemies.push(new Enemy(j, i, 2));
+                            spawnEnemy(j, i);
                             //enemies.push(new Enemy(j, i, 1));
                             player.moveCycle+=10;
                         }
