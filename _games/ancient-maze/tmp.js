@@ -80,6 +80,8 @@ var yCameraOffset = 0;
 
 var DIFFICULTY = 0.03;
 
+var HIGHSCORE = 0;
+
 /*
 setInterval(function(){tileSize*=0.995; cameraX = player.gameX*0.995-player.x+player.width*tileSize/2; cameraY = player.gameY*0.995-player.y+player.height*tileSize/2; seglength = tileSize/10;}, 100);
  */
@@ -109,7 +111,7 @@ var clicked = false;
 var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "WIDE SWORD", "DOUBLE AXE", "RAT MEAT", "BERRIES", "HEALTH POTION", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
 var nutritionValues = [0, 20, 0, 50, 0, 0, 15, 0, 0, 25, 20, 15];
-var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 40];
+var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 65];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0, 24, 15, 0, 0, 0];
 
 var itemSpawnRate = [3, 15, 1, 12, 6, 4, 0, 2, 3, 0, 18, 2];
@@ -136,6 +138,9 @@ var GAMESTATE = "MENU";
 var SWIPEVALUE = 0;
 
 var buttons = [];
+
+var sacrificedItem = -1;
+var sacrificedAnimationFrame = 0;
 
 //TEST
 
@@ -613,6 +618,7 @@ function Player(x, y, width, height){
         }
 
         if(this.inventory.length > this.inventorySelected && this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0) {
+            ctx.font = fontSize3 + 'px quickPixel';
             ctx.textAlign = 'right';
             ctx.fillStyle = 'rgb(50, 50, 50)';
             ctx.fillText("Press Q to DROP ITEM", WIDTH/2 + WIDTH/7, HEIGHT - HEIGHT/25);
@@ -693,6 +699,9 @@ function Player(x, y, width, height){
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
                     GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue(), MAXGODSATISFACTION);
+                    var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
+                    sacrificedItem = itemIDs[tmpItem];
+                    sacrificedAnimationFrame = 0.01;
                     this.inventory.splice(this.inventorySelected, 1);
                     this.ereleased = false;
                 }
@@ -763,6 +772,11 @@ function Player(x, y, width, height){
             console.log("YOU WIN!");
             trMaker.nextState = "WIN";
             trMaker.transitioning = true;
+            var tmpHScore = localStorage.getItem("HighScoreMaze");
+            if(TIME < tmpHScore || tmpHScore === 0){
+                localStorage.setItem("HighScoreMaze", TIME.toString());
+                HIGHSCORE = TIME;
+            }
             this.frozen = true;
         }
         if(this.health <= 0){
@@ -1074,7 +1088,7 @@ function Enemy(tileX, tileY, type){
         if(frameCount % 5 === 0) {
             if (this.followingPlayer === false) {
                 this.checkPlayerVisible();
-            } else {
+            } else if(!player.frozen){
                 this.path = pathFinding([this.tileX, this.tileY], [player.tileX3, player.tileY2]);
                 //console.log(this.path);
             }
@@ -1439,7 +1453,12 @@ function generateMap(){
                 if((i === mapheight/2 - 1 && j === mapwidth/2 - 1) || (i === mapheight/2 - 1 && j === mapwidth/2 + 1)){
                     temparray.push(1.97);
                 }else if(i >= mapheight/2 - 1 && i <= mapheight/2 + 1 && j >= mapwidth/2 - 1 && j <= mapwidth/2 + 1) {
-                    temparray.push(0.5);
+                    if(j === mapwidth/2 && i === mapheight/2 - 1){
+                        temparray.push(5.2); //SACRIFICE TILE
+                    }else{
+                        temparray.push(0.5);
+                    }
+
                 }else{
                     temparray.push(5);
                 }
@@ -1954,6 +1973,7 @@ function renderTile(i, j){
     }else if(map[j][i] === 0.5){
         ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //CARPET
+        //ctx.drawImage(tileMap, textureSize, textureSize * 3, textureSize, textureSize, i * tileSize + xCameraOffset + offset - cameraX, j * tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
     }//WALLS
 
     else if(Math.floor(map[j][i]*10) === 6){
@@ -2005,9 +2025,10 @@ function renderTile(i, j){
     }
 
     else if(map[j][i] === 1.97){ //LIGHTS
-        ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
+        //ctx.drawImage(tileMap, 0, textureSize*2, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
         ctx.drawImage(tileMap, 0, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize + tileSize/2, tileSize, tileSize*1.5);
+        //ctx.drawImage(tileMap, textureSize, textureSize * 3, textureSize, textureSize, i * tileSize + xCameraOffset + offset - cameraX, j * tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
     }
 
     else if(map[j][i] === 1.8){//DOOR WALL
@@ -2046,7 +2067,27 @@ function renderTile(i, j){
         ctx.fill();
         ctx.drawImage(tileMap, Math.round((map[j][i]-4)*10)*textureSize, textureSize*5.5 + textureSize*(Math.round((map[j][i]-4)*100-Math.round((map[j][i]-4)*10)*10)/100)*100, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/3 - Math.round(Math.sin(frameCount/25)*5), tileSize, tileSize); //NORMAL
     }else if(Math.floor(map[j][i]) === 5){
-        ctx.drawImage(tileMap, textureSize, textureSize*3, textureSize, textureSize, i*tileSize+ xCameraOffset + offset - cameraX, j*tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
+        if(map[j][i] !== 5.2) {
+            ctx.drawImage(tileMap, textureSize, textureSize * 3, textureSize, textureSize, i * tileSize + xCameraOffset + offset - cameraX, j * tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
+            if(map[j][i] === 5.21) {
+                ctx.drawImage(tileMap, textureSize*2, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY, tileSize, tileSize); //NORMAL
+                map[j][i] = 5.2;
+            }
+        }else{
+            ctx.fillStyle = 'rgba(200, 220, 255, 0.5)';
+            ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.1*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*8, (0.8-sacrificedAnimationFrame*0.2)*tileSize, sacrificedAnimationFrame*tileSize*6);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.2*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*9, (0.8-sacrificedAnimationFrame*0.4)*tileSize, sacrificedAnimationFrame*tileSize*5);
+
+            ctx.globalAlpha = Math.max(0, 1-sacrificedAnimationFrame*1.5);
+            if(sacrificedAnimationFrame > 0) {
+                ctx.drawImage(tileMap, Math.round((sacrificedItem - 4) * 10) * textureSize, textureSize * 5.5 + textureSize * (Math.round((sacrificedItem - 4) * 100 - Math.round((sacrificedItem - 4) * 10) * 10) / 100) * 100, textureSize, textureSize, i * tileSize + offset + xCameraOffset - cameraX + tileSize*0.5*(sacrificedAnimationFrame), j * tileSize + offset + yCameraOffset - cameraY + tileSize / 2 - sacrificedAnimationFrame * tileSize/2 - tileSize*1.5, tileSize*(1-sacrificedAnimationFrame), tileSize); //NORMAL
+                //yCameraOffset = tileSize*sacrificedAnimationFrame;
+            }
+            ctx.globalAlpha = 1;
+            map[j][i] = 5.21;
+        }
     }
 }
 
@@ -2293,6 +2334,13 @@ function game(){
             player.update();
         }
 
+        if(sacrificedAnimationFrame > 0){
+            sacrificedAnimationFrame = Math.min(sacrificedAnimationFrame*1.09, 1);
+            if(sacrificedAnimationFrame === 1){
+                sacrificedAnimationFrame = 0;
+            }
+        }
+
         cameraX = Math.round(cameraX);
         cameraY = Math.round(cameraY);
 
@@ -2348,6 +2396,14 @@ function game(){
             }
         }
 
+        for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
+            for (var j = Math.max(player.tileY - 4, 0); j <= Math.min(player.tileY + 5, mapheight); j++) {
+                if (map[j][i]=== 5.2) {
+                    renderTile(i, j);
+                }
+            }
+        }
+
         if (gameRunning === true) {
 
             frameCount++;
@@ -2359,6 +2415,16 @@ function game(){
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
             doLighting();
+
+
+            if(sacrificedAnimationFrame > 0) {
+                ctx.globalAlpha = Math.max(0, 1 - Math.pow(sacrificedAnimationFrame, 0.5))/5;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                ctx.globalAlpha = 1;
+            }else{
+                yCameraOffset = Math.floor(yCameraOffset*0.9);
+            }
 
             player.renderGUI();
 
@@ -2408,7 +2474,7 @@ function player_give(name){
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
-
+gameRunning = false;
 function Start(){
     if(gameRunning === false){
         SCORE = 0;
@@ -2422,10 +2488,13 @@ function Start(){
         //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
         //document.getElementById("scorediv").removeAttribute("hidden");
         //document.getElementById("gamescorediv").removeAttribute("hidden");
-        HIGHSCORE = localStorage.getItem("HighScoreBusiness");
+        if(!isNaN(parseInt(localStorage.getItem("HighScoreMaze")))){
+            HIGHSCORE = parseInt(localStorage.getItem("HighScoreMaze"));
+        }
         gameRunning = true;
     }
 }
+Start();
 
 /* EXAMPLE DIV HIDE
  function ShowInstructions(){
