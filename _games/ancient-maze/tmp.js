@@ -934,12 +934,10 @@ function Enemy(tileX, tileY, type){
     this.dead = false;
 
     this.path = [];
-    this.followDelay = -1;
     this.followingPlayer = false;
 
     this.paralysisTimer = 0;
 
-    this.attacking = false;
     this.attackTimer = 0;
 
     this.animationFrame = 0;
@@ -967,10 +965,8 @@ function Enemy(tileX, tileY, type){
                 if(this.path[l].y !== this.tileY || this.path[l].x !== this.tileX){
                     if(this.path[l].y < this.tileY && (Math.floor(map[this.tileY - 1][this.tileX]) === 0 || Math.floor(map[this.tileY - 1][this.tileX]) === 4)){
                         this.moveDirY = -1;
-                        this.dir = 1;
                     }else if(this.path[l].y > this.tileY && (Math.floor(map[this.tileY + 1][this.tileX]) === 0 || Math.floor(map[this.tileY + 1][this.tileX]) === 4)){
                         this.moveDirY = 1;
-                        this.dir = 3;
                     }else{
                         this.moveDirY = 0;
                         this.yOffset = 0;
@@ -987,13 +983,11 @@ function Enemy(tileX, tileY, type){
                             ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = -1;
                             this.animDir = -1;
-                            this.dir = 4;
                         }else if(this.path[l].x > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
                             ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
                             ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = 1;
                             this.animDir = 1;
-                            this.dir = 2;
                         }else{
                             this.moveDirX = 0;
                             this.xOffset = 0;
@@ -1017,14 +1011,6 @@ function Enemy(tileX, tileY, type){
                     }
                 }
             }
-
-            if(Math.floor(map[this.tileY][this.tileX]) === 1){
-                this.dead = true;
-            }
-
-            if(this.followDelay > 0){
-                this.followDelay--;
-            }
         }else{
             this.paralysisTimer--;
         }
@@ -1037,11 +1023,6 @@ function Enemy(tileX, tileY, type){
 
         if(this.attackTimer > 0){
             this.attackTimer--;
-        }
-        if(this.attackTimer < 10 && this.attackTimer > 0){
-            this.attacking = true;
-        }else{
-            this.attacking = false;
         }
 
         if(this.attackOffsetX !== 0){
@@ -1080,7 +1061,7 @@ function Enemy(tileX, tileY, type){
             }
         }
 
-        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize && this.attackTimer === 0 && this.followingPlayer === true){
+        if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize && this.attackTimer === 0 && this.followingPlayer === true && this.xOffSet === 0 && this.yOffSet === 0){
             this.startAttack();
         }
 
@@ -1121,7 +1102,7 @@ function Enemy(tileX, tileY, type){
             }
         }else{
             var distanceTmp = Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY)));
-            if(distanceTmp < tileSize/2) {
+            if(distanceTmp < tileSize) {
                 playerSpeed = playerSpeedsList[1]*(WIDTH/800); //Slow down player when passing by
             }else if(distanceTmp < tileSize/4){
                 this.path = [];
@@ -1139,10 +1120,9 @@ function Enemy(tileX, tileY, type){
 
     this.dealDamage = function(){
         if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
-            player.health = Math.max(0, player.health - this.damage);
+            if(DEBUG === false){player.health = Math.max(0, player.health - this.damage);}
             this.attackOffsetX+=20*this.moveDirX;
             this.attackOffsetY+=20*this.moveDirY;
-            this.attacking = false;
             player.stunTimer = 8;
             player.stunY = -8;
         }
@@ -1229,12 +1209,10 @@ function Enemy(tileX, tileY, type){
 
             currentLight = 0;
             this.followingPlayer = true;
-            this.followDelay = 10;
             //this.path.push([player.tileY2, player.tileX2]);
             for (var k = 0; k < rayseg; k++) {
                 if (Math.floor(map[Math.floor((cameraY + player.y + (seglength * (k + 1)) * Math.sin(theta)) / tileSize)][Math.floor((cameraX + player.x + (seglength * (k + 1)) * Math.cos(theta)) / tileSize)]) === 1) {
                     this.followingPlayer = false;
-                    this.followDelay = -1;
                     this.path = [];
                     break;
                 }
@@ -1398,6 +1376,12 @@ function loadFont(){
 function randomNum() {
     var x = Math.sin(SEED++) * 10000;
     return x - Math.floor(x);
+}
+
+function sign(x){
+    if(x > 0){return 1;}
+    else if(x < 0){return -1;}
+    else{return 0;}
 }
 
 function resetVars(){
