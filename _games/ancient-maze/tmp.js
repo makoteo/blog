@@ -673,6 +673,19 @@ function Player(x, y, width, height){
         ctx.fillStyle = 'rgba(0, 0, 0)';
         ctx.fillText("GODS' SATISFACTION", WIDTH/2, HEIGHT/13);
 
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.translate(WIDTH/2, HEIGHT/2);
+        var tmptheta = Math.atan2(this.gameY - mapwidth/2*tileSize, this.gameX - mapheight/2*tileSize) - Math.PI/2;
+        ctx.rotate(tmptheta);
+        ctx.beginPath();
+        ctx.lineTo(-WIDTH/100, -WIDTH/6);
+        ctx.lineTo(0, -WIDTH/40-WIDTH/6);
+        ctx.lineTo(WIDTH/100, -WIDTH/6);
+        ctx.lineTo(0, -WIDTH/6);
+        ctx.fill();
+        ctx.rotate(-tmptheta);
+        ctx.translate(-WIDTH/2, -HEIGHT/2);
+
     };
 
     this.attack = function(){
@@ -1471,8 +1484,11 @@ function resetVars(){
     yCameraOffset = 0;
     player = new Player(WIDTH/2, HEIGHT/2, 0.9, 1); //Add the Player
 
-    cameraX = tileSize*(mapwidth-10)/2;
-    cameraY = tileSize*(mapheight-6)/2;
+    player.gameX = mapwidth/2*tileSize;
+    player.gameY = mapheight/2*tileSize;
+
+    cameraX = (player.gameX-player.x+player.width*tileSize/2);
+    cameraY = (player.gameY-player.y+player.height*tileSize/2);
     ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
     SEED = ORIGINALSEED;
 
