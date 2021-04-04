@@ -1011,14 +1011,16 @@ function Enemy(tileX, tileY, type){
                     }
                 }
             }
-            if(this.path.length === 0){
+            if(this.moveDirX === 0) {
                 //This is basically to finish step so it doesn't get stuck in walls.
-                if(Math.abs(this.xOffSet) < tileSize - this.moveSpeed && this.xOffSet !== 0){
-                    this.xOffSet-=sign(this.xOffSet)*this.moveSpeed;
-                }else{
+                if (Math.abs(this.xOffSet) > 0 + this.moveSpeed) {
+                    this.xOffSet -= sign(this.xOffSet) * this.moveSpeed;
+                } else {
                     this.xOffSet = 0;
                 }
-                if(Math.abs(this.yOffSet) < tileSize - this.moveSpeed && this.yOffSet !== 0){
+            }
+            if(this.moveDirY === 0){
+                if(Math.abs(this.yOffSet) > 0 + this.moveSpeed){
                     this.yOffSet-=sign(this.yOffSet)*this.moveSpeed;
                 }else{
                     this.yOffSet = 0;
@@ -1119,7 +1121,7 @@ function Enemy(tileX, tileY, type){
             var distanceTmp = Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY)));
             if(distanceTmp < tileSize) {
                 playerSpeed = playerSpeedsList[1]*(WIDTH/800); //Slow down player when passing by
-            }else if(distanceTmp < tileSize){
+            }else if(distanceTmp < tileSize*0.5){
                 this.path = [];
                 this.xOffSet = 0;
                 this.yOffSet = 0;
