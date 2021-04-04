@@ -142,6 +142,8 @@ var buttons = [];
 var sacrificedItem = -1;
 var sacrificedAnimationFrame = 0;
 
+var FULLSCREEN = false;
+
 //TEST
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -640,14 +642,14 @@ function Player(x, y, width, height){
         //HEALTH AND HUNGER
 
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.maxHealth*2, HEIGHT/20);
-        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.maxHunger*2, HEIGHT/20);
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.maxHealth*2*WIDTH/1024, HEIGHT/20);
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.maxHunger*2*WIDTH/1024, HEIGHT/20);
 
         ctx.fillStyle = 'rgba(150, 0, 0, 0.8)';
-        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.health*2, HEIGHT/20);
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40, this.health*2*WIDTH/1024, HEIGHT/20);
 
         ctx.fillStyle = 'rgba(0, 100, 0, 0.8)';
-        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2, HEIGHT/20);
+        ctx.fillRect(WIDTH/100, this.inventoryY + HEIGHT/40 + HEIGHT/20 + HEIGHT/100, this.hunger*2*WIDTH/1024, HEIGHT/20);
 
 
         ctx.font = HEIGHT/18 + 'px quickPixel';
@@ -659,10 +661,10 @@ function Player(x, y, width, height){
         //GOD SATISFACTION
 
         ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5, HEIGHT/40, MAXGODSATISFACTION*3, HEIGHT/15);
+        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5*WIDTH/1024, HEIGHT/40, MAXGODSATISFACTION*3*WIDTH/1024, HEIGHT/15);
 
         ctx.fillStyle = 'rgba(240, 240, 240, 0.8)';
-        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5, HEIGHT/40, GODSATISFACTION*3, HEIGHT/15);
+        ctx.fillRect(WIDTH/2 - MAXGODSATISFACTION*1.5*WIDTH/1024, HEIGHT/40, GODSATISFACTION*3*WIDTH/1024, HEIGHT/15);
 
         ctx.font = HEIGHT/10 + 'px quickPixel';
         ctx.textAlign = 'center';
@@ -1260,15 +1262,28 @@ function Button(x, y, text, type, action){
     this.progress = 0;
 
     this.widener = 0;
+
+    this.color = 'white';
     this.update = function(){
         if(SWIPEVALUE === 0) {
-            if (this.type === 1) {
+            if (this.type === 1 || Math.floor(this.type) === 3) {
                 if (mousePosX > this.x - this.width / 2 - this.widener / 2 && mousePosX < this.x + this.width / 2 + this.widener / 2 && mousePosY > this.y - this.height / 2 && mousePosY < this.y + this.height / 2) {
                     this.widener = Math.min(this.widener + 5, 20);
-                    if (clicked) {
-                        generateMap();
-                        trMaker.nextState = this.action;
-                        trMaker.transitioning = true;
+                    if(this.type === 1) {
+                        if (clicked) {
+                            generateMap();
+                            trMaker.nextState = this.action;
+                            trMaker.transitioning = true;
+                        }
+                    }else if(Math.floor(this.type) === 3){
+                        if(clicked) {
+                            for (var i in buttons) {
+                                if (buttons[i].type === this.type) {
+                                    buttons[i].color = 'white';
+                                }
+                            }
+                            this.color = 'green';
+                        }
                     }
                 } else {
                     this.widener = Math.max(this.widener - 5, 0);
@@ -1311,6 +1326,15 @@ function Button(x, y, text, type, action){
             ctx.textAlign = 'center';
             ctx.font = HEIGHT / 25 + "px quickPixel";
             ctx.fillText("Generating map...", this.x + SWIPEVALUE * WIDTH, this.y + this.height);
+        }else if(Math.floor(this.type) === 3){
+            ctx.strokeStyle = this.color;
+            ctx.fillStyle = this.color;
+            ctx.lineWidth = 5;
+            ctx.strokeRect(this.x - this.width / 2 - this.widener / 2 + SWIPEVALUE * WIDTH, this.y - this.height / 2, this.width + this.widener, this.height);
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'center';
+            ctx.font = HEIGHT / 10 + "px quickPixel";
+            ctx.fillText(this.text, this.x + SWIPEVALUE * WIDTH, this.y + this.height / 4);
         }
     }
 }
@@ -1368,6 +1392,18 @@ function TransitionMaker(){
             loadMenu();
         }else if(this.nextState === "GAME"){
             TIME = 0;
+        }else if(this.nextState === "CONFIG"){
+            buttons = [];
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
+            buttons.push(new Button(WIDTH/2 - WIDTH/4, HEIGHT/2 - HEIGHT/4, "SMALL", 3.1, "sml"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/4, "MEDIUM", 3.1, "md"));
+            buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2 - HEIGHT/4, "LARGE", 3.1, "lg"));
+
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/3, "PLAY", 1, "LOAD"));
+        }else if(this.nextState === "OPTIONS"){
+            //buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
+            openFullScreen();
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "MENU", 1, "MENU"));
         }
     }
 }
@@ -1375,8 +1411,8 @@ function TransitionMaker(){
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 function loadMenu(){
-    buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "LOAD"));
-    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "options"));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "CONFIG"));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "OPTIONS"));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "options"));
 }
 loadMenu();
@@ -2300,7 +2336,7 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD" || GAMESTATE === "WIN" || GAMESTATE === "LOSS"){
+    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD" || GAMESTATE === "WIN" || GAMESTATE === "LOSS" || GAMESTATE === "CONFIG" || GAMESTATE === "OPTIONS"){
         if(GAMESTATE === "LOAD"){
             for (var i = 0; i < creators.length; i++) {
                 if (creators[i].dead === false) {
@@ -2535,6 +2571,52 @@ function click(){
 document.getElementById("myCanvas").onmousemove = findScreenCoords;
 document.getElementById("myCanvas").onclick = click;
 
+function openFullScreen(){
+    if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+    } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+    } else if (canvas.msRequestFullscreen) {
+        canvas.msRequestFullscreen();
+    }
+}
+
+canvas.addEventListener("fullscreenchange", function() {
+    FULLSCREEN = !FULLSCREEN;
+    if(FULLSCREEN){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        canvas.position = 'absolute';
+        canvas.left = '0';
+        canvas.top = '0';
+    }else{
+        canvas.width = 1024;
+        canvas.height = 576;
+
+        canvas.position = 'relative';
+    }
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
+    console.log(canvas.getBoundingClientRect().top);
+
+    cameraX = (player.gameX-player.x+player.width*tileSize/2)*(Math.floor(72*(WIDTH/1024))/tileSize);
+    cameraY = (player.gameY-player.y+player.height*tileSize/2)*(Math.floor(72*(WIDTH/1024))/tileSize);
+
+    tileSize = Math.floor(72*(WIDTH/1024));
+
+    grd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, 10, WIDTH/2, HEIGHT/2, tileSize*5);
+    grd.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    grd.addColorStop(1, "black");
+
+    fontSize1 = WIDTH/23;
+    fontSize2 = WIDTH/13.3;
+    fontSize3 = WIDTH/26.6;
+
+    buttons = [];
+    trMaker.nextState = "MENU";
+    trMaker.transitioning = true;
+}, false);
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
 
