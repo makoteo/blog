@@ -143,6 +143,8 @@ var sacrificedItem = -1;
 var sacrificedAnimationFrame = 0;
 
 var FULLSCREEN = false;
+var SETDIFFICULTY = "e";
+var MAPSIZE = "sml";
 
 //TEST
 
@@ -700,7 +702,7 @@ function Player(x, y, width, height){
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
-                    GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue(), MAXGODSATISFACTION);
+                    GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue()*1.3, MAXGODSATISFACTION);
                     var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
                     sacrificedItem = itemIDs[tmpItem];
                     sacrificedAnimationFrame = 0.01;
@@ -716,7 +718,7 @@ function Player(x, y, width, height){
         if(keys && keys[81] && this.qreleased === true){
             if(this.inventory.length > this.inventorySelected && map[this.tileY3][this.tileX3] === 0) {
                 var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
-                console.log(tmpItem);
+                //console.log(tmpItem);
                 map[player.tileY4][player.tileX3] = itemIDs[tmpItem];
                 this.inventory.splice(this.inventorySelected, 1);
             }
@@ -1091,7 +1093,7 @@ function Enemy(tileX, tileY, type){
                 this.path = pathFinding([this.tileX, this.tileY], [player.tileX3, player.tileY2]);
                 //console.log(this.path);
             }
-            console.log(this.xOffSet, this.yOffSet)
+            //console.log(this.xOffSet, this.yOffSet)
         }
 
         if(Math.abs(player.tileX - this.tileX) > this.despawnDistance || Math.abs(player.tileY - this.tileY) > this.despawnDistance){
@@ -1264,6 +1266,9 @@ function Button(x, y, text, type, action){
     this.widener = 0;
 
     this.color = 'white';
+
+    if(this.type === 3.1 && this.action === MAPSIZE){this.color = 'green';}
+    if(this.type === 3.2 && this.action === SETDIFFICULTY){this.color = 'green';}
     this.update = function(){
         if(SWIPEVALUE === 0) {
             if (this.type === 1 || Math.floor(this.type) === 3) {
@@ -1277,12 +1282,24 @@ function Button(x, y, text, type, action){
                         }
                     }else if(Math.floor(this.type) === 3){
                         if(clicked) {
+                            if(this.action === "fullscreen"){
+                                if(FULLSCREEN){
+                                    closeFullScreen();
+                                }else{
+                                    openFullScreen();
+                                }
+                            }
                             for (var i in buttons) {
                                 if (buttons[i].type === this.type) {
                                     buttons[i].color = 'white';
                                 }
                             }
                             this.color = 'green';
+                            if(this.type === 3.1){
+                                MAPSIZE = this.action;
+                            }else if(this.type === 3.2){
+                                SETDIFFICULTY = this.action;
+                            }
                         }
                     }
                 } else {
@@ -1292,6 +1309,11 @@ function Button(x, y, text, type, action){
                 if (this.progress >= 1) {
                     trMaker.nextState = this.action;
                     trMaker.transitioning = true;
+                }
+            }
+            if(this.type === 3){
+                if(this.action === "fullscreen"){
+                    if(FULLSCREEN){this.color = 'green';}else{this.color = 'white';}
                 }
             }
         }
@@ -1399,10 +1421,17 @@ function TransitionMaker(){
             buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/4, "MEDIUM", 3.1, "md"));
             buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2 - HEIGHT/4, "LARGE", 3.1, "lg"));
 
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3 + HEIGHT/4, "DIFFICULTY", 0.5, ""));
+            buttons.push(new Button(WIDTH/2 - WIDTH/4, HEIGHT/2, "EASY", 3.2, "e"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "MEDIUM", 3.2, "m"));
+            buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2, "HARD", 3.2, "h"));
+
             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/3, "PLAY", 1, "LOAD"));
         }else if(this.nextState === "OPTIONS"){
+            buttons = [];
             //buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
-            openFullScreen();
+            //openFullScreen();
+            buttons.push(new Button(WIDTH/2, HEIGHT/2, "FULLSCREEN", 3, "fullscreen"));
             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "MENU", 1, "MENU"));
         }
     }
@@ -1458,6 +1487,56 @@ function generateMap(){
     loadFont();
     creators = [];
     map = [];
+
+    if(MAPSIZE === "md"){
+        mapdimensions = 90; //70, 90, 110
+
+        mapwidth = mapdimensions;
+        mapheight = mapdimensions;
+
+        roomsize = 8; //8
+
+        room2size = 40; //36, 40, 40
+        room2 = true; //true, true, true
+
+        room3size = 72; //null, null, 72
+        room3 = false; //false, false, true
+    }else if(MAPSIZE === "lg"){
+        mapdimensions = 110; //70, 90, 110
+
+        mapwidth = mapdimensions;
+        mapheight = mapdimensions;
+
+        roomsize = 8; //8
+
+        room2size = 40; //36, 40, 40
+        room2 = true; //true, true, true
+
+        room3size = 72; //null, null, 72
+        room3 = true; //false, false, true
+    }else{
+        mapdimensions = 70; //70, 90, 110
+
+        mapwidth = mapdimensions;
+        mapheight = mapdimensions;
+
+        roomsize = 8; //8
+
+        room2size = 36; //36, 40, 40
+        room2 = true; //true, true, true
+
+        room3size = 72; //null, null, 72
+        room3 = false; //false, false, true
+    }
+
+    if(SETDIFFICULTY === "m"){
+        DIFFICULTY = 0.06;
+    }else if(SETDIFFICULTY === "h"){
+        DIFFICULTY = 0.09;
+    }else{
+        DIFFICULTY = 0.03;
+    }
+
     resetVars();
     creators.push(new Creator(1, 1, false));
     creators.push(new Creator(mapwidth-1, mapheight-1, false));
@@ -2581,6 +2660,17 @@ function openFullScreen(){
     }
 }
 
+function closeFullScreen(){
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen();
+    }
+}
+
+
 canvas.addEventListener("fullscreenchange", function() {
     FULLSCREEN = !FULLSCREEN;
     if(FULLSCREEN){
@@ -2598,10 +2688,13 @@ canvas.addEventListener("fullscreenchange", function() {
     }
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
-    console.log(canvas.getBoundingClientRect().top);
+    //console.log(canvas.getBoundingClientRect().top);
 
     cameraX = (player.gameX-player.x+player.width*tileSize/2)*(Math.floor(72*(WIDTH/1024))/tileSize);
     cameraY = (player.gameY-player.y+player.height*tileSize/2)*(Math.floor(72*(WIDTH/1024))/tileSize);
+
+    player.x = WIDTH/2;
+    player.y = HEIGHT/2;
 
     tileSize = Math.floor(72*(WIDTH/1024));
 
@@ -2613,9 +2706,18 @@ canvas.addEventListener("fullscreenchange", function() {
     fontSize2 = WIDTH/13.3;
     fontSize3 = WIDTH/26.6;
 
-    buttons = [];
-    trMaker.nextState = "MENU";
-    trMaker.transitioning = true;
+    player.inventoryX = WIDTH - WIDTH/3;
+    player.inventoryY = HEIGHT- HEIGHT/5;
+    player.inventorySize = WIDTH/10;
+    player.inventoryOffset = WIDTH/100;
+
+    player.inventoryItemOffset = WIDTH/100;
+
+    if(GAMESTATE !== "GAME") {
+        buttons = [];
+        trMaker.nextState = "OPTIONS";
+        trMaker.transitioning = true;
+    }
 }, false);
 
 // ---------------------------------------------------------- RELOAD FUNCTION ------------------------------------------------------------------------ //
