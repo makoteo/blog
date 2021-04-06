@@ -1,6 +1,6 @@
 //Copyright (c) Martin Feranec - 2020
 
-var versionCode = "Alpha 0.96  Item Update";
+var versionCode = "Alpha 0.97 Menu Update";
 var WIDTH = 1024;//800
 var HEIGHT = 576;//450
 var gameRunning = true;
@@ -114,7 +114,7 @@ var nutritionValues = [0, 20, 0, 50, 0, 0, 15, 0, 0, 25, 20, 15];
 var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 65];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0, 24, 15, 0, 0, 0];
 
-var itemSpawnRate = [3, 15, 1, 12, 6, 4, 0, 2, 3, 0, 18, 2];
+var itemSpawnRate = [3, 16, 1, 14, 7, 4, 0, 2, 3, 0, 19, 2];
 var enemyRates = [4, 2, 1];
 
 var spikesAnimFrame = 0;
@@ -145,6 +145,8 @@ var sacrificedAnimationFrame = 0;
 var FULLSCREEN = false;
 var SETDIFFICULTY = "e";
 var MAPSIZE = "sml";
+var SCARCELOOT = false;
+var MADGODS = 0;
 
 //TEST
 
@@ -715,7 +717,7 @@ function Player(x, y, width, height){
             //SACRIFICE
             else if(this.tileY3 < mapheight && this.tileY3 > -1 && map[this.tileY3][this.tileX3] === 0.5 && this.ereleased === true){
                 if(this.inventorySelected < this.inventory.length){
-                    GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue()*1.3, MAXGODSATISFACTION);
+                    GODSATISFACTION = Math.min(GODSATISFACTION + this.getItemSelectedSacrificeValue()*1.3 - 0.3*MADGODS, MAXGODSATISFACTION);
                     var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
                     sacrificedItem = itemIDs[tmpItem];
                     sacrificedAnimationFrame = 0.01;
@@ -729,10 +731,10 @@ function Player(x, y, width, height){
 
         //Q KEY
         if(keys && keys[81] && this.qreleased === true){
-            if(this.inventory.length > this.inventorySelected && map[this.tileY3][this.tileX3] === 0) {
+            if(this.inventory.length > this.inventorySelected && map[this.tileY4][this.tileX3] === 0) {
                 var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
                 //console.log(tmpItem);
-                map[player.tileY4][player.tileX3] = itemIDs[tmpItem];
+                map[this.tileY4][this.tileX3] = itemIDs[tmpItem];
                 this.inventory.splice(this.inventorySelected, 1);
             }
             this.qreleased = false;
@@ -995,12 +997,12 @@ function Enemy(tileX, tileY, type){
                         this.yOffSet = 0;
                     }
                     if(this.moveDirY === 0){
-                        if(this.path[l].x < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4) && this.moveDirY === 0) ||
+                        if(this.path[l].x < this.tileX && (((Math.floor(map[this.tileY][this.tileX - 1]) === 0 || Math.floor(map[this.tileY][this.tileX - 1]) === 4)) ||
                             ((Math.floor(map[this.tileY + 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX - 1]) === 4) && this.moveDirY === 1) ||
                             ((Math.floor(map[this.tileY - 1][this.tileX - 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX - 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = -1;
                             this.animDir = -1;
-                        }else if(this.path[l].x > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4) && this.moveDirY === 0) ||
+                        }else if(this.path[l].x > this.tileX && (((Math.floor(map[this.tileY][this.tileX + 1]) === 0 || Math.floor(map[this.tileY][this.tileX + 1]) === 4)) ||
                             ((Math.floor(map[this.tileY + 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY + 1][this.tileX + 1]) === 4) && this.moveDirY === 1) ||
                             ((Math.floor(map[this.tileY - 1][this.tileX + 1]) === 0 || Math.floor(map[this.tileY - 1][this.tileX + 1]) === 4) && this.moveDirY === -1))){
                             this.moveDirX = 1;
@@ -1302,9 +1304,16 @@ function Button(x, y, text, type, action){
                                     openFullScreen();
                                 }
                             }
-                            for (var i in buttons) {
-                                if (buttons[i].type === this.type) {
-                                    buttons[i].color = 'white';
+                            if(this.action === "scarceloot"){
+                                SCARCELOOT = !SCARCELOOT;
+                            }else if(this.action === "madgods"){
+                                MADGODS = Math.abs(MADGODS-1);
+                            }
+                            if(this.type !== 3){
+                                for (var i in buttons) {
+                                    if (buttons[i].type === this.type) {
+                                        buttons[i].color = 'white';
+                                    }
                                 }
                             }
                             this.color = 'green';
@@ -1327,6 +1336,12 @@ function Button(x, y, text, type, action){
             if(this.type === 3){
                 if(this.action === "fullscreen"){
                     if(FULLSCREEN){this.color = 'green';}else{this.color = 'white';}
+                }
+                if(this.action === "scarceloot"){
+                    if(SCARCELOOT){this.color = 'green';}else{this.color = 'white';}
+                }
+                if(this.action === "madgods"){
+                    if(MADGODS){this.color = 'green';}else{this.color = 'white';}
                 }
             }
         }
@@ -1429,17 +1444,21 @@ function TransitionMaker(){
             TIME = 0;
         }else if(this.nextState === "CONFIG"){
             buttons = [];
-            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0, ""));
             buttons.push(new Button(WIDTH/2 - WIDTH/4, HEIGHT/2 - HEIGHT/4, "SMALL", 3.1, "sml"));
             buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/4, "MEDIUM", 3.1, "md"));
             buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2 - HEIGHT/4, "LARGE", 3.1, "lg"));
 
-            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3 + HEIGHT/4, "DIFFICULTY", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3 + HEIGHT/4, "DIFFICULTY", 0, ""));
             buttons.push(new Button(WIDTH/2 - WIDTH/4, HEIGHT/2, "EASY", 3.2, "e"));
             buttons.push(new Button(WIDTH/2, HEIGHT/2, "MEDIUM", 3.2, "m"));
             buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2, "HARD", 3.2, "h"));
 
-            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/3, "PLAY", 1, "LOAD"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3 + HEIGHT/2, "EXTRA", 0, ""));
+            buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/4, "RARE LOOT", 3, "scarceloot"));
+            buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/4, "MAD GODS", 3, "madgods"));
+
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/2.5, "PLAY", 1, "LOAD"));
         }else if(this.nextState === "OPTIONS"){
             buttons = [];
             //buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
@@ -1551,6 +1570,12 @@ function generateMap(){
         DIFFICULTY = 0.09;
     }else{
         DIFFICULTY = 0.03;
+    }
+
+    if(SCARCELOOT === true){
+        lootChances = 0.042;
+    }else{
+        lootChances = 0.09;
     }
 
     resetVars();
@@ -2206,14 +2231,30 @@ function renderTile(i, j){
                 map[j][i] = 5.2;
             }
         }else{
-            ctx.fillStyle = 'rgba(200, 220, 255, 0.5)';
-            ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.1*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*8, (0.8-sacrificedAnimationFrame*0.2)*tileSize, sacrificedAnimationFrame*tileSize*6);
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.2*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*9, (0.8-sacrificedAnimationFrame*0.4)*tileSize, sacrificedAnimationFrame*tileSize*5);
-
             ctx.globalAlpha = Math.max(0, 1-sacrificedAnimationFrame*1.5);
             if(sacrificedAnimationFrame > 0) {
+                ctx.fillStyle = 'rgba(200, 220, 255, 0.2)';
+                ctx.beginPath();
+                ctx.moveTo(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.1*tileSize + tileSize/2 -0.5*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 +0.5*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 +1.5*tileSize + 4*tileSize*sacrificedAnimationFrame, j*tileSize + yCameraOffset + offset - cameraY + tileSize - tileSize*8 - sacrificedAnimationFrame*tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 -1.5*tileSize - 4*tileSize*sacrificedAnimationFrame, j*tileSize + yCameraOffset + offset - cameraY + tileSize - tileSize*8 - sacrificedAnimationFrame*tileSize);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(200, 220, 255, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.1*tileSize + tileSize/2 -0.5*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 +0.5*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 +1.5*tileSize + 2*tileSize*sacrificedAnimationFrame, j*tileSize + yCameraOffset + offset - cameraY + tileSize - tileSize*8 - sacrificedAnimationFrame*tileSize);
+                ctx.lineTo(i*tileSize+ xCameraOffset + offset - cameraX - sacrificedAnimationFrame*0.1*tileSize + tileSize/2 -1.5*tileSize - 2*tileSize*sacrificedAnimationFrame, j*tileSize + yCameraOffset + offset - cameraY + tileSize - tileSize*8 - sacrificedAnimationFrame*tileSize);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(200, 220, 255, 0.5)';
+                ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.1*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*8, (0.8-sacrificedAnimationFrame*0.2)*tileSize, sacrificedAnimationFrame*tileSize*6);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(i*tileSize+ xCameraOffset + offset - cameraX + sacrificedAnimationFrame*0.2*tileSize + 0.1*tileSize, j*tileSize + yCameraOffset + offset - cameraY + tileSize - sacrificedAnimationFrame*tileSize*9, (0.8-sacrificedAnimationFrame*0.4)*tileSize, sacrificedAnimationFrame*tileSize*5);
+
                 ctx.drawImage(tileMap, Math.round((sacrificedItem - 4) * 10) * textureSize, textureSize * 5.5 + textureSize * (Math.round((sacrificedItem - 4) * 100 - Math.round((sacrificedItem - 4) * 10) * 10) / 100) * 100, textureSize, textureSize, i * tileSize + offset + xCameraOffset - cameraX + tileSize*0.5*(sacrificedAnimationFrame), j * tileSize + offset + yCameraOffset - cameraY + tileSize / 2 - sacrificedAnimationFrame * tileSize/2 - tileSize*1.5, tileSize*(1-sacrificedAnimationFrame), tileSize); //NORMAL
                 //yCameraOffset = tileSize*sacrificedAnimationFrame;
             }
