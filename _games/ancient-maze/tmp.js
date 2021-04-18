@@ -56,6 +56,9 @@ var tileMap = new Image();
 //tileMap.onload = generateMap();
 tileMap.src = "TileSetMazeScaled.png";
 
+var backgrounds = new Image();
+backgrounds.src = "backgrounds.png";
+
 // EXAMPLE ARRAY coins = [];
 
 //LIGHTING
@@ -108,13 +111,13 @@ var mousePosY = 0;
 
 var clicked = false;
 
-var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "WIDE SWORD", "DOUBLE AXE", "RAT MEAT", "BERRIES", "HEALTH POTION", "Why", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
+var itemNames = ["SWORD", "BREAD", "KEY", "CHICKEN", "CLUB", "SPIKY CLUB", "BAT WING", "WIDE SWORD", "DOUBLE AXE", "RAT MEAT", "BERRIES", "HEALTH POTION", "SPIDER GLAND", "Not"]; //ADD ITEM ID WHEN ADDING ITEM
 var itemIDs = [4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.01, 4.11, 4.21, 4.31, 4.41, 4.51, 4.61, 4.71, 4.81, 4.91, 4.02];
-var nutritionValues = [0, 20, 0, 50, 0, 0, 15, 0, 0, 25, 20, 15];
-var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 65];
+var nutritionValues = [0, 20, 0, 50, 0, 0, 15, 0, 0, 25, 20, 15, 40];
+var itemSacrificeValues = [45, 20, 70, 30, 30, 40, 20, 55, 35, 25, 15, 65, 35];
 var itemDamageValues = [20, 0, 0, 0, 10, 18, 0, 24, 15, 0, 0, 0];
 
-var itemSpawnRate = [3, 16, 1, 14, 7, 4, 0, 2, 3, 0, 19, 2];
+var itemSpawnRate = [3, 16, 1, 14, 7, 4, 0, 2, 3, 0, 19, 2, 0];
 var enemyRates = [4, 2, 1];
 
 var spikesAnimFrame = 0;
@@ -147,6 +150,13 @@ var SETDIFFICULTY = "e";
 var MAPSIZE = "sml";
 var SCARCELOOT = false;
 var MADGODS = 0;
+
+var SFX = true;
+var MUSIC = true;
+
+var GUI = true;
+
+var BGRANDOMS = [0, 0];
 
 //TEST
 
@@ -219,6 +229,10 @@ function Player(x, y, width, height){
 
     this.moveCycle = 1;
 
+    this.noclip = false;
+
+    this.visible = true;
+
     this.update = function(){
         this.winStateCheck();
 
@@ -261,7 +275,7 @@ function Player(x, y, width, height){
         this.tileY4 = Math.floor((this.gameY+this.height/3*2*tileSize)/tileSize);
 
         if(this.frozen === false && this.attacking === false && this.stunTimer === 0){
-            this.checkCollisions(1);
+            if(!this.noclip){this.checkCollisions(1);}else{this.checkCollisions(-1);}
             this.actionButtonCheck();
         }
 
@@ -749,8 +763,8 @@ function Player(x, y, width, height){
         if(keys && keys[32]){
             if(this.getItemSelectedNutrition() > 0 && this.spaceReleased === true && this.hunger !== this.maxHunger){
                 this.hunger = Math.min(this.hunger + this.getItemSelectedNutrition(), this.maxHunger);
-                if(this.getItemSelectedName() === "BAT WING"){
-                    this.health = Math.min(this.health + this.getItemSelectedNutrition()*1.5, this.maxHealth);
+                if(this.getItemSelectedName() === "SPIDER GLAND"){
+                    this.health = Math.min(this.health + this.getItemSelectedNutrition()*0.8, this.maxHealth);
                 }else if(this.getItemSelectedName() === "HEALTH POTION"){
                     this.health = Math.min(this.health + this.getItemSelectedNutrition()*5, this.maxHealth);
                 }else{
@@ -913,8 +927,6 @@ function Enemy(tileX, tileY, type){
     this.tileY = tileY;
     this.type = type;
 
-    this.health = 50;
-
     this.size = tileSize;
 
     this.despawnDistance = 10;
@@ -925,24 +937,28 @@ function Enemy(tileX, tileY, type){
     this.xOffSet = 0;
     this.yOffSet = 0;
 
+    //Should probably be switch
     if(this.type === 0) {// BAT
         this.moveSpeed = 3*(WIDTH/800);
         this.attackSpeed = 40;
-        this.paralysisTime = 30;
+        this.paralysisTime = 25;
         this.damage = 5;
         this.attackDelayer = 5;
+        this.health = 50;
     }else if(this.type === 1) { //RAT
         this.moveSpeed = 4*(WIDTH/800);
         this.attackSpeed = 30;
-        this.paralysisTime = 25;
+        this.paralysisTime = 10;
         this.damage = 10;
         this.attackDelayer = 4;
+        this.health = 60;
     }else if(this.type === 2) { //RAT
         this.moveSpeed = 2.5*(WIDTH/800);
         this.attackSpeed = 40;
         this.paralysisTime = 20;
         this.damage = 25;
         this.attackDelayer = 4;
+        this.health = 80;
     }
 
     this.moveDirX = 0;
@@ -1091,6 +1107,10 @@ function Enemy(tileX, tileY, type){
                 }else if(this.type === 1){
                     if(rnd < 1){
                         map[this.tileY][this.tileX] = 4.9;
+                    }
+                }else if(this.type === 2){
+                    if(rnd < 1){
+                        map[this.tileY][this.tileX] = 4.21;
                     }
                 }
             }
@@ -1291,6 +1311,7 @@ function Button(x, y, text, type, action){
                     this.widener = Math.min(this.widener + 5, 20);
                     if(this.type === 1) {
                         if (clicked) {
+                            //if(this.action === "LOAD"){generateMap();}
                             generateMap();
                             trMaker.nextState = this.action;
                             trMaker.transitioning = true;
@@ -1308,6 +1329,10 @@ function Button(x, y, text, type, action){
                                 SCARCELOOT = !SCARCELOOT;
                             }else if(this.action === "madgods"){
                                 MADGODS = Math.abs(MADGODS-1);
+                            }else if(this.action === "music"){
+                                MUSIC = !MUSIC;
+                            }else if(this.action === "sfx"){
+                                SFX = !SFX;
                             }
                             if(this.type !== 3){
                                 for (var i in buttons) {
@@ -1333,16 +1358,23 @@ function Button(x, y, text, type, action){
                     trMaker.transitioning = true;
                 }
             }
-            if(this.type === 3){
-                if(this.action === "fullscreen"){
-                    if(FULLSCREEN){this.color = 'green';}else{this.color = 'white';}
-                }
-                if(this.action === "scarceloot"){
-                    if(SCARCELOOT){this.color = 'green';}else{this.color = 'white';}
-                }
-                if(this.action === "madgods"){
-                    if(MADGODS){this.color = 'green';}else{this.color = 'white';}
-                }
+        }
+        if(this.type === 3){
+            //All of this shud've been made differently lol, will do next time
+            if(this.action === "fullscreen"){
+                if(FULLSCREEN){this.color = 'green';}else{this.color = 'white';}
+            }
+            else if(this.action === "scarceloot"){
+                if(SCARCELOOT){this.color = 'green';}else{this.color = 'white';}
+            }
+            else if(this.action === "madgods"){
+                if(MADGODS){this.color = 'green';}else{this.color = 'white';}
+            }
+            else if(this.action === "music"){
+                if(MUSIC){this.color = 'green';}else{this.color = 'white';}
+            }
+            else if(this.action === "sfx"){
+                if(SFX){this.color = 'green';}else{this.color = 'white';}
             }
         }
     }
@@ -1391,12 +1423,13 @@ function Button(x, y, text, type, action){
 
 function TransitionMaker(){
     this.nextState = "";
+    this.previousState = "";
     this.transitioning = false;
 
     this.vX = 0;
     this.update = function(){
         if(this.transitioning){
-            if(SWIPEVALUE === 0){this.vX = 0;}
+            if(SWIPEVALUE === 0){this.vX = 0; this.previousState = GAMESTATE;}
             this.vX-=0.003;
             SWIPEVALUE += this.vX;
             if(SWIPEVALUE < -1){
@@ -1442,6 +1475,7 @@ function TransitionMaker(){
             loadMenu();
         }else if(this.nextState === "GAME"){
             TIME = 0;
+            frameCount = 0;
         }else if(this.nextState === "CONFIG"){
             buttons = [];
             buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0, ""));
@@ -1458,26 +1492,45 @@ function TransitionMaker(){
             buttons.push(new Button(WIDTH/2 - WIDTH/8, HEIGHT/2 + HEIGHT/4, "RARE LOOT", 3, "scarceloot"));
             buttons.push(new Button(WIDTH/2 + WIDTH/8, HEIGHT/2 + HEIGHT/4, "MAD GODS", 3, "madgods"));
 
-            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/2.5, "PLAY", 1, "LOAD"));
+            buttons.push(new Button(WIDTH/2 + WIDTH/4, HEIGHT/2 + HEIGHT/2.5, "PLAY", 1, "LOAD"));
+            buttons.push(new Button(WIDTH/2 - WIDTH/4, HEIGHT/2 + HEIGHT/2.5, "MENU", 1, "MENU"));
         }else if(this.nextState === "OPTIONS"){
             buttons = [];
             //buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3, "MAZE SIZE", 0.5, ""));
             //openFullScreen();
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/12, "SFX", 3, "sfx"));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/6, "MUSIC", 3, "music"));
             buttons.push(new Button(WIDTH/2, HEIGHT/2, "FULLSCREEN", 3, "fullscreen"));
             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "MENU", 1, "MENU"));
+        }else if(this.nextState === "CONTROLS"){
+            buttons = [];
+
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3.5, "CONTROLS", 0, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3.5 + HEIGHT/8, "WASD to move", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/16, "SPACE to attack", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/16*2, "E to pickup item", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/3.5 + HEIGHT/8 + HEIGHT/16*3, "Q to drop item", 0.5, ""));
+            buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*3, "MENU", 1, "MENU"));
         }
     }
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
+var trMaker = new TransitionMaker();
 function loadMenu(){
+    if(trMaker.previousState === "WIN" || trMaker.previousState === "LOSS" || trMaker.previousState === "") {
+        BGRANDOMS[0] = Math.round(Math.random());
+        BGRANDOMS[1] = Math.round(Math.random());
+    }
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 - HEIGHT/5, "A    MAZE", 0, ""));
+    buttons.push(new Button(WIDTH/2 - WIDTH/20, HEIGHT/2 - HEIGHT/5, "(ncient)", 0.5, ""));
+
     buttons.push(new Button(WIDTH/2, HEIGHT/2, "PLAY", 1, "CONFIG"));
     buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12, "OPTIONS", 1, "OPTIONS"));
-    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "options"));
+    buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*2, "CONTROLS", 1, "CONTROLS"));
 }
 loadMenu();
-var trMaker = new TransitionMaker();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
@@ -1503,11 +1556,14 @@ function resetVars(){
     yCameraOffset = 0;
     player = new Player(WIDTH/2, HEIGHT/2, 0.9, 1); //Add the Player
 
+    tileSize = Math.floor(72*(WIDTH/1024))*cameraZoom;
+
     player.gameX = mapwidth/2*tileSize;
     player.gameY = mapheight/2*tileSize;
 
-    cameraX = (player.gameX-player.x+player.width*tileSize/2);
-    cameraY = (player.gameY-player.y+player.height*tileSize/2);
+    cameraX = (player.gameX-player.x+player.width*tileSize/2)*cameraZoom;
+    cameraY = (player.gameY-player.y+player.height*tileSize/2)*cameraZoom;
+
     ORIGINALSEED = Math.floor(Math.random()*Math.pow(10, 10)); //COPY THIS IF YOU WANT TO PLAY THE SAME MAZE
     SEED = ORIGINALSEED;
 
@@ -2193,6 +2249,12 @@ function renderTile(i, j){
         ctx.drawImage(tileMap, textureSize, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
     }
 
+    else if(map[j][i] === 2){
+        //ctx.drawImage(tileMap, 0, textureSize*3, textureSize, textureSize, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset - cameraY + yCameraOffset, tileSize, tileSize); //NORMAL
+        //ctx.drawImage(tileMap, textureSize*4, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*2, tileSize, tileSize*1.5);
+        ctx.drawImage(tileMap, textureSize, textureSize * 3, textureSize, textureSize, i * tileSize + xCameraOffset + offset - cameraX, j * tileSize + yCameraOffset + offset - cameraY, tileSize, tileSize); //NORMAL
+    }
+
     else if(map[j][i] === 6.1){//DOOR WALL
         ctx.drawImage(tileMap, textureSize*2, textureSize*4, textureSize, textureSize*1.5, i*tileSize + offset + xCameraOffset - cameraX, j*tileSize + offset + yCameraOffset - cameraY - tileSize/4*3, tileSize, tileSize*1.5);
         if(frameCount % 3 === 0) {
@@ -2413,7 +2475,7 @@ function pathFinding(start, end){
         }
 
         moves = [];
-        var steppable = [0, 4, 5];
+        var steppable = [0, 4, 5, 6];
         for(var s in steppable) {
             if (Math.floor(map[Math.max(0, currentNode.y - 1)][currentNode.x]) === steppable[s]) {
                 moves.push([currentNode.x, currentNode.y - 1]);
@@ -2472,7 +2534,8 @@ function game(){
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD" || GAMESTATE === "WIN" || GAMESTATE === "LOSS" || GAMESTATE === "CONFIG" || GAMESTATE === "OPTIONS"){
+    if(GAMESTATE === "MENU" || GAMESTATE === "LOAD" || GAMESTATE === "WIN" || GAMESTATE === "LOSS" || GAMESTATE === "CONFIG" || GAMESTATE === "OPTIONS" || GAMESTATE === "CONTROLS"){
+        frameCount++;
         if(GAMESTATE === "LOAD"){
             for (var i = 0; i < creators.length; i++) {
                 if (creators[i].dead === false) {
@@ -2496,6 +2559,16 @@ function game(){
             }else if(creators.length === 0 && doorsGenerated === true){
                 buttons[0].progress = 1;
             }
+        }else if(GAMESTATE !== "WIN" && GAMESTATE !== "LOSS"){
+            ctx.globalAlpha = 0.8;
+            ctx.drawImage(backgrounds, Math.sin(frameCount/1000)/8*1024 + 1024/8 + BGRANDOMS[0]*1024, Math.cos(frameCount/1000)/8*576 + 576/8 + BGRANDOMS[1]*576, 1024*3/4, 576*3/4, 0, 0, WIDTH, HEIGHT);
+            ctx.globalAlpha = 1;
+            if(trMaker.nextState === "MENU" && trMaker.previousState === "CONFIG"){
+
+            } else if((trMaker.nextState === "MENU" || trMaker.nextState === "LOAD") && (trMaker.previousState === "WIN" || trMaker.previousState === "LOSS" || trMaker.previousState === "CONFIG") && SWIPEVALUE !== 0){
+                ctx.fillStyle = "rgba(0, 0, 0, " + Math.abs(SWIPEVALUE) + ")";
+                ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            }
         }
         for(var i = 0; i < buttons.length; i++){
             buttons[i].draw();
@@ -2518,7 +2591,7 @@ function game(){
         cameraY = Math.round(cameraY);
 
         for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-            for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 5, mapheight); j++) {
+            for (var j = Math.max(player.tileY - 4, 0); j <= Math.min(player.tileY + 5, mapheight); j++) {
                 if (Math.floor(map[j][i]) === 0 || Math.floor(map[j][i]) === 4 || Math.floor(map[j][i]) === 5 || Math.floor(map[j][i]) === 6 || Math.floor(map[j][i] * 10) === 6) {
                     if (Math.floor(map[j][i]) !== 4 && Math.floor(map[j][i]) !== 6 && Math.floor(map[j][i] * 10) !== 6) {
                         renderTile(i, j);
@@ -2532,7 +2605,7 @@ function game(){
         }
 
         for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
-            for (var j = Math.max(player.tileY - 3, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
+            for (var j = Math.max(player.tileY - 4, 0); j <= Math.min(player.tileY + 1, mapheight); j++) {
                 if ((Math.floor(map[j][i]) !== 0 || Math.floor(map[j][i] * 10) === 6) && Math.floor(map[j][i]) !== 5) {
                     renderTile(i, j);
                 }
@@ -2550,7 +2623,10 @@ function game(){
         }
 
         if (gameRunning === true) {
-            player.draw();
+            if(player.visible) {
+                player.draw();
+            }
+
         }
 
         for (var i = Math.max(player.tileX - 6, 0); i <= Math.min(player.tileX + 6, mapwidth); i++) {
@@ -2599,7 +2675,9 @@ function game(){
                 yCameraOffset = Math.floor(yCameraOffset*0.9);
             }
 
-            player.renderGUI();
+            if(GUI){
+                player.renderGUI();
+            }
 
             //tileSize*=cameraZoom; cameraX = (player.gameX-player.x+player.width*tileSize/2)*cameraZoom; cameraY = (player.gameY-player.y+player.height*tileSize/2)*cameraZoom; seglength = tileSize/10;
 
@@ -2753,7 +2831,7 @@ canvas.addEventListener("fullscreenchange", function() {
     player.x = WIDTH/2;
     player.y = HEIGHT/2;
 
-    tileSize = Math.floor(72*(WIDTH/1024));
+    tileSize = Math.floor(72*(WIDTH/1024))*cameraZoom;
 
     grd = ctx.createRadialGradient(WIDTH/2, HEIGHT/2, 10, WIDTH/2, HEIGHT/2, tileSize*5);
     grd.addColorStop(0, 'rgba(0, 0, 0, 0)');
@@ -2772,7 +2850,7 @@ canvas.addEventListener("fullscreenchange", function() {
 
     if(GAMESTATE !== "GAME") {
         buttons = [];
-        trMaker.nextState = "OPTIONS";
+        trMaker.nextState = GAMESTATE;
         trMaker.transitioning = true;
     }
 }, false);
