@@ -158,6 +158,10 @@ var GUI = true;
 
 var BGRANDOMS = [0, 0];
 
+var sounds = [];
+
+var soundOn = true;
+
 //TEST
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -201,8 +205,8 @@ function Player(x, y, width, height){
 
     this.inventoryItemOffset = WIDTH/100;
 
-    this.previousGameX = cameraX - this.width/2*tileSize + WIDTH/2;
-    this.previousGameY = cameraY - this.height/2*tileSize + HEIGHT/2;
+    this.previousGameX = 0;
+    this.previousGameY = 0;
 
     this.maxHealth = 100;
     this.maxHunger = 100;
@@ -254,6 +258,15 @@ function Player(x, y, width, height){
 
         if(this.previousGameX !== this.gameX || this.previousGameY !== this.gameY){
             this.moveCycle++;
+            if(document.getElementById("walkingAudioGame") === null && TIME !== 0){
+                if(playerSpeed === (playerSpeedsList[0]*(WIDTH/800))){
+                    sounds.push(new sound("walking.wav", true, "walkingAudioGame"));
+                }else{
+                    sounds.push(new sound("walkingSlow.wav", true, "walkingAudioGame"));
+                }
+                sounds[sounds.length-1].sound.volume = 0.2;
+                sounds[sounds.length-1].play();
+            }
         }else{
             if(cameraZoom < 1) {
                 //cameraZoom += 0.001;
@@ -389,6 +402,11 @@ function Player(x, y, width, height){
     this.countHealth = function(){
         if(map[this.tileY2][this.tileX3] === 0.63){
             this.health = Math.max(this.health - 1, 0);
+            if(document.getElementById("oof") === null) {
+                sounds.push(new sound("oof.wav", true, "oof"));
+                sounds[sounds.length - 1].sound.volume = 0.3;
+                sounds[sounds.length - 1].play();
+            }
         }
         if(map[this.tileY2][this.tileX3] === 0.7){
             playerSpeed = playerSpeedsList[1]*(WIDTH/1600);
@@ -714,6 +732,9 @@ function Player(x, y, width, height){
             //DOORS
             if((map[this.tileY][this.tileX] === 1.8 && this.tileY < mapheight/2) && this.getItemSelectedName() === "KEY"){
                 map[this.tileY][this.tileX] = 6.1;
+                sounds.push(new sound("release.wav", true, "rel"));
+                sounds[sounds.length-1].sound.volume = 0.5;
+                sounds[sounds.length-1].play();
                 this.inventory.splice(this.inventorySelected, 1);
             }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2 && this.getItemSelectedName() === "KEY"){
                 map[this.tileY + 2][this.tileX] = 6.1;
@@ -724,6 +745,9 @@ function Player(x, y, width, height){
                 if(this.inventory.length < 3){
                     this.inventory.push(Math.round((map[this.tileY4][this.tileX3] - 4)*100)/10);
                     map[this.tileY4][this.tileX3] = 0;
+                    sounds.push(new sound("pickup.wav", true, "attack"));
+                    sounds[sounds.length-1].sound.volume = 0.3;
+                    sounds[sounds.length-1].play();
                 }else{
                     //DISPLAY INVENTORY FULL MESSAGE OR SWAP ITEM IDK
                 }
@@ -735,6 +759,9 @@ function Player(x, y, width, height){
                     var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
                     sacrificedItem = itemIDs[tmpItem];
                     sacrificedAnimationFrame = 0.01;
+                    sounds.push(new sound("swish2.wav", true, "attack"));
+                    sounds[sounds.length-1].sound.volume = 0.5;
+                    sounds[sounds.length-1].play();
                     this.inventory.splice(this.inventorySelected, 1);
                     this.ereleased = false;
                 }
@@ -750,6 +777,9 @@ function Player(x, y, width, height){
                 //console.log(tmpItem);
                 map[this.tileY4][this.tileX3] = itemIDs[tmpItem];
                 this.inventory.splice(this.inventorySelected, 1);
+                sounds.push(new sound("pickup.wav", true, "attack"));
+                sounds[sounds.length-1].sound.volume = 0.15;
+                sounds[sounds.length-1].play();
             }
             this.qreleased = false;
         }else{
@@ -771,10 +801,17 @@ function Player(x, y, width, height){
                     this.health = Math.min(this.health + this.getItemSelectedNutrition()/10, this.maxHealth);
                 }
                 this.inventory.splice(this.inventorySelected, 1);
+                sounds.push(new sound("hardSwipe.wav", true, "attack"));
+                sounds[sounds.length-1].sound.volume = 0.2;
+                sounds[sounds.length-1].play();
                 this.spaceReleased = false;
             }
             if((this.getItemSelectedName() === "SWORD" || this.getItemSelectedName() === "CLUB"  || this.getItemSelectedName() === "SPIKY CLUB"  || this.getItemSelectedName() === "WIDE SWORD" || this.getItemSelectedName() === "DOUBLE AXE") && this.spaceReleased === true && this.attackTimer === 0){
                 this.attack();
+                sounds.push(new sound("weapon.wav", true, "attack"));
+                sounds[sounds.length-1].sound.volume = 0.5;
+                sounds[sounds.length-1].play();
+
                 this.spaceReleased = false;
             }
         }else{
@@ -785,17 +822,26 @@ function Player(x, y, width, height){
             for(var invs = 0; invs < 3; invs++){
                 if(mousePosX > this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs && mousePosX < this.inventoryX + this.inventorySize*invs + this.inventoryOffset*invs + this.inventorySize &&
                     mousePosY > this.inventoryY && mousePosY < this.inventoryY + this.inventorySize){
+                    if(this.inventorySelected !== invs){
+                        sounds.push(new sound("clickBass.wav", true, "clickBass"));
+                        sounds[sounds.length-1].sound.volume = 0.2;
+                        sounds[sounds.length-1].play();
+                    }
                     this.inventorySelected = invs;
+                    break;
                 }
             }
         }
 
-        if(keys && keys[49]){
-            this.inventorySelected = 0;
-        }else if(keys && keys[50]){
-            this.inventorySelected = 1;
-        }else if(keys && keys[51]){
-            this.inventorySelected = 2;
+        //Could be done through for loop... Oh I fixed it lol
+        for(var idk = 49; idk < 52; idk++){
+            if(keys && keys[idk] && this.inventorySelected !== idk-49){
+                this.inventorySelected = idk-49;
+                sounds.push(new sound("clickBass.wav", true, "clickBass"));
+                sounds[sounds.length-1].sound.volume = 0.2;
+                sounds[sounds.length-1].play();
+                break;
+            }
         }
 
     };
@@ -1098,7 +1144,7 @@ function Enemy(tileX, tileY, type){
         //Item drops
         if(this.health <= 0){
             this.dead = true;
-            if(Math.floor(map[this.tileY][this.tileX]) === 0 && (map[this.tileY][this.tileX] < 0.6 || map[this.tileY][this.tileX] > 0.65)){
+            if((map[this.tileY][this.tileX]) === 0){
                 var rnd = randomNum();
                 if(this.type === 0){
                     if(rnd < 1){
@@ -1147,6 +1193,9 @@ function Enemy(tileX, tileY, type){
                     (this.tileX <= player.tileX3 && player.dir === 0) || (this.tileX >= player.tileX3 && player.dir === 1)){
                     this.paralysisTimer = this.paralysisTime;
                     this.health -= player.getItemSelectedDamageValue();
+                    sounds.push(new sound("sigh.wav", true, "attack"));
+                    sounds[sounds.length-1].sound.volume = 0.5;
+                    sounds[sounds.length-1].play();
                     this.animationFrame = 3; //Red hit frame
                     this.animationDir = 0;
                     this.aliveTimer -= this.aliveTimer%7 + 1; //Probably resetting frame
@@ -1166,6 +1215,25 @@ function Enemy(tileX, tileY, type){
                 this.yOffSet = 0;
                 console.log("Deleted");
             }
+
+            if(this.aliveTimer%30 === 0){
+                if(this.type === 0) {
+                    sounds.push(new sound("release.wav", true, "batSounds"));
+                    sounds[sounds.length - 1].sound.playbackRate = 1.1;
+                    sounds[sounds.length - 1].sound.volume = 0.4 / Math.sqrt(Math.max(distanceTmp, 0.5));
+                    sounds[sounds.length - 1].play();
+                }else if(this.type === 1 && this.animationRunning){
+                    sounds.push(new sound("walking.wav", true, "ratSounds"));
+                    sounds[sounds.length - 1].sound.playbackRate = 1.4;
+                    sounds[sounds.length - 1].sound.volume = 0.7 / Math.sqrt(Math.max(distanceTmp, 0.5));
+                    sounds[sounds.length - 1].play();
+                }else if(this.type === 2 && this.animationRunning){
+                    sounds.push(new sound("walkingSlow.wav", true, "SpiderSounds"));
+                    sounds[sounds.length - 1].sound.playbackRate = 0.95;
+                    sounds[sounds.length - 1].sound.volume = 0.7 / Math.sqrt(Math.max(distanceTmp, 0.5));
+                    sounds[sounds.length - 1].play();
+                }
+            }
         }
     };
 
@@ -1176,7 +1244,12 @@ function Enemy(tileX, tileY, type){
 
     this.dealDamage = function(){
         if(Math.sqrt((player.gameX + player.width*tileSize/2 - (this.gameX + cameraX))*(player.gameX + player.width*tileSize/2 - (this.gameX + cameraX)) + (player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))*(player.gameY + player.height*tileSize/3*2 - (this.gameY - this.size/2 + cameraY))) < tileSize*1.5) {
-            if(DEBUG === false){player.health = Math.max(0, player.health - this.damage);}
+            if(DEBUG === false){
+                player.health = Math.max(0, player.health - this.damage);
+                sounds.push(new sound("oof.wav", true, "oof"));
+                sounds[sounds.length-1].sound.volume = 0.3;
+                sounds[sounds.length-1].play();
+            }
             this.attackOffsetX+=20*this.moveDirX;
             this.attackOffsetY+=20*this.moveDirY;
             player.stunTimer = 8;
@@ -1312,12 +1385,18 @@ function Button(x, y, text, type, action){
                     if(this.type === 1) {
                         if (clicked) {
                             //if(this.action === "LOAD"){generateMap();}
+                            sounds.push(new sound("clickBass.wav", true, "clickBass"));
+                            sounds[sounds.length-1].sound.volume = 0.2;
+                            sounds[sounds.length-1].play();
                             generateMap();
                             trMaker.nextState = this.action;
                             trMaker.transitioning = true;
                         }
                     }else if(Math.floor(this.type) === 3){
                         if(clicked) {
+                            sounds.push(new sound("clickBass.wav", true, "clickBass"));
+                            sounds[sounds.length-1].sound.volume = 0.2;
+                            sounds[sounds.length-1].play();
                             if(this.action === "fullscreen"){
                                 if(FULLSCREEN){
                                     closeFullScreen();
@@ -1513,6 +1592,32 @@ function TransitionMaker(){
             buttons.push(new Button(WIDTH/2, HEIGHT/2 + HEIGHT/12*3, "MENU", 1, "MENU"));
         }
     }
+}
+
+function sound(src, dlt, id) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.id = id;
+
+    this.dlt = dlt;
+
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+
+    document.body.appendChild(this.sound);
+    this.play = function(){
+        if(soundOn === true){this.sound.play();}
+    };
+    this.stop = function(){
+        this.sound.pause();
+    };
+    this.delete = function(){
+        this.sound.parentNode.removeChild(this.sound);
+    };
+    this.changeVolume = function(){
+        this.sound.volume = globalVolume;
+    };
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
@@ -2706,6 +2811,14 @@ function game(){
 
         }
     }
+
+    for(var i in sounds){
+        if(sounds[i].dlt === true && sounds[i].sound.paused){
+            sounds[i].delete();
+            sounds.splice(i, 1);
+        }
+    }
+
     clicked = false;
 }
 
