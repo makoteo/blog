@@ -160,6 +160,8 @@ var BGRANDOMS = [0, 0];
 
 var sounds = [];
 
+var MUSICCHANCE = 0.04;
+
 //TEST
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -236,7 +238,7 @@ function Player(x, y, width, height){
     this.visible = true;
 
     this.update = function(){
-        this.winStateCheck();
+        if(!this.frozen){this.winStateCheck();}
 
         if(this.stunTimer > 0){
             this.stunTimer--;
@@ -864,12 +866,18 @@ function Player(x, y, width, height){
                 HIGHSCORE = TIME;
             }
             this.frozen = true;
+            sounds.push(new sound("backSwish.wav", true, "oof"));
+            sounds[sounds.length - 1].sound.volume = 0.1;
+            sounds[sounds.length - 1].play();
         }
         if(this.health <= 0){
             console.log("YOU LOSE!");
             trMaker.nextState = "LOSS";
             trMaker.transitioning = true;
             this.frozen = true;
+            sounds.push(new sound("backSwish.wav", true, "oof"));
+            sounds[sounds.length - 1].sound.volume = 0.1;
+            sounds[sounds.length - 1].play();
         }
     };
 
@@ -1417,6 +1425,11 @@ function Button(x, y, text, type, action){
                                 MADGODS = Math.abs(MADGODS-1);
                             }else if(this.action === "music"){
                                 MUSIC = !MUSIC;
+                                if(MUSIC === false){
+                                    if(document.getElementById("musicThingy") !== null) {
+                                        document.getElementById("musicThingy").remove();
+                                    }
+                                }
                             }else if(this.action === "sfx"){
                                 SFX = !SFX;
                             }
@@ -2690,6 +2703,23 @@ function game(){
     }else if(GAMESTATE === "GAME") {
         if (gameRunning === true) {
             player.update();
+        }
+
+        if(frameCount % 800 === 0 && MUSIC === true){
+            var musicRandom = Math.random();
+            console.log("Moosic" + musicRandom);
+            if(musicRandom < MUSICCHANCE){
+                musicRandom = Math.random();
+                if(document.getElementById("musicThingy") === null){
+                    if(musicRandom < 0.5){
+                        sounds.push(new sound("Temple.wav", true, "musicThingy"));
+                    }else{
+                        sounds.push(new sound("LostDisk.wav", true, "musicThingy"));
+                    }
+                    sounds[sounds.length - 1].sound.volume = 0.2;
+                    sounds[sounds.length - 1].play();
+                }
+            }
         }
 
         if(sacrificedAnimationFrame > 0){
