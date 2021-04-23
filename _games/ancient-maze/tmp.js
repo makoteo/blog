@@ -160,8 +160,6 @@ var BGRANDOMS = [0, 0];
 
 var sounds = [];
 
-var soundOn = true;
-
 //TEST
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -735,9 +733,18 @@ function Player(x, y, width, height){
                 sounds.push(new sound("release.wav", true, "rel"));
                 sounds[sounds.length-1].sound.volume = 0.5;
                 sounds[sounds.length-1].play();
+                sounds.push(new sound("sigh.wav", true, "rel"));
+                sounds[sounds.length-1].sound.volume = 0.5;
+                sounds[sounds.length-1].play();
                 this.inventory.splice(this.inventorySelected, 1);
             }else if(map[this.tileY + 2][this.tileX] === 1.8 && this.tileY > mapheight/2 && this.getItemSelectedName() === "KEY"){
                 map[this.tileY + 2][this.tileX] = 6.1;
+                sounds.push(new sound("release.wav", true, "rel"));
+                sounds[sounds.length-1].sound.volume = 0.5;
+                sounds[sounds.length-1].play();
+                sounds.push(new sound("sigh.wav", true, "rel"));
+                sounds[sounds.length-1].sound.volume = 0.5;
+                sounds[sounds.length-1].play();
                 this.inventory.splice(this.inventorySelected, 1);
             }
             //ITEM PICK UP
@@ -759,8 +766,8 @@ function Player(x, y, width, height){
                     var tmpItem = Math.floor(Math.floor(this.inventory[this.inventorySelected]) + 100*(this.inventory[this.inventorySelected]%1));
                     sacrificedItem = itemIDs[tmpItem];
                     sacrificedAnimationFrame = 0.01;
-                    sounds.push(new sound("swish2.wav", true, "attack"));
-                    sounds[sounds.length-1].sound.volume = 0.5;
+                    sounds.push(new sound("choirSac.wav", true, "attack"));
+                    sounds[sounds.length-1].sound.volume = 0.6;
                     sounds[sounds.length-1].play();
                     this.inventory.splice(this.inventorySelected, 1);
                     this.ereleased = false;
@@ -1607,7 +1614,7 @@ function sound(src, dlt, id) {
 
     document.body.appendChild(this.sound);
     this.play = function(){
-        if(soundOn === true){this.sound.play();}
+        if(SFX === true){this.sound.play();}
     };
     this.stop = function(){
         this.sound.pause();
@@ -2834,7 +2841,7 @@ function player_give(name){
             give_go = false;
         }
     }
-    if(give_go === true){player.inventory.push(item%10 + (Math.floor(item/10)*0.1))};
+    if(give_go === true){player.inventory.push(item%10 + (Math.floor(item/10)*0.1));}
 }
 
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
