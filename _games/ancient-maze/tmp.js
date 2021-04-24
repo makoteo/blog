@@ -396,7 +396,7 @@ function Player(x, y, width, height){
         GODSATISFACTION = Math.max(GODSATISFACTION - godDecreasePerSecond, 0.1);
         mobSpawnChance = DIFFICULTY*(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18)+TIME/200000;
         maxMobCount = Math.floor(1/Math.pow((GODSATISFACTION/10)/10000, 0.25) - 0.25*18);
-        console.log(maxMobCount, mobSpawnChance);
+        //console.log(maxMobCount, mobSpawnChance);
     };
 
     this.countHealth = function(){
@@ -1228,7 +1228,7 @@ function Enemy(tileX, tileY, type){
                 this.path = [];
                 this.xOffSet = 0;
                 this.yOffSet = 0;
-                console.log("Deleted");
+                //console.log("Deleted");
             }
 
             if(this.aliveTimer%30 === 0){
@@ -1658,6 +1658,17 @@ function loadMenu(){
 loadMenu();
 
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
+
+function loadSounds(){
+    var soundFiles = ["backSwish.wav", "choirSac.wav", "clickBass.wav", "hardSwipe.wav", "oof.wav", "pickup.wav", "release.wav", "sigh.wav", "swish2.wav", "walking.wav", "walkingSlow.wav", "weapon.wav"];
+    for(var i = 0; i < soundFiles.length; i++){
+        sounds.push(new sound(soundFiles[i], true));
+        sounds[sounds.length-1].sound.volume = 0;
+        sounds[sounds.length-1].play();
+    }
+    canvas.removeEventListener("click", loadSounds);
+}
+canvas.addEventListener("click", loadSounds);
 
 function loadFont(){
     ctx.font = HEIGHT/45 + "px quickPixel";
@@ -2587,7 +2598,7 @@ function pathFinding(start, end){
         closedList.push(currentNode);
 
         if(currentNode.x === end[0] && currentNode.y === end[1]){
-            console.log("Done!");
+            //console.log("Done!");
             var tmpCur = currentNode;
             path.push(tmpCur);
             while(tmpCur.parent !== null){
@@ -2707,7 +2718,7 @@ function game(){
 
         if(frameCount % 800 === 0 && MUSIC === true){
             var musicRandom = Math.random();
-            console.log("Moosic" + musicRandom);
+            //console.log("Moosic" + musicRandom);
             if(musicRandom < MUSICCHANCE){
                 musicRandom = Math.random();
                 if(document.getElementById("musicThingy") === null){
