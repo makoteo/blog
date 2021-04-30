@@ -65,6 +65,13 @@ function game(){
     ctx.fillStyle = COLORS.white;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
+    //DRAW BOARD TO PLAY ON
+
+    ctx.fillStyle = COLORS.red;
+    ctx.globalAlpha = 0.1;
+    ctx.fillRect(WIDTH/3*(currentBoard%3), WIDTH/3*Math.floor(currentBoard/3), WIDTH/3, HEIGHT/3);
+    ctx.globalAlpha = 1;
+
     //DRAW BOARDS
 
     ctx.strokeStyle = COLORS.black;
@@ -146,6 +153,13 @@ function game(){
         }
     }
 
+    if(gameRunning){
+        if (checkWinCondition(mainBoard) !== 0) {
+            alert("GAME OVER");
+            gameRunning = false;
+        }
+    }
+
     shapeSize = squareSize/3;
     ctx.lineWidth = 20;
 
@@ -174,12 +188,15 @@ function game(){
     //mouseClickHandler
     if(clicked === true) {
         for (var i in boards) {
+            if(currentBoard !== -1){i = currentBoard;}
             for (var j in boards[i]) {
                 if(boards[i][j] === 0) {
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
+                            currentBoard = j;
                             currentTurn = -currentTurn;
+                            break;
                         }
                     }
                 }
