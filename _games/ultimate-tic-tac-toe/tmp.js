@@ -126,6 +126,9 @@ function game(){
 
     //Shapes
     ctx.lineWidth = 5;
+
+    if(mainBoard[currentBoard] !== 0){currentBoard = -1;}
+
     for(var i in boards){
         if(mainBoard[i] === 0) {
             if (checkWinCondition(boards[i]) !== 0) {
@@ -188,7 +191,7 @@ function game(){
     //mouseClickHandler
     if(clicked === true) {
         for (var i in boards) {
-            if(currentBoard !== -1){i = currentBoard;}
+            if(currentBoard !== -1){i = currentBoard;if(mainBoard[currentBoard] !== 0){continue;}}
             for (var j in boards[i]) {
                 if(boards[i][j] === 0) {
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
