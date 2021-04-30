@@ -6,4 +6,4 @@ title: This is the tmp setup!!
 
 [Back To Main Page](../../).
 
-{% include_relative tmp.html %}
+{% include_relative index.html %}
