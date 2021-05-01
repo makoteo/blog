@@ -29,10 +29,10 @@ var clicked = false;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var currentTurn = 1;
+var currentTurn = -1;
 var player = 1;
 var ai = -1;
-var currentBoard = -1;
+var currentBoard = 4;
 
 var gameRunning = true;
 
@@ -124,6 +124,13 @@ function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximiz
 
 function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
     RUNS++;
+
+    var count = 0;
+    for(var i = 0; i < 9; i++){
+        if(position[i] !== 0) count++;
+    }
+    if(count === 9){return 0;}
+
     if(checkWinCondition(position) !== 0){
         return -checkWinCondition(position);
     }
@@ -280,30 +287,23 @@ function game(){
         //currentTurn = -currentTurn;
         //currentBoard = resultAlg.m;
 
-        var moveScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for(var t in boards[currentBoard]){
-            if(boards[currentBoard][t] === 0){
-                boards[currentBoard][t] = ai;
+        var bestScore = -Infinity;
+        //var moveScores = [null, null, null, null, null, null, null, null, null];
+        var move = 0;
+        for(var a = 0; a < 9; a++){
+            if(boards[currentBoard][a] === 0){
+                boards[currentBoard][a] = ai;
                 var score = oneBoardMinMax(boards[currentBoard], -Infinity, Infinity, false);
-                boards[currentBoard][t] = 0;
-                moveScores[t] = score;
+                boards[currentBoard][a] = 0;
+                //moveScores[t] = score;
+                if(score > bestScore){
+                    bestScore = score;
+                    move = a;
+                }
             }
         }
+        boards[currentBoard][move] = ai;
         console.log(RUNS);
-        console.log(moveScores);
-
-        RUNS = 0;
-        var moveScores2 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for(var t in boards[currentBoard]){
-            if(boards[currentBoard][t] === 0){
-                boards[currentBoard][t] = ai;
-                var score = miniMax(boards, mainBoard, t, 6, -Infinity, +Infinity, true);
-                boards[currentBoard][t] = 0;
-                moveScores2[t] = score;
-            }
-        }
-        console.log(RUNS);
-        console.log(moveScores2);
 
         currentTurn = -currentTurn;
 
@@ -352,7 +352,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            currentBoard = j;
+                            //currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
