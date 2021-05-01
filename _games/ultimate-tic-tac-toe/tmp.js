@@ -122,7 +122,7 @@ function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximiz
     }
 }
 
-function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
+function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
     var count = 0;
@@ -132,7 +132,7 @@ function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
     if(count === 9){return 0;}
 
     if(checkWinCondition(position) !== 0){
-        return -checkWinCondition(position);
+        return -checkWinCondition(position)*10-sign(-checkWinCondition(position))*depth*0.5;
     }
 
     if(maximizingPlayer){
@@ -140,7 +140,7 @@ function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
         for(var t in position){
             if(position[t] === 0){
                 position[t] = ai;
-                var evalu = oneBoardMinMax(position, alpha, beta, false);
+                var evalu = oneBoardMinMax(position, depth+1, alpha, beta, false);
                 position[t] = 0;
                 maxEval = Math.max(maxEval, evalu);
                 alpha = Math.max(alpha, evalu);
@@ -155,7 +155,7 @@ function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
         for(var t in position){
             if(position[t] === 0){
                 position[t] = player;
-                var evalu = oneBoardMinMax(position, alpha, beta, true);
+                var evalu = oneBoardMinMax(position, depth+1, alpha, beta, true);
                 position[t] = 0;
                 minEval = Math.min(minEval, evalu);
                 beta = Math.min(beta, evalu);
@@ -180,6 +180,16 @@ function evaluatePosition(pos, mb, play, depth){
     //oneBoardMinMax(pos[play], -Infinity, Infinity, true);
 
     return evaluation;
+}
+
+function sign(x){
+    if(x > 0){
+        return 1;
+    }else if(x < 0){
+        return -1;
+    }else{
+        return 0;
+    }
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
@@ -278,40 +288,6 @@ function game(){
         }
     }
 
-    if(currentTurn === -1){
-        RUNS = 0;
-        //var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
-        //console.log(resultAlg.mE);
-        //boards[currentBoard][resultAlg.m] = ai;
-        //console.log(RUNS);
-        //currentTurn = -currentTurn;
-        //currentBoard = resultAlg.m;
-        var moveScores = [null, null, null, null, null, null, null, null, null];
-        for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = ai;
-                var score = oneBoardMinMax(boards[currentBoard], -Infinity, Infinity, false);
-                boards[currentBoard][a] = 0;
-                moveScores[a] = score;
-            }
-        }
-        console.log(RUNS);
-        console.log(moveScores);
-
-        var move = 0;
-
-        for(var i in moveScores){
-            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null){
-                move = i;
-            }
-        }
-
-        if(boards[currentBoard][move] === 0){boards[currentBoard][move] = ai;}
-
-        currentTurn = -currentTurn;
-
-    }
-
     shapeSize = squareSize/3;
     ctx.lineWidth = 20;
 
@@ -355,7 +331,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            //currentBoard = j;
+                            currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
@@ -363,6 +339,56 @@ function game(){
                 }
             }
         }
+    }
+
+    //AI HANDLER
+
+    if(currentTurn === -1){
+        RUNS = 0;
+        //var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
+        //console.log(resultAlg.mE);
+        //boards[currentBoard][resultAlg.m] = ai;
+        //console.log(RUNS);
+        //currentTurn = -currentTurn;
+        //currentBoard = resultAlg.m;
+
+        var moveScores = [null, null, null, null, null, null, null, null, null];
+        for(var a = 0; a < 9; a++){
+            if(boards[currentBoard][a] === 0){
+                boards[currentBoard][a] = ai;
+                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
+                console.log(score);
+                boards[currentBoard][a] = 0;
+                moveScores[a] = score;
+            }
+        }
+
+        for(var b = 0; b < 9; b++){
+            if(mainBoard[b] === 0){
+
+            }else{
+                //moveScores[b]
+            }
+        }
+
+        console.log(RUNS);
+        console.log(moveScores);
+
+        var move = 0;
+
+        for(var i in moveScores){
+            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null){
+                move = i;
+            }
+        }
+
+        if(boards[currentBoard][move] === 0){
+            boards[currentBoard][move] = ai;
+            currentBoard = move;
+        }
+
+        currentTurn = -currentTurn;
+
     }
 
     clicked = false;
