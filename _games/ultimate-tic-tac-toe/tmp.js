@@ -29,7 +29,7 @@ var clicked = false;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var currentTurn = -1;
+var currentTurn = 1;
 var player = 1;
 var ai = -1;
 var currentBoard = 4;
@@ -286,24 +286,27 @@ function game(){
         //console.log(RUNS);
         //currentTurn = -currentTurn;
         //currentBoard = resultAlg.m;
-
-        var bestScore = -Infinity;
-        //var moveScores = [null, null, null, null, null, null, null, null, null];
-        var move = 0;
+        var moveScores = [null, null, null, null, null, null, null, null, null];
         for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
                 var score = oneBoardMinMax(boards[currentBoard], -Infinity, Infinity, false);
                 boards[currentBoard][a] = 0;
-                //moveScores[t] = score;
-                if(score > bestScore){
-                    bestScore = score;
-                    move = a;
-                }
+                moveScores[a] = score;
             }
         }
-        boards[currentBoard][move] = ai;
         console.log(RUNS);
+        console.log(moveScores);
+
+        var move = 0;
+
+        for(var i in moveScores){
+            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null){
+                move = i;
+            }
+        }
+
+        if(boards[currentBoard][move] === 0){boards[currentBoard][move] = ai;}
 
         currentTurn = -currentTurn;
 
