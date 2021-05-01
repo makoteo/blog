@@ -122,14 +122,55 @@ function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximiz
     }
 }
 
+function oneBoardMinMax(position, alpha, beta, maximizingPlayer) {
+    RUNS++;
+    if(checkWinCondition(position) !== 0){
+        return -checkWinCondition(position);
+    }
+
+    if(maximizingPlayer){
+        var maxEval = -Infinity;
+        for(var t in position){
+            if(position[t] === 0){
+                position[t] = ai;
+                var evalu = oneBoardMinMax(position, alpha, beta, false);
+                position[t] = 0;
+                maxEval = Math.max(maxEval, evalu);
+                alpha = Math.max(alpha, evalu);
+                if(beta <= alpha){
+                    break;
+                }
+            }
+        }
+        return maxEval;
+    }else{
+        var minEval = Infinity;
+        for(var t in position){
+            if(position[t] === 0){
+                position[t] = player;
+                var evalu = oneBoardMinMax(position, alpha, beta, true);
+                position[t] = 0;
+                minEval = Math.min(minEval, evalu);
+                beta = Math.min(beta, evalu);
+                if(beta <= alpha){
+                    break;
+                }
+            }
+        }
+        return minEval;
+    }
+}
+
 function evaluatePosition(pos, mb, play, depth){
     var evaluation = 0;
     //evaluation-=checkWinCondition(mb)*20;
     //if(evaluation!==0){return evaluation;}
 
-    evaluation-=10*checkWinCondition(pos[play]);
+    evaluation-=5*checkWinCondition(pos[play]);
 
     evaluation-=10*mb.reduce(function(acc, val) { return acc + val; }, 0);
+
+    //oneBoardMinMax(pos[play], -Infinity, Infinity, true);
 
     return evaluation;
 }
@@ -232,12 +273,40 @@ function game(){
 
     if(currentTurn === -1){
         RUNS = 0;
-        var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
-        console.log(resultAlg.mE);
-        boards[currentBoard][resultAlg.m] = ai;
+        //var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
+        //console.log(resultAlg.mE);
+        //boards[currentBoard][resultAlg.m] = ai;
+        //console.log(RUNS);
+        //currentTurn = -currentTurn;
+        //currentBoard = resultAlg.m;
+
+        var moveScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for(var t in boards[currentBoard]){
+            if(boards[currentBoard][t] === 0){
+                boards[currentBoard][t] = ai;
+                var score = oneBoardMinMax(boards[currentBoard], -Infinity, Infinity, false);
+                boards[currentBoard][t] = 0;
+                moveScores[t] = score;
+            }
+        }
         console.log(RUNS);
+        console.log(moveScores);
+
+        RUNS = 0;
+        var moveScores2 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for(var t in boards[currentBoard]){
+            if(boards[currentBoard][t] === 0){
+                boards[currentBoard][t] = ai;
+                var score = miniMax(boards, mainBoard, t, 6, -Infinity, +Infinity, true);
+                boards[currentBoard][t] = 0;
+                moveScores2[t] = score;
+            }
+        }
+        console.log(RUNS);
+        console.log(moveScores2);
+
         currentTurn = -currentTurn;
-        currentBoard = resultAlg.m;
+
     }
 
     shapeSize = squareSize/3;
