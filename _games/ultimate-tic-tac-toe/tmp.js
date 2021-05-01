@@ -30,9 +30,13 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
 var currentTurn = 1;
+var player = 1;
+var ai = -1;
 var currentBoard = -1;
 
 var gameRunning = true;
+
+var RUNS = 0;
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
@@ -58,19 +62,84 @@ function checkWinCondition(map) {
     return 0;
 }
 
+function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
+    RUNS++;
+
+    if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
+        return {mE: evaluatePosition(position, mainBoard, boardToPlayOn, depth), m: 0};
+    }
+
+    if(boardToPlayOn === -1){
+        boardToPlayOn = 0;
+    }
+
+    if(maximizingPlayer){
+        var maxEval = -Infinity;
+        var movePlay = 0;
+        for(var b in position[boardToPlayOn]){
+            if(position[boardToPlayOn][b] === 0){
+                position[boardToPlayOn][b] = ai;
+                var savedMainBoard = mainBoard[b];
+                mainBoard[b] = checkWinCondition(position[boardToPlayOn]);
+                var tmpBoardToPlayOn = b;
+                var evalu = miniMax(position, mainBoard, tmpBoardToPlayOn, depth-1, alpha, beta, false);
+                position[boardToPlayOn][b] = 0;
+                mainBoard[b] = savedMainBoard;
+                if(evalu.mE > maxEval){
+                    maxEval = evalu.mE;
+                    movePlay = b;
+                }
+                alpha = Math.max(alpha, evalu.mE);
+                if(beta <= alpha){
+                    break;
+                }
+            }
+        }
+        return {mE: maxEval, m: movePlay};
+    }else{
+        var minEval = Infinity;
+        var movePlay = 0;
+        for(var b in position[boardToPlayOn]){
+            if(position[boardToPlayOn][b] === 0){
+                position[boardToPlayOn][b] = player;
+                var savedMainBoard = mainBoard[b];
+                mainBoard[b] = checkWinCondition(position[boardToPlayOn]);
+                var tmpBoardToPlayOn = b;
+                var evalu = miniMax(position, mainBoard, tmpBoardToPlayOn, depth-1, alpha, beta, true);
+                position[boardToPlayOn][b] = 0;
+                mainBoard[b] = savedMainBoard;
+                if(evalu.mE < minEval){
+                    minEval = evalu.mE;
+                    movePlay = b;
+                }
+                beta = Math.min(beta, evalu.mE);
+                if(beta <= alpha){
+                    break;
+                }
+            }
+        }
+        return {mE: minEval, m: movePlay};
+    }
+}
+
+function evaluatePosition(pos, mb, play, depth){
+    var evaluation = 0;
+    //evaluation-=checkWinCondition(mb)*20;
+    //if(evaluation!==0){return evaluation;}
+
+    evaluation-=10*checkWinCondition(pos[play]);
+
+    evaluation-=10*mb.reduce(function(acc, val) { return acc + val; }, 0);
+
+    return evaluation;
+}
+
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
 
 function game(){
     //SKY FILL
     ctx.fillStyle = COLORS.white;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-    //DRAW BOARD TO PLAY ON
-
-    ctx.fillStyle = COLORS.red;
-    ctx.globalAlpha = 0.1;
-    ctx.fillRect(WIDTH/3*(currentBoard%3), WIDTH/3*Math.floor(currentBoard/3), WIDTH/3, HEIGHT/3);
-    ctx.globalAlpha = 1;
 
     //DRAW BOARDS
 
@@ -127,8 +196,6 @@ function game(){
     //Shapes
     ctx.lineWidth = 5;
 
-    if(mainBoard[currentBoard] !== 0){currentBoard = -1;}
-
     for(var i in boards){
         if(mainBoard[i] === 0) {
             if (checkWinCondition(boards[i]) !== 0) {
@@ -163,6 +230,16 @@ function game(){
         }
     }
 
+    if(currentTurn === -1){
+        RUNS = 0;
+        var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
+        console.log(resultAlg.mE);
+        boards[currentBoard][resultAlg.m] = ai;
+        console.log(RUNS);
+        currentTurn = -currentTurn;
+        currentBoard = resultAlg.m;
+    }
+
     shapeSize = squareSize/3;
     ctx.lineWidth = 20;
 
@@ -185,6 +262,15 @@ function game(){
             ctx.stroke();
         }
     }
+
+    if(mainBoard[currentBoard] !== 0){currentBoard = -1;}
+
+    //HIGHLIGHT BOARD TO PLAY ON
+
+    ctx.fillStyle = COLORS.red;
+    ctx.globalAlpha = 0.1;
+    ctx.fillRect(WIDTH/3*(currentBoard%3), WIDTH/3*Math.floor(currentBoard/3), WIDTH/3, HEIGHT/3);
+    ctx.globalAlpha = 1;
 
     shapeSize = squareSize/6;
 
