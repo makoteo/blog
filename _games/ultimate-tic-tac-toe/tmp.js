@@ -1,6 +1,6 @@
 var versionCode = "Alpha 0.9";
 var WIDTH = 800;
-var HEIGHT = 800;
+var HEIGHT = 850;
 
 var COLORS = {white: "rgb(254, 250, 236)", black: "rgb(7, 5, 14)", blue: "rgb(36, 32, 95)", red: "rgb(129, 43, 56)"};
 
@@ -38,6 +38,8 @@ var gameRunning = true;
 
 var RUNS = 0;
 
+var estimatedInFiveTurns = 0;
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 
@@ -62,11 +64,27 @@ function checkWinCondition(map) {
     return 0;
 }
 
-function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
+function checkSmartPosition(map) {
+    var sum = 0;
+    var a = -2/3;
+    if (map[0] + map[1] + map[2] === a * 3 || map[3] + map[4] + map[5] === a * 3 || map[6] + map[7] + map[8] === a * 3 || map[0] + map[3] + map[6] === a * 3 || map[1] + map[4] + map[7] === a * 3 ||
+        map[2] + map[5] + map[8] === a * 3 || map[0] + map[4] + map[8] === a * 3 || map[2] + map[4] + map[6] === a * 3) {
+        sum+=a;
+    }
+    a = 2/3;
+    if (map[0] + map[1] + map[2] === a * 3 || map[3] + map[4] + map[5] === a * 3 || map[6] + map[7] + map[8] === a * 3 || map[0] + map[3] + map[6] === a * 3 || map[1] + map[4] + map[7] === a * 3 ||
+        map[2] + map[5] + map[8] === a * 3 || map[0] + map[4] + map[8] === a * 3 || map[2] + map[4] + map[6] === a * 3) {
+        sum+=a;
+    }
+    return sum;
+}
+
+
+function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
     if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        return {mE: evaluatePosition(position, mainBoard, boardToPlayOn, depth), m: 0};
+        return -evaluatePosition(position, boardToPlayOn);
     }
 
     if(boardToPlayOn === -1){
@@ -75,65 +93,53 @@ function miniMax(position, mainBoard, boardToPlayOn, depth, alpha, beta, maximiz
 
     if(maximizingPlayer){
         var maxEval = -Infinity;
-        var movePlay = 0;
-        for(var b in position[boardToPlayOn]){
-            if(position[boardToPlayOn][b] === 0){
-                position[boardToPlayOn][b] = ai;
-                var savedMainBoard = mainBoard[b];
-                mainBoard[b] = checkWinCondition(position[boardToPlayOn]);
-                var tmpBoardToPlayOn = b;
-                var evalu = miniMax(position, mainBoard, tmpBoardToPlayOn, depth-1, alpha, beta, false);
-                position[boardToPlayOn][b] = 0;
-                mainBoard[b] = savedMainBoard;
-                if(evalu.mE > maxEval){
-                    maxEval = evalu.mE;
-                    movePlay = b;
-                }
-                alpha = Math.max(alpha, evalu.mE);
+        for(var mm = 0; mm < 9; mm++){
+            if(position[boardToPlayOn][mm] === 0){
+                position[boardToPlayOn][mm] = ai;
+                var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                position[boardToPlayOn][mm] = 0;
+                maxEval = Math.max(evalu, maxEval);
+                alpha = Math.max(alpha, evalu);
                 if(beta <= alpha){
                     break;
                 }
             }
         }
-        return {mE: maxEval, m: movePlay};
+        return maxEval;
     }else{
         var minEval = Infinity;
-        var movePlay = 0;
-        for(var b in position[boardToPlayOn]){
-            if(position[boardToPlayOn][b] === 0){
-                position[boardToPlayOn][b] = player;
-                var savedMainBoard = mainBoard[b];
-                mainBoard[b] = checkWinCondition(position[boardToPlayOn]);
-                var tmpBoardToPlayOn = b;
-                var evalu = miniMax(position, mainBoard, tmpBoardToPlayOn, depth-1, alpha, beta, true);
-                position[boardToPlayOn][b] = 0;
-                mainBoard[b] = savedMainBoard;
-                if(evalu.mE < minEval){
-                    minEval = evalu.mE;
-                    movePlay = b;
-                }
-                beta = Math.min(beta, evalu.mE);
+        for(var mm = 0; mm < 9; mm++){
+            if(position[boardToPlayOn][mm] === 0){
+                position[boardToPlayOn][mm] = player;
+                var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                position[boardToPlayOn][mm] = 0;
+                minEval = Math.min(evalu, minEval);
+                beta = Math.min(beta, evalu);
                 if(beta <= alpha){
                     break;
                 }
             }
         }
-        return {mE: minEval, m: movePlay};
+        return minEval;
     }
 }
 
 function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
+    if(checkWinCondition(position) !== 0){
+        if(depth > 0){
+            return -checkWinCondition(position)*10-sign(-checkWinCondition(position))*depth*0.5;
+        }else{
+            return -checkWinCondition(position)*10-sign(-checkWinCondition(position))*depth*0.1;
+        }
+    }
+
     var count = 0;
     for(var i = 0; i < 9; i++){
         if(position[i] !== 0) count++;
     }
-    if(count === 9){return 0;}
-
-    if(checkWinCondition(position) !== 0){
-        return -checkWinCondition(position)*10-sign(-checkWinCondition(position))*depth*0.5;
-    }
+    if(count === 9 || depth === 1000){return 0;}
 
     if(maximizingPlayer){
         var maxEval = -Infinity;
@@ -168,16 +174,17 @@ function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     }
 }
 
-function evaluatePosition(pos, mb, play, depth){
+//POSITIVE INTEGER IS WINNING FOR BLUE AND VICA VERSA
+function evaluatePosition(pos, next){
     var evaluation = 0;
-    //evaluation-=checkWinCondition(mb)*20;
-    //if(evaluation!==0){return evaluation;}
 
-    evaluation-=5*checkWinCondition(pos[play]);
-
-    evaluation-=10*mb.reduce(function(acc, val) { return acc + val; }, 0);
-
-    //oneBoardMinMax(pos[play], -Infinity, Infinity, true);
+    //Simple Positional Analysis
+    for(var idk in pos){
+        evaluation -= (pos[idk][0]*0.2+pos[idk][1]*0.1+pos[idk][2]*0.2+pos[idk][3]*1+pos[idk][4]*0.25+pos[idk][5]*0.1+pos[idk][6]*0.2+pos[idk][7]*0.1+pos[idk][8]*0.2);
+        evaluation -= checkWinCondition(pos[idk])*20;
+        //evaluation += checkDumbPosition(pos[idk])*2;
+        evaluation -= checkSmartPosition(pos[idk])*7;
+    }
 
     return evaluation;
 }
@@ -205,22 +212,22 @@ function game(){
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(WIDTH/3, 0);
-    ctx.lineTo(WIDTH/3, HEIGHT);
+    ctx.lineTo(WIDTH/3, WIDTH);
     ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(WIDTH/3*2, 0);
-    ctx.lineTo(WIDTH/3*2, HEIGHT);
+    ctx.lineTo(WIDTH/3*2, WIDTH);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(0, HEIGHT/3);
-    ctx.lineTo(WIDTH, HEIGHT/3);
+    ctx.moveTo(0, WIDTH/3);
+    ctx.lineTo(WIDTH, WIDTH/3);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(0, HEIGHT/3*2);
-    ctx.lineTo(WIDTH, HEIGHT/3*2);
+    ctx.moveTo(0, WIDTH/3*2);
+    ctx.lineTo(WIDTH, WIDTH/3*2);
     ctx.stroke();
 
     ctx.lineWidth = 3;
@@ -317,7 +324,7 @@ function game(){
 
     ctx.fillStyle = COLORS.red;
     ctx.globalAlpha = 0.1;
-    ctx.fillRect(WIDTH/3*(currentBoard%3), WIDTH/3*Math.floor(currentBoard/3), WIDTH/3, HEIGHT/3);
+    ctx.fillRect(WIDTH/3*(currentBoard%3), WIDTH/3*Math.floor(currentBoard/3), WIDTH/3, WIDTH/3);
     ctx.globalAlpha = 1;
 
     shapeSize = squareSize/6;
@@ -341,51 +348,144 @@ function game(){
         }
     }
 
+    //Draw EVAL BAR
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(WIDTH/2, WIDTH, estimatedInFiveTurns*4, HEIGHT/16);
+
+    if(evaluatePosition(boards) > 0){
+        ctx.fillStyle = COLORS.blue;
+        ctx.fillRect(WIDTH/2, WIDTH + HEIGHT/200, evaluatePosition(boards)*4, HEIGHT/20);
+    }else{
+        ctx.fillStyle = COLORS.red;
+        ctx.fillRect(WIDTH/2 + (evaluatePosition(boards))*4, WIDTH + HEIGHT/200, -evaluatePosition(boards)*4, HEIGHT/20);
+    }
+
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(WIDTH/2, WIDTH);
+    ctx.lineTo(WIDTH/2, WIDTH+HEIGHT);
+    ctx.stroke();
+
     //AI HANDLER
 
     if(currentTurn === -1){
         RUNS = 0;
-        //var resultAlg = miniMax(boards, mainBoard, currentBoard, 6, -Infinity, +Infinity, true);
-        //console.log(resultAlg.mE);
-        //boards[currentBoard][resultAlg.m] = ai;
-        //console.log(RUNS);
-        //currentTurn = -currentTurn;
-        //currentBoard = resultAlg.m;
-
         var moveScores = [null, null, null, null, null, null, null, null, null];
-        for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = ai;
-                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
-                console.log(score);
-                boards[currentBoard][a] = 0;
-                moveScores[a] = score;
+        if(currentBoard !== -1 && mainBoard[currentBoard] === 0){
+            //Just like playing normal tic tac toe
+            for(var a = 0; a < 9; a++){
+                if(boards[currentBoard][a] === 0){
+                    boards[currentBoard][a] = ai;
+                    var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
+                    boards[currentBoard][a] = 0;
+                    moveScores[a] = score*1.2;
+                }
             }
+
+            //Looking at global board and seeing which squares are worth it, then subtracting those so opponent doesn't get them
+            for(var b = 0; b < 9; b++){
+                if(mainBoard[b] === 0){
+                    mainBoard[b] = ai;
+                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, false);
+                    mainBoard[b] = 0;
+                    if(moveScores[b] !== null){ moveScores[b] -= score;}
+                }else{
+                    if(moveScores[b] !== null){ moveScores[b] -= 10;}
+                }
+            }
+
+            //Looking at all the boards and evaluating them
+            var boardScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            for(var a = 0; a < 9; a++){
+                for (var b = 0; b < 9; b++) {
+                    if(boards[a][b] === 0){
+                        boards[a][b] = ai;
+                        var score = oneBoardMinMax(boards[a], 0, -Infinity, Infinity, false);
+                        boards[a][b] = 0;
+                        boardScores[a] += score*0.02;
+                    }
+                }
+            }
+
+            //Add Board Scores to Move Scores
+            for(var i in moveScores){
+                if(moveScores[i] !== null){ moveScores[i] += boardScores[i];}
+            }
+
+            //Evaluate the current board for each possibility
+            /*for(var g = 0; g < 9; g++){
+                if(boards[currentBoard][g] === 0){
+                    boards[currentBoard][g] = ai;
+                    if(moveScores[g] !== null){ moveScores[g] += evaluatePosition(boards)*0.1;}
+                    boards[currentBoard][g] = 0;
+                }
+            }*/
+
+            var tmpForEval = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            //Final evaluation function
+            for(var c = 0; c < 9; c++){
+                if(boards[currentBoard][c] === 0){
+                    boards[currentBoard][c] = ai;
+                    var score = miniMax(boards, currentBoard, 6, -Infinity, +Infinity, false);
+                    boards[currentBoard][c] = 0;
+                    moveScores[c] += score;
+                    tmpForEval[c] = score;
+                }
+            }
+            estimatedInFiveTurns = Math.min(tmpForEval[0], tmpForEval[1], tmpForEval[2], tmpForEval[3], tmpForEval[4], tmpForEval[5], tmpForEval[6], tmpForEval[7], tmpForEval[8]);
+        }else{
+            for(var b = 0; b < 9; b++){
+                if(mainBoard[b] === 0){
+                    mainBoard[b] = ai;
+                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, false);
+                    console.log("BoardScore: " + score);
+                    mainBoard[b] = 0;
+                    moveScores[b] += score*0.1;
+                }
+            }
+
+            var playOn = 0;
+
+            for(var i in moveScores){
+                if(moveScores[i] >= moveScores[playOn] && moveScores[i] !== null && mainBoard[i] === 0){
+                    playOn = i;
+                }
+            }
+
+            currentBoard = playOn;
+
         }
 
-        for(var b = 0; b < 9; b++){
-            if(mainBoard[b] === 0){
-
-            }else{
-                //moveScores[b]
+        /*for(var e = 0; e < 9; e++){
+            var sum = 0;
+            for(var f = 0; f < 9; f++){
+                sum+=boards[e][f];
             }
-        }
+            if(moveScores[e] !== null){ moveScores[e] -= sum;}
+        }*/
 
         console.log(RUNS);
         console.log(moveScores);
 
         var move = 0;
+        for(var j in moveScores){
+            if(moveScores[j] !== null){
+                move = j; break;
+            }
+        }
 
-        for(var i in moveScores){
-            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null){
+        for(var i = 0; i < 9; i++){
+            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null && boards[currentBoard][i] === 0){
                 move = i;
             }
         }
 
-        if(boards[currentBoard][move] === 0){
-            boards[currentBoard][move] = ai;
-            currentBoard = move;
-        }
+        boards[currentBoard][move] = ai;
+        currentBoard = move;
+
 
         currentTurn = -currentTurn;
 
@@ -410,6 +510,7 @@ function findScreenCoords(mouseEvent)
 
 function click(){
     clicked = true;
+    console.log("Eval: " + evaluatePosition(boards));
 }
 document.getElementById("myCanvas").onmousemove = findScreenCoords;
 document.getElementById("myCanvas").onclick = click;
