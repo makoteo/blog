@@ -383,7 +383,7 @@ function game(){
 
     if(currentTurn === -1){
         RUNS = 0;
-        var bestMove = 0;
+        var bestMove = -1;
         var bestScore = 0;
 
         for(var i = 0; i < 9; i++){
@@ -407,50 +407,25 @@ function game(){
         }
          */
 
-        for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                var score = evaluatePos(boards[currentBoard], a);
+        if(bestMove !== -1) {
+            for (var a = 0; a < 9; a++) {
+                if (boards[currentBoard][a] === 0) {
+                    var score = evaluatePos(boards[currentBoard], a);
 
-                if(score >= bestScore){
-                    bestScore = score;
-                    bestMove = a;
+                    if (score >= bestScore) {
+                        bestScore = score;
+                        bestMove = a;
+                    }
                 }
             }
+            console.log(evaluatePos(boards[currentBoard], bestMove));
+            if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = ai;}
         }
-
-        console.log(evaluatePos(boards[currentBoard], bestMove));
-
-        if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = ai;}
         //currentBoard = move;
 
 
         currentTurn = -currentTurn;
 
-    }else{
-        var bestMove = 0;
-        var bestScore = 0;
-
-        for(var i = 0; i < 9; i++){
-            if(boards[currentBoard][i] === 0){
-                bestMove = i;
-                break;
-            }
-        }
-
-        for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = player;
-                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, true);
-                boards[currentBoard][a] = 0;
-                if(score <= bestScore){
-                    bestScore = score;
-                    bestMove = a;
-                }
-            }
-        }
-
-        if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = player;}
-        currentTurn = -currentTurn;
     }
 
     clicked = false;
