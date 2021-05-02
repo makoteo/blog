@@ -385,7 +385,16 @@ function game(){
         RUNS = 0;
         var bestMove = 0;
         var bestScore = 0;
-        /*for(var a = 0; a < 9; a++){
+
+        for(var i = 0; i < 9; i++){
+            if(boards[currentBoard][i] === 0){
+                bestMove = i;
+                break;
+            }
+        }
+
+        /*
+        for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
                 var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
@@ -395,14 +404,8 @@ function game(){
                     bestMove = a;
                 }
             }
-        }*/
-
-        for(var i = 0; i < 9; i++){
-            if(boards[currentBoard][i] === 0){
-                bestMove = i;
-                break;
-            }
         }
+         */
 
         for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
@@ -417,12 +420,37 @@ function game(){
 
         console.log(evaluatePos(boards[currentBoard], bestMove));
 
-        boards[currentBoard][bestMove] = ai;
+        if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = ai;}
         //currentBoard = move;
 
 
         currentTurn = -currentTurn;
 
+    }else{
+        var bestMove = 0;
+        var bestScore = 0;
+
+        for(var i = 0; i < 9; i++){
+            if(boards[currentBoard][i] === 0){
+                bestMove = i;
+                break;
+            }
+        }
+
+        for(var a = 0; a < 9; a++){
+            if(boards[currentBoard][a] === 0){
+                boards[currentBoard][a] = player;
+                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, true);
+                boards[currentBoard][a] = 0;
+                if(score <= bestScore){
+                    bestScore = score;
+                    bestMove = a;
+                }
+            }
+        }
+
+        if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = player;}
+        currentTurn = -currentTurn;
     }
 
     clicked = false;
