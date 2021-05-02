@@ -84,7 +84,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     RUNS++;
 
     if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        return -evaluatePosition(position, boardToPlayOn);
+        return evaluatePosition(position, boardToPlayOn);
     }
 
     if(boardToPlayOn === -1){
@@ -388,8 +388,8 @@ function game(){
             //Looking at global board and seeing which squares are worth it, then subtracting those so opponent doesn't get them
             for(var b = 0; b < 9; b++){
                 if(mainBoard[b] === 0){
-                    mainBoard[b] = ai;
-                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, false);
+                    mainBoard[b] = player;
+                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, true);
                     mainBoard[b] = 0;
                     if(moveScores[b] !== null){ moveScores[b] -= score;}
                 }else{
