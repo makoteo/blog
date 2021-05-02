@@ -69,7 +69,16 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     RUNS++;
 
     if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        return evaluatePosition(position, boardToPlayOn);
+        var maxEv = -Infinity;
+        var totalEv = 0;
+        for(var bd = 0; bd < 9; bd++){
+            maxEv = 0;
+            for(var ev = 0; ev < 9; ev++){
+                maxEv = Math.max(evaluatePos(position[bd], ev), maxEv);
+            }
+            totalEv += maxEv
+        }
+        return totalEv/9;
     }
 
     if(boardToPlayOn === -1){
@@ -159,15 +168,41 @@ function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     }
 }
 
-function evaluatePos(pos){
+//Low number means losing the board, big number means winning
+function evaluatePos(pos, square){
+    pos[square] = ai;
     var evaluation = 0;
-    evaluation -= (pos[0]*0.2+pos[1]*0.1+pos[2]*0.2+pos[3]*0.1+pos[4]*0.25+pos[5]*0.1+pos[6]*0.2+pos[7]*0.1+pos[8]*0.2);
+    //Prefer center over corners over edges
+    //evaluation -= (pos[0]*0.2+pos[1]*0.1+pos[2]*0.2+pos[3]*0.1+pos[4]*0.25+pos[5]*0.1+pos[6]*0.2+pos[7]*0.1+pos[8]*0.2);
+    var points = [0.2, 0.1, 0.2, 0.1, 0.25, 0.1, 0.2, 0.1, 0.2];
+    evaluation+=points[square];
 
+    //Prefer creating pairs
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
         pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
         evaluation -= 1;
     }
+
+    //Take victories
+    a = -3;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 5;
+    }
+
+    //Block a players turn if necessary
+    pos[square] = player;
+
+    a = 3;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 2;
+    }
+
+    pos[square] = 0;
+
+    evaluation -= checkWinCondition(pos)*4;
 
     return evaluation;
 }
@@ -362,17 +397,25 @@ function game(){
             }
         }*/
 
+        for(var i = 0; i < 9; i++){
+            if(boards[currentBoard][i] === 0){
+                bestMove = i;
+                break;
+            }
+        }
+
         for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = ai;
-                var score = evaluatePos(boards[currentBoard]);
-                boards[currentBoard][a] = 0;
+                var score = evaluatePos(boards[currentBoard], a);
+
                 if(score >= bestScore){
                     bestScore = score;
                     bestMove = a;
                 }
             }
         }
+
+        console.log(evaluatePos(boards[currentBoard], bestMove));
 
         boards[currentBoard][bestMove] = ai;
         //currentBoard = move;
@@ -401,7 +444,7 @@ function findScreenCoords(mouseEvent)
 
 function click(){
     clicked = true;
-    console.log("Eval: " + evaluatePosition(boards));
+    //console.log("Eval: " + evaluatePosition(boards));
 }
 document.getElementById("myCanvas").onmousemove = findScreenCoords;
 document.getElementById("myCanvas").onclick = click;
