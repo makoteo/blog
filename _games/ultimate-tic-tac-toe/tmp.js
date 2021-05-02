@@ -64,21 +64,6 @@ function checkWinCondition(map) {
     return 0;
 }
 
-function checkSmartPosition(map) {
-    var sum = 0;
-    var a = -2/3;
-    if (map[0] + map[1] + map[2] === a * 3 || map[3] + map[4] + map[5] === a * 3 || map[6] + map[7] + map[8] === a * 3 || map[0] + map[3] + map[6] === a * 3 || map[1] + map[4] + map[7] === a * 3 ||
-        map[2] + map[5] + map[8] === a * 3 || map[0] + map[4] + map[8] === a * 3 || map[2] + map[4] + map[6] === a * 3) {
-        sum+=a;
-    }
-    a = 2/3;
-    if (map[0] + map[1] + map[2] === a * 3 || map[3] + map[4] + map[5] === a * 3 || map[6] + map[7] + map[8] === a * 3 || map[0] + map[3] + map[6] === a * 3 || map[1] + map[4] + map[7] === a * 3 ||
-        map[2] + map[5] + map[8] === a * 3 || map[0] + map[4] + map[8] === a * 3 || map[2] + map[4] + map[6] === a * 3) {
-        sum+=a;
-    }
-    return sum;
-}
-
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
@@ -174,16 +159,14 @@ function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     }
 }
 
-//POSITIVE INTEGER IS WINNING FOR BLUE AND VICA VERSA
-function evaluatePosition(pos, next){
+function evaluatePos(pos){
     var evaluation = 0;
+    evaluation -= (pos[0]*0.2+pos[1]*0.1+pos[2]*0.2+pos[3]*0.1+pos[4]*0.25+pos[5]*0.1+pos[6]*0.2+pos[7]*0.1+pos[8]*0.2);
 
-    //Simple Positional Analysis
-    for(var idk in pos){
-        evaluation -= (pos[idk][0]*0.2+pos[idk][1]*0.1+pos[idk][2]*0.2+pos[idk][3]*1+pos[idk][4]*0.25+pos[idk][5]*0.1+pos[idk][6]*0.2+pos[idk][7]*0.1+pos[idk][8]*0.2);
-        evaluation -= checkWinCondition(pos[idk])*20;
-        //evaluation += checkDumbPosition(pos[idk])*2;
-        evaluation -= checkSmartPosition(pos[idk])*7;
+    var a = 2;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation -= 1;
     }
 
     return evaluation;
@@ -338,7 +321,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            currentBoard = j;
+                            //currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
@@ -353,14 +336,6 @@ function game(){
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(WIDTH/2, WIDTH, estimatedInFiveTurns*4, HEIGHT/16);
 
-    if(evaluatePosition(boards) > 0){
-        ctx.fillStyle = COLORS.blue;
-        ctx.fillRect(WIDTH/2, WIDTH + HEIGHT/200, evaluatePosition(boards)*4, HEIGHT/20);
-    }else{
-        ctx.fillStyle = COLORS.red;
-        ctx.fillRect(WIDTH/2 + (evaluatePosition(boards))*4, WIDTH + HEIGHT/200, -evaluatePosition(boards)*4, HEIGHT/20);
-    }
-
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
 
@@ -373,118 +348,34 @@ function game(){
 
     if(currentTurn === -1){
         RUNS = 0;
-        var moveScores = [null, null, null, null, null, null, null, null, null];
-        if(currentBoard !== -1 && mainBoard[currentBoard] === 0){
-            //Just like playing normal tic tac toe
-            for(var a = 0; a < 9; a++){
-                if(boards[currentBoard][a] === 0){
-                    boards[currentBoard][a] = ai;
-                    var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
-                    boards[currentBoard][a] = 0;
-                    moveScores[a] = score*1.2;
+        var bestMove = 0;
+        var bestScore = 0;
+        /*for(var a = 0; a < 9; a++){
+            if(boards[currentBoard][a] === 0){
+                boards[currentBoard][a] = ai;
+                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
+                boards[currentBoard][a] = 0;
+                if(score >= bestScore){
+                    bestScore = score;
+                    bestMove = a;
                 }
             }
-
-            //Looking at global board and seeing which squares are worth it, then subtracting those so opponent doesn't get them
-            for(var b = 0; b < 9; b++){
-                if(mainBoard[b] === 0){
-                    mainBoard[b] = player;
-                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, true);
-                    mainBoard[b] = 0;
-                    if(moveScores[b] !== null){ moveScores[b] -= score;}
-                }else{
-                    if(moveScores[b] !== null){ moveScores[b] -= 10;}
-                }
-            }
-
-            //Looking at all the boards and evaluating them
-            var boardScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-            for(var a = 0; a < 9; a++){
-                for (var b = 0; b < 9; b++) {
-                    if(boards[a][b] === 0){
-                        boards[a][b] = ai;
-                        var score = oneBoardMinMax(boards[a], 0, -Infinity, Infinity, false);
-                        boards[a][b] = 0;
-                        boardScores[a] += score*0.02;
-                    }
-                }
-            }
-
-            //Add Board Scores to Move Scores
-            for(var i in moveScores){
-                if(moveScores[i] !== null){ moveScores[i] += boardScores[i];}
-            }
-
-            //Evaluate the current board for each possibility
-            /*for(var g = 0; g < 9; g++){
-                if(boards[currentBoard][g] === 0){
-                    boards[currentBoard][g] = ai;
-                    if(moveScores[g] !== null){ moveScores[g] += evaluatePosition(boards)*0.1;}
-                    boards[currentBoard][g] = 0;
-                }
-            }*/
-
-            var tmpForEval = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            //Final evaluation function
-            for(var c = 0; c < 9; c++){
-                if(boards[currentBoard][c] === 0){
-                    boards[currentBoard][c] = ai;
-                    var score = miniMax(boards, currentBoard, 6, -Infinity, +Infinity, false);
-                    boards[currentBoard][c] = 0;
-                    moveScores[c] += score;
-                    tmpForEval[c] = score;
-                }
-            }
-            estimatedInFiveTurns = Math.min(tmpForEval[0], tmpForEval[1], tmpForEval[2], tmpForEval[3], tmpForEval[4], tmpForEval[5], tmpForEval[6], tmpForEval[7], tmpForEval[8]);
-        }else{
-            for(var b = 0; b < 9; b++){
-                if(mainBoard[b] === 0){
-                    mainBoard[b] = ai;
-                    var score = oneBoardMinMax(mainBoard, 0, -Infinity, Infinity, false);
-                    console.log("BoardScore: " + score);
-                    mainBoard[b] = 0;
-                    moveScores[b] += score*0.1;
-                }
-            }
-
-            var playOn = 0;
-
-            for(var i in moveScores){
-                if(moveScores[i] >= moveScores[playOn] && moveScores[i] !== null && mainBoard[i] === 0){
-                    playOn = i;
-                }
-            }
-
-            currentBoard = playOn;
-
-        }
-
-        /*for(var e = 0; e < 9; e++){
-            var sum = 0;
-            for(var f = 0; f < 9; f++){
-                sum+=boards[e][f];
-            }
-            if(moveScores[e] !== null){ moveScores[e] -= sum;}
         }*/
 
-        console.log(RUNS);
-        console.log(moveScores);
-
-        var move = 0;
-        for(var j in moveScores){
-            if(moveScores[j] !== null){
-                move = j; break;
+        for(var a = 0; a < 9; a++){
+            if(boards[currentBoard][a] === 0){
+                boards[currentBoard][a] = ai;
+                var score = evaluatePos(boards[currentBoard]);
+                boards[currentBoard][a] = 0;
+                if(score >= bestScore){
+                    bestScore = score;
+                    bestMove = a;
+                }
             }
         }
 
-        for(var i = 0; i < 9; i++){
-            if(moveScores[i] >= moveScores[move] && moveScores[i] !== null && boards[currentBoard][i] === 0){
-                move = i;
-            }
-        }
-
-        boards[currentBoard][move] = ai;
-        currentBoard = move;
+        boards[currentBoard][bestMove] = ai;
+        //currentBoard = move;
 
 
         currentTurn = -currentTurn;
