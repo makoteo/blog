@@ -91,7 +91,6 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     RUNS++;
 
     if(depth === 0) {
-        //console.log(position, boardToPlayOn);
         return evaluateGame(position);
     }
 
@@ -106,7 +105,6 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
                 position[boardToPlayOn][mm] = ai;
-                //console.log(position, boardToPlayOn, mm, position[boardToPlayOn][mm]);
                 var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
                 position[boardToPlayOn][mm] = 0;
                 maxEval = Math.max(evalu, maxEval);
@@ -443,7 +441,7 @@ function game(){
 
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, currentBoard, 5, -Infinity, Infinity, true);
+                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, true);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
                 console.log(score2);
             }
