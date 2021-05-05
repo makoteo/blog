@@ -68,7 +68,7 @@ function evaluateGame(position) {
     var maxEv = -Infinity;
     var totalEv = 0;
     for(var bd = 0; bd < 9; bd++){
-        maxEv = 0;
+        maxEv = -Infinity;
         for(var ev = 0; ev < 9; ev++){
             if(position[bd][ev] === 0){
                 maxEv = Math.max(evaluatePos(position[bd], ev), maxEv);
@@ -80,7 +80,7 @@ function evaluateGame(position) {
     totalEv = totalEv/9-1.05;
 
     for(var f = 0; f < 9; f++){
-        totalEv-=checkWinCondition(position[f])*5;
+        totalEv-=checkWinCondition(position[f])*10;
     }
 
     return totalEv*4;
@@ -411,7 +411,7 @@ function game(){
         }
 
 
-        /*for(var a = 0; a < 9; a++){
+        for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
                 var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
@@ -421,7 +421,7 @@ function game(){
                     bestMove = a;
                 }
             }
-        }*/
+        }
 
 
         if(bestMove !== -1) {
@@ -433,7 +433,6 @@ function game(){
                         bestScore = score;
                         bestMove = a;
                     }
-
                     moveScores[a] = score;
                 }
             }
@@ -441,20 +440,22 @@ function game(){
 
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, true);
+                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
-                console.log(score2);
+                //console.log(score2);
             }
         }
 
         for(var c in moveScores){
-            if(moveScores[c] > moveScores[bestMove]){
+            if(moveScores[c] > moveScores[bestMove] && moveScores[c] !== null){
                 bestMove = c;
             }
         }
 
+        console.log(moveScores);
+
         //console.log(evaluatePos(boards[currentBoard], bestMove));
-        if(boards[currentBoard][bestMove] === 0){boards[currentBoard][bestMove] = ai;}
+        boards[currentBoard][bestMove] = ai;
         currentBoard = bestMove;
 
 
