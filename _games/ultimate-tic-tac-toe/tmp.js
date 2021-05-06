@@ -80,7 +80,7 @@ function evaluateGame(position) {
     totalEv = totalEv/9-1.05;
 
     for(var f = 0; f < 9; f++){
-        totalEv-=checkWinCondition(position[f])*10;
+        totalEv-=checkWinCondition(position[f])/4;
     }
 
     return totalEv*4;
@@ -104,9 +104,20 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                position[boardToPlayOn][mm] = ai;
-                var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
-                position[boardToPlayOn][mm] = 0;
+                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                    var tmpToPlay = chooseMainSquare(position, true);
+                    if(position[tmpToPlay][mm] === 0) {
+                        position[tmpToPlay][mm] = ai;
+                        var evalu = miniMax(position, tmpToPlay, depth - 1, alpha, beta, false);
+                        position[tmpToPlay][mm] = 0;
+                    }else{
+                        break;
+                    }
+                }else{
+                    position[boardToPlayOn][mm] = ai;
+                    var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                    position[boardToPlayOn][mm] = 0;
+                }
                 maxEval = Math.max(evalu, maxEval);
                 alpha = Math.max(alpha, evalu);
                 if(beta <= alpha){
@@ -119,9 +130,20 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var minEval = Infinity;
         for(var m2 = 0; m2 < 9; m2++){
             if(position[boardToPlayOn][m2] === 0){
-                position[boardToPlayOn][m2] = player;
-                var evalu = miniMax(position, m2, depth-1, alpha, beta, true);
-                position[boardToPlayOn][m2] = 0;
+                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                    var tmpToPlay = chooseMainSquare(position, false);
+                    if(position[tmpToPlay][m2] === 0){
+                        position[tmpToPlay][m2] = player;
+                        var evalu = miniMax(position, tmpToPlay, depth-1, alpha, beta, true);
+                        position[tmpToPlay][m2] = 0;
+                    }else{
+                        break;
+                    }
+                }else{
+                    position[boardToPlayOn][m2] = player;
+                    var evalu = miniMax(position, m2, depth-1, alpha, beta, true);
+                    position[boardToPlayOn][m2] = 0;
+                }
                 minEval = Math.min(evalu, minEval);
                 beta = Math.min(beta, evalu);
                 if(beta <= alpha){
@@ -220,6 +242,55 @@ function evaluatePos(pos, square){
     evaluation -= checkWinCondition(pos)*4;
 
     return evaluation;
+}
+
+function chooseMainSquare(position, pl){
+    var maxEv = [-Infinity, 0];
+    var totalEv = [null, null, null, null, null, null, null, null, null];
+
+    if(pl){
+        maxEv[0] = Infinity;
+        for(var bd = 0; bd < 9; bd++){
+            //maxEv = -Infinity;
+            if(checkWinCondition(position[bd]) !== 0){
+                totalEv[bd] = Infinity;
+                continue;
+            }
+            for(var ev = 0; ev < 9; ev++){
+                if(position[bd][ev] === 0){
+                    totalEv[bd] = Math.min(evaluatePos(position[bd], ev), totalEv[bd]);
+                }
+            }
+            //totalEv += maxEv
+        }
+        for(var bww = 0; bww < 9; bww++){
+            if(totalEv[bww] < maxEv[0] && totalEv[bww] !== null){
+                maxEv[1] = bww;
+                maxEv[0] = totalEv[bww];
+            }
+        }
+    }else{
+        for(var bd = 0; bd < 9; bd++){
+            //maxEv = -Infinity;
+            if(checkWinCondition(position[bd]) !== 0){
+                totalEv[bd] = -Infinity;
+                continue;
+            }
+            for(var ev = 0; ev < 9; ev++){
+                if(position[bd][ev] === 0){
+                    totalEv[bd] = Math.max(evaluatePos(position[bd], ev), totalEv[bd]);
+                }
+            }
+            //totalEv += maxEv
+        }
+        for(var bww = 0; bww < 9; bww++){
+            if(totalEv[bww] > maxEv[0] && totalEv[bww] !== null){
+                maxEv[1] = bww;
+                maxEv[0] = totalEv[bww];
+            }
+        }
+    }
+    return maxEv[1];
 }
 
 function sign(x){
@@ -403,6 +474,12 @@ function game(){
 
         var moveScores = [null, null, null, null, null, null, null, null, null];
 
+        if(currentBoard === -1 || mainBoard[currentBoard] !== 0){
+            console.log("HAI");
+            currentBoard = chooseMainSquare(boards, false);
+        }
+
+        //Evaluate a temporary move to play if nothing else
         for(var i = 0; i < 9; i++){
             if(boards[currentBoard][i] === 0){
                 bestMove = i;
@@ -410,20 +487,7 @@ function game(){
             }
         }
 
-
-        for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = ai;
-                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
-                boards[currentBoard][a] = 0;
-                if(score >= bestScore){
-                    bestScore = score;
-                    bestMove = a;
-                }
-            }
-        }
-
-
+        //Play THE current board
         if(bestMove !== -1) {
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
@@ -438,19 +502,23 @@ function game(){
             }
         }
 
+        //Look ahead
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                var score2 = miniMax(boards, b, 5, -Infinity, Infinity, false);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
                 //console.log(score2);
             }
         }
 
+        //Find best move
         for(var c in moveScores){
             if(moveScores[c] > moveScores[bestMove] && moveScores[c] !== null){
                 bestMove = c;
             }
         }
+
+
 
         console.log(moveScores);
 
