@@ -109,9 +109,13 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpToPlay][mm] === 0) {
                         position[tmpToPlay][mm] = ai;
                         var evalu = miniMax(position, tmpToPlay, depth - 1, alpha, beta, false);
+                        if(evalu === Infinity){
+                            console.log(position, tmpToPlay)
+                        }
+                        evalu += 3;
                         position[tmpToPlay][mm] = 0;
                     }else{
-                        break;
+                        continue;
                     }
                 }else{
                     position[boardToPlayOn][mm] = ai;
@@ -135,9 +139,10 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpToPlay][m2] === 0){
                         position[tmpToPlay][m2] = player;
                         var evalu = miniMax(position, tmpToPlay, depth-1, alpha, beta, true);
+                        evalu -= 3;
                         position[tmpToPlay][m2] = 0;
                     }else{
-                        break;
+                        continue;
                     }
                 }else{
                     position[boardToPlayOn][m2] = player;
@@ -474,7 +479,7 @@ function game(){
 
         var moveScores = [null, null, null, null, null, null, null, null, null];
 
-        if(currentBoard === -1 || mainBoard[currentBoard] !== 0){
+        if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
             console.log("HAI");
             currentBoard = chooseMainSquare(boards, false);
         }
@@ -505,7 +510,7 @@ function game(){
         //Look ahead
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, b, 5, -Infinity, Infinity, false);
+                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
                 //console.log(score2);
             }
