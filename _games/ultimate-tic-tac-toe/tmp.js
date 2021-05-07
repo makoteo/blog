@@ -79,9 +79,14 @@ function evaluateGame(position) {
 
     totalEv = totalEv/9-1.05;
 
+    var mainBrd = [];
+
     for(var f = 0; f < 9; f++){
-        totalEv-=checkWinCondition(position[f])/4;
+        totalEv-=checkWinCondition(position[f])/2;
+        mainBrd.push(checkWinCondition(position[f]));
     }
+
+    totalEv-=checkWinCondition(mainBrd)*10;
 
     return totalEv*4;
 }
@@ -109,10 +114,9 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpToPlay][mm] === 0) {
                         position[tmpToPlay][mm] = ai;
                         var evalu = miniMax(position, tmpToPlay, depth - 1, alpha, beta, false);
-                        if(evalu === Infinity){
-                            console.log(position, tmpToPlay)
-                        }
-                        evalu += 3;
+                        //if(evalu === Infinity){
+                            //console.log(position, tmpToPlay)
+                        //}
                         position[tmpToPlay][mm] = 0;
                     }else{
                         continue;
@@ -139,7 +143,6 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpToPlay][m2] === 0){
                         position[tmpToPlay][m2] = player;
                         var evalu = miniMax(position, tmpToPlay, depth-1, alpha, beta, true);
-                        evalu -= 3;
                         position[tmpToPlay][m2] = 0;
                     }else{
                         continue;
@@ -250,15 +253,15 @@ function evaluatePos(pos, square){
 }
 
 function chooseMainSquare(position, pl){
-    var maxEv = [-Infinity, 0];
+    var maxEv = [-10.5, 0];
     var totalEv = [null, null, null, null, null, null, null, null, null];
 
     if(pl){
-        maxEv[0] = Infinity;
+        maxEv[0] = 10.5;
         for(var bd = 0; bd < 9; bd++){
             //maxEv = -Infinity;
             if(checkWinCondition(position[bd]) !== 0){
-                totalEv[bd] = Infinity;
+                totalEv[bd] = 10.5;
                 continue;
             }
             for(var ev = 0; ev < 9; ev++){
@@ -278,7 +281,7 @@ function chooseMainSquare(position, pl){
         for(var bd = 0; bd < 9; bd++){
             //maxEv = -Infinity;
             if(checkWinCondition(position[bd]) !== 0){
-                totalEv[bd] = -Infinity;
+                totalEv[bd] = -10.5;
                 continue;
             }
             for(var ev = 0; ev < 9; ev++){
@@ -510,7 +513,7 @@ function game(){
         //Look ahead
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                var score2 = miniMax(boards, b, 7, -Infinity, Infinity, false);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
                 //console.log(score2);
             }
