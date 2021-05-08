@@ -29,7 +29,7 @@ var clicked = false;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var currentTurn = 1;
+var currentTurn = -1;
 var player = 1;
 var ai = -1;
 var currentBoard = 4;
@@ -65,23 +65,35 @@ function checkWinCondition(map) {
 }
 
 function evaluateGame(position, currentBoard, turn) {
+    var gameEval = 0;
+    var count = 0;
+    for (var bb = 0; bb < 9; bb++){
+        for(var trn = 0; trn < 9; trn ++){
+            if(position[bb][trn] === 0){
+                gameEval += evaluatePos(position[bb], trn, ai) - evaluatePos(position[bb], trn, player);
+                count++;
+            }
+        }
+        gameEval-=checkWinCondition(position[bb])*1000;
+    }
 
+    var turnNum = 0;
+
+    if(turn === true){turnNum = 1;}else{turnNum = -1;}
+
+    for(var sqru = 0; sqru < 9; sqru++){
+        if(position[currentBoard][sqru] === 0){
+            gameEval += turnNum*evaluatePos(position[currentBoard], sqru, turnNum)*50;
+        }
+    }
+    return gameEval/count * 2;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
     if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        var maxEv = -Infinity;
-        var totalEv = 0;
-        for(var bd = 0; bd < 9; bd++){
-            maxEv = 0;
-            for(var ev = 0; ev < 9; ev++){
-                maxEv = Math.max(evaluatePos(position[bd], ev), maxEv, currentTurn);
-            }
-            totalEv += maxEv
-        }
-        return totalEv/9;
+        return evaluateGame(position, boardToPlayOn, maximizingPlayer);
     }
 
     if(boardToPlayOn === -1){
@@ -182,7 +194,6 @@ function evaluatePos(pos, square, turn){
     var a = 2;
     if(turn === -1){
         evaluation+=points[square];
-        console.log("Eyy");
         //Prefer creating pairs
         a = 2;
         if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
@@ -386,7 +397,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            //currentBoard = j;
+                            currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
@@ -414,7 +425,7 @@ function game(){
     if(currentTurn === -1){
         RUNS = 0;
         var bestMove = -1;
-        var bestScore = -Infinity;
+        var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,];
         /*for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
@@ -438,33 +449,30 @@ function game(){
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
                     var score = evaluatePos(boards[currentBoard], a, currentTurn);
-
-                    if (score >= bestScore) {
-                        bestScore = score;
-                        bestMove = a;
-                    }
+                    bestScore[a] = score;
                 }
             }
 
-            var bestNegMove = 0;
-            var bestNegScore = Infinity;
-
-            for (var a = 0; a < 9; a++) {
-                if (boards[currentBoard][a] === 0) {
-                    var score = evaluatePos(boards[currentBoard], a, -currentTurn);
-
-                    if (score <= bestScore) {
-                        bestNegScore = score;
-                        bestNegMove = a;
-                    }
+            for(var b = 0; b < 9; b++){
+                if (boards[currentBoard][b] === 0) {
+                    var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                    bestScore[b] += score2;
+                    //console.log(score2);
                 }
             }
-            console.log(evaluatePos(boards[currentBoard], bestMove, currentTurn) - evaluatePos(boards[currentBoard], bestNegMove, -currentTurn));
+
+            for(var i in bestScore){
+                if(bestScore[i] > bestScore[bestMove]){
+                    bestMove = i;
+                }
+            }
 
             if(boards[currentBoard][bestMove] === 0){
                 boards[currentBoard][bestMove] = ai;
-                //currentBoard = move;
+                currentBoard = bestMove;
             }
+
+            console.log(evaluateGame(boards, currentBoard, true) - evaluateGame(boards, currentBoard, false));
         }
 
 
