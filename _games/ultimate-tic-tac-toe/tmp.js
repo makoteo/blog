@@ -66,22 +66,29 @@ function checkWinCondition(map) {
 
 function evaluateGame(position, currentBoard) {
     var evale = 0;
+    var mainBd = [];
     for (var eh = 0; eh < 9; eh++){
         evale += realEvaluateSquare(position[eh]);
         //if(eh === currentBoard){
         //    evale += realEvaluateSquare(position[eh])*2;
         //}
-        evale -= checkWinCondition(position[eh])*5;
+        var tmpEv = checkWinCondition(position[eh]);
+        evale -= tmpEv*5;
+        mainBd.push(tmpEv);
     }
+    evale -= checkWinCondition(mainBd)*75;
     return evale;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
-    if(depth === 0 || checkWinCondition(position[boardToPlayOn]) !== 0) {
+    if(depth === 0) {
         return evaluateGame(position, boardToPlayOn);
     }
+    //if(checkWinCondition()){
+
+    //}
 
     if(boardToPlayOn === -1){
         boardToPlayOn = 0;
@@ -91,17 +98,19 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
+                var evalu = 0;
                 if(checkWinCondition(position[boardToPlayOn]) !== 0){
-                    var tmpPlay = pickBoard(position);
+                    var tmpPlay = 0;
                     if(position[tmpPlay][mm] === 0){
                         position[tmpPlay][mm] = ai;
-                        var evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
-                        evalu-=5;
+                        evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
+                        evalu+=11150;
                         position[tmpPlay][mm] = 0;
                     }
+                    //console.log("Eeeeyo");
                 }else{
                     position[boardToPlayOn][mm] = ai;
-                    var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                    evalu = miniMax(position, mm, depth-1, alpha, beta, false);
                     position[boardToPlayOn][mm] = 0;
                 }
                 maxEval = Math.max(evalu, maxEval);
@@ -116,19 +125,21 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
+                var evalu = 0;
                 if(checkWinCondition(position[boardToPlayOn]) !== 0){
-                    var tmpPlay = pickBoard(position);
+                    var tmpPlay = 0;
                     if(position[tmpPlay][mm] === 0) {
                         position[tmpPlay][mm] = player;
-                        var evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
-                        evalu+=5;
+                        evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
+                        evalu-=11150;
                         position[tmpPlay][mm] = 0;
                     }
                 }else{
                     position[boardToPlayOn][mm] = player;
-                    var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                    evalu = miniMax(position, mm, depth-1, alpha, beta, true);
                     position[boardToPlayOn][mm] = 0;
                 }
+                //console.log("Eeeeyo");
                 minEval = Math.min(evalu, minEval);
                 beta = Math.min(beta, evalu);
                 if(beta <= alpha){
@@ -311,13 +322,14 @@ function realEvaluateSquare(pos){
     return evaluation;
 }
 
-function pickBoard(pos){
+function pickBoard(pos, pl){
     var bestScoreThing = -Infinity;
+    if(!pl){bestScoreThing = Infinity;}
     var remembered = 0;
     for(var ah = 0; ah < 9; ah++){
         if(checkWinCondition(pos[ah]) === 0){
             var scoreThing = realEvaluateSquare(pos[ah]);
-            if(scoreThing > bestScoreThing){
+            if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
                 bestScoreThing = scoreThing;
                 remembered = ah;
             }
@@ -517,7 +529,7 @@ function game(){
         }*/
 
         if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
-            currentBoard = pickBoard(boards);
+            currentBoard = pickBoard(boards, true);
         }
 
         for(var i = 0; i < 9; i++){
