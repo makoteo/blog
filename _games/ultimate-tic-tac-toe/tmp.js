@@ -86,7 +86,7 @@ function evaluateGame(position) {
         mainBrd.push(checkWinCondition(position[f]));
     }
 
-    totalEv-=checkWinCondition(mainBrd)*10;
+    totalEv -= checkWinCondition(mainBrd)*10000;
 
     return totalEv*4;
 }
@@ -114,9 +114,9 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpToPlay][mm] === 0) {
                         position[tmpToPlay][mm] = ai;
                         var evalu = miniMax(position, tmpToPlay, depth - 1, alpha, beta, false);
-                        //if(evalu === Infinity){
-                            //console.log(position, tmpToPlay)
-                        //}
+                        if(evalu === Infinity){
+                            //console.log(tmpToPlay)
+                        }
                         position[tmpToPlay][mm] = 0;
                     }else{
                         continue;
@@ -226,14 +226,20 @@ function evaluatePos(pos, square){
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
         pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation -= 1;
+        evaluation -= 2;
+    }
+
+    a = -2;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 2;
     }
 
     //Take victories
     a = -3;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
         pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation += 5;
+        evaluation += 7;
     }
 
     //Block a players turn if necessary
@@ -242,26 +248,24 @@ function evaluatePos(pos, square){
     a = 3;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
         pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation += 2;
+        evaluation += 3;
     }
 
     pos[square] = 0;
-
-    evaluation -= checkWinCondition(pos)*4;
 
     return evaluation;
 }
 
 function chooseMainSquare(position, pl){
-    var maxEv = [-10.5, 0];
+    var maxEv = [-Infinity, 0];
     var totalEv = [null, null, null, null, null, null, null, null, null];
 
     if(pl){
-        maxEv[0] = 10.5;
+        maxEv[0] = Infinity;
         for(var bd = 0; bd < 9; bd++){
             //maxEv = -Infinity;
             if(checkWinCondition(position[bd]) !== 0){
-                totalEv[bd] = 10.5;
+                totalEv[bd] = Infinity;
                 continue;
             }
             for(var ev = 0; ev < 9; ev++){
@@ -281,7 +285,7 @@ function chooseMainSquare(position, pl){
         for(var bd = 0; bd < 9; bd++){
             //maxEv = -Infinity;
             if(checkWinCondition(position[bd]) !== 0){
-                totalEv[bd] = -10.5;
+                totalEv[bd] = -Infinity;
                 continue;
             }
             for(var ev = 0; ev < 9; ev++){
@@ -513,7 +517,7 @@ function game(){
         //Look ahead
         for(var b = 0; b < 9; b++){
             if (boards[currentBoard][b] === 0) {
-                var score2 = miniMax(boards, b, 7, -Infinity, Infinity, false);
+                var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
                 if(moveScores[b] !== null){moveScores[b] += score2;}
                 //console.log(score2);
             }
