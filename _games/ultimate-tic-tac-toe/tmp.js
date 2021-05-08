@@ -74,19 +74,22 @@ function evaluateGame(position, currentBoard, turn) {
                 count++;
             }
         }
-        gameEval-=checkWinCondition(position[bb])*1000;
     }
 
     var turnNum = 0;
+
+    gameEval = gameEval/count;
 
     if(turn === true){turnNum = 1;}else{turnNum = -1;}
 
     for(var sqru = 0; sqru < 9; sqru++){
         if(position[currentBoard][sqru] === 0){
-            gameEval += turnNum*evaluatePos(position[currentBoard], sqru, turnNum)*50;
+            gameEval += evaluatePos(position[currentBoard], sqru, -1)*5;
+            gameEval -= evaluatePos(position[currentBoard], sqru, 1)*5;
         }
+        gameEval-=checkWinCondition(position[sqru])*10;
     }
-    return gameEval/count * 2;
+    return gameEval * 2;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
@@ -472,7 +475,7 @@ function game(){
                 currentBoard = bestMove;
             }
 
-            console.log(evaluateGame(boards, currentBoard, true) - evaluateGame(boards, currentBoard, false));
+            console.log(evaluateGame(boards, currentBoard, true));
         }
 
 
