@@ -66,7 +66,7 @@ function checkWinCondition(map) {
 
 function evaluateGame(position, currentBoard) {
     var evale = 0;
-    for (var eh in position){
+    for (var eh = 0; eh < 9; eh++){
         evale += realEvaluateSquare(position[eh]);
     }
     return evale;
@@ -216,48 +216,48 @@ function realEvaluateSquare(pos){
     var points = [0.2, 0.1, 0.2, 0.1, 0.25, 0.1, 0.2, 0.1, 0.2];
 
     for(var bw in pos){
-        evaluation -= pos[bw]*points[bw];
+        //evaluation -= pos[bw]*points[bw];
     }
 
     var a = 1;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += 0.1;
+        evaluation += 4;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += 0.1;
+        evaluation += 4;
     }
 
     var a = -1;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += -0.1;
+        evaluation += -4;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += -0.1;
+        evaluation += -4;
     }
 
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation -= 1;
+        evaluation -= 3;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation -= 1;
+        evaluation -= 3;
     }
     if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation -= 1.2;
+        evaluation -= 3.5;
     }
 
     a = -2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += 1;
+        evaluation += 3;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += 1;
+        evaluation += 3;
     }
     if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation += 1.2;
+        evaluation += 3.5;
     }
 
-    evaluation -= checkWinCondition(pos)*5;
+    evaluation += checkWinCondition(pos)*7;
 
     return evaluation;
 }
@@ -488,7 +488,7 @@ function game(){
                 currentBoard = bestMove;
             }
 
-            console.log(realEvaluateSquare(boards[currentBoard]));
+            console.log(evaluateGame(boards[currentBoard]));
         }
 
 
