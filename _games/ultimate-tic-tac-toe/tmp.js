@@ -64,96 +64,38 @@ function checkWinCondition(map) {
     return 0;
 }
 
-function evaluateGame(position, currentBoard, turn) {
-    var gameEval = 0;
-    var count = 1;
-    for (var bb = 0; bb < 9; bb++){
-        for(var trn = 0; trn < 9; trn ++){
-            if(position[bb][trn] === 0){
-                gameEval += evaluatePos(position[bb], trn, ai);
-                count++;
-            }
-        }
-    }
+function evaluateGame(position, currentBoard) {
 
-    var turnNum = 0;
-
-    gameEval = gameEval/count * 5;
-
-    //console.log(currentBoard);
-
-    /*for(var sqru = 0; sqru < 9; sqru++){
-        if(position[currentBoard][sqru] === 0){
-            gameEval += evaluatePos(position[currentBoard], sqru, -1)*2;
-            //gameEval -= evaluatePos(position[currentBoard], sqru, 1)*2;
-        }
-        gameEval-=checkWinCondition(position[sqru])*5;
-    }*/
-    return gameEval * 2;
-}
-
-function pickBoard(position, maximizing){
-    var bdScores = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for (var bb = 0; bb < 9; bb++){
-        if(checkWinCondition(position[bb]) === 0){
-            for(var trn = 0; trn < 9; trn ++){
-                if(position[bb][trn] === 0){
-                    if(maximizing){
-                        bdScores[bb] = evaluatePos(position[bb], trn, ai);
-                    }else{
-                        bdScores[bb] = evaluatePos(position[bb], trn, player);
-                    }
-                }
-            }
-        }
-    }
-    var maxThing = 0;
-    for(var je = 0; je < 9; je++){
-        if(bdScores[je] > bdScores[maxThing]){
-            maxThing = je;
-        }
-    }
-
-    //console.log(maxThing);
-    return maxThing;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
-    boardToPlayOn = parseInt(boardToPlayOn);
-
-    if(boardToPlayOn < 0 || boardToPlayOn > 8){
-        boardToPlayOn = pickBoard(position, maximizingPlayer);
+    if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
+        var maxEv = -Infinity;
+        var totalEv = 0;
+        for(var bd = 0; bd < 9; bd++){
+            maxEv = 0;
+            for(var ev = 0; ev < 9; ev++){
+                maxEv = Math.max(evaluatePos(position[bd], ev), maxEv, currentTurn);
+            }
+            totalEv += maxEv
+        }
+        return totalEv/9;
     }
 
-    if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        //console.log(evaluateGame(position, parseInt(boardToPlayOn), maximizingPlayer));
-        return evaluateGame(position, boardToPlayOn, maximizingPlayer);
+    if(boardToPlayOn === -1){
+        boardToPlayOn = 0;
     }
 
     if(maximizingPlayer){
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                if(checkWinCondition(position[boardToPlayOn] !== 0)){
-                    var tmpToPlay = pickBoard(position, true);
-                    if(position[tmpToPlay][mm] === 0){
-                        position[tmpToPlay][mm] = ai;
-                        var evalu = miniMax(position, tmpToPlay, depth-1, alpha, beta, false);
-                        evalu = evalu/2;
-                        position[tmpToPlay][mm] = 0;
-                    }else{
-                        continue;
-                    }
-                }else{
-                    position[boardToPlayOn][mm] = ai;
-                    var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
-                    position[boardToPlayOn][mm] = 0;
-                }
-                if(evalu > maxEval && !isNaN(evalu)) {
-                    maxEval = evalu;
-                }
+                position[boardToPlayOn][mm] = ai;
+                var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                position[boardToPlayOn][mm] = 0;
+                maxEval = Math.max(evalu, maxEval);
                 alpha = Math.max(alpha, evalu);
                 if(beta <= alpha){
                     break;
@@ -165,24 +107,10 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                if(checkWinCondition(position[boardToPlayOn]) !== 0){
-                    var tmpToPlay = pickBoard(position, false);
-                    if(position[tmpToPlay][mm] === 0){
-                        position[tmpToPlay][mm] = player;
-                        var evalu = miniMax(position, tmpToPlay, depth-1, alpha, beta, true);
-                        evalu = evalu/2;
-                        position[tmpToPlay][mm] = 0;
-                    }else{
-                        continue;
-                    }
-                }else{
-                    position[boardToPlayOn][mm] = player;
-                    var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
-                    position[boardToPlayOn][mm] = 0;
-                }
-                if(evalu < minEval && !isNaN(evalu)) {
-                    minEval = evalu;
-                }
+                position[boardToPlayOn][mm] = player;
+                var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                position[boardToPlayOn][mm] = 0;
+                minEval = Math.min(evalu, minEval);
                 beta = Math.min(beta, evalu);
                 if(beta <= alpha){
                     break;
@@ -244,7 +172,8 @@ function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
 }
 
 //Low number means losing the board, big number means winning
-function evaluatePos(pos, square, turn){
+//Tbf this is less an evaluation algorithm and more something that figures out where the AI shud move to win normal Tic Tac Toe
+function evaluatePos(pos, square){
     pos[square] = ai;
     var evaluation = 0;
     //Prefer center over corners over edges
@@ -252,58 +181,88 @@ function evaluatePos(pos, square, turn){
     var points = [0.2, 0.1, 0.2, 0.1, 0.25, 0.1, 0.2, 0.1, 0.2];
 
     var a = 2;
-    if(turn === -1){
-        evaluation+=points[square];
-        //Prefer creating pairs
-        a = 2;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation -= 1;
-        }
-        //Take victories
-        a = -3;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation += 5;
-        }
-
-        //Block a players turn if necessary
-        pos[square] = player;
-
-        a = 3;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation += 2;
-        }
-    }else{
-        pos[square] = player;
-        evaluation+=points[square];
-
-        a = -2;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation -= 1;
-        }
-
-        a = 3;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation += 5;
-        }
-
-        //Block a players turn if necessary
-        pos[square] = ai;
-
-        a = -3;
-        if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
-            pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-            evaluation += 2;
-        }
+    evaluation+=points[square];
+    console.log("Eyy");
+    //Prefer creating pairs
+    a = -2;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 1;
     }
+    //Take victories
+    a = -3;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 5;
+    }
+
+    //Block a players turn if necessary
+    pos[square] = player;
+
+    a = 3;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a || pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a ||
+        pos[2] + pos[5] + pos[8] === a || pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 2;
+    }
+
+    pos[square] = ai;
+
+    evaluation-=checkWinCondition(pos)*3;
 
     pos[square] = 0;
 
     //evaluation -= checkWinCondition(pos)*4;
+
+    return evaluation;
+}
+
+function realEvaluateSquare(pos){
+    var evaluation = 0;
+    var points = [0.2, 0.1, 0.2, 0.1, 0.25, 0.1, 0.2, 0.1, 0.2];
+
+    for(var bw in pos){
+        evaluation -= pos[bw]*points[bw];
+    }
+
+    var a = 1;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
+        evaluation += 0.1;
+    }
+    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
+        evaluation += 0.1;
+    }
+
+    var a = -1;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
+        evaluation += -0.1;
+    }
+    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
+        evaluation += -0.1;
+    }
+
+    var a = 2;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
+        evaluation -= 1;
+    }
+    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
+        evaluation -= 1;
+    }
+    if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation -= 1.2;
+    }
+
+    a = -2;
+    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
+        evaluation += 1;
+    }
+    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
+        evaluation += 1;
+    }
+    if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
+        evaluation += 1.2;
+    }
+
+    evaluation -= checkWinCondition(pos)*5;
 
     return evaluation;
 }
@@ -457,7 +416,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            currentBoard = j;
+                            //currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
@@ -470,7 +429,7 @@ function game(){
     //Draw EVAL BAR
 
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    //ctx.fillRect(WIDTH/2, WIDTH, evaluateGame(boards, currentBoard, true)*4, HEIGHT/16);
+    ctx.fillRect(WIDTH/2, WIDTH, estimatedInFiveTurns*4, HEIGHT/16);
 
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
@@ -485,7 +444,7 @@ function game(){
     if(currentTurn === -1){
         RUNS = 0;
         var bestMove = -1;
-        var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
+        var bestScore = -Infinity;
         /*for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
@@ -498,11 +457,6 @@ function game(){
             }
         }*/
 
-        if(checkWinCondition(boards[currentBoard]) !== 0 || currentBoard === -1){
-            currentBoard = pickBoard(boards, true);
-            console.log(currentBoard);
-        }
-
         for(var i = 0; i < 9; i++){
             if(boards[currentBoard][i] === 0){
                 bestMove = i;
@@ -514,30 +468,20 @@ function game(){
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
                     var score = evaluatePos(boards[currentBoard], a, currentTurn);
-                    bestScore[a] = score;
-                }
-            }
 
-            for(var b = 0; b < 9; b++){
-                if (boards[currentBoard][b] === 0) {
-                    var score2 = miniMax(boards, b, 5, -Infinity, Infinity, false);
-                    bestScore[b] += score2;
-                    //console.log(score2);
-                }
-            }
-
-            for(var i in bestScore){
-                if(bestScore[i] > bestScore[bestMove]){
-                    bestMove = i;
+                    if (score >= bestScore) {
+                        bestScore = score;
+                        bestMove = a;
+                    }
                 }
             }
 
             if(boards[currentBoard][bestMove] === 0){
                 boards[currentBoard][bestMove] = ai;
-                currentBoard = bestMove;
+                //currentBoard = move;
             }
 
-            console.log(bestScore);
+            console.log(realEvaluateSquare(boards[currentBoard]));
         }
 
 
