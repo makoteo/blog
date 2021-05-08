@@ -68,6 +68,10 @@ function evaluateGame(position, currentBoard) {
     var evale = 0;
     for (var eh = 0; eh < 9; eh++){
         evale += realEvaluateSquare(position[eh]);
+        //if(eh === currentBoard){
+        //    evale += realEvaluateSquare(position[eh])*2;
+        //}
+        evale -= checkWinCondition(position[eh])*5;
     }
     return evale;
 }
@@ -75,7 +79,7 @@ function evaluateGame(position, currentBoard) {
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
-    if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
+    if(depth === 0 || checkWinCondition(position[boardToPlayOn]) !== 0) {
         return evaluateGame(position, boardToPlayOn);
     }
 
@@ -87,9 +91,19 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                position[boardToPlayOn][mm] = ai;
-                var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
-                position[boardToPlayOn][mm] = 0;
+                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                    var tmpPlay = pickBoard(position);
+                    if(position[tmpPlay][mm] === 0){
+                        position[tmpPlay][mm] = ai;
+                        var evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
+                        evalu-=5;
+                        position[tmpPlay][mm] = 0;
+                    }
+                }else{
+                    position[boardToPlayOn][mm] = ai;
+                    var evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                    position[boardToPlayOn][mm] = 0;
+                }
                 maxEval = Math.max(evalu, maxEval);
                 alpha = Math.max(alpha, evalu);
                 if(beta <= alpha){
@@ -102,9 +116,19 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                position[boardToPlayOn][mm] = player;
-                var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
-                position[boardToPlayOn][mm] = 0;
+                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                    var tmpPlay = pickBoard(position);
+                    if(position[tmpPlay][mm] === 0) {
+                        position[tmpPlay][mm] = player;
+                        var evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
+                        evalu+=5;
+                        position[tmpPlay][mm] = 0;
+                    }
+                }else{
+                    position[boardToPlayOn][mm] = player;
+                    var evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                    position[boardToPlayOn][mm] = 0;
+                }
                 minEval = Math.min(evalu, minEval);
                 beta = Math.min(beta, evalu);
                 if(beta <= alpha){
@@ -216,10 +240,10 @@ function realEvaluateSquare(pos){
     var points = [0.2, 0.1, 0.2, 0.1, 0.25, 0.1, 0.2, 0.1, 0.2];
 
     for(var bw in pos){
-        //evaluation -= pos[bw]*points[bw];
+        evaluation -= pos[bw]*points[bw];
     }
 
-    var a = 1;
+    /*var a = 1;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
         evaluation += 4;
     }
@@ -233,7 +257,8 @@ function realEvaluateSquare(pos){
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
         evaluation += -4;
-    }
+    }*/
+
 
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
@@ -244,6 +269,18 @@ function realEvaluateSquare(pos){
     }
     if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
         evaluation -= 3.5;
+    }
+
+    a = -1;
+    if((pos[0] + pos[1] === 2*a && pos[2] === -a) || (pos[1] + pos[2] === 2*a && pos[0] === -a) || (pos[0] + pos[2] === 2*a && pos[1] === -a)
+        || (pos[3] + pos[4] === 2*a && pos[5] === -a) || (pos[3] + pos[5] === 2*a && pos[4] === -a) || (pos[5] + pos[4] === 2*a && pos[3] === -a)
+        || (pos[6] + pos[7] === 2*a && pos[8] === -a) || (pos[6] + pos[8] === 2*a && pos[7] === -a) || (pos[7] + pos[8] === 2*a && pos[6] === -a)
+        || (pos[0] + pos[3] === 2*a && pos[6] === -a) || (pos[0] + pos[6] === 2*a && pos[3] === -a) || (pos[3] + pos[6] === 2*a && pos[0] === -a)
+        || (pos[1] + pos[4] === 2*a && pos[7] === -a) || (pos[1] + pos[7] === 2*a && pos[4] === -a) || (pos[4] + pos[7] === 2*a && pos[1] === -a)
+        || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
+        || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
+        || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
+        evaluation-=5;
     }
 
     a = -2;
@@ -257,9 +294,36 @@ function realEvaluateSquare(pos){
         evaluation += 3.5;
     }
 
-    evaluation += checkWinCondition(pos)*7;
+    a = 1;
+    if((pos[0] + pos[1] === 2*a && pos[2] === -a) || (pos[1] + pos[2] === 2*a && pos[0] === -a) || (pos[0] + pos[2] === 2*a && pos[1] === -a)
+        || (pos[3] + pos[4] === 2*a && pos[5] === -a) || (pos[3] + pos[5] === 2*a && pos[4] === -a) || (pos[5] + pos[4] === 2*a && pos[3] === -a)
+        || (pos[6] + pos[7] === 2*a && pos[8] === -a) || (pos[6] + pos[8] === 2*a && pos[7] === -a) || (pos[7] + pos[8] === 2*a && pos[6] === -a)
+        || (pos[0] + pos[3] === 2*a && pos[6] === -a) || (pos[0] + pos[6] === 2*a && pos[3] === -a) || (pos[3] + pos[6] === 2*a && pos[0] === -a)
+        || (pos[1] + pos[4] === 2*a && pos[7] === -a) || (pos[1] + pos[7] === 2*a && pos[4] === -a) || (pos[4] + pos[7] === 2*a && pos[1] === -a)
+        || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
+        || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
+        || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
+        evaluation+=5;
+    }
+
+    evaluation -= checkWinCondition(pos)*7;
 
     return evaluation;
+}
+
+function pickBoard(pos){
+    var bestScoreThing = -Infinity;
+    var remembered = 0;
+    for(var ah = 0; ah < 9; ah++){
+        if(checkWinCondition(pos[ah]) === 0){
+            var scoreThing = realEvaluateSquare(pos[ah]);
+            if(scoreThing > bestScoreThing){
+                bestScoreThing = scoreThing;
+                remembered = ah;
+            }
+        }
+    }
+    return remembered;
 }
 
 function sign(x){
@@ -424,7 +488,7 @@ function game(){
     //Draw EVAL BAR
 
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(WIDTH/2, WIDTH, estimatedInFiveTurns*4, HEIGHT/16);
+    ctx.fillRect(WIDTH/2, WIDTH, evaluateGame(boards, currentBoard)*2, HEIGHT/16);
 
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
@@ -451,6 +515,10 @@ function game(){
                 }
             }
         }*/
+
+        if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
+            currentBoard = pickBoard(boards);
+        }
 
         for(var i = 0; i < 9; i++){
             if(boards[currentBoard][i] === 0){
@@ -488,7 +556,7 @@ function game(){
                 currentBoard = bestMove;
             }
 
-            console.log(evaluateGame(boards[currentBoard]));
+            console.log(evaluateGame(boards, currentBoard));
         }
 
 
