@@ -65,23 +65,18 @@ function checkWinCondition(map) {
 }
 
 function evaluateGame(position, currentBoard) {
-
+    var evale = 0;
+    for (var eh in position){
+        evale += realEvaluateSquare(position[eh]);
+    }
+    return evale;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
     if(depth === 0 || checkWinCondition(mainBoard) !== 0) {
-        var maxEv = -Infinity;
-        var totalEv = 0;
-        for(var bd = 0; bd < 9; bd++){
-            maxEv = 0;
-            for(var ev = 0; ev < 9; ev++){
-                maxEv = Math.max(evaluatePos(position[bd], ev), maxEv, currentTurn);
-            }
-            totalEv += maxEv
-        }
-        return totalEv/9;
+        return evaluateGame(position, boardToPlayOn);
     }
 
     if(boardToPlayOn === -1){
@@ -416,7 +411,7 @@ function game(){
                     if (mousePosX > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3 && mousePosX < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + (j % 3) * squareSize / 3 + (i % 3) * WIDTH / 3) {
                         if (mousePosY > (WIDTH / 3 - squareSize) / 2 + squareSize / 6 - shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3 && mousePosY < (WIDTH / 3 - squareSize) / 2 + squareSize / 6 + shapeSize + Math.floor(j / 3) * squareSize / 3 + Math.floor(i / 3) * WIDTH / 3) {
                             boards[i][j] = currentTurn;
-                            //currentBoard = j;
+                            currentBoard = j;
                             currentTurn = -currentTurn;
                             break;
                         }
@@ -444,7 +439,7 @@ function game(){
     if(currentTurn === -1){
         RUNS = 0;
         var bestMove = -1;
-        var bestScore = -Infinity;
+        var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,];
         /*for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
@@ -468,17 +463,29 @@ function game(){
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
                     var score = evaluatePos(boards[currentBoard], a, currentTurn);
+                    bestScore[a] = score;
+                }
+            }
 
-                    if (score >= bestScore) {
-                        bestScore = score;
-                        bestMove = a;
-                    }
+            for(var b = 0; b < 9; b++){
+                if (boards[currentBoard][b] === 0) {
+                    var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                    bestScore[b] += score2;
+                    //console.log(score2);
+                }
+            }
+
+            console.log(bestScore);
+
+            for(var i in bestScore){
+                if(bestScore[i] > bestScore[bestMove]){
+                    bestMove = i;
                 }
             }
 
             if(boards[currentBoard][bestMove] === 0){
                 boards[currentBoard][bestMove] = ai;
-                //currentBoard = move;
+                currentBoard = bestMove;
             }
 
             console.log(realEvaluateSquare(boards[currentBoard]));
