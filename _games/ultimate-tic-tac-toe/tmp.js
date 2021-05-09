@@ -68,7 +68,7 @@ function evaluateGame(position, currentBoard) {
     var evale = 0;
     var mainBd = [];
     for (var eh = 0; eh < 9; eh++){
-        evale += realEvaluateSquare(position[eh])*2;
+        evale += realEvaluateSquare(position[eh])*3;
         //if(eh === currentBoard){
         //    evale += realEvaluateSquare(position[eh])*2;
         //}
@@ -105,7 +105,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpPlay][mm] === 0){
                         position[tmpPlay][mm] = ai;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
-                        evalu+=10;
+                        evalu+=2;
                         position[tmpPlay][mm] = 0;
                     }
                     //console.log("Eeeeyo");
@@ -132,7 +132,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     if(position[tmpPlay][mm] === 0) {
                         position[tmpPlay][mm] = player;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
-                        evalu-=10;
+                        evalu-=2;
                         position[tmpPlay][mm] = 0;
                     }
                 }else{
@@ -564,7 +564,7 @@ function game(){
                     boards[currentBoard][b] = ai;
                     var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
                     boards[currentBoard][b] = 0;
-                    bestScore[b] += score2/2;
+                    bestScore[b] += score2;
                     //console.log(score2);
                 }
             }
@@ -591,12 +591,8 @@ function game(){
     }
 
     ctx.globalAlpha = 0.3;
-    if(bestScore[i] > 0){
-        ctx.fillStyle = COLORS.blue;
-    }else{
-        ctx.fillStyle = COLORS.red;
-    }
-    ctx.fillRect(WIDTH/2, WIDTH, bestScore[i]*2, HEIGHT/16);
+    ctx.fillStyle = COLORS.black;
+    ctx.fillRect(WIDTH/2, WIDTH, bestScore[bestMove]*2, HEIGHT/16);
     ctx.globalAlpha = 1;
 
     clicked = false;
