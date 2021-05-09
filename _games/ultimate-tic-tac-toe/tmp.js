@@ -68,15 +68,16 @@ function evaluateGame(position, currentBoard) {
     var evale = 0;
     var mainBd = [];
     for (var eh = 0; eh < 9; eh++){
-        evale += realEvaluateSquare(position[eh]);
+        evale += realEvaluateSquare(position[eh])*2;
         //if(eh === currentBoard){
         //    evale += realEvaluateSquare(position[eh])*2;
         //}
         var tmpEv = checkWinCondition(position[eh]);
-        evale -= tmpEv*5;
+        evale -= tmpEv*20;
         mainBd.push(tmpEv);
     }
     evale -= checkWinCondition(mainBd)*75;
+    evale += realEvaluateSquare(mainBd)*20;
     return evale;
 }
 
@@ -127,7 +128,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
             if(position[boardToPlayOn][mm] === 0){
                 var evalu = 0;
                 if(checkWinCondition(position[boardToPlayOn]) !== 0){
-                    var tmpPlay = pickBoard(position, true);
+                    var tmpPlay = pickBoard(position, false);
                     if(position[tmpPlay][mm] === 0) {
                         position[tmpPlay][mm] = player;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
@@ -291,7 +292,7 @@ function realEvaluateSquare(pos){
         || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
         || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
         || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
-        evaluation-=10;
+        evaluation-=20;
     }
 
     a = -2;
@@ -314,7 +315,7 @@ function realEvaluateSquare(pos){
         || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
         || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
         || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
-        evaluation+=10;
+        evaluation+=20;
     }
 
     evaluation -= checkWinCondition(pos)*15;
@@ -349,6 +350,9 @@ function sign(x){
 }
 
 // ---------------------------------------------------------- GAME FUNCTION ------------------------------------------------------------------------ //
+
+var bestMove = -1;
+var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
 
 function game(){
     //SKY FILL
@@ -499,8 +503,14 @@ function game(){
 
     //Draw EVAL BAR
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.globalAlpha = 0.9;
+    if(evaluateGame(boards, currentBoard) > 0){
+        ctx.fillStyle = COLORS.blue;
+    }else{
+        ctx.fillStyle = COLORS.red;
+    }
     ctx.fillRect(WIDTH/2, WIDTH, evaluateGame(boards, currentBoard)*2, HEIGHT/16);
+    ctx.globalAlpha = 1;
 
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
@@ -513,9 +523,11 @@ function game(){
     //AI HANDLER
 
     if(currentTurn === -1){
+
+        bestMove = -1;
+        bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
+
         RUNS = 0;
-        var bestMove = -1;
-        var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity,];
         /*for(var a = 0; a < 9; a++){
             if(boards[currentBoard][a] === 0){
                 boards[currentBoard][a] = ai;
@@ -542,14 +554,16 @@ function game(){
         if(bestMove !== -1) {
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
-                    var score = evaluatePos(boards[currentBoard], a, currentTurn);
+                    var score = evaluatePos(boards[currentBoard], a, currentTurn)*1.2;
                     bestScore[a] = score;
                 }
             }
 
             for(var b = 0; b < 9; b++){
                 if (boards[currentBoard][b] === 0) {
+                    boards[currentBoard][b] = ai;
                     var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                    boards[currentBoard][b] = 0;
                     bestScore[b] += score2/2;
                     //console.log(score2);
                 }
@@ -575,6 +589,15 @@ function game(){
         currentTurn = -currentTurn;
 
     }
+
+    ctx.globalAlpha = 0.3;
+    if(bestScore[i] > 0){
+        ctx.fillStyle = COLORS.blue;
+    }else{
+        ctx.fillStyle = COLORS.red;
+    }
+    ctx.fillRect(WIDTH/2, WIDTH, bestScore[i]*2, HEIGHT/16);
+    ctx.globalAlpha = 1;
 
     clicked = false;
 
