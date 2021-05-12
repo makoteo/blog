@@ -29,7 +29,7 @@ var clicked = false;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var currentTurn = -1;
+var currentTurn = 1;
 var player = 1;
 var ai = -1;
 var currentBoard = 4;
@@ -72,12 +72,12 @@ function evaluateGame(position, currentBoard) {
         if(eh === currentBoard){
             evale += realEvaluateSquare(position[eh]);
         }
-        var tmpEv = checkWinCondition(position[eh])*2.5;
-        evale -= tmpEv*3;
+        var tmpEv = checkWinCondition(position[eh]);
+        evale -= tmpEv*20;
         mainBd.push(tmpEv);
     }
     evale -= checkWinCondition(mainBd)*1000;
-    evale += realEvaluateSquare(mainBd)*30;
+    evale += realEvaluateSquare(mainBd)*75;
     return evale;
 }
 
@@ -99,13 +99,13 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                var evalu = 0;
+                var evalu = -Infinity;
                 if(checkWinCondition(position[boardToPlayOn]) !== 0){
                     var tmpPlay = pickBoard(position, true);
                     if(position[tmpPlay][mm] === 0){
                         position[tmpPlay][mm] = ai;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
-                        evalu+=2;
+                        evalu+=10;
                         position[tmpPlay][mm] = 0;
                     }
                     //console.log("Eeeeyo");
@@ -126,13 +126,13 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
             if(position[boardToPlayOn][mm] === 0){
-                var evalu = 0;
+                var evalu = Infinity;
                 if(checkWinCondition(position[boardToPlayOn]) !== 0){
                     var tmpPlay = pickBoard(position, false);
                     if(position[tmpPlay][mm] === 0) {
                         position[tmpPlay][mm] = player;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
-                        evalu-=2;
+                        evalu-=10;
                         position[tmpPlay][mm] = 0;
                     }
                 }else{
@@ -274,13 +274,13 @@ function realEvaluateSquare(pos){
 
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation -= 2;
+        evaluation -= 6;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation -= 2;
+        evaluation -= 6;
     }
     if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation -= 3;
+        evaluation -= 7;
     }
 
     a = -1;
@@ -292,18 +292,18 @@ function realEvaluateSquare(pos){
         || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
         || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
         || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
-        evaluation-=8;
+        evaluation-=9;
     }
 
     a = -2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += 2;
+        evaluation += 6;
     }
     if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += 2;
+        evaluation += 6;
     }
     if(pos[0] + pos[4] + pos[8] === a || pos[2] + pos[4] + pos[6] === a) {
-        evaluation += 3;
+        evaluation += 7;
     }
 
     a = 1;
@@ -315,7 +315,7 @@ function realEvaluateSquare(pos){
         || (pos[2] + pos[5] === 2*a && pos[8] === -a) || (pos[2] + pos[8] === 2*a && pos[5] === -a) || (pos[5] + pos[8] === 2*a && pos[2] === -a)
         || (pos[0] + pos[4] === 2*a && pos[8] === -a) || (pos[0] + pos[8] === 2*a && pos[4] === -a) || (pos[4] + pos[8] === 2*a && pos[0] === -a)
         || (pos[2] + pos[4] === 2*a && pos[6] === -a) || (pos[2] + pos[6] === 2*a && pos[4] === -a) || (pos[4] + pos[6] === 2*a && pos[2] === -a)){
-        evaluation+=8;
+        evaluation+=9;
     }
 
     evaluation -= checkWinCondition(pos)*12;
@@ -330,8 +330,21 @@ function pickBoard(pos, pl){
     for(var ah = 0; ah < 9; ah++){
         if(checkWinCondition(pos[ah]) === 0){
             for(var eheh = 0; eheh < 9; eheh++){
-                if(boards[ah][eheh] === 0){
-                    var scoreThing = evaluateGame(boards, eheh);
+                if(pos[ah][eheh] === 0){
+                    if(pl){
+                        pos[ah][eheh] = ai;
+                    }else{
+                        pos[ah][eheh] = player;
+                    }
+                    var scoreThing = evaluateGame(pos, eheh);
+                    pos[ah][eheh] = 0;
+                    for(var what = 0; what < 9; what++){
+                        if(checkWinCondition(pos[eheh]) === 0) {
+                            if (pos[eheh][what] === 0) {
+                                scoreThing += realEvaluateSquare(pos[eheh])*10;
+                            }
+                        }
+                    }
                     if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
                         bestScoreThing = scoreThing;
                         remembered = ah;
@@ -517,7 +530,7 @@ function game(){
     ctx.globalAlpha = 1;
 
     ctx.strokeStyle = 'black';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 4;
 
     ctx.beginPath();
     ctx.moveTo(WIDTH/2, WIDTH);
@@ -593,6 +606,8 @@ function game(){
         currentTurn = -currentTurn;
 
     }
+
+    //console.log(RUNS);
 
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = COLORS.black;
