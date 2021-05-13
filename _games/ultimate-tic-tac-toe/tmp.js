@@ -621,7 +621,7 @@ function game(){
             for(var b = 0; b < 9; b++){
                 if (boards[currentBoard][b] === 0) {
                     boards[currentBoard][b] = ai;
-                    var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                    var score2 = miniMax(boards, b, 7, -Infinity, Infinity, false);
                     boards[currentBoard][b] = 0;
                     bestScore[b] += score2*1.5;
                     //console.log(score2);
