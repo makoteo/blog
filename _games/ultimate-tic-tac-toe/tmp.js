@@ -29,7 +29,7 @@ var clicked = false;
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
-var currentTurn = 1;
+var currentTurn = -1;
 var player = 1;
 var ai = -1;
 var currentBoard = 4;
@@ -67,13 +67,14 @@ function checkWinCondition(map) {
 function evaluateGame(position, currentBoard) {
     var evale = 0;
     var mainBd = [];
+    var evaluatorMul = [1.5, 1, 1.5, 1, 2, 1, 1.5, 1, 1.5];
     for (var eh = 0; eh < 9; eh++){
-        evale += realEvaluateSquare(position[eh])*1.5;
+        evale += realEvaluateSquare(position[eh])*1.5*evaluatorMul[eh];
         if(eh === currentBoard){
-            evale += realEvaluateSquare(position[eh]);
+            evale += realEvaluateSquare(position[eh])*evaluatorMul[eh];
         }
         var tmpEv = checkWinCondition(position[eh]);
-        evale -= tmpEv*20;
+        evale -= tmpEv*20*evaluatorMul[eh];
         mainBd.push(tmpEv);
     }
     evale -= checkWinCondition(mainBd)*1000;
@@ -378,9 +379,8 @@ function pickBoard(pos, pl){
                     }
                     var scoreThing = evaluateGame(pos, eheh)*10;
                     pos[ah][eheh] = 0;
-                    /*if(checkWinCondition(pos[eheh]) === 0) {
-                        scoreThing += realEvaluateSquare(pos[eheh])*25;
-                    }*/
+                    scoreThing -= realEvaluateSquare(pos[eheh])*35;
+
                     if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
                         bestScoreThing = scoreThing;
                         remembered = ah;
@@ -621,7 +621,7 @@ function game(){
             for(var b = 0; b < 9; b++){
                 if (boards[currentBoard][b] === 0) {
                     boards[currentBoard][b] = ai;
-                    var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                    var score2 = miniMax(boards, b, 7, -Infinity, Infinity, false);
                     boards[currentBoard][b] = 0;
                     bestScore[b] += score2*1.5;
                     //console.log(score2);
