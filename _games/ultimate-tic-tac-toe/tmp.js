@@ -77,35 +77,32 @@ function evaluateGame(position, currentBoard) {
         mainBd.push(tmpEv);
     }
     evale -= checkWinCondition(mainBd)*1000;
-    evale += realEvaluateSquare(mainBd)*75;
+    evale += realEvaluateSquare(mainBd)*150;
     return evale;
 }
 
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
-    if(depth === 0 || Math.abs(evaluateGame(position, boardToPlayOn)) > 1000) {
+    if(depth <= 0 || Math.abs(evaluateGame(position, boardToPlayOn)) > 1000) {
         return evaluateGame(position, boardToPlayOn);
     }
-    //if(checkWinCondition()){
-
-    //}
-
-    if(boardToPlayOn === -1){
-        boardToPlayOn = 0;
+    if(checkWinCondition(position[boardToPlayOn]) !== 0){
+        boardToPlayOn = -1;
     }
 
     if(maximizingPlayer){
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
-            if(position[boardToPlayOn][mm] === 0){
+            /*if(position[boardToPlayOn][mm] === 0){
                 var evalu = -Infinity;
-                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                if(boardToPlayOn === -1 || checkWinCondition(position[boardToPlayOn]) !== 0){
                     var tmpPlay = pickBoard(position, true);
+                    depth = 1;
                     if(position[tmpPlay][mm] === 0){
                         position[tmpPlay][mm] = ai;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
-                        evalu+=10;
+                        evalu+=100;
                         position[tmpPlay][mm] = 0;
                     }
                     //console.log("Eeeeyo");
@@ -119,20 +116,42 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                 if(beta <= alpha){
                     break;
                 }
+            }*/
+            var evalu = -Infinity;
+            if(boardToPlayOn === -1){
+                var tmpPlay = pickBoard(position, true);
+                if(position[tmpPlay][mm] === 0){
+                    position[tmpPlay][mm] = ai;
+                    evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
+                    evalu+=150;
+                    position[tmpPlay][mm] = 0;
+                }
+            }else{
+                if(position[boardToPlayOn][mm] === 0){
+                    position[boardToPlayOn][mm] = ai;
+                    evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                    position[boardToPlayOn][mm] = 0;
+                }
+            }
+            maxEval = Math.max(evalu, maxEval);
+            alpha = Math.max(alpha, evalu);
+            if(beta <= alpha){
+                break;
             }
         }
         return maxEval;
     }else{
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
-            if(position[boardToPlayOn][mm] === 0){
+            /*if(position[boardToPlayOn][mm] === 0){
                 var evalu = Infinity;
-                if(checkWinCondition(position[boardToPlayOn]) !== 0){
+                if(boardToPlayOn === -1 || checkWinCondition(position[boardToPlayOn]) !== 0){
                     var tmpPlay = pickBoard(position, false);
+                    depth = 1;
                     if(position[tmpPlay][mm] === 0) {
                         position[tmpPlay][mm] = player;
                         evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
-                        evalu-=10;
+                        evalu-=100;
                         position[tmpPlay][mm] = 0;
                     }
                 }else{
@@ -146,6 +165,27 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                 if(beta <= alpha){
                     break;
                 }
+            }*/
+            var evalu = Infinity;
+            if(boardToPlayOn === -1){
+                var tmpPlay = pickBoard(position, false);
+                if(position[tmpPlay][mm] === 0){
+                    position[tmpPlay][mm] = player;
+                    evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
+                    evalu-=150;
+                    position[tmpPlay][mm] = 0;
+                }
+            }else{
+                if(position[boardToPlayOn][mm] === 0){
+                    position[boardToPlayOn][mm] = player;
+                    evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                    position[boardToPlayOn][mm] = 0;
+                }
+            }
+            minEval = Math.min(evalu, minEval);
+            beta = Math.min(beta, evalu);
+            if(beta <= alpha){
+                break;
             }
         }
         return minEval;
@@ -336,19 +376,21 @@ function pickBoard(pos, pl){
                     }else{
                         pos[ah][eheh] = player;
                     }
-                    var scoreThing = evaluateGame(pos, eheh);
+                    var scoreThing = evaluateGame(pos, eheh)*10;
                     pos[ah][eheh] = 0;
-                    for(var what = 0; what < 9; what++){
-                        if(checkWinCondition(pos[eheh]) === 0) {
-                            if (pos[eheh][what] === 0) {
-                                scoreThing += realEvaluateSquare(pos[eheh])*10;
-                            }
-                        }
-                    }
+                    /*if(checkWinCondition(pos[eheh]) === 0) {
+                        scoreThing += realEvaluateSquare(pos[eheh])*25;
+                    }*/
                     if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
                         bestScoreThing = scoreThing;
                         remembered = ah;
                     }
+                    /*var scoreThing = miniMax(pos, eheh, 2, -Infinity, Infinity, !pl);
+                    pos[ah][eheh] = 0;
+                    if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
+                        bestScoreThing = scoreThing;
+                        remembered = ah;
+                    }*/
                 }
             }
         }
