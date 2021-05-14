@@ -131,22 +131,26 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     position[tmpPlay][mm] = 0;
                 }*/
                 for(var trr = 0; trr < 9; trr++){
-                    if(checkWinCondition(position[trr]) === 0){
-                        if(position[trr][mm] === 0){
-                            position[trr][mm] = ai;
+                    if(checkWinCondition(position[mm]) === 0){
+                        if(position[mm][trr] === 0){
+                            position[mm][trr] = ai;
                             //tmpPlay = pickBoard(position, true);
-                            evalut = miniMax(position, trr, depth-1, alpha, beta, false).mE;
-                            position[trr][mm] = 0;
+                            evalut = miniMax(position, mm, depth-1, alpha, beta, false).mE;
+                            position[mm][trr] = 0;
                         }
                         if(evalut > maxEval){
                             maxEval = evalut;
-                            tmpPlay = trr;
+                            tmpPlay = mm;
                         }
                         /*alpha = Math.max(alpha, evalut);
                         if(beta <= alpha){
                             break;
                         }*/
                     }
+                }
+                alpha = Math.max(alpha, evalut);
+                if(beta <= alpha){
+                    break;
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
@@ -198,22 +202,26 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     position[tmpPlay][mm] = 0;
                 }*/
                 for(var trr = 0; trr < 9; trr++){
-                    if(checkWinCondition(position[trr]) === 0){
-                        if(position[trr][mm] === 0){
-                            position[trr][mm] = player;
+                    if(checkWinCondition(position[mm]) === 0){
+                        if(position[mm][trr] === 0){
+                            position[mm][trr] = player;
                             //tmpPlay = pickBoard(position, true);
-                            evalua = miniMax(position, trr, depth-1, alpha, beta, true).mE;
-                            position[trr][mm] = 0;
+                            evalua = miniMax(position, mm, depth-1, alpha, beta, true).mE;
+                            position[mm][trr] = 0;
                         }
                         if(evalua < minEval){
                             minEval = evalua;
-                            tmpPlay = trr;
+                            tmpPlay = mm;
                         }
                         /*beta = Math.min(beta, evalua);
                         if(beta <= alpha){
                             break;
                         }*/
                     }
+                }
+                beta = Math.min(beta, evalua);
+                if(beta <= alpha){
+                    break;
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
