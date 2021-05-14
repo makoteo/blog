@@ -136,22 +136,23 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             position[mm][trr] = ai;
                             //tmpPlay = pickBoard(position, true);
                             evalut = miniMax(position, mm, depth-1, alpha, beta, false).mE;
+                            evalut-=150;
                             position[mm][trr] = 0;
                         }
                         if(evalut > maxEval){
                             maxEval = evalut;
                             tmpPlay = mm;
                         }
-                        /*alpha = Math.max(alpha, evalut);
+                        alpha = Math.max(alpha, evalut);
                         if(beta <= alpha){
                             break;
-                        }*/
+                        }
                     }
                 }
-                alpha = Math.max(alpha, evalut);
+                /*alpha = Math.max(alpha, evalut);
                 if(beta <= alpha){
                     break;
-                }
+                }*/
             }else{
                 if(position[boardToPlayOn][mm] === 0){
                     position[boardToPlayOn][mm] = ai;
@@ -207,22 +208,23 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             position[mm][trr] = player;
                             //tmpPlay = pickBoard(position, true);
                             evalua = miniMax(position, mm, depth-1, alpha, beta, true).mE;
+                            evalua += 150;
                             position[mm][trr] = 0;
                         }
                         if(evalua < minEval){
                             minEval = evalua;
                             tmpPlay = mm;
                         }
-                        /*beta = Math.min(beta, evalua);
+                        beta = Math.min(beta, evalua);
                         if(beta <= alpha){
                             break;
-                        }*/
+                        }
                     }
                 }
-                beta = Math.min(beta, evalua);
+                /*beta = Math.min(beta, evalua);
                 if(beta <= alpha){
                     break;
-                }
+                }*/
             }else{
                 if(position[boardToPlayOn][mm] === 0){
                     position[boardToPlayOn][mm] = player;
