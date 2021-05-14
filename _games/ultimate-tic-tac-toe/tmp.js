@@ -136,7 +136,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             position[mm][trr] = ai;
                             //tmpPlay = pickBoard(position, true);
                             evalut = miniMax(position, mm, depth-1, alpha, beta, false).mE;
-                            evalut-=150;
+                            //evalut+=150;
                             position[mm][trr] = 0;
                         }
                         if(evalut > maxEval){
@@ -208,7 +208,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             position[mm][trr] = player;
                             //tmpPlay = pickBoard(position, true);
                             evalua = miniMax(position, mm, depth-1, alpha, beta, true).mE;
-                            evalua += 150;
+                            //evalua -= 150;
                             position[mm][trr] = 0;
                         }
                         if(evalua < minEval){
@@ -660,17 +660,18 @@ function game(){
         }
 
         if(bestMove !== -1) {
-            for (var a = 0; a < 9; a++) {
-                if (boards[currentBoard][a] === 0) {
-                    var score = evaluatePos(boards[currentBoard], a, currentTurn)*45;
-                    bestScore[a] = score;
-                }
-            }
 
             if(checkWinCondition(boards[currentBoard]) !== 0){
                 var savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
                 console.log(savedMm);
                 currentBoard = savedMm.tP;
+            }
+
+            for (var a = 0; a < 9; a++) {
+                if (boards[currentBoard][a] === 0) {
+                    var score = evaluatePos(boards[currentBoard], a, currentTurn)*45;
+                    bestScore[a] = score;
+                }
             }
 
             for(var b = 0; b < 9; b++){
