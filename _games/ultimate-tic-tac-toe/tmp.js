@@ -67,7 +67,7 @@ function checkWinCondition(map) {
 function evaluateGame(position, currentBoard) {
     var evale = 0;
     var mainBd = [];
-    var evaluatorMul = [1.5, 1, 1.5, 1, 2, 1, 1.5, 1, 1.5];
+    var evaluatorMul = [1.2, 1, 1.2, 1, 1.5, 1, 1.2, 1, 1.2];
     for (var eh = 0; eh < 9; eh++){
         evale += realEvaluateSquare(position[eh])*1.5*evaluatorMul[eh];
         if(eh === currentBoard){
@@ -85,19 +85,18 @@ function evaluateGame(position, currentBoard) {
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
+    var tmpPlay = -1;
+
     var calcEval = evaluateGame(position, boardToPlayOn);
     if(depth <= 0 || Math.abs(calcEval) > 5000) {
-        return calcEval;
+        return {"mE": calcEval, "tP": tmpPlay};
     }
-    if(checkWinCondition(position[boardToPlayOn]) !== 0){
+    if(boardToPlayOn !== -1 && checkWinCondition(position[boardToPlayOn]) !== 0){
         boardToPlayOn = -1;
     }
 
-    var tmpPlay = 0;
-
     if(maximizingPlayer){
         var maxEval = -Infinity;
-        if(boardToPlayOn === -1){tmpPlay = pickBoard(position, true);}
         for(var mm = 0; mm < 9; mm++){
             /*if(position[boardToPlayOn][mm] === 0){
                 var evalu = -Infinity;
@@ -122,31 +121,49 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     break;
                 }
             }*/
-            var evalu = -Infinity;
+            var evalut = -Infinity;
             if(boardToPlayOn === -1){
-                if(position[tmpPlay][mm] === 0){
+                /*if(position[tmpPlay][mm] === 0){
                     position[tmpPlay][mm] = ai;
+                    tmpPlay = pickBoard(position, true);
                     evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, false);
                     evalu+=500;
                     position[tmpPlay][mm] = 0;
+                }*/
+                for(var trr = 0; trr < 9; trr++){
+                    if(checkWinCondition(position[trr]) === 0){
+                        if(position[trr][mm] === 0){
+                            position[trr][mm] = ai;
+                            //tmpPlay = pickBoard(position, true);
+                            evalut = miniMax(position, trr, depth-1, alpha, beta, false).mE;
+                            position[trr][mm] = 0;
+                        }
+                        if(evalut > maxEval){
+                            maxEval = evalut;
+                            tmpPlay = trr;
+                        }
+                        /*alpha = Math.max(alpha, evalut);
+                        if(beta <= alpha){
+                            break;
+                        }*/
+                    }
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
                     position[boardToPlayOn][mm] = ai;
-                    evalu = miniMax(position, mm, depth-1, alpha, beta, false);
+                    evalut = miniMax(position, mm, depth-1, alpha, beta, false).mE;
                     position[boardToPlayOn][mm] = 0;
                 }
-            }
-            maxEval = Math.max(evalu, maxEval);
-            alpha = Math.max(alpha, evalu);
-            if(beta <= alpha){
-                break;
+                maxEval = Math.max(evalut, maxEval);
+                alpha = Math.max(alpha, evalut);
+                if(beta <= alpha){
+                    break;
+                }
             }
         }
-        return maxEval;
+        return {"mE": maxEval, "tP": tmpPlay};
     }else{
         var minEval = Infinity;
-        if(boardToPlayOn === -1){tmpPlay = pickBoard(position, false);}
         for(var mm = 0; mm < 9; mm++){
             /*if(position[boardToPlayOn][mm] === 0){
                 var evalu = Infinity;
@@ -171,28 +188,47 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     break;
                 }
             }*/
-            var evalu = Infinity;
+            var evalua = Infinity;
             if(boardToPlayOn === -1){
-                if(position[tmpPlay][mm] === 0){
+                /*if(position[tmpPlay][mm] === 0){
                     position[tmpPlay][mm] = player;
+                    tmpPlay = pickBoard(position, false);
                     evalu = miniMax(position, tmpPlay, depth-1, alpha, beta, true);
                     evalu-=500;
                     position[tmpPlay][mm] = 0;
+                }*/
+                for(var trr = 0; trr < 9; trr++){
+                    if(checkWinCondition(position[trr]) === 0){
+                        if(position[trr][mm] === 0){
+                            position[trr][mm] = player;
+                            //tmpPlay = pickBoard(position, true);
+                            evalua = miniMax(position, trr, depth-1, alpha, beta, true).mE;
+                            position[trr][mm] = 0;
+                        }
+                        if(evalua < minEval){
+                            minEval = evalua;
+                            tmpPlay = trr;
+                        }
+                        /*beta = Math.min(beta, evalua);
+                        if(beta <= alpha){
+                            break;
+                        }*/
+                    }
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
                     position[boardToPlayOn][mm] = player;
-                    evalu = miniMax(position, mm, depth-1, alpha, beta, true);
+                    evalua = miniMax(position, mm, depth-1, alpha, beta, true).mE;
                     position[boardToPlayOn][mm] = 0;
                 }
-            }
-            minEval = Math.min(evalu, minEval);
-            beta = Math.min(beta, evalu);
-            if(beta <= alpha){
-                break;
+                minEval = Math.min(evalua, minEval);
+                beta = Math.min(beta, evalua);
+                if(beta <= alpha){
+                    break;
+                }
             }
         }
-        return minEval;
+        return {"mE": minEval, "tP": tmpPlay};
     }
 }
 
@@ -389,11 +425,11 @@ function pickBoard(pos, pl){
                         remembered = ah;
                     }
                     //scoreThing += miniMax(pos, eheh, 2, -Infinity, Infinity, !pl);
-                    pos[ah][eheh] = 0;
+                    /*pos[ah][eheh] = 0;
                     if((scoreThing > bestScoreThing && pl) || (scoreThing < bestScoreThing && !pl)){
                         bestScoreThing = scoreThing;
                         remembered = ah;
-                    }
+                    }*/
                 }
             }
         }
@@ -602,9 +638,9 @@ function game(){
             }
         }*/
 
-        if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
+        /*if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
             currentBoard = pickBoard(boards, true);
-        }
+        }*/
 
         for(var i = 0; i < 9; i++){
             if(boards[currentBoard][i] === 0){
@@ -621,13 +657,24 @@ function game(){
                 }
             }
 
+            if(checkWinCondition(boards[currentBoard]) !== 0){
+                var savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
+                console.log(savedMm);
+                currentBoard = savedMm.tP;
+            }
+
             for(var b = 0; b < 9; b++){
-                if (boards[currentBoard][b] === 0) {
-                    boards[currentBoard][b] = ai;
-                    var score2 = miniMax(boards, b, 6, -Infinity, Infinity, false);
-                    boards[currentBoard][b] = 0;
-                    bestScore[b] += score2;
-                    //console.log(score2);
+                if(checkWinCondition(boards[currentBoard]) === 0){
+                    if (boards[currentBoard][b] === 0) {
+                        boards[currentBoard][b] = ai;
+                        var savedMm = miniMax(boards, b, 5, -Infinity, Infinity, false);
+                        console.log(savedMm);
+                        var score2 = savedMm.mE;
+                        boards[currentBoard][b] = 0;
+                        bestScore[b] += score2;
+                        //boardSel[b] = savedMm.tP;
+                        //console.log(score2);
+                    }
                 }
             }
 
