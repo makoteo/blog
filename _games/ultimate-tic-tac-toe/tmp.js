@@ -818,6 +818,7 @@ function startGame(type){
     MOVES = 0;
 
     currentTurn = 1;
+    currentBoard = -1;
 
     if(type === 0){
         AIACTIVE = true;
