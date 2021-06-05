@@ -501,28 +501,30 @@ function game(){
             currentBoard = pickBoard(boards, true);
         }*/
 
-        for(var i = 0; i < 9; i++){
-            if(boards[currentBoard][i] === 0){
+
+        if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
+            var savedMm;
+            if(MOVES < 10) {
+                savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
+            }else if(MOVES < 18){
+                savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
+            }else{
+                savedMm = miniMax(boards, -1, 7, -Infinity, Infinity, true);
+            }
+
+            console.log(savedMm.tP);
+            currentBoard = savedMm.tP;
+        }
+
+        for (var i = 0; i < 9; i++) {
+            if (boards[currentBoard][i] === 0) {
                 bestMove = i;
                 break;
             }
         }
 
+
         if(bestMove !== -1) {
-
-            if(checkWinCondition(boards[currentBoard]) !== 0){
-                var savedMm;
-                if(MOVES < 10) {
-                    savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
-                }else if(MOVES < 18){
-                    savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
-                }else{
-                    savedMm = miniMax(boards, -1, 7, -Infinity, Infinity, true);
-                }
-
-                console.log(savedMm.tP);
-                currentBoard = savedMm.tP;
-            }
 
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
