@@ -47,6 +47,8 @@ var switchAroo = 1;
 
 var AIACTIVE = true;
 
+var playerNames = ["PLAYER", "AI"];
+
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
 
 
@@ -684,8 +686,13 @@ function game(){
 
     if(gameRunning){
         if (checkWinCondition(mainBoard) !== 0) {
-            alert("GAME OVER");
             gameRunning = false;
+            document.getElementById("winMenu").removeAttribute("hidden");
+            if(checkWinCondition(mainBoard) === 1){
+                document.getElementById("result").innerHTML = playerNames[0] + " WINS!";
+            }else{
+                document.getElementById("result").innerHTML = playerNames[1] + " WINS!";
+            }
         }
     }
 
@@ -792,14 +799,62 @@ function Reload() {
 }
 
 function startGame(type){
+    boards = [
+
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    ];
+
+    mainBoard = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    MOVES = 0;
+
+    currentTurn = 1;
+
     if(type === 0){
         AIACTIVE = true;
         gameRunning = true;
+        playerNames[0] = "PLAYER";
+        playerNames[1] = "AI";
     }else{
         AIACTIVE = false;
         gameRunning = true;
+        switchAroo = 1;
+        playerNames[0] = "PLAYER 1";
+        playerNames[1] = "PLAYER 2";
     }
     document.getElementById("startMenu").setAttribute("hidden", "hidden");
+    document.getElementById("turnMenu").setAttribute("hidden", "hidden");
+}
+
+function setGame(type){
+    if(type === 0){
+        currentTurn = 1;
+        switchAroo = 1;
+    }else{
+        currentTurn = -1;
+        switchAroo = -1;
+    }
+    startGame(0);
+}
+
+function menu(){
+    document.getElementById("startMenu").removeAttribute("hidden");
+    document.getElementById("turnMenu").setAttribute("hidden", "hidden");
+    document.getElementById("winMenu").setAttribute("hidden", "hidden");
+}
+
+function pickTurns(){
+    document.getElementById("startMenu").setAttribute("hidden", "hidden");
+    document.getElementById("turnMenu").removeAttribute("hidden");
 }
 
 // ---------------------------------------------------------- GAME LOOP ------------------------------------------------------------------------ //

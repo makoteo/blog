@@ -11,14 +11,17 @@
 
         <div class="absolute" id="startMenu">
             <p class="centeredbig">Ultimate Tic-Tac-Toe</p>
-            <p class="centered" onclick="startGame(0)"><button>1 Player</button></p>
+            <p class="centered" onclick="pickTurns()"><button>1 Player</button></p>
             <p class="centered" onclick="startGame(1)"><button>2 Players</button></p>
         </div>
-        <div class="absolute" id="resetMenu" hidden="hidden">
-            <p class="centeredbig">Game Over</p>
-            <p class="centered" id="endScore">Score: 0</p>
-            <p class="centered" id="endHighScore">HighScore: 0</p>
-            <p class="centered" onclick="Start()"><button>Play again</button></p>
+        <div class="absolute" id="turnMenu" hidden="hidden">
+            <p class="centeredbig">Ultimate Tic-Tac-Toe</p>
+            <p class="centered" onclick="setGame(0)"><button>Player 1st</button></p>
+            <p class="centered" onclick="setGame(1)"><button>AI 1st</button></p>
+        </div>
+        <div class="absolute" id="winMenu" hidden="hidden">
+            <p class="centeredbig" id="result">Player 1 Wins!</p>
+            <p class="centered" onclick="menu()"><button>Play again</button></p>
         </div>
     </div>
 
