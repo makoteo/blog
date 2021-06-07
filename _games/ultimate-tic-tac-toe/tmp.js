@@ -749,10 +749,12 @@ function game(){
 
     //console.log(RUNS);
 
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = COLORS.black;
-    ctx.fillRect(WIDTH/2, WIDTH, bestScore[bestMove]*2*switchAroo, HEIGHT/16);
-    ctx.globalAlpha = 1;
+    if(AIACTIVE){
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = COLORS.black;
+        ctx.fillRect(WIDTH/2, WIDTH, bestScore[bestMove]*2*switchAroo, HEIGHT/16);
+        ctx.globalAlpha = 1;
+    }
 
     clicked = false;
 
