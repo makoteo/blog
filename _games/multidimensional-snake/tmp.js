@@ -27,6 +27,7 @@ var savedDir = 0;
 var currentDimension = 1;
 
 var spaceReleased = true;
+var flashDimTim = 0;
 
 for(var i = 0; i < cellDivision; i++){
     var tmpZero = [];
@@ -75,8 +76,8 @@ function drawBoard(dimension){
     }
 }
 
-function drawGrid(){
-    if(currentDimension === 1){
+function drawGrid(dimension){
+    if(dimension === 1){
         for(var i = 0; i < cellDivision; i++){
             for(var j = 0; j < cellDivision; j++){
                 if(gridU[i][j] <= 1){
@@ -91,6 +92,12 @@ function drawGrid(){
                 }
                 else if(gridU[i][j] === 3){
                     ctx.fillStyle = 'rgba(70, 50, 50)';
+                    ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
+                }else if(gridU[i][j] === 4){
+                    ctx.fillStyle = 'rgba(20, 170, 200)';
+                    ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
+                }else if(gridU[i][j] === 5){
+                    ctx.fillStyle = 'rgba(220, 220, 20)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 if(gridD[i][j] <= 1){gridD[i][j] = Math.max(0, gridD[i][j] - 1/decay);}
@@ -111,6 +118,12 @@ function drawGrid(){
                 }
                 else if(gridD[i][j] === 3){
                     ctx.fillStyle = 'rgba(50, 50, 70)';
+                    ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
+                }else if(gridD[i][j] === 4){
+                    ctx.fillStyle = 'rgba(20, 170, 200)';
+                    ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
+                }else if(gridD[i][j] === 5){
+                    ctx.fillStyle = 'rgba(220, 220, 20)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 if(gridU[i][j] <= 1){gridU[i][j] = Math.max(0, gridU[i][j] - 1/decay);}
@@ -136,6 +149,39 @@ function spawnFood(){
     }
 }
 
+function spawnItem(){
+    //if(Math.random() > 0.1){return 0;}
+    var tmpX = Math.floor(Math.random()*cellDivision);
+    var tmpY = Math.floor(Math.random()*cellDivision);
+    var board = Math.round(Math.random());
+    while((gridU[tmpY][tmpX] !== 0 || gridD[tmpY][tmpX] !== 0) || ((dir === 0 || dir === 2) && tmpX === sX) || ((dir === 1 || dir === 3) && tmpY === sY)){
+        tmpX = Math.floor(Math.random()*cellDivision);
+        tmpY = Math.floor(Math.random()*cellDivision);
+    }
+    var itemType = Math.random();
+    if(board === 0){
+        if(itemType < 0.1){
+            gridU[tmpY][tmpX] = 4;
+        }else{
+            if(board === 0) {
+                gridU[tmpY][tmpX] = 5;
+            }else{
+                gridD[tmpY][tmpX] = 5;
+            }
+        }
+    }else{
+        if(itemType < 0.1){
+            gridD[tmpY][tmpX] = 4;
+        }else{
+            if(board === 0) {
+                gridU[tmpY][tmpX] = 5;
+            }else{
+                gridD[tmpY][tmpX] = 5;
+            }
+        }
+    }
+}
+
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
 
@@ -149,10 +195,18 @@ function spawnFood(){
 function game(){
 
     drawBg(currentDimension);
-    drawGrid();
+    drawGrid(currentDimension);
     drawBoard(currentDimension);
 
+    if(flashDimTim > 0){
+        ctx.globalAlpha = 0.3;
+        drawGrid(-currentDimension);
+    }
+    ctx.globalAlpha = 1;
+
     if(gameRunning === true) {
+
+        flashDimTim = Math.max(flashDimTim-1, 0);
 
         frameCount++;
 
@@ -171,8 +225,12 @@ function game(){
                 if(gridU[sY][sX] === 2){
                     decay += 20;
                     spawnFood();
+                    spawnItem();
+                }else if(gridU[sY][sX] === 5){
+                    decay += 20;
+                    flashDimTim = 100;
                 }
-                else if(gridU[sY][sX] > 0 || gridU[sY][sX] === 3){
+                else if(gridU[sY][sX] > 0 || gridU[sY][sX] === 3 || gridU[sY][sX] === 4){
                     gameRunning = false;
                     decay = Infinity;
                     console.log("GAME OVER");
@@ -181,8 +239,12 @@ function game(){
                 if(gridD[sY][sX] === 2){
                     decay += 20;
                     spawnFood();
+                    spawnItem();
+                }else if(gridD[sY][sX] === 5){
+                    decay += 20;
+                    flashDimTim = 100;
                 }
-                else if(gridD[sY][sX] > 0 || gridD[sY][sX] === 3){
+                else if(gridD[sY][sX] > 0 || gridD[sY][sX] === 3 || gridU[sY][sX] === 4){
                     gameRunning = false;
                     decay = Infinity;
                     console.log("GAME OVER");
