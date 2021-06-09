@@ -3,6 +3,7 @@ var WIDTH = 750;
 var HEIGHT = 750;
 var gameRunning = true;
 var SCORE = 0;
+var HIGHSCORE = 0;
 var frameCount = 0;
 
 var cellDivision = 25;
@@ -43,6 +44,10 @@ for(var i = 0; i < cellDivision; i++){
         tmpZero1.push(0);
     }
     gridD.push(tmpZero1);
+}
+
+if(!isNaN(parseInt(localStorage.getItem('highScoreSnek')))){
+    HIGHSCORE = parseInt(localStorage.getItem('highScoreSnek'));
 }
 
 // ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
@@ -91,10 +96,10 @@ function drawGrid(dimension){
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 else if(gridU[i][j] === 3){
-                    ctx.fillStyle = 'rgba(70, 50, 50)';
+                    ctx.fillStyle = 'rgba(180, 160, 160)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }else if(gridU[i][j] === 4){
-                    ctx.fillStyle = 'rgba(20, 170, 200)';
+                    ctx.fillStyle = 'rgba(80, 160, 160)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }else if(gridU[i][j] === 5){
                     ctx.fillStyle = 'rgba(220, 220, 20)';
@@ -117,10 +122,10 @@ function drawGrid(dimension){
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 else if(gridD[i][j] === 3){
-                    ctx.fillStyle = 'rgba(50, 50, 70)';
+                    ctx.fillStyle = 'rgba(160, 160, 180)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }else if(gridD[i][j] === 4){
-                    ctx.fillStyle = 'rgba(20, 170, 200)';
+                    ctx.fillStyle = 'rgba(80, 160, 180)';
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }else if(gridD[i][j] === 5){
                     ctx.fillStyle = 'rgba(220, 220, 20)';
@@ -136,7 +141,7 @@ function spawnFood(){
     var tmpX = Math.floor(Math.random()*cellDivision);
     var tmpY = Math.floor(Math.random()*cellDivision);
     var board = Math.round(Math.random());
-    while((gridU[tmpY][tmpX] !== 0 || gridD[tmpY][tmpX] !== 0) || ((dir === 0 || dir === 2) && tmpX === sX) || ((dir === 1 || dir === 3) && tmpY === sY)){
+    while((gridU[tmpY][tmpX] !== 0 || gridD[tmpY][tmpX] !== 0) || ((dir === 0 || dir === 2) && tmpY === sY) || ((dir === 1 || dir === 3) && tmpX === sX)){
         tmpX = Math.floor(Math.random()*cellDivision);
         tmpY = Math.floor(Math.random()*cellDivision);
     }
@@ -150,36 +155,26 @@ function spawnFood(){
 }
 
 function spawnItem(){
-    //if(Math.random() > 0.1){return 0;}
+    if(Math.random() > 0.4){return 0;}
     var tmpX = Math.floor(Math.random()*cellDivision);
     var tmpY = Math.floor(Math.random()*cellDivision);
     var board = Math.round(Math.random());
-    while((gridU[tmpY][tmpX] !== 0 || gridD[tmpY][tmpX] !== 0) || ((dir === 0 || dir === 2) && tmpX === sX) || ((dir === 1 || dir === 3) && tmpY === sY)){
+    while((gridU[tmpY][tmpX] !== 0 || gridD[tmpY][tmpX] !== 0) || ((dir === 0 || dir === 2) && tmpY === sY) || ((dir === 1 || dir === 3) && tmpX === sX)){
         tmpX = Math.floor(Math.random()*cellDivision);
         tmpY = Math.floor(Math.random()*cellDivision);
     }
     var itemType = Math.random();
-    if(board === 0){
-        if(itemType < 0.1){
-            gridU[tmpY][tmpX] = 4;
-        }else{
-            if(board === 0) {
-                gridU[tmpY][tmpX] = 5;
-            }else{
-                gridD[tmpY][tmpX] = 5;
-            }
-        }
+    if(itemType < 0.7){
+        gridU[tmpY][tmpX] = 4;
+        gridD[tmpY][tmpX] = 4;
     }else{
-        if(itemType < 0.1){
-            gridD[tmpY][tmpX] = 4;
+        if(board === 0) {
+            gridU[tmpY][tmpX] = 5;
         }else{
-            if(board === 0) {
-                gridU[tmpY][tmpX] = 5;
-            }else{
-                gridD[tmpY][tmpX] = 5;
-            }
+            gridD[tmpY][tmpX] = 5;
         }
     }
+
 }
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
@@ -223,29 +218,37 @@ function game(){
 
             if(currentDimension === 1){
                 if(gridU[sY][sX] === 2){
-                    decay += 20;
+                    decay += 25;
+                    SCORE++;
                     spawnFood();
                     spawnItem();
                 }else if(gridU[sY][sX] === 5){
-                    decay += 20;
                     flashDimTim = 100;
                 }
                 else if(gridU[sY][sX] > 0 || gridU[sY][sX] === 3 || gridU[sY][sX] === 4){
                     gameRunning = false;
+                    if(SCORE > HIGHSCORE){
+                        HIGHSCORE = SCORE;
+                        localStorage.setItem('highScoreSnek', HIGHSCORE.toString());
+                    }
                     decay = Infinity;
                     console.log("GAME OVER");
                 }
             }else{
                 if(gridD[sY][sX] === 2){
-                    decay += 20;
+                    decay += 25;
+                    SCORE++;
                     spawnFood();
                     spawnItem();
                 }else if(gridD[sY][sX] === 5){
-                    decay += 20;
                     flashDimTim = 100;
                 }
                 else if(gridD[sY][sX] > 0 || gridD[sY][sX] === 3 || gridU[sY][sX] === 4){
                     gameRunning = false;
+                    if(SCORE > HIGHSCORE){
+                        HIGHSCORE = SCORE;
+                        localStorage.setItem('highScoreSnek', HIGHSCORE.toString());
+                    }
                     decay = Infinity;
                     console.log("GAME OVER");
                 }
@@ -287,6 +290,14 @@ function game(){
         */
 
     }
+
+    ctx.font = 50 + 'px quickPixel';
+    ctx.fillStyle = "white";
+    ctx.textAlign = 'left';
+    ctx.fillText("SCORE: " + SCORE, WIDTH/100, HEIGHT/30);
+    ctx.textAlign = 'right';
+    ctx.fillText("HIGHSCORE: " + HIGHSCORE, WIDTH - WIDTH/100, HEIGHT/30);
+
 }
 
 spawnFood();

@@ -1,3 +1,9 @@
+@font-face
+{
+    font-family: quickPixel;
+    src: url('QuickPixel.ttf');
+}
+
 div.relative {
     position: relative;
     width: 750px;
