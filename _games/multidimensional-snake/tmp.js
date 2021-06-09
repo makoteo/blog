@@ -1,7 +1,7 @@
 var versionCode = "Alpha 0.9";
 var WIDTH = 750;
 var HEIGHT = 750;
-var gameRunning = true;
+var gameRunning = false;
 var SCORE = 0;
 var HIGHSCORE = 0;
 var frameCount = 0;
@@ -30,22 +30,6 @@ var currentDimension = 1;
 var spaceReleased = true;
 var flashDimTim = 0;
 
-for(var i = 0; i < cellDivision; i++){
-    var tmpZero = [];
-    for(var j = 0; j < cellDivision; j++){
-        tmpZero.push(0);
-    }
-    gridU.push(tmpZero);
-}
-
-for(var i = 0; i < cellDivision; i++){
-    var tmpZero1 = [];
-    for(var j = 0; j < cellDivision; j++){
-        tmpZero1.push(0);
-    }
-    gridD.push(tmpZero1);
-}
-
 if(!isNaN(parseInt(localStorage.getItem('highScoreSnek')))){
     HIGHSCORE = parseInt(localStorage.getItem('highScoreSnek'));
 }
@@ -68,6 +52,7 @@ function drawBoard(dimension){
     }else{
         ctx.strokeStyle = "rgb(25, 48, 220)";
     }
+    ctx.lineWidth = 1;
     for(var i = 0; i < cellDivision; i++){
         ctx.beginPath();
         ctx.moveTo(i*(WIDTH/cellDivision), 0);
@@ -176,6 +161,41 @@ function spawnItem(){
     }
 
 }
+
+function Start(){
+    gridU = [];
+    gridD = [];
+    for(var i = 0; i < cellDivision; i++){
+        var tmpZero = [];
+        for(var j = 0; j < cellDivision; j++){
+            tmpZero.push(0);
+        }
+        gridU.push(tmpZero);
+    }
+
+    for(var i = 0; i < cellDivision; i++){
+        var tmpZero1 = [];
+        for(var j = 0; j < cellDivision; j++){
+            tmpZero1.push(0);
+        }
+        gridD.push(tmpZero1);
+    }
+
+    SCORE = 0;
+    decay = 50;
+    speed = 10;
+    currentDimension = 1;
+    flashDimTim = 0;
+
+    sX = Math.floor(cellDivision/2);
+    sY = Math.floor(cellDivision/2);
+
+    dir = 0;
+
+    //gameRunning = true;
+}
+
+Start();
 
 // ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
 
@@ -289,38 +309,32 @@ function game(){
         }
         */
 
+    }else{
+        ctx.lineWidth = 3;
+        ctx.font = 100 + 'px quickPixel';
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = 'black';
+        ctx.textAlign = 'center';
+        ctx.strokeText("PRESS SPACE TO START", WIDTH/2, HEIGHT/2);
+        ctx.fillText("PRESS SPACE TO START", WIDTH/2, HEIGHT/2);
+
+        if (keys && keys[32] && spaceReleased) {gameRunning = true; spaceReleased = false; Start(); spawnFood();}else if(keys && !keys[32]){spaceReleased = true;}
     }
 
+    ctx.lineWidth = 3;
     ctx.font = 50 + 'px quickPixel';
     ctx.fillStyle = "white";
+    ctx.strokeStyle = 'black';
     ctx.textAlign = 'left';
+    ctx.strokeText("SCORE: " + SCORE, WIDTH/100, HEIGHT/30);
     ctx.fillText("SCORE: " + SCORE, WIDTH/100, HEIGHT/30);
     ctx.textAlign = 'right';
+    ctx.strokeText("HIGHSCORE: " + HIGHSCORE, WIDTH - WIDTH/100, HEIGHT/30);
     ctx.fillText("HIGHSCORE: " + HIGHSCORE, WIDTH - WIDTH/100, HEIGHT/30);
 
 }
 
-spawnFood();
-
 // ---------------------------------------------------------- RESET FUNCTION ------------------------------------------------------------------------ //
-
-function Start(){
-    if(gameRunning === false){
-        SCORE = 0;
-        frameCount = 0;
-
-        /* RESET ARRAYS (EXAMPLE)
-        coins = [];
-        */
-
-        //document.getElementById("score").innerHTML = "" + SCORE;
-        //document.getElementById("gamescore").innerHTML = "" + GAMESCORE;
-        //document.getElementById("scorediv").removeAttribute("hidden");
-        //document.getElementById("gamescorediv").removeAttribute("hidden");
-        HIGHSCORE = localStorage.getItem("HighScoreBusiness");
-        gameRunning = true;
-    }
-}
 
 /* EXAMPLE DIV HIDE
 function ShowInstructions(){
