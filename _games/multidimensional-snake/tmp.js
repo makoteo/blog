@@ -1,4 +1,4 @@
-var versionCode = "Alpha 0.9";
+var versionCode = "Alpha 1";
 var WIDTH = 750;
 var HEIGHT = 750;
 var gameRunning = false;
@@ -29,6 +29,8 @@ var currentDimension = 1;
 
 var spaceReleased = true;
 var flashDimTim = 0;
+
+var DEBUG = false;
 
 if(!isNaN(parseInt(localStorage.getItem('highScoreSnek')))){
     HIGHSCORE = parseInt(localStorage.getItem('highScoreSnek'));
@@ -91,6 +93,12 @@ function drawGrid(dimension){
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 if(gridD[i][j] <= 1){gridD[i][j] = Math.max(0, gridD[i][j] - 1/decay);}
+                if(DEBUG){
+                    ctx.textAlign = 'center';
+                    ctx.font = '30px quickPixel';
+                    ctx.fillStyle = 'lime';
+                    ctx.fillText(Math.round(gridU[i][j]*10)/10, j*(WIDTH/cellDivision) + WIDTH/2/cellDivision, i*(HEIGHT/cellDivision) + HEIGHT/2/cellDivision);
+                }
             }
         }
     }else{
@@ -117,6 +125,12 @@ function drawGrid(dimension){
                     ctx.fillRect(j*(WIDTH/cellDivision), i*(HEIGHT/cellDivision), WIDTH/cellDivision, HEIGHT/cellDivision);
                 }
                 if(gridU[i][j] <= 1){gridU[i][j] = Math.max(0, gridU[i][j] - 1/decay);}
+                if(DEBUG){
+                    ctx.textAlign = 'center';
+                    ctx.font = '30px quickPixel';
+                    ctx.fillStyle = 'lime';
+                    ctx.fillText(Math.round(gridD[i][j]*10)/10, j*(WIDTH/cellDivision) + WIDTH/2/cellDivision, i*(HEIGHT/cellDivision) + HEIGHT/2/cellDivision);
+                }
             }
         }
     }
@@ -140,7 +154,7 @@ function spawnFood(){
 }
 
 function spawnItem(){
-    if(Math.random() > 0.4){return 0;}
+    if(Math.random() > 0.45){return 0;}
     var tmpX = Math.floor(Math.random()*cellDivision);
     var tmpY = Math.floor(Math.random()*cellDivision);
     var board = Math.round(Math.random());
@@ -149,7 +163,7 @@ function spawnItem(){
         tmpY = Math.floor(Math.random()*cellDivision);
     }
     var itemType = Math.random();
-    if(itemType < 0.7){
+    if(itemType < 0.5){
         gridU[tmpY][tmpX] = 4;
         gridD[tmpY][tmpX] = 4;
     }else{
