@@ -103,6 +103,9 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     if(boardToPlayOn !== -1 && checkWinCondition(position[boardToPlayOn]) !== 0){
         boardToPlayOn = -1;
     }
+    if(boardToPlayOn !== -1 && !position[boardToPlayOn].includes(0)){
+        boardToPlayOn = -1;
+    }
 
     if(maximizingPlayer){
         var maxEval = -Infinity;
@@ -123,10 +126,11 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             tmpPlay = mm;
                         }
                         alpha = Math.max(alpha, evalut);
-                        if(beta <= alpha){
-                            break;
-                        }
                     }
+
+                }
+                if(beta <= alpha){
+                    break;
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
@@ -134,11 +138,12 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     evalut = miniMax(position, mm, depth-1, alpha, beta, false);
                     position[boardToPlayOn][mm] = 0;
                 }
-                if(evalut.mE > maxEval){
-                    maxEval = evalut.mE;
+                var blop = evalut.mE;
+                if(blop > maxEval){
+                    maxEval = blop;
                     tmpPlay = evalut.tP;
                 }
-                alpha = Math.max(alpha, evalut.mE);
+                alpha = Math.max(alpha, blop);
                 if(beta <= alpha){
                     break;
                 }
@@ -164,10 +169,11 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                             tmpPlay = mm;
                         }
                         beta = Math.min(beta, evalua);
-                        if(beta <= alpha){
-                            break;
-                        }
                     }
+
+                }
+                if(beta <= alpha){
+                    break;
                 }
             }else{
                 if(position[boardToPlayOn][mm] === 0){
@@ -175,11 +181,12 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                     evalua = miniMax(position, mm, depth-1, alpha, beta, true);
                     position[boardToPlayOn][mm] = 0;
                 }
-                if(evalua.mE < minEval){
-                    minEval = evalua.mE;
+                var blep = evalua.mE;
+                if(blep < minEval){
+                    minEval = blep;
                     tmpPlay = evalua.tP;
                 }
-                beta = Math.min(beta, evalua.mE);
+                beta = Math.min(beta, blep);
                 if(beta <= alpha){
                     break;
                 }
@@ -421,6 +428,8 @@ function game(){
 
     if(currentTurn === -1 && gameRunning && AIACTIVE){
 
+        //document.getElementById("loader").classList.remove('fade');
+
         console.log("EEyo");
 
         bestMove = -1;
@@ -517,6 +526,8 @@ function game(){
 
 
         currentTurn = -currentTurn;
+
+        //document.getElementById("loader").classList.add('fade');
 
     }
 
@@ -799,7 +810,6 @@ function pickTurns(){
     document.getElementById("startMenu").setAttribute("hidden", "hidden");
     document.getElementById("turnMenu").removeAttribute("hidden");
 }
-
 // ---------------------------------------------------------- GAME LOOP ------------------------------------------------------------------------ //
 
 function repeatOften() {
