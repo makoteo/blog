@@ -455,14 +455,23 @@ function game(){
 
         if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
             var savedMm;
-            if(MOVES < 10) {
-                savedMm = miniMax(boards, -1, 4, -Infinity, Infinity, true);
-            }else if(MOVES < 18){
-                savedMm = miniMax(boards, -1, 5, -Infinity, Infinity, true);
-            }else{
-                savedMm = miniMax(boards, -1, 6, -Infinity, Infinity, true);
+
+            var count = 0;
+            for(var bt = 0; bt < boards.length; bt++){
+                if(checkWinCondition(boards[bt]) === 0){
+                    boards[bt].forEach((v) => (v === 0 && count++));
+                }
             }
 
+            console.log("Reamining: " + count);
+
+            if(MOVES < 10) {
+                savedMm = miniMax(boards, -1, Math.min(4, count), -Infinity, Infinity, true);
+            }else if(MOVES < 18){
+                savedMm = miniMax(boards, -1, Math.min(5, count), -Infinity, Infinity, true);
+            }else{
+                savedMm = miniMax(boards, -1, Math.min(6, count), -Infinity, Infinity, true);
+            }
             console.log(savedMm.tP);
             currentBoard = savedMm.tP;
         }
@@ -645,6 +654,19 @@ function game(){
                 document.getElementById("result").innerHTML = playerNames[1] + " WINS!";
             }
         }
+
+        var countw = 0;
+        for(var bt = 0; bt < boards.length; bt++){
+            if(checkWinCondition(boards[bt]) === 0){
+                boards[bt].forEach((v) => (v === 0 && countw++));
+            }
+        }
+
+        if(countw === 0){
+            gameRunning = false;
+            document.getElementById("winMenu").removeAttribute("hidden");
+            document.getElementById("result").innerHTML = "IT'S A TIE!";
+        }
     }
 
     shapeSize = squareSize/3;
@@ -670,7 +692,7 @@ function game(){
         }
     }
 
-    if(mainBoard[currentBoard] !== 0){currentBoard = -1;}
+    if(mainBoard[currentBoard] !== 0 || !boards[currentBoard].includes(0)){currentBoard = -1;}
 
     //HIGHLIGHT BOARD TO PLAY ON
 
