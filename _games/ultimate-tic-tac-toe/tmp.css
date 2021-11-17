@@ -114,12 +114,6 @@ button:focus {
 
 #loader{
     pointer-events: none;
-    opacity: 1;
-    transition: opacity 0.5s;
-}
-
-#loader.fade {
-    opacity: 0;
 }
 
 .lds-ring {

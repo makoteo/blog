@@ -1,9 +1,11 @@
 var versionCode = "Alpha 0.9";
+//CANVAS WIDTH AND HEIGHT
 var WIDTH = 800;
 var HEIGHT = 850;
 
 var COLORS = {white: "rgb(254, 250, 236)", black: "rgb(7, 5, 14)", blue: "rgb(36, 32, 95)", red: "rgb(129, 43, 56)"};
 
+//BOARDS IS AN ARRAY OF ARRAYS, WHERE EACH OF THE 9 ARRAYS REPRESENTS A LOCAL BOARD
 var boards = [
 
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -18,6 +20,7 @@ var boards = [
 
 ];
 
+//THIS ARRAY GETS EDITED IF YOU WIN A LOCAL BOARD
 var mainBoard = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 var mousePosX = 0;
@@ -38,9 +41,6 @@ var gameRunning = false;
 
 var RUNS = 0;
 
-var estimatedInFiveTurns = 0;
-
-var SEARCHDEPTH = 6;
 var MOVES = 0;
 
 var switchAroo = 1;
@@ -49,16 +49,9 @@ var AIACTIVE = true;
 
 var playerNames = ["PLAYER", "AI"];
 
-// ---------------------------------------------------------- OBJECTS ------------------------------------------------------------------------ //
-
-
-
-// ---------------------------------------------------------- BEFORE GAME RUN ------------------------------------------------------------------------ //
-
-
-
 // ---------------------------------------------------------- FUNCTIONS ------------------------------------------------------------------------ //
 
+//SIMPLY CHECKS A NORMAL TIC TAC TOE BOARD, RETURNS 1 or -1 if a specific player has won, returns 0 if no one has won.
 function checkWinCondition(map) {
     var a = 1;
     if (map[0] + map[1] + map[2] === a * 3 || map[3] + map[4] + map[5] === a * 3 || map[6] + map[7] + map[8] === a * 3 || map[0] + map[3] + map[6] === a * 3 || map[1] + map[4] + map[7] === a * 3 ||
@@ -73,6 +66,7 @@ function checkWinCondition(map) {
     return 0;
 }
 
+//The most important function, returns a numerical evaluation of the whole game in it's current state
 function evaluateGame(position, currentBoard) {
     var evale = 0;
     var mainBd = [];
@@ -91,6 +85,7 @@ function evaluateGame(position, currentBoard) {
     return evale;
 }
 
+//minimax algorithm
 function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
@@ -100,9 +95,11 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     if(depth <= 0 || Math.abs(calcEval) > 5000) {
         return {"mE": calcEval, "tP": tmpPlay};
     }
+    //If the board to play on is -1, it means you can play on any board
     if(boardToPlayOn !== -1 && checkWinCondition(position[boardToPlayOn]) !== 0){
         boardToPlayOn = -1;
     }
+    //If a board is full (doesn't include 0), it also sets the board to play on to -1
     if(boardToPlayOn !== -1 && !position[boardToPlayOn].includes(0)){
         boardToPlayOn = -1;
     }
@@ -111,8 +108,10 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         var maxEval = -Infinity;
         for(var mm = 0; mm < 9; mm++){
             var evalut = -Infinity;
+            //If you can play on any board, you have to go through all of them
             if(boardToPlayOn === -1){
                 for(var trr = 0; trr < 9; trr++){
+                    //Except the ones which are won
                     if(checkWinCondition(position[mm]) === 0){
                         if(position[mm][trr] === 0){
                             position[mm][trr] = ai;
@@ -132,15 +131,18 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
                 if(beta <= alpha){
                     break;
                 }
+            //If there's a specific board to play on, you just go through it's squares
             }else{
                 if(position[boardToPlayOn][mm] === 0){
                     position[boardToPlayOn][mm] = ai;
                     evalut = miniMax(position, mm, depth-1, alpha, beta, false);
                     position[boardToPlayOn][mm] = 0;
                 }
+                //Beautiful variable naming
                 var blop = evalut.mE;
                 if(blop > maxEval){
                     maxEval = blop;
+                    //Saves which board you should play on, so that this can be passed on when the AI is allowed to play in any board
                     tmpPlay = evalut.tP;
                 }
                 alpha = Math.max(alpha, blop);
@@ -151,6 +153,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
         }
         return {"mE": maxEval, "tP": tmpPlay};
     }else{
+        //Same for the minimizing end
         var minEval = Infinity;
         for(var mm = 0; mm < 9; mm++){
             var evalua = Infinity;
@@ -196,6 +199,7 @@ function miniMax(position, boardToPlayOn, depth, alpha, beta, maximizingPlayer) 
     }
 }
 
+//Useless function, just here so I could study minimax
 function oneBoardMinMax(position, depth, alpha, beta, maximizingPlayer) {
     RUNS++;
 
@@ -291,6 +295,7 @@ function evaluatePos(pos, square){
     return evaluation;
 }
 
+//This function actually evaluates a board fairly, is talked about in video.
 function realEvaluateSquare(pos){
     var evaluation = 0;
     var points = [0.2, 0.17, 0.2, 0.17, 0.22, 0.17, 0.2, 0.17, 0.2];
@@ -298,23 +303,6 @@ function realEvaluateSquare(pos){
     for(var bw in pos){
         evaluation -= pos[bw]*points[bw];
     }
-
-    /*var a = 1;
-    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += 1.5;
-    }
-    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += 1.5;
-    }
-
-    var a = -1;
-    if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
-        evaluation += -1.5;
-    }
-    if(pos[0] + pos[3] + pos[6] === a || pos[1] + pos[4] + pos[7] === a || pos[2] + pos[5] + pos[8] === a) {
-        evaluation += -1.5;
-    }*/
-
 
     var a = 2;
     if(pos[0] + pos[1] + pos[2] === a || pos[3] + pos[4] + pos[5] === a || pos[6] + pos[7] + pos[8] === a) {
@@ -367,6 +355,7 @@ function realEvaluateSquare(pos){
     return evaluation;
 }
 
+//Also a no longer used function, my first attempts to get the AI to pick a board to play on when it can play anywhere
 function pickBoard(pos, pl){
     var bestScoreThing = -Infinity;
     if(!pl){bestScoreThing = Infinity;}
@@ -401,6 +390,7 @@ function pickBoard(pos, pl){
     return remembered;
 }
 
+//Just a quick function to return the sign of a number
 function sign(x){
     if(x > 0){
         return 1;
@@ -417,7 +407,7 @@ var bestMove = -1;
 var bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
 
 function game(){
-    //SKY FILL
+    //BG FILL
     ctx.fillStyle = COLORS.white;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -428,45 +418,31 @@ function game(){
 
     if(currentTurn === -1 && gameRunning && AIACTIVE){
 
-        //document.getElementById("loader").classList.remove('fade');
-
-        console.log("EEyo");
+        console.log("Start AI");
+        //document.getElementById("loader").removeAttribute('hidden');
 
         bestMove = -1;
         bestScore = [-Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity, -Infinity];
 
-        RUNS = 0;
-        /*for(var a = 0; a < 9; a++){
-            if(boards[currentBoard][a] === 0){
-                boards[currentBoard][a] = ai;
-                var score = oneBoardMinMax(boards[currentBoard], 0, -Infinity, Infinity, false);
-                boards[currentBoard][a] = 0;
-                if(score >= bestScore){
-                    bestScore = score;
-                    bestMove = a;
-                }
-            }
-        }*/
+        RUNS = 0; //Just a variable where I store how many times minimax has run
 
-        /*if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
-            currentBoard = pickBoard(boards, true);
-        }*/
+        //Calculates the remaining amount of empty squares
+        var count = 0;
+        for(var bt = 0; bt < boards.length; bt++){
+            if(checkWinCondition(boards[bt]) === 0){
+                boards[bt].forEach((v) => (v === 0 && count++));
+            }
+        }
 
 
         if(currentBoard === -1 || checkWinCondition(boards[currentBoard]) !== 0){
             var savedMm;
 
-            var count = 0;
-            for(var bt = 0; bt < boards.length; bt++){
-                if(checkWinCondition(boards[bt]) === 0){
-                    boards[bt].forEach((v) => (v === 0 && count++));
-                }
-            }
+            console.log("Remaining: " + count);
 
-            console.log("Reamining: " + count);
-
+            //This minimax doesn't actually play a move, it simply figures out which board you should play on
             if(MOVES < 10) {
-                savedMm = miniMax(boards, -1, Math.min(4, count), -Infinity, Infinity, true);
+                savedMm = miniMax(boards, -1, Math.min(4, count), -Infinity, Infinity, true); //Putting math.min makes sure that minimax doesn't run when the board is full
             }else if(MOVES < 18){
                 savedMm = miniMax(boards, -1, Math.min(5, count), -Infinity, Infinity, true);
             }else{
@@ -476,6 +452,7 @@ function game(){
             currentBoard = savedMm.tP;
         }
 
+        //Just makes a quick default move for if all else fails
         for (var i = 0; i < 9; i++) {
             if (boards[currentBoard][i] === 0) {
                 bestMove = i;
@@ -484,8 +461,9 @@ function game(){
         }
 
 
-        if(bestMove !== -1) {
+        if(bestMove !== -1) { //This condition should only be false if the board is full, but it's here in case
 
+            //Best score is an array which contains individual scores for each square, here we're just changing them based on how good the move is on that one local board
             for (var a = 0; a < 9; a++) {
                 if (boards[currentBoard][a] === 0) {
                     var score = evaluatePos(boards[currentBoard], a, currentTurn)*45;
@@ -493,19 +471,21 @@ function game(){
                 }
             }
 
+            //And here we actually run minimax and add those values to the array
             for(var b = 0; b < 9; b++){
                 if(checkWinCondition(boards[currentBoard]) === 0){
                     if (boards[currentBoard][b] === 0) {
                         boards[currentBoard][b] = ai;
                         var savedMm;
+                        //Notice the stacking, at the beginning of the game, the depth is much lower than at the end
                         if(MOVES < 20){
-                            savedMm = miniMax(boards, b, 5, -Infinity, Infinity, false);
+                            savedMm = miniMax(boards, b, Math.min(5, count), -Infinity, Infinity, false);
                         }else if(MOVES < 32){
                             console.log("DEEP SEARCH");
-                            savedMm = miniMax(boards, b, 6, -Infinity, Infinity, false);
+                            savedMm = miniMax(boards, b, Math.min(6, count), -Infinity, Infinity, false);
                         }else{
                             console.log("ULTRA DEEP SEARCH");
-                            savedMm = miniMax(boards, b, 7, -Infinity, Infinity, false);
+                            savedMm = miniMax(boards, b, Math.min(7, count), -Infinity, Infinity, false);
                         }
                         console.log(savedMm);
                         var score2 = savedMm.mE;
@@ -519,12 +499,14 @@ function game(){
 
             console.log(bestScore);
 
+            //Choses to play on the square with the highest evaluation in the bestScore array
             for(var i in bestScore){
                 if(bestScore[i] > bestScore[bestMove]){
                     bestMove = i;
                 }
             }
 
+            //Actually places the cross/nought
             if(boards[currentBoard][bestMove] === 0){
                 boards[currentBoard][bestMove] = ai;
                 currentBoard = bestMove;
@@ -533,10 +515,9 @@ function game(){
             console.log(evaluateGame(boards, currentBoard));
         }
 
+        //document.getElementById("loader").setAttribute('hidden', 'hidden');
 
         currentTurn = -currentTurn;
-
-        //document.getElementById("loader").classList.add('fade');
 
     }
 
@@ -614,7 +595,7 @@ function game(){
         }
     }
 
-    //Shapes
+    //Draws the SMALL noughts and crosses
     ctx.lineWidth = 5;
 
     for(var i in boards){
@@ -644,6 +625,7 @@ function game(){
         }
     }
 
+    //Checks the win conditions
     if(gameRunning){
         if (checkWinCondition(mainBoard) !== 0) {
             gameRunning = false;
@@ -655,6 +637,7 @@ function game(){
             }
         }
 
+        //Once again, count the amount of playable squares, if it's 0, game is a tie
         var countw = 0;
         for(var bt = 0; bt < boards.length; bt++){
             if(checkWinCondition(boards[bt]) === 0){
@@ -672,6 +655,7 @@ function game(){
     shapeSize = squareSize/3;
     ctx.lineWidth = 20;
 
+    //Draws the BIG noughts and crosses
     for(var j in mainBoard){
         if(mainBoard[j] === 1*switchAroo){
             ctx.strokeStyle = COLORS.red;
