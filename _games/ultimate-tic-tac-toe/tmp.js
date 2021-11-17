@@ -1,4 +1,4 @@
-var versionCode = "Alpha 0.9";
+var versionCode = "Alpha 1.0";
 //CANVAS WIDTH AND HEIGHT
 var WIDTH = 800;
 var HEIGHT = 850;
