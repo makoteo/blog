@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<script src="/static/options.js"></script>
+{% endblock %}
+
+{% block main %}
+<div class="d-flex">
+    <h1 class="mx-auto p-3 largeBanner" id="quote"> Options </h1>
+</div>
+<div class="mainContainer">
+    <section class="">
+        <h2>Appearance/Behaviour</h2>
+        <hr>
+        <p><strong>Scroll down to 'Score' section after game ends:</strong></p>
+        <div class="form-check d-flex align-items-center">
+            <input class="form-check-input" type="radio" name="scoreMes" id="scoreMes1" value="scoreMes1" checked>
+            <label class="form-check-label" for="scoreMes1">
+                <p style="padding-top: 0.3em; margin: 0;">Always</p>
+            </label>
+        </div>
+        <div class="form-check d-flex align-items-center">
+            <input class="form-check-input" type="radio" name="scoreMes" id="scoreMes2" value="scoreMes2">
+            <label class="form-check-label" for="scoreMes2">
+                <p style="padding-top: 0.3em; margin: 0;">Never</p>
+            </label>
+        </div>
+        <div class="form-check d-flex align-items-center">
+            <input class="form-check-input" type="radio" name="scoreMes" id="scoreMes3" value="scoreMes3">
+            <label class="form-check-label" for="scoreMes3">
+                <p style="padding-top: 0.3em; margin: 0;">If score is larger than 0</p>
+            </label>
+        </div>
+        <hr>
+        <div class="form-check d-flex align-items-center">
+            <input class="form-check-input" type="checkbox" value="" id="minCheck" checked>
+            <label class="form-check-label" for="minCheck">
+                <p style="padding-top: 0.3em; margin: 0;"><strong>Minimal Mode</strong></p>
+            </label>
+        </div>
+        <p><label for="colorRange">Don't show  article section, only the game. Press ESC to make it appear. </label></p>
+        <div class="form-check d-flex align-items-center">
+            <input class="form-check-input" type="checkbox" value="" id="colorCheck" checked>
+            <label class="form-check-label" for="colorCheck">
+                <p style="padding-top: 0.3em; margin: 0;"><strong>Randomize Colors</strong></p>
+            </label>
+        </div>
+        <div class="form-group">
+            <p><label for="colorRange">If unchecked, you can select a color you like, and the game will always use it: </label></p>
+            <input type="range" class="form-control-range" id="colorRange" min="0" max="299" disabled>
+        </div>
+        <hr>
+        <p><strong>Custom Button Labels: </strong></p>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <input type="text" class="form-control" name="buttonName" id="inputButton1" placeholder="Button 1" maxlength="15">
+            </div>
+            <div class="form-group col-md-6">
+                <input type="text" class="form-control" name="buttonName" id="inputButton2" placeholder="Button 2" maxlength="15">
+            </div>
+        </div>
+        <p><label for="colorRange">If left empty, button labels will be randomized every now and then. </label></p>
+    </section>
+    <section class="">
+        <h2>Change Username</h2>
+        <hr>
+        <p><strong>Note, if you ever set a high score, this new name will be displayed. However, any old high scores you may have will keep their current name. </strong></p>
+        <form class="d-flex" action="/options" method="post">
+            <div class="d-inline-flex mx-auto w-auto align-items-center">
+                <input autocomplete="off" autofocus class="form-control mx-auto py-4" id="name" name="name" placeholder="New Username" type="text" pattern="[a-zA-Z0-9-_]+" oninvalid="this.setCustomValidity('Please include only letters, numbers and _ or - (no spaces)')" oninput="this.setCustomValidity('')">
+                <button class="buttonGeneral" type="submit">Change</button>
+            </div>
+        </form>
+    </section>
+    <section>
+        <div class="d-flex justify-content-center">
+            <button class="buttonGeneral" onclick="location.href='/'">Play Again</button>
+            <button class="buttonGeneral" onclick="location.href='/the_list'">The List</button>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="d-flex">
+    <h1 class="mx-auto p-3 largeBanner" id="quote">The story</h1>
+</div>
+<div class="mainContainer">
+    <section class="">
+        <h2>Why make this?</h2>
+        <p>I thought it was funny. That's it. Admittedly, I didn't expect to put this much effort into it, but I kind of got caught up in all the interesting statistics. Also, I needed a final project for CS50x and thought this could be a simple enough website to create. Originally, it was just supposed to be a 50/50 chance every round, but it became evident quite soon that that was boring, which is why I implemented all the powerups.</p>
+    </section>
+    <section>
+        <h2>Is there any meaning to this?</h2>
+        <p>Nope. I mean, I guess it's a fun social experiment to figure out how long people will spend playing a game which they have no influence over, but that's about it. You can go to a casino if you want to see that. </p>
+    </section>
+    <section>
+        <h2>What is <em>your</em> high score?</h2>
+        <p>As of writing this answer, 11.</p>
+        <p><em>Well actually, I just got 12 but I'm too lazy to go and rewrite every reference to the 11, so everyone's going to forever think I never got more than that. </em></p>
+    </section>
+    <section>
+        <h2>Sources for fun facts and timeline? </h2>
+        <p>The timeline events mostly come from <a href="https://en.wikipedia.org/wiki/Timeline_of_the_far_future">this wikipedia article</a>, which is a very interesting read on it's own. The fun facts for different scores come from various sources, and that's why they may seem quite ridiculous at times. Even I don't believe them.</p>
+    </section>
+    <section>
+        <div class="d-flex justify-content-center">
+            <button class="buttonGeneral" onclick="location.href='/'">Back to Game</button>
+            <button class="buttonGeneral" onclick="location.href='/the_list'">The List</button>
+        </div>
+    </section>
+</div>
+{% endblock %}

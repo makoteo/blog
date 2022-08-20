@@ -1,0 +1,31 @@
+<table class="table hoverTable mb-5">
+    <tr>
+        <th style="width: 20%; text-align: center;">Score</th>
+        <th style="width: 80%">Names</th>
+    </tr>
+
+    {% for group in humans %}
+        <tr>
+            <td style="text-align: center;">{{ group }}</td>
+            <td>
+            {% for name in humans[group] %}
+                <a class="tableLink" style="color: black;" href="/validate?id={{name[1]}}">
+                    <span class="nametag" > 
+                        {% if name[1] == highscore %}
+                            <strong>{{ name[0] }} (That's you!)</strong>
+                        {% else %}
+                            {{ name[0] }}
+                        {% endif %}
+                    </span></a>
+            {% endfor %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% if highscore == -9%}
+    <p>This is a table continaing the 100 highest scoring participants. The lowest and oldest scores are progressively knocked out to make way for luckier people. </p>
+    <p><strong>If you manage to get your name in this table, congratulations, you will be one of the 100 luckiest people in the world.</strong></p>
+{% else %}
+    <p>Oh hey, it's you! You're on the list! If you've gotten this far, I assume you know that that means you are <strong>one of the 100 luckiest humans in the world.</strong></strong></p>
+{% endif %}

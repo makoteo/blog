@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="d-flex">
+    <h1 class="mx-auto p-3 largeBanner" id="quote"> Sorry, {{ name }}</h1>
+</div>
+<div class="mainContainer">
+    <section class="">
+        <h2>Either you haven't yet set a high score, or someone has taken your spot.</h2>
+        <p>That's a shame, but good luck nonetheless!</p>
+    </section>
+    <section>
+        <div class="d-flex justify-content-center">
+            <button class="buttonGeneral" onclick="location.href='/'">Back to Game</button>
+        </div>
+    </section>
+</div>
+{% endblock %}

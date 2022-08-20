@@ -1,0 +1,373 @@
+:root {
+    --main-color: hsl(40, 100%, 50%);
+    --darker-main-color: hsl(35, 100%, 50%);
+    --lighter-main-color: hsl(35, 100%, 60%);
+}
+
+body {
+    background-color: var(--main-color);
+    color: white;
+    font-family: 'Montserrat', sans-serif;;
+}
+
+body, html {
+    margin:0; 
+    padding:0; 
+    height:100%; 
+    width:100%;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 300;
+    text-align: left;
+    margin-top: 5pt;
+    margin-bottom: 15pt;
+
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 36pt;
+}
+
+#quote {
+    border-bottom: 2px solid var(--lighter-main-color);
+    text-align: center;
+}
+
+#message {
+    text-align: center;
+}
+
+h1:not(#quote)::before {
+    content: "";
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+    background-color: var(--main-color);
+    vertical-align: middle;
+}
+
+.largeBanner {
+    font-size: 36pt;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    border-bottom: 4px solid var(--lighter-main-color);
+    text-align: center;
+}
+
+p {
+    font-size: 18pt;
+    font-weight: 300;
+}
+
+a:not(.tableLink), .btn-link {
+    font-size: 16pt;
+    font-weight: 300;
+    color: var(--darker-main-color)
+}
+
+a:hover, .btn-link:hover {
+    color: var(--lighter-main-color)
+}
+
+section {
+    background-color: white;
+    padding-top: 30pt;
+    padding-bottom: 10pt;
+    padding-left: 50pt;
+    padding-right: 50pt;
+
+    color: black;
+    font-weight: 300;
+}
+
+section p {
+    text-align: justify;
+    font-size: 16pt;
+}
+
+.mainContainer section:nth-of-type(2n) {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+button:focus, input:focus{
+    outline: none;
+}
+
+.loginButton {
+    background-color: var(--darker-main-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 100px;
+    margin-left: 10px;
+}
+
+.loginButton:hover {
+    background-color: var(--lighter-main-color);
+}
+
+.buttonGeneral {
+    background-color: var(--darker-main-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px;
+    font-size: 15pt;
+}
+
+.buttonGeneral:hover {
+    background-color: var(--lighter-main-color);
+}
+
+.choiceButton {
+    width: 400px;
+    height: 400px;
+
+    font-size: 40px;
+
+    margin: auto;
+
+    color: white;
+    background-color: var(--darker-main-color);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 12px 12px 3px rgba(0, 0, 0, 0.2);
+
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+}
+
+.choiceButton:hover {
+    background-color: var(--lighter-main-color);
+}
+
+.choiceButton:active {
+    transform: translateY(7px);
+    box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.3);
+}
+
+.buttonHolder {
+    width: 920px;
+}
+
+.loginHolder {
+    width: 720px;
+    margin: auto;
+    height: 95%;
+}
+
+footer {
+    height: 5%;
+    width: 60%;
+    margin: auto;
+    text-align: center;
+}
+
+footer p {
+    font-size: 12pt;
+}
+
+.individualButtonSlot {
+    /*height: 60%;*/
+    padding-bottom: 10%;
+}
+
+.mainContainer {
+    width: 60%;
+    margin: auto;
+}
+
+table {
+    font-size: 16pt;
+    font-weight: 400;
+    border: 10px solid var(--darker-main-color);
+    box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.2);
+}
+
+table tr td, table tr th  {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+table tr th { 
+    color: white;
+    background-color: var(--darker-main-color) !important;
+}
+
+table tr td:nth-of-type(1) {
+    color: white;
+    background-color: var(--main-color);
+    transition: all 0.1s;
+    line-height: 1em;
+}
+
+.hoverTable tr td:nth-of-type(1):hover {
+    background-color: var(--lighter-main-color);
+    font-size: 1.2em;
+    line-height: 1em;
+    font-weight: 400;
+}
+
+.nametag {
+    display: inline-block;
+    background-color: none;
+    transition: all 0.1s;
+}
+
+.nametag:hover {
+    background-color: var(--lighter-main-color);
+    transform: translateY(-4px);
+}
+
+.modal {
+    color: black;
+}
+
+/* Weird fraction styling I copied from stackoverflow*/
+.frac {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    letter-spacing: 0.001em;
+    text-align: center;
+    font-style: italic;
+    min-width: 1.5em;
+}
+.frac > span {
+    display: block;
+    padding: 0.1em;
+    text-align: center;
+    padding-bottom: 0;
+}
+
+.dontwrap {
+    white-space: nowrap;
+}
+
+.frac > span p {
+    margin-bottom: 0;
+    text-align: center;
+}
+.frac span.bottom {
+    text-align: center;
+}
+.frac span.top {
+    padding-left: 0.4em;
+}
+.frac span.bottom span {
+    border-top: thin solid black;
+    position: absolute;
+    left: 5px;
+    width: calc(100% - 5px);
+    text-align: center;
+}
+.frac span.symbol {
+    display: none;
+}
+.halfSize {
+    height: 1em;
+}
+
+label {
+    font-size: 0.7em;
+    margin: 0;
+}
+
+@media only screen and (max-width: 1399px) {
+    .buttonHolder {
+        width: 720px;
+    }
+    .choiceButton {
+        width: 300px;
+        height: 300px;
+    
+        font-size: 30px;
+    }
+    footer {
+        width: 80%;
+    }
+    .mainContainer {
+        width: 80%;
+    }
+    h1 {
+        font-size: 26pt;
+    }
+    h3 {
+        font-size: 24px;
+    }
+    h4 {
+        font-size: 22px;
+    }
+    p {
+        font-size: 14pt;
+    }
+    a:not(.tableLink) {
+        font-size: 14pt;
+    }
+    section p {
+        font-size: 14pt;
+    }
+    table tr td, table tr th {
+        font-size: 15pt;
+    }
+}
+
+@media only screen and (max-height: 800px) {
+    .choiceButton {
+        height: 200px;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    .buttonHolder {
+        width: 300px;
+    }
+    .loginHolder {
+        width: 300px;
+    }
+    .choiceButton {
+        margin-top: 5%;
+    }
+    p {
+        font-size: 11pt;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    h3 {
+        font-size: 20px;
+    }
+    h4 {
+        font-size: 18px;
+    }
+    a:not(.tableLink) {
+        font-size: 11pt;
+    }
+    section p {
+        font-size: 11pt;
+    }
+    table tr td, table tr th {
+        font-size: 12pt;
+    }
+    section {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+    .mainContainer {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 300px) {
+    .buttonHolder {
+        width: 100%;
+    }
+}

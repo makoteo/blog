@@ -1,0 +1,451 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="d-flex">
+    <h1 class="mx-auto p-3 largeBanner" id="quote"> The Odds</h1>
+</div>
+<div class="mainContainer">
+    <section class="">
+        <h2>So first off, does my decision actually mean anything?</h2>
+        <p><strong>When you click a button, the website sends a message to the server.</strong> In theory, I could have just generated a random number on the server to decide whether you passed or not. <strong>However</strong>, I feel like it's more genuine (albeit statistically equivalent) if the program does actually take your choice into account. That is why the server doesn't generate just a pass/fail, but it does in fact randomly choose which button was right, and evaluates the choice you made.</p>
+        <p>As mentioned, this doesn't really change your odds, but it does make the game <em>feel</em> more under your control.</p>
+    </section>
+    <section>
+        <h2>What are your odds, really?</h2>
+        <p><strong>The odds aren't exactly 50/50.</strong> This is due to the powerups which you are sometimes gifted. The probability of getting different powerups is listed in the table below:</p> 
+        <table class="table mb-4 mt-1">
+            <tr>
+                <th>Powerup</th>
+                <th>Chance</th>
+            </tr>
+            <tr>
+                <td class="align-middle">None</td>
+                <td class="text-center">
+                    <div class="frac">
+                        <span class="top">10</span>
+                        <span class="symbol">/</span>
+                        <span class="bottom"><span></span>15</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="align-middle">Both choices are correct</td>
+                <td class="text-center">
+                    <div class="frac">
+                        <span class="top">1</span>
+                        <span class="symbol">/</span>
+                        <span class="bottom"><span></span>15</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="align-middle">75/25 Split</td>
+                <td class="text-center">
+                    <div class="frac">
+                        <span class="top">2</span>
+                        <span class="symbol">/</span>
+                        <span class="bottom"><span></span>15</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="align-middle">Next 2 answers are the same/different</td>
+                <td class="text-center">
+                    <div class="frac">
+                        <span class="top">2</span>
+                        <span class="symbol">/</span>
+                        <span class="bottom"><span></span>15</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <p>Based on this, your odds of guessing correctly are actually (on average):</p> 
+        <div class="d-flex flex-wrap justify-content-center mt-4 mb-4">
+            <div class="frac">
+                <span class="top"><p> 10</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>15 </p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span class="dontwrap"><p> &times; 50% + </p></span>
+            </div>
+
+            <div class="frac">
+                <span class="top"><p> 1</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>15 </p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span class="dontwrap"><p> &times; 100% + </p</span>
+            </div>
+
+            <div class="frac">
+                <span class="top"><p> 2</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>15 </p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span class="dontwrap"><p> &times; 75% + </p</span>
+            </div>
+
+            <div class="frac">
+                <span class="top"><p> 2</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>15 </p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span class="dontwrap"><p> &times; 100% = <strong>63.33%</strong></p</span>
+            </div>
+        </div>
+        <p><em>The last element in the equation represents the 2 out of 15 times that you will know an answer based on the previous answer due to the 'next two answers are same/different' powerup.</em></p>
+        <p>Note, this doesn't mean you have a 63.33% chance of guessing correctly <em>every</em> round. It's just that, on average, your odds of guessing correctly will be 63.33%, since sometimes you will have a powerup.</p>
+        <p>It is also important to note that your first guess will not be a powerup, since the first round of the game is always a 50/50. From this we can then write a simple set of exponential equations to represent your chance of getting to a certain score: </p>
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P = 0.5 if n = 0</em></p>
+        </div>
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P = 0.5 &times; 0.633<sup>(n - 1)</sup> if n > 0</em></p>
+        </div>
+
+        <p>Where P is the probability (as a decimal number) and n is the score. This is also the equation used in the actual game.</p>
+        <p>If you want to calculate the probability of a certain score, you can plug it into the following input, which will evaluate the equation for you: </p>
+
+    <hr>
+
+        <div class="d-flex justify-content-center">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-md-6 align-self-center">
+                        <input type="number" id="simpleP" value="0" class="form-control mx-auto w-auto p-3" oninput="calculateSimpleP()">
+                    </div>
+                    <div class="col-md-6 align-self-center">
+                        <p class="p-3 mb-0" id="simplePResponse" style="width: 100%; text-align: center;"><strong>P = 50%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <hr>
+
+    </section>
+    <section>
+
+        <h2>As a side note</h2>
+        <p>That is the chance of getting <strong>to</strong> a certain score. Meaning it actually represents the chance of getting a score of n or more. </p>
+        <p>To put it more simply, you don't have a 50% chance of getting 1 point. You have a 50% chance of getting <strong>1 or more points</strong>. If you wanted to calculate the chance of getting <em>exactly</em> n points, you would subtract the probability of getting n + 1 (or more) points, thus getting the equation: </p>
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P = 0.5 &times; 0.633<sup>(n - 1)</sup> - 0.5 &times; 0.633<sup> n</sup> if n > 0</em></p>
+        </div>
+        <p>Which can be simplified to:</p>
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P = 0.5 &times; 0.633<sup> n</sup> &times; (0.633<sup>-1</sup> - 1)</em></p>
+        </div>
+        <p>Once again, <strong>you can try this out here:</strong></p>
+
+    <hr>
+
+        <div class="d-flex justify-content-center">
+            <div class="container">
+                <div class="row align-items-center justify-content-center">
+                    <div class="col-md-6 align-self-center">
+                        <input type="number" id="complexP" value="0" class="form-control mx-auto w-auto p-3" oninput="calculateComplexP()">
+                    </div>
+                    <div class="col-md-6 align-self-center">
+                        <p class="p-3 mb-0" id="complexPResponse" style="width: 100%; text-align: center;"><strong>P = 50%</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <hr>
+
+    </section>
+    <section>
+
+        <h2>Average amount of attempts to reach n points</h2>
+        <p>This is where the math gets more complicated. And frankly, we're going to have to make a few estimates (as I'm not <em>that</em> good at statistics).</p>
+        <p>To make the calculation easier, we're going to modify the 63.33% success rate just a bit, to account for the fact that the first round of a game has a 50% success rate.</p>
+        <p>To do this, we will calculate how long an average game lasts, and from that we will figure out how many rounds (on average) will have a 50% chance, and how many a 63.33%. Based on this, we can make a global average probability for getting an answer right.</p>
+        <p>We can actually get the length of an average game easily. Assume that you have a game where 50% of games last 10 rounds, and 50% of games last 20 rounds. Obviously, the average game lasts 15 rounds. The mathematical way of getting to this result would be:</p>
+        
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P = 10&times;50% + 20&times;50% = 15</em></p>
+        </div>
+
+        <p>So essentially, we take the sum of all round lengths multiplied by their chance of happening. Now, we already know how to calculate the chance of a player getting a specific score, we did that in the section above. Now we just multiply by n.</p>
+        
+        <div class="d-flex flex-wrap justify-content-center">
+            <p><em>P<sub>N</sub> = <strong>n</strong> &times; 0.5 &times; 0.633<sup> n</sup> &times;(0.633<sup> -1</sup>-1)</em></p>
+        </div>
+
+        <p>This <em>P<sub>N</sub></em> element is equal to n (the amount of rounds) &times; the probability of n rounds occuring. All we need to do to find the average game length is to then take the infinite sum (from 1 to infinity) of this function, <a href="https://www.emathhelp.net/calculators/calculus-2/series-calculator/?f=0.5*n*0.633%5En*%280.633%5E%28-1%29-1%29&var=&a=1&b=inf"> which is thankfully something we can do on the internet</a>. </p>
+
+        <p><strong>The infinite sum evaluates to <em>1.3624</em>, which means that you will get one point in the average game </strong>(this seems ridiculous, but as of writing, this value is quite accurate). Or, to be more precise, you will play 2 rounds. On the first round you have a 50% chance of guessing correctly, and on the second round, a 63.33% chance. Thus: </p>
+
+        <div class="d-flex flex-wrap justify-content-center mt-4 mb-4">
+            <div class="frac">
+                <span class="top"><p>1</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>2</p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span><p> &times; 50% + </p</span>
+            </div>
+
+            <div class="frac">
+                <span class="top"><p>1</p></span>
+                <span class="symbol">/</span>
+                <span class="bottom"><span></span><p>2</p></span>
+            </div>
+            <div class="frac">
+                <span class="halfSize"></span>
+                <span><p> &times; 63.33% = <strong>56.5%</strong> </p</span>
+            </div>
+        </div>
+
+        <p>So, on the average round, you only have approximately a 56.5% chance of guessing the correct answer. Which, frankly, is pretty terrible, but it is what it is. There are now two ways to calculate the amount of attempts required to get to a certain score:</p>
+
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    The Simple Way
+                    </button>
+                </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <p>If an event has a 1 in 4 chance of occuring, it means that the event will happen, on average, once in every 4 attempts. Thus, the amount of attempts required is just equal to the inverted probabilty of the event happening.</p>
+                        <p>We already simplified our success rate to 56.5%, meaning that the probability of getting a score of s is just 0.565<sup>s</sup>. And so:</p>
+                        <div class="d-flex flex-wrap justify-content-center mt-4 mb-4">
+                            <div class="frac">
+                                <span class="halfSize"></span>
+                                <span><p>N = </p</span>
+                            </div>
+                
+                            <div class="frac">
+                                <span class="top"><p>1</p></span>
+                                <span class="symbol">/</span>
+                                <span class="bottom"><span></span><p>0.565<sup>s</sup></p></span>
+                            </div>
+                        </div>
+                        <p>Here, you can try to plug in a score and get the calculated amount of attempts required to get to it: </p>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-center">
+                            <div class="container">
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col-md-6 align-self-center">
+                                        <input type="number" id="simpleN" value="0" class="form-control mx-auto w-auto p-3" oninput="calculateSimpleN()">
+                                    </div>
+                                    <div class="col-md-6 align-self-center">
+                                        <p class="p-3 mb-0" id="simpleNResponse" style="width: 100%; text-align: center;"><strong>N = 0</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <p>While this calculation may seem rather simple, it is reasonably accurate compared to the simulated values, which I talk about in the 'complicated' section. </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-header" id="headingTwo">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                    The Complicated Way
+                    </button>
+                </h5>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body">
+                        <p>I could discuss the logic of the complicated solution, but the basic premise is copied from <a href="https://apollo.neocities.org/math/runofheads.html">here</a>, and frankly, I will not do a better job of explaining it. </p>
+                        <p>Basically, we calculate the probability of <em>not</em> getting a score of s, and then use logarithms and the equation from the linked website to come up with the following formula:</p>
+                
+                        <div class="d-flex flex-wrap justify-content-center mt-4 mb-4">
+                            <div class="frac">
+                                <span class="halfSize"></span>
+                                <span><p> N = </p</span>
+                            </div>
+                
+                            <div class="frac">
+                                <span class="top"><p>log(0.2)</p></span>
+                                <span class="symbol">/</span>
+                                <span class="bottom"><span></span><p>1.3624 &times; log(1-0.565<sup>s</sup>)</p></span>
+                            </div>
+                        </div>
+                
+                        <p><em>Some notes: We chose a probability of 80%, meaning that once you do N attempts, you will have an 80% chance of getting to the score s. This was chosen based on a quick python program I coded (which actually tested how many attempts getting a certain score would take), since the values returned by this function matched these 'experimental' values very closely. Also, just dividing the logarithms doesn't return the number of games we play, but instead the amount of choices, or button clicks. That's why we also add 1.3624 into the denominator, since an average game lasts that many 'choices'.</em></p>
+                    
+                        <p>You can try this calculation, as well as get the experimental (simulated) value (N<sub>e</sub>), here:</p>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-center">
+                            <div class="container">
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col-md-6 align-self-center">
+                                        <input type="number" id="complexN" value="0" class="form-control mx-auto w-auto p-3" oninput="calculateComplexN()">
+                                    </div>
+                                    <div class="col-md-6 align-self-center">
+                                        <p class="p-3 mb-0" id="complexNResponse" style="width: 100%; text-align: center;"><strong>N = 0</strong></p>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col-md-6 align-self-center"></div>
+                                    <div class="col-md-6 align-self-center">
+                                        <p class="p-3 mb-0" id="complexNExperimentalResponse" style="width: 100%; text-align: center;"><strong>N<sub>e</sub> = 0</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <p><em>Note than N<sub>e</sub> gets less accurate as the numbers get larger, since there is a cap to how many simulations should be run. If this cap is reached before any simulations have succeeded, it will return "Can't evaluate". You will also often get different values, since the simulation is re-run every time you enter a new number. </em></p>
+
+                        <p>For some reason (which I genuinely do not know), the logarithm in the denominator will eventually return 0, at which point it can also not be evaluated. Which is one of the reasons that the game doesn't use this technique. But I found it interesting, and it closely matches both the experimental values, and also those calculated by the simple solution. </p>
+
+                    </div>
+                </div>
+            </div>
+
+            <p>The game uses the simple solution, as it is accurate enough and doesn't fail at 65-ish points. </p>
+
+            <p><b>Anyway, I think that was enough math for at least a year. </b></p>
+
+        </div>
+
+    </section>
+
+    <section>
+        <div class="d-flex justify-content-center">
+            <button class="buttonGeneral" onclick="location.href='/'">Back to Game</button>
+            <button class="buttonGeneral" onclick="location.href='/the_list'">The List</button>
+        </div>
+    </section>
+
+    <script>
+        // I'm not exactly sure why I'm not putting the js into a new file... Probably cause it's easier to see what it does here.
+        function prettify(val){
+            if((val < 0.1 && val > 0) || val > 10000) {
+                val = val.toExponential(2);
+                val = val.replace("+", ""); // remove the plus in the exponent
+                val = val.replace("e", "&times10<sup>");
+                val += "</sup>";
+            }else{
+                val = Math.round(val * 100) / 100;
+            }
+            return val;
+        }
+
+        function calculateSimpleP(){
+            let val = parseInt($("#simpleP").val());
+            let calc = val < 0 ? 0 : (val > 0 ? 0.5 * Math.pow(0.633, val - 1) * 100 : 50);
+            console.log(val, calc);
+            calc = prettify(calc);
+            $("#simplePResponse").html("<strong>P = " + calc + "%</strong>");
+        }
+
+        function calculateComplexP(){
+            let val = parseInt($("#complexP").val());
+            let calc = val < 0 ? 0 : (val > 0 ? (0.5 * Math.pow(0.633, val - 1) - 0.5 * Math.pow(0.633, val)) * 100 : 50);
+            console.log(val, calc);
+            calc = prettify(calc);
+            $("#complexPResponse").html("<strong>P = " + calc + "%</strong>");
+        }
+
+        function calculateSimpleN(){
+            let val = parseInt($("#simpleN").val());
+            let calc = val < 0 ? 0 : (val > 0 ? 1/Math.pow(0.565, val) : 0);
+            console.log(val, calc);
+            calc = prettify(calc);
+            $("#simpleNResponse").html("<strong>N = " + calc + "</strong>");
+        }
+
+        // Helper functions for experimental values
+
+        let totalRuns = 0;
+        let runCap = 10000000;
+
+        function flipCoin(goal){
+            let runs = 1
+            let current = 0
+            while(totalRuns < runCap)
+            {
+                //if(Math.floor(Math.random()*1000) <= 565)
+                rand = Math.floor(Math.random()*1000)
+                if((current == 0 && rand <= 500) || (current > 0 && rand <= 565))
+                {
+                    current++;
+                    if(current == goal) return runs;
+                }
+                else
+                {
+                    runs++;
+                    totalRuns++;
+                    current = 0
+                }
+            }
+            return -1;
+        }
+
+        function average(runs, goal){
+            totalRuns = 0;
+            let n = 0;
+            let sum = 0;
+            while(n < runs && totalRuns < runCap)
+            {
+                tmp = flipCoin(goal);
+                console.log(tmp);
+                if(tmp >= 0){
+                    sum += tmp;
+                    n++;
+                }
+            }
+            console.log("S " + sum + ", " + n);
+            return sum/n;
+        }
+
+        function calculateComplexN(){
+            let val = parseInt($("#complexN").val());
+            val = isNaN(val) ? 0 : val;
+            let calc = val <= 0 ? 0 : (Math.log(0.2)/(1.3624*Math.log(1-Math.pow(0.565, val))));
+            console.log(val, calc);
+            let sim;
+            if(calc == -Infinity){
+                calc = "Too Large"; 
+                sim = "Can't Evaluate";
+            }else{
+                calc = prettify(calc);
+                if (val > 0){
+                    sim = average(1000, val);
+                }else{
+                    sim = 0;
+                }
+
+                if(isNaN(sim)){
+                    sim = "Can't evaluate";
+                }else{
+                    sim = prettify(sim);
+                }
+            }
+            $("#complexNResponse").html("<strong>N = " + calc + "</strong>");
+            $("#complexNExperimentalResponse").html("<strong>N<sub>e</sub> = " + sim + "</strong>");
+        }
+    </script>
+
+</div>
+{% endblock %}

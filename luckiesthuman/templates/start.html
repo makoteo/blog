@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+    <div class="loginHolder">
+        <div class="row justify-content-center align-items-center" style="height:100%">
+            <div>
+                <h2><strong style="font-weight: 800;">Enter your username: </strong></h2>
+                <p class="mx-auto">In case you get a highscore, what should we call you?</p>
+                <form class="d-flex" action="/pre_game" method="post">
+                    <div class="d-inline-flex mx-auto w-auto">
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Username" type="text" pattern="[a-zA-Z0-9-_]+" oninvalid="this.setCustomValidity('Please include only letters, numbers and _ or - (no spaces)')" oninput="this.setCustomValidity('')">
+                        <button class="loginButton" type="submit">Start</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Did you know that the timer exists to preserve session time, not to stress you out?</p>
+    </footer>
+
+{% endblock %}

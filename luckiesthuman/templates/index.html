@@ -1,0 +1,205 @@
+{% extends "layout.html" %}
+
+{% block main %}
+
+<div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+    <div class="buttonHolder">
+        <div class="container individualButtonSlot">
+            <div class="row justify-content-center align-items-center">
+                <div class="d-flex justify-content-center col-md-6">
+                    <button class="choiceButton" id="op1">Left</button>
+                </div>
+                <div class="d-flex justify-content-center col-md-6">
+                    <button class="choiceButton" id="op2">Right</button>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex">
+            <h1 class="mx-auto p-3" id="quote"> {{ quote }} </h1>
+        </div>
+        <div class="d-flex">
+            <p class="mx-auto" id="message"> {{ message }} </p>
+        </div>
+    </div>
+</div>
+
+<div class="mainContainer">
+    <section class="" id="afterword">
+
+    </section>
+
+    <section class="">
+        <h1>The 100 Luckiest Humans:</h1>
+        <hr>
+        {% include 'listgenerator.html' %}
+    </section>
+
+    <section class="" id="breakdown">
+        <h1>Statistical Breakdown:</h1>
+        <hr>
+        <p>You would probably like to think that you have some control over the game, but other than taking powerups into account, you really don't. You may think to yourself: <em>"Oh, I've pressed the same button 5 times in a row, surely it's time to switch up now"</em>. But the math stays the same, getting 5 heads and then 1 tails in a row is just as likely as getting 6 heads.</p>
+        <p>Past a certain point, it becomes difficult to comprehend the statistical unlikelyhood of you guessing correctly. Where would you put that point? Predicting 10 answers? 20? 100? <a href="#2ToN">We take a look at that in the next section</a>.</p>
+        <p><strong>The chances in this game aren't exactly 50/50.</strong> <a href="/background">You can read more about that here</a>, but just remember that you should have about a <strong>63%</strong> chance of guessing correctly on average, due to powerups. <em>Note, lower down we mention that there is a 50% chance of getting 0 points, and thus a 50% chance of getting 1 or more points, which is correct, due to reasons noted on the linked page.</em></p>
+        <p>Even then, it's interesting to take a look at the data. For fun, we keep a running count of how many times people have achieved a certain score. Every time a game ends, the final score gets added to the following table: </p>
+        <div style="position: relative; width: 100%;">
+            <canvas id="myChart"></canvas>
+        </div>
+        <meta id="table-data" data-stuff="{{counts}}">
+        <p><strong>On first glance, it seems like a ludicrous amount of games end at 0 points</strong>, despite the fact that it seems getting 0 points should be as likely as getting 1 point. It's a coin flip, no? But it's important to realize that when you get 1 point, you get to continue the game, and possibly get <em>more</em> points.</p>
+        <p>This means that the amount of games that end at 0 points should be about equal to the amount of all other games (where you get 1 or more points) combined. <strong>Currently, that count is <span id="zeroToSum"></span>.</strong></p>
+        <p>So while it may seem rather discouraging, contantly losing on the first guess, you shouldn't be all that surprised. Perseverance is what will get you further. </p>
+        <script>
+            console.log($("#table-data").data().stuff);
+            $(document).ready(function(){
+                const labels = [
+                    '0',
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                    '6',
+                    '7',
+                    '>7'
+                ];
+                const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Amount',
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--lighter-main-color'),
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--main-color'),
+                    data: $("#table-data").data().stuff,
+                }]
+                };
+                const config = {
+                    type: 'bar',
+                    data: data,
+                    beginAtZero: true,
+                    options: {
+                        responsive: true,
+                        maintainAspectRation: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: false
+                            }
+                        },
+                        scales: {
+                            yAxis: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    stepSize: 1
+                                },
+                                gridLines: {
+                                    color: 'white'
+                                }
+                            }]
+                        }
+                    }
+                };
+                const myChart = new Chart(
+                        document.getElementById('myChart'),
+                        config
+                );
+
+                let tabdata =  [...$("#table-data").data().stuff]
+                let zeroGames = tabdata[0];
+                tabdata.shift();
+
+                let sumGames = tabdata.reduce(add, 0); // with initial value to avoid when the array is empty
+
+                function add(accumulator, a) {
+                    return accumulator + a;
+                }
+                console.log(zeroGames, sumGames);
+                $("#zeroToSum").text(zeroGames + " 'zero point games' to " + sumGames + " 'one or more point' games")
+            });
+          </script>
+    </section>
+
+    <section id="2ToN" class="timeline_area section_padding_130">
+        <div class="container">
+            <div class="row justify-content-left">
+                <div class="col">
+                    <!-- Section Heading-->
+                    <div class="section_heading text-center">
+                        <h1>How ridiculous getting to 100 points would be, or rather*: Putting into perspective, what is basically 2<sup>n</sup></h1>
+                        <hr>
+                        <p>Let's assume Bob finishes an average game in 10 seconds, and plays 24 hours a day, 7 days a week. We can calculate how many games on average it will take to get to a certain score, which is something we demonstrate in the following timeline: </p>
+                        <div class="line"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <!-- Timeline Area-->
+                    <div class="apland-timeline-area">
+                        <!-- Single Timeline Content-->
+                        {% for line in timeline %}
+                        <div class="single-timeline-area">
+                            <div class="timeline-date wow fadeInLeft" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInLeft;">
+                                <h3>{{ line }}</h3>
+                            </div>
+                            <div class="row">
+                                {% for text in timeline[line] %}
+                                <div class="col-12 col-lg-6">
+                                    <div class="single-timeline-content d-flex wow fadeInLeft" data-wow-delay="0.3s" style="visibility: visible; animation-delay: 0.3s; animation-name: fadeInLeft;">                                        
+                                        <div class="timeline-text">
+                                            <h4><strong>{{ text[0] }}</strong></h4>
+                                            <p>{{ text[1] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <p><em>*This isn't actually 2<sup>n</sup>, due to all the powerups. But more is explained on <a href="/background">this page</a>.</em></p>
+            </div>
+        </div>
+        <p>So, that sounds fun, doesn't it? Obviously, these numbers are merely estimates, and shouldn't be discouraging, since Bob can only play 8640 games per day. But regardless, don't get your hopes up too much. </p>
+    </section>
+
+    <!-- Possibly add options: (saved in local storage) Would include - Don't scroll if score is 0; Force Color; Custom Button Messages; Change name; See high score;-->
+
+    <section class="" id="breakdown">
+        <h1>More:</h1>
+        <hr>
+        <a href="/background">How this website works, and some more math behind it</a>
+        </br>
+        <hr>
+        <a href="/backstory">The story behind this project</a>
+        </br>
+        <hr>
+        <a href="/options">Options</a>
+        </br>
+        <hr>
+    </section>
+</div>
+
+<div id="modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Welcome to Luckiest Human!</h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 15pt;"><strong>There are two buttons.</strong> One of them gives you a point, the other ends the game. And other than the ocassional lucky hint, you have no way of knowing which one is which. </p>
+          <p style="font-size: 15pt;">The most fortunate people who get a highscore are added to <a href="/the_list">The List</a>. Good luck. </p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="location.href='/the_list'" class="buttonGeneral" data-dismiss="modal">The List</button>
+            <button type="button" class="buttonGeneral" data-dismiss="modal">Play Game!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block main %}
+<div class="d-flex">
+    <h1 class="mx-auto p-3 largeBanner"> The 100 Luckiest Humans</h1>
+</div>
+<div class="mainContainer">
+    <section class="">
+        {% include 'listgenerator.html' %}
+    </section>
+    <section>
+        <div class="d-flex justify-content-center">
+            <button class="buttonGeneral" onclick="location.href='/'">Back to Game</button>
+        </div>
+    </section>
+</div>
+{% endblock %}
